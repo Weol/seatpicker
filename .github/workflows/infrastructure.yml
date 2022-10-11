@@ -1,0 +1,25 @@
+name: Deploy template
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy infrastructure
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout code
+      - uses: azure/login@v1
+        name: Login to Azure
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Run template deployment
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          resourceGroupName: ${{ secrets.AZURE_RESOURCEGROUP }}
+          template: ./infrastructure/master.bicep
