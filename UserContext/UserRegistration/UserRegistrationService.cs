@@ -11,7 +11,7 @@ internal class UserRegistrationService : IUserRegistrationService
 {
     public Task<User> Register(UnregisteredUser user, string password)
     {
-        throw new NotImplementedException();
+        return Task.FromResult(new User(user.Id, user.Nick, user.Id, Array.Empty<string>(), DateTime.Now));
     }
 }
 

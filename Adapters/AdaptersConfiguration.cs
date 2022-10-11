@@ -13,7 +13,7 @@ public class AdaptersConfiguration
     {
         AuthenticationCertificateSecretName = config["AuthenticationCertificateSecretName"];
         KeyvaultUri = new Uri(config["KeyvaultUri"]);
-        TableStorageUri = new Uri(config["AzureWebJobsStorage"]);
+        TableStorageUri = new Uri(config["StorageEndpoint"]);
     }
 
     public virtual string AuthenticationCertificateSecretName { get; }
