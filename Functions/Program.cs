@@ -18,8 +18,8 @@ var host = new HostBuilder()
         var config = context.Configuration;
 
         services
-            .AddApplication(ApplicationConfiguration.From(config))
-            .AddAdapters(AdaptersConfiguration.From(config))
+            .AddApplication(config)
+            .AddAdapters(config)
             .AddUserContext();
     })
     .Build();

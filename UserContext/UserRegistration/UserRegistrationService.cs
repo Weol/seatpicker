@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Seatpicker.Domain.UserRegistration.Ports;
 
-namespace Seatpicker.Domain.Services;
+namespace Seatpicker.Domain.UserRegistration;
 
 public interface IUserRegistrationService
 {
@@ -9,9 +10,16 @@ public interface IUserRegistrationService
 
 internal class UserRegistrationService : IUserRegistrationService
 {
-    public Task<User> Register(UnregisteredUser user, string password)
+    private readonly IStoreUser storeUser;
+
+    public UserRegistrationService(IStoreUser storeUser)
     {
-        return Task.FromResult(new User(user.Id, user.Nick, user.Id, Array.Empty<string>(), DateTime.Now));
+        this.storeUser = storeUser;
+    }
+
+    public async Task<User> Register(UnregisteredUser user, string password)
+    {
+        return new User(id, user.EmailId, user.Nick, user.Name, claims, DateTime.Now);
     }
 }
 

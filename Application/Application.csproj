@@ -4,12 +4,14 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <RootNamespace>Application</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="FluentValidation" Version="11.2.2" />
       <PackageReference Include="Microsoft.Azure.Functions.Worker.Core" Version="1.8.0" />
       <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.0.12" />
+      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.25.0" />
     </ItemGroup>
 
     <ItemGroup>

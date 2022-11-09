@@ -1,8 +1,8 @@
 ﻿using System.Security.Cryptography.X509Certificates;
 
-namespace Application.Authentication;
+namespace Application.Authentication.Ports;
 
 public interface IAuthenticationCertificateProvider
 {
-    Task<X509Certificate2?> Get();
+    Task<X509Certificate2> Get();
 }

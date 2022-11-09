@@ -1,13 +1,12 @@
 ﻿using System.Net;
 using System.Text.Json;
-using Application.Authentication;
 using Application.Middleware;
 using FluentValidation;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Seatpicker.Domain;
-using Seatpicker.Domain.Services;
+using Seatpicker.Domain.UserRegistration;
 
 namespace Application.Entrypoints;
 
@@ -35,7 +34,7 @@ public class Signup
         
         ValidateModel(model);
         
-        var user = new UnregisteredUser(model.Id, model.Nick, model.Name);
+        var user = new UnregisteredUser(model.EmailId, model.Nick, model.Name);
         
         await userRegistrationService.Register(user, model.Password);
         
@@ -48,14 +47,14 @@ public class Signup
         if (!result.IsValid) throw new ModelValidationException(result);
     }
 
-    private record SignupModel(string Nick, string Id, string Name, string Password);
+    private record SignupModel(string EmailId, string Nick, string Name, string Password);
 
     private class SignupModelValidator : AbstractValidator<SignupModel> {
         public SignupModelValidator()
         {
             RuleFor(x => x.Nick).NotEmpty();
             RuleFor(x => x.Name).NotEmpty();
-            RuleFor(x => x.Id).NotEmpty().Length(64).Matches("[A-Fa-f\\d]+");
+            RuleFor(x => x.EmailId).NotEmpty().Length(64).Matches("[A-Fa-f\\d]+");
             RuleFor(x => x.Password).NotEmpty().Length(64).Matches("[A-Fa-f\\d]+");
         }
     }
