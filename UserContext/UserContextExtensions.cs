@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Seatpicker.Domain.UserRegistration;
+using Seatpicker.Domain.Registration;
 
 namespace Seatpicker.Domain;
 

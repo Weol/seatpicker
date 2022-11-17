@@ -2,6 +2,6 @@
 
 public class TableStorageOptions
 {
-    public Uri Uri { get; set; } = null!;
+    public string Endpoint { get; set; } = null!;
     public string TableName { get; set; } = null!;
 }

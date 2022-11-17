@@ -1,5 +1,15 @@
 ﻿namespace Seatpicker.Domain;
 
-public record User(string Email, string Nick, string Name, IEnumerable<Claim> Claims, DateTimeOffset CreatedAt); 
+public record User(
+    string Id, 
+    string Nick, 
+    string Avatar,
+    string Name,
+    IEnumerable<Role> Roles, 
+    DateTimeOffset CreatedAt);
 
-public record UnregisteredUser(string Email, string Nick, string Name); 
+public record UnregisteredUser(
+    string Id,
+    string Nick,
+    string Avatar,
+    string Name);

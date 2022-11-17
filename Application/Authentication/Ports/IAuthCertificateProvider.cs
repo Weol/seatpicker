@@ -2,7 +2,7 @@
 
 namespace Application.Authentication.Ports;
 
-public interface IAuthenticationCertificateProvider
+public interface IAuthCertificateProvider
 {
     Task<X509Certificate2> Get();
 }

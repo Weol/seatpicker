@@ -1,4 +1,4 @@
-﻿namespace Seatpicker.Domain.UserRegistration.Ports;
+﻿namespace Seatpicker.Domain.Registration.Ports;
 
 public interface IStoreUser
 {
