@@ -14,14 +14,13 @@ public class Signup
 {
     private readonly ILogger<Signup> logger;
     private readonly IUserRegistrationService userRegistrationService;
-    private readonly JsonSerializerOptions serializerOptions;
-    private readonly SignupModelValidator validator = new();
+    private readonly IModelDeserializerService modelDeserializer;
 
-    public Signup(ILogger<Signup> logger, IUserRegistrationService userRegistrationService, JsonSerializerOptions serializerOptions)
+    public Signup(ILogger<Signup> logger, IUserRegistrationService userRegistrationService, IModelDeserializerService modelDeserializer)
     {
         this.logger = logger;
         this.userRegistrationService = userRegistrationService;
-        this.serializerOptions = serializerOptions;
+        this.modelDeserializer = modelDeserializer;
     }
 
     [Function(nameof(Signup))]
@@ -29,33 +28,24 @@ public class Signup
         [HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData request,
         FunctionContext executionContext)
     {
-        var body = await request.ReadAsStringAsync() ?? throw new NullReferenceException();
-        var model = JsonSerializer.Deserialize<SignupModel>(body, serializerOptions) ?? throw new NullReferenceException();
+        var model = await modelDeserializer.Deserialize<SignupModel, SignupModelValidator>(request);
         
-        ValidateModel(model);
-        
-        var user = new UnregisteredUser(model.EmailId, model.Nick, model.Name);
+        var user = new UnregisteredUser(model.Email, model.Nick, model.Name);
         
         await userRegistrationService.Register(user, model.Password);
         
         return request.CreateResponse(HttpStatusCode.OK);
     }
 
-    private void ValidateModel(SignupModel model)
-    {
-        var result = validator.Validate(model);
-        if (!result.IsValid) throw new ModelValidationException(result);
-    }
-
-    private record SignupModel(string EmailId, string Nick, string Name, string Password);
+    private record SignupModel(string Email, string Nick, string Name, string Password);
 
     private class SignupModelValidator : AbstractValidator<SignupModel> {
         public SignupModelValidator()
         {
             RuleFor(x => x.Nick).NotEmpty();
             RuleFor(x => x.Name).NotEmpty();
-            RuleFor(x => x.EmailId).NotEmpty().Length(64).Matches("[A-Fa-f\\d]+");
-            RuleFor(x => x.Password).NotEmpty().Length(64).Matches("[A-Fa-f\\d]+");
+            RuleFor(x => x.Email).NotEmpty().EmailAddress();
+            RuleFor(x => x.Password).NotEmpty().Length(6, 1024);
         }
     }
 

@@ -5,7 +5,7 @@ namespace Seatpicker.Domain.UserRegistration;
 
 public interface IUserRegistrationService
 {
-    Task<User> Register(UnregisteredUser user, string password);
+    Task<User> Register(UnregisteredUser unregisteredUser, string password);
 }
 
 internal class UserRegistrationService : IUserRegistrationService
@@ -17,9 +17,18 @@ internal class UserRegistrationService : IUserRegistrationService
         this.storeUser = storeUser;
     }
 
-    public async Task<User> Register(UnregisteredUser user, string password)
+    public async Task<User> Register(UnregisteredUser unregisteredUser, string password)
     {
-        return new User(id, user.EmailId, user.Nick, user.Name, claims, DateTime.Now);
+        var defaultClaims = new[]
+        {
+            Claim.Reserve,
+            Claim.ViewReservedSeats
+        };
+        
+        var user = new User(unregisteredUser.Email, unregisteredUser.Nick, unregisteredUser.Name, defaultClaims, DateTime.Now);
+
+        await storeUser.Store(user);
+        return user;
     }
 }
 

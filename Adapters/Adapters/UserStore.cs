@@ -11,7 +11,7 @@ using Seatpicker.Domain.UserRegistration.Ports;
 
 namespace Seatpicker.Adapters.Adapters;
 
-internal class UserStore : IStoreUser
+internal class UserStore : IStoreUser, IVerifyUser
 {
     private readonly TableClient tableClient;
 
@@ -26,7 +26,7 @@ internal class UserStore : IStoreUser
 
         await tableClient.UpsertEntityAsync(new UserEntity
         {
-            Id = user.Id,
+            Id = user.Email,
             Nick = user.Nick,
             Name = user.Name,
             Claims = jsonClaims,

@@ -112,7 +112,33 @@ resource signalr 'Microsoft.SignalRService/signalR@2022-02-01' = {
   }
 }
 
-var keyVaultReferenceFormat = '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName={0})'
+resource serviceBus 'Microsoft.ServiceBus/namespaces@2022-01-01-preview' = {
+  name: 'servicebus-${postfix}'
+  location: location
+  sku: {
+    name: 'Standard'
+  }
+}
+
+resource frontend 'Microsoft.Web/staticSites@2022-03-01' = {
+  name: 'frontend-${postfix}'
+  location: location
+  sku: {
+    name: 'Free'
+    tier: 'Free'
+  }
+  properties: {
+    allowConfigFileUpdates: true
+    stagingEnvironmentPolicy: 'Disabled'
+  }
+
+  resource appsettings 'config' = {
+    name: 'appsettings'
+    properties: {
+      BACKEND_URL: 'https://${api.properties.defaultHostName}/api'
+    }
+  }
+}
 
 resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
   name: 'appsettings'
@@ -121,8 +147,7 @@ resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
     AzureWebJobsStorage: storageAccountConnectionString
     WEBSITE_CONTENTAZUREFILECONNECTIONSTRING: storageAccountConnectionString
     APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.properties.InstrumentationKey
-    FUNCTIONS_WORKER_RUNTIME: 'java'
+    FUNCTIONS_WORKER_RUNTIME: 'dotnet'
     FUNCTIONS_EXTENSION_VERSION: '~4'
-    AuthCertificate: format(keyVaultReferenceFormat, 'AuthCertificate')
   }
 }
