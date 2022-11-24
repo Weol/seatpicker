@@ -1,6 +1,4 @@
-﻿using Application.Discord;
-
-namespace Application.Authentication.Ports;
+﻿namespace Seatpicker.Domain.Application.UserToken.Ports;
 
 public interface IDiscordAccessTokenProvider
 {

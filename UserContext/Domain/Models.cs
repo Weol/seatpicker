@@ -1,10 +1,10 @@
-﻿namespace Seatpicker.Domain;
+﻿namespace Seatpicker.Domain.Domain;
 
 public record User(
     string Id, 
     string Nick, 
     string Avatar,
-    string Name,
+    string? Name,
     IEnumerable<Role> Roles, 
     DateTimeOffset CreatedAt);
 

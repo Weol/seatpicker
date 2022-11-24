@@ -1,53 +1,39 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Application.Authentication.Ports;
-using Application.Ports;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Seatpicker.Domain.Registration;
+using Seatpicker.Domain.Application.UserToken.Ports;
+using Seatpicker.Domain.Domain;
 
-namespace Application.Authentication;
+namespace Seatpicker.Domain.Application.UserToken;
 
-public interface ILoginJwtService
+public interface IUserTokenService
 {
-    public Task<string> GetJwtFor(string discordToken);
+    public Task<string> GetJwtFor(User user);
 }
 
-internal class LoginJwtService : ILoginJwtService
+internal class UserTokenService : IUserTokenService
 {
-    private ILogger<LoginJwtService> logger;
+    private ILogger<UserTokenService> logger;
     private readonly Options options;
     private readonly IAuthCertificateProvider certificateProvider;
     private readonly ILanIdentityProvider lanIdentityProvider;
-    private readonly ILookupUser lookupUser;
-    private readonly IRegistrationService registrationService;
 
-    public LoginJwtService(ILogger<LoginJwtService> logger, IOptions<Options> options, IAuthCertificateProvider certificateProvider, IRegistrationService registrationService, ILanIdentityProvider lanIdentityProvider, ILookupUser lookupUser)
+    public UserTokenService(ILogger<UserTokenService> logger, IOptions<Options> options,
+        IAuthCertificateProvider certificateProvider,
+        ILanIdentityProvider lanIdentityProvider, ILookupUser lookupUser,
+        IDiscordAccessTokenProvider discordAccessTokenProvider)
     {
         this.logger = logger;
         this.options = options.Value;
         this.certificateProvider = certificateProvider;
-        this.registrationService = registrationService;
         this.lanIdentityProvider = lanIdentityProvider;
-        this.lookupUser = lookupUser;
     }
 
-    public async Task<string> GetJwtFor(string discordToken)
-    {
-        var token = await CreateToken();
-
-        var user = lookupUser.Lookup(discordToken);
-        
-        logger.LogInformation("Created ");
-        
-        return token.ToString();
-    }
-
-    private async Task<JwtSecurityToken> CreateToken()
+    public async Task<string> GetJwtFor(User user)
     {
         var certificate = await certificateProvider.Get();
 
@@ -76,7 +62,8 @@ internal class LoginJwtService : ILoginJwtService
             now.AddDays(30),
             new SigningCredentials(rsaSecurityKey, SecurityAlgorithms.RsaSha256)
         );
-        return token;
+
+        return token.ToString();
     }
 
     public class Options
@@ -85,12 +72,13 @@ internal class LoginJwtService : ILoginJwtService
     }
 }
 
-internal static class LoginJwtServiceExtensions
+internal static class UserTokenServiceExtensions
 {
-    public static IServiceCollection AddLoginJwtService(this IServiceCollection services, Action<LoginJwtService.Options> configureAction)
+    public static IServiceCollection AddUserTokenService(this IServiceCollection services,
+        Action<UserTokenService.Options> configureAction)
     {
         services.Configure(configureAction);
-        
-        return services.AddSingleton<ILoginJwtService, LoginJwtService>();
+
+        return services.AddSingleton<IUserTokenService, UserTokenService>();
     }
 }

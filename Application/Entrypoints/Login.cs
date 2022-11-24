@@ -1,22 +1,22 @@
 ﻿using System.Net;
-using Application.Authentication;
 using FluentValidation;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
+using Seatpicker.Domain.Application.UserToken;
 
 namespace Application.Entrypoints;
 
 public class Login
 {
     private readonly ILogger<Login> logger;
-    private readonly ILoginJwtService loginJwtService;
+    private readonly IUserTokenService userTokenService;
     private readonly IModelDeserializerService modelDeserializer;
 
-    public Login(ILogger<Login> logger, ILoginJwtService loginJwtService, IModelDeserializerService modelDeserializer)
+    public Login(ILogger<Login> logger, IUserTokenService userTokenService, IModelDeserializerService modelDeserializer)
     {
         this.logger = logger;
-        this.loginJwtService = loginJwtService;
+        this.userTokenService = userTokenService;
         this.modelDeserializer = modelDeserializer;
     }
 
@@ -26,6 +26,8 @@ public class Login
         FunctionContext executionContext)
     {
         var model = await modelDeserializer.Deserialize<LoginModel, LoginModelValidator>(request);
+        
+        
         
         return request.CreateResponse(HttpStatusCode.OK);
     }

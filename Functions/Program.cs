@@ -20,9 +20,9 @@ var host = new HostBuilder()
         var isDevelopment = context.HostingEnvironment.EnvironmentName == "Development";
         
         services
-            .AddApplication(config)
             .AddAdapters(config, isDevelopment)
-            .AddUserContext();
+            .AddApplication(config)
+            .AddUserContext(config);
     })
     .Build();
 

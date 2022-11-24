@@ -1,6 +1,6 @@
-﻿using Application.Ports;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Seatpicker.Domain.Application.UserToken.Ports;
 
 namespace Seatpicker.Adapters.Adapters;
 

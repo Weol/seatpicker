@@ -10,8 +10,8 @@ namespace Seatpicker.Adapters;
 
 public static class AdapterExtensions
 {
-    public static IConfiguration Configuration { get; set; }
-    
+    public static IConfiguration Configuration { get; set; } = null!;
+
     public static IServiceCollection AddAdapters(this IServiceCollection services, IConfiguration configuration, bool isDevelopment)
     {
         Configuration = configuration;
@@ -19,7 +19,16 @@ public static class AdapterExtensions
         return services
             .AddUserStore(GetUserStoreOptions())
             .AddAuthenticationCertificateProvider(ConfigureAuthenticationCertificateProvider, isDevelopment)
-            .AddLanIdentityProvider(ConfigureLanIdentityProvider);
+            .AddLanIdentityProvider(ConfigureLanIdentityProvider)
+            .AddDiscordClient(ConfigureDiscordClient);
+    }
+
+    private static void ConfigureDiscordClient(DiscordClientOptions options)
+    {
+        options.BaseUri = new Uri(Configuration["BaseUri"]);
+        options.ClientId = Configuration["ClientId"];
+        options.ClientSecret = Configuration["ClientSecret"];
+        options.RedirectUri = new Uri(Configuration["RedirectUri"]);
     }
 
     private static void ConfigureLanIdentityProvider(LanIdentityProvider.Options options)

@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Application.Ports;
 using Azure;
 using Azure.Data.Tables;
 using Azure.Identity;
@@ -7,7 +6,9 @@ using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
 using Seatpicker.Adapters.Common;
 using Seatpicker.Domain;
-using Seatpicker.Domain.Registration.Ports;
+using Seatpicker.Domain.Application.UserToken.Ports;
+using Seatpicker.Domain.Domain;
+using Seatpicker.Domain.Domain.Registration.Ports;
 
 namespace Seatpicker.Adapters.Adapters;
 
