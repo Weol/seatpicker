@@ -41,29 +41,44 @@ internal class UserTokenService : IUserTokenService
 
         using var rsa = certificate.GetRSAPrivateKey();
         var rsaSecurityKey = new RsaSecurityKey(rsa);
+        
+        var userClaims = CreateClaimsForUser(user);
 
-        // Generating the token 
-        var now = DateTime.UtcNow;
-
+        var lanId = await lanIdentityProvider.GetCurrentLanId();
+        
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, options.ClientId),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim("lan_id", lanId.ToString()),
         };
 
-        var lanId = await lanIdentityProvider.GetCurrentLanId();
-
+        var now = DateTime.UtcNow;
         var token = new JwtSecurityToken
         (
             options.ClientId,
-            lanId.ToString(),
-            claims,
+            user.Id,
+            claims.Concat(userClaims),
             now.AddMilliseconds(-30),
             now.AddDays(30),
             new SigningCredentials(rsaSecurityKey, SecurityAlgorithms.RsaSha256)
         );
 
         return token.ToString();
+    }
+
+    private static IEnumerable<Claim> CreateClaimsForUser(User user)
+    {
+        var unixTimeCreated = user.CreatedAt.ToUniversalTime().ToUnixTimeMilliseconds().ToString();
+        
+        return new[]
+        {
+            new Claim("spu_id", user.Id),
+            new Claim("spu_nick", user.Nick),
+            new Claim("spu_avatar", user.Avatar),
+            new Claim("spu_created_at_utc", unixTimeCreated),
+            new Claim("spu_roles", string.Join(",", user.Roles)),
+        };
     }
 
     public class Options

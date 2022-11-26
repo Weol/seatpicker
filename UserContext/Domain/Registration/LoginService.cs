@@ -65,7 +65,7 @@ internal class LoginService : ILoginService
         
         var token = await userTokenService.GetJwtFor(user);
 
-        return token.ToString();
+        return token;
     }
 }
 

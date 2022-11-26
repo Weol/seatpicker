@@ -5,16 +5,16 @@ using Microsoft.Azure.Functions.Worker.Http;
 
 namespace Application;
 
-public interface IModelDeserializerService
+public interface IRequestModelDeserializerService
 {
     Task<TModel> Deserialize<TModel, TValidator>(HttpRequestData request) where TValidator : IValidator<TModel>, new();
 }
 
-public class ModelDeserializerService : IModelDeserializerService
+public class RequestModelDeserializerService : IRequestModelDeserializerService
 {
     private readonly JsonSerializerOptions jsonSerializerOptions;
 
-    public ModelDeserializerService(JsonSerializerOptions jsonSerializerOptions)
+    public RequestModelDeserializerService(JsonSerializerOptions jsonSerializerOptions)
     {
         this.jsonSerializerOptions = jsonSerializerOptions;
     }

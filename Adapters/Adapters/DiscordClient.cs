@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +10,7 @@ using Seatpicker.Domain.Application.UserToken.Ports;
 
 namespace Seatpicker.Adapters.Adapters;
 
-internal class DiscordClient : IDiscordAccessTokenProvider
+internal class DiscordClient : IDiscordAccessTokenProvider, IDiscordLookupUser
 {
     private readonly HttpClient httpClient;
     private readonly JsonSerializerOptions jsonSerializerOptions;
@@ -35,11 +36,27 @@ internal class DiscordClient : IDiscordAccessTokenProvider
             new KeyValuePair<string, string>("code", discordToken),
         }));
 
+        return await DeserializeContent<DiscordAccessToken>(response);
+    }
+
+    public async Task<DiscordUser> Lookup(string accessToken)
+    {
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/users/@me");
+        
+        requestMessage.Headers.Authorization =
+            new AuthenticationHeaderValue("Bearer", accessToken);
+    
+        var response = await httpClient.SendAsync(requestMessage);
+        return await DeserializeContent<DiscordUser>(response);
+    }
+
+    private async Task<TModel> DeserializeContent<TModel>(HttpResponseMessage response)
+    {
         var body = await response.Content.ReadAsStringAsync();
         if (response.IsSuccessStatusCode)
         {
-            return JsonSerializer.Deserialize<DiscordAccessToken>(body, jsonSerializerOptions)
-                   ?? throw new NullReferenceException($"Could not deserialize response to {nameof(DiscordAccessToken)}");
+            return JsonSerializer.Deserialize<TModel>(body, jsonSerializerOptions)
+                   ?? throw new NullReferenceException($"Could not deserialize Discord response to {nameof(TModel)}");
         }
 
         throw new DiscordException($"Non-successful response code from Discord {response.StatusCode}");
