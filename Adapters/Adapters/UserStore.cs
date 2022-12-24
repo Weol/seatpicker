@@ -1,11 +1,9 @@
 ﻿using System.Text.Json;
 using Azure;
 using Azure.Data.Tables;
-using Azure.Identity;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
-using Seatpicker.Adapters.Common;
-using Seatpicker.Domain;
+using Microsoft.Extensions.Options;
 using Seatpicker.Domain.Application.UserToken.Ports;
 using Seatpicker.Domain.Domain;
 using Seatpicker.Domain.Domain.Registration.Ports;
@@ -16,9 +14,14 @@ internal class UserStore : IStoreUser, ILookupUser
 {
     private readonly TableClient tableClient;
 
-    public UserStore(TableClient tableClient)
+    public UserStore(IAzureClientFactory<TableServiceClient> tableClientFactory, IOptions<Options> options)
     {
-        this.tableClient = tableClient;
+        var tableServiceClient = tableClientFactory.CreateClient(options.Value.Endpoint);
+
+        tableServiceClient.CreateTableIfNotExists(options.Value.TableName);
+        
+        tableClient = tableServiceClient
+            .GetTableClient(options.Value.TableName);
     }
 
     public async Task Store(User user)
@@ -59,7 +62,7 @@ internal class UserStore : IStoreUser, ILookupUser
         }
     }
 
-    private class UserEntity : ITableEntity 
+    internal class UserEntity : ITableEntity 
     {
         public string RowKey { get; set; }
         public string PartitionKey { get; set; } = "Default";
@@ -72,17 +75,32 @@ internal class UserStore : IStoreUser, ILookupUser
         
         public ETag ETag { get; set; }
     }
+    
+    public class Options
+    {
+        public string Endpoint { get; set; } = null!;
+        public string TableName { get; set; } = null!;
+    }
 }
 
 internal static class UserStoreExtensions
 {
-    internal static IServiceCollection AddUserStore(this IServiceCollection services, TableStorageOptions options)
+    internal static IServiceCollection AddUserStore(this IServiceCollection services, Action<UserStore.Options> configureAction)
     {
+        services.Configure(configureAction);
+        
         services.AddAzureClients(builder =>
         {
+            var options = new UserStore.Options();
+            configureAction(options);
+            
             builder.AddTableServiceClient(options.Endpoint)
                 .WithName(options.Endpoint);
         });
+            
+        services
+            .AddSingletonPortMapping<IStoreUser, UserStore>()
+            .AddSingletonPortMapping<ILookupUser, UserStore>();
 
         return services;
     }

@@ -1,12 +1,10 @@
 ﻿using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Seatpicker.Domain.Application.UserToken;
-using Seatpicker.Domain.Application.UserToken.Ports;
+using Seatpicker.Domain.Domain.Registration.Ports;
 
 namespace Seatpicker.Adapters.Adapters;
 
@@ -86,19 +84,16 @@ internal class DiscordClientOptions
 
     private static int GetVersionFromDiscordUri(Uri baseUri)
     {
-        var version = baseUri.Segments[-1];
+        var version = baseUri.Segments[Index.FromEnd(1)];
         if (version.StartsWith("v"))
         {
             if (int.TryParse(version[Range.StartAt(1)], out var number))
             {
                 return number;
             }
-
-            throw new UriFormatException("Invalid discord uri");
         }
         throw new UriFormatException("Invalid discord uri");
     }
-    
 }
 
 internal static class DiscordHttpClientExtensions 
@@ -120,6 +115,8 @@ internal static class DiscordHttpClientExtensions
             client.DefaultRequestHeaders.Add("User-Agent", userAgent);
         });
 
-        return services;
+        return services
+            .AddSingletonPortMapping<IDiscordLookupUser, DiscordClient>()
+            .AddSingletonPortMapping<IDiscordAccessTokenProvider, DiscordClient>();
     }
 }

@@ -30,6 +30,6 @@ internal static class LanIdentityProviderExtensions
     {
         services.Configure(configureAction);
         
-        return services.AddSingleton<ILanIdentityProvider, LanIdentityProvider>();
+        return services.AddSingletonPortMapping<ILanIdentityProvider, LanIdentityProvider>();
     }
 }

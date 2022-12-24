@@ -1,7 +1,4 @@
 ﻿using System.Text.Json;
-using Application.Entrypoints;
-using Application.Middleware;
-using FluentValidation;
 using Microsoft.Azure.Functions.Worker.Http;
 
 namespace Application;

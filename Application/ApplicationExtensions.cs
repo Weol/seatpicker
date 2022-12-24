@@ -1,14 +1,18 @@
 using System.Text.Json;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application;
 
 public static class ApplicationExtensions
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        var jsonSerializerOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+        };
+
         return services
-            .AddSingleton(new JsonSerializerOptions());
+            .AddSingleton(jsonSerializerOptions);
     }
 }

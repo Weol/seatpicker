@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Seatpicker.Domain.Application.UserToken.Ports;
 using Seatpicker.Domain.Domain;
+using Seatpicker.Domain.Domain.Registration.Ports;
 
 namespace Seatpicker.Domain.Application.UserToken;
 
@@ -94,6 +95,6 @@ internal static class UserTokenServiceExtensions
     {
         services.Configure(configureAction);
 
-        return services.AddSingleton<IUserTokenService, UserTokenService>();
+        return services.AddScoped<IUserTokenService, UserTokenService>();
     }
 }

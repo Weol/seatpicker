@@ -1,11 +1,13 @@
-﻿namespace Seatpicker.Domain.Application.UserToken;
+﻿using System.Text.Json.Serialization;
+
+namespace Seatpicker.Domain.Application.UserToken;
 
 public record DiscordAccessToken(
-    string AccessToken, 
-    int ExpiresIn,
-    string RefreshToken,
-    IEnumerable<string> Scopes,
-    string TokenType);
+    [property: JsonPropertyName("access_token")] string AccessToken, 
+    [property: JsonPropertyName("expires_in")] int ExpiresIn,
+    [property: JsonPropertyName("refresh_token")] string RefreshToken,
+    [property: JsonPropertyName("scopes")] IEnumerable<string> Scopes,
+    [property: JsonPropertyName("token_type")] string TokenType);
 
 public record DiscordUser(
     string Id, 

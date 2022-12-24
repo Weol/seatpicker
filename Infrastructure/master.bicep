@@ -75,6 +75,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2021-10-01' = {
   }
 }
 
+/**
 resource signalr 'Microsoft.SignalRService/signalR@2022-02-01' = {
   name: 'signalr-${postfix}' 
   location: location
@@ -111,7 +112,9 @@ resource signalr 'Microsoft.SignalRService/signalR@2022-02-01' = {
     ]
   }
 }
+*/
 
+/*
 resource serviceBus 'Microsoft.ServiceBus/namespaces@2022-01-01-preview' = {
   name: 'servicebus-${postfix}'
   location: location
@@ -119,6 +122,7 @@ resource serviceBus 'Microsoft.ServiceBus/namespaces@2022-01-01-preview' = {
     name: 'Standard'
   }
 }
+*/
 
 resource frontend 'Microsoft.Web/staticSites@2022-03-01' = {
   name: 'frontend-${postfix}'

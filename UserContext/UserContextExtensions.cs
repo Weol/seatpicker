@@ -1,15 +1,19 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Seatpicker.Domain.Application.UserToken;
 using Seatpicker.Domain.Domain.Registration;
 
 namespace Seatpicker.Domain;
 
+public interface IUserContextConfiguration
+{
+    string ClientId { get; }
+}
+
 public static class UserContextExtensions
 {
-    private static IConfiguration Configuration { get; set; } = null!;
+    private static IUserContextConfiguration Configuration { get; set; } = null!;
 
-    public static IServiceCollection AddUserContext(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddUserContext(this IServiceCollection services, IUserContextConfiguration configuration)
     {
         Configuration = configuration;
         
@@ -20,6 +24,6 @@ public static class UserContextExtensions
 
     private static void ConfigureUserTokenService(UserTokenService.Options options)
     {
-        options.ClientId = Configuration["ClientId"];
+        options.ClientId = Configuration.ClientId;
     }
 }

@@ -1,9 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Seatpicker.Domain.Application.UserToken;
 using Seatpicker.Domain.Application.UserToken.Ports;
 using Seatpicker.Domain.Domain.Registration.Ports;
@@ -73,6 +69,6 @@ internal static class LoginServiceExtensions
 {
     public static IServiceCollection AddLoginService(this IServiceCollection services)
     {
-        return services.AddSingleton<IUserTokenService, UserTokenService>();
+        return services.AddScoped<ILoginService, LoginService>();
     }
 }

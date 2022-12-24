@@ -1,8 +1,7 @@
-using System.Text.Json;
 using Application;
 using Application.Middleware;
 using Functions;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Seatpicker.Adapters;
 using Seatpicker.Domain;
@@ -17,13 +16,44 @@ var host = new HostBuilder()
     {
         var config = context.Configuration;
 
-        var isDevelopment = context.HostingEnvironment.EnvironmentName == "Development";
-        
         services
-            .AddAdapters(config, isDevelopment)
-            .AddApplication(config)
-            .AddUserContext(config);
+            .AddAdapters(new AdapterConfiguration(config))
+            .AddApplication()
+            .AddUserContext(new UserContextConfiguration(config));
     })
     .Build();
 
 host.Run();
+
+namespace Functions
+{
+    internal class AdapterConfiguration : IAdapterConfiguration
+    {
+        public AdapterConfiguration(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        private IConfiguration Configuration { get; }
+    
+        public Uri DiscordBaseUri => new(Configuration["BaseUri"]);
+        public Uri DiscordRedirectUri => new(Configuration["RedirectUri"]);
+        public string ClientId => Configuration["ClientId"];
+        public string ClientSecret => Configuration["ClientSecret"];
+        public Guid LanId => Guid.Parse(Configuration["LanId"]);
+        public Uri KeyvaultUri => new(Configuration["KeyvaultUri"]);
+        public string StorageEndpoint => Configuration["StorageEndpoint"];
+    }
+
+    internal class UserContextConfiguration : IUserContextConfiguration
+    {
+        public UserContextConfiguration(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        private IConfiguration Configuration { get; }
+    
+        public string ClientId => Configuration["ClientId"];
+    }
+}

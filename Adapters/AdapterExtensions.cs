@@ -1,53 +1,56 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using Microsoft.Extensions.Azure;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Seatpicker.Adapters.Adapters;
-using Seatpicker.Adapters.Common;
-using Seatpicker.Domain;
 
 namespace Seatpicker.Adapters;
 
+public interface IAdapterConfiguration
+{
+    Uri DiscordBaseUri { get; }
+    Uri DiscordRedirectUri { get; }
+    string ClientId { get; }
+    string ClientSecret { get; }
+    Guid LanId { get; }
+    Uri KeyvaultUri { get; }
+    string StorageEndpoint { get; }
+}
+
 public static class AdapterExtensions
 {
-    public static IConfiguration Configuration { get; set; } = null!;
+    private static IAdapterConfiguration Configuration { get; set; } = null!;
 
-    public static IServiceCollection AddAdapters(this IServiceCollection services, IConfiguration configuration, bool isDevelopment)
+    public static IServiceCollection AddAdapters(this IServiceCollection services, IAdapterConfiguration configuration)
     {
         Configuration = configuration;
 
         return services
-            .AddUserStore(GetUserStoreOptions())
-            .AddAuthenticationCertificateProvider(ConfigureAuthenticationCertificateProvider, isDevelopment)
+            .AddUserStore(ConfigureUserStore)
+            .AddAuthenticationCertificateProvider(ConfigureAuthenticationCertificateProvider)
             .AddLanIdentityProvider(ConfigureLanIdentityProvider)
             .AddDiscordClient(ConfigureDiscordClient);
     }
 
     private static void ConfigureDiscordClient(DiscordClientOptions options)
     {
-        options.BaseUri = new Uri(Configuration["BaseUri"]);
-        options.ClientId = Configuration["ClientId"];
-        options.ClientSecret = Configuration["ClientSecret"];
-        options.RedirectUri = new Uri(Configuration["RedirectUri"]);
+        options.BaseUri = Configuration.DiscordBaseUri;
+        options.RedirectUri = Configuration.DiscordRedirectUri;
+        options.ClientId = Configuration.ClientId;
+        options.ClientSecret = Configuration.ClientSecret;
     }
 
     private static void ConfigureLanIdentityProvider(LanIdentityProvider.Options options)
     {
-        options.LanId = Guid.Parse(Configuration["LanId"]);
+        options.LanId = Configuration.LanId;
     }
-    
+
     private static void ConfigureAuthenticationCertificateProvider(AuthCertificateProvider.Options options)
     {
         options.SecretName = "AuthenticationCertificate";
-        options.KeyvaultUri = new Uri(Configuration["KeyvaultUri"]);
+        options.KeyvaultUri = Configuration.KeyvaultUri;
     }
 
-    private static TableStorageOptions GetUserStoreOptions()
+    private static void ConfigureUserStore(UserStore.Options options)
     {
-        return new TableStorageOptions
-        {
-            Endpoint = Configuration["StorageEndpoint"],
-            TableName = "Users",
-        };
+        options.Endpoint = Configuration.StorageEndpoint;
+        options.TableName = "Users";
     }
 }
