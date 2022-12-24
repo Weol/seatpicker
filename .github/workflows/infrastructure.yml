@@ -22,4 +22,4 @@ jobs:
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ secrets.AZURE_RESOURCEGROUP }}
-          template: ./infrastructure/master.bicep
+          template: ./Infrastructure/master.bicep
