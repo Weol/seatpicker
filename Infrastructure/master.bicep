@@ -124,6 +124,7 @@ resource serviceBus 'Microsoft.ServiceBus/namespaces@2022-01-01-preview' = {
 }
 */
 
+/*
 resource frontend 'Microsoft.Web/staticSites@2022-03-01' = {
   name: 'frontend-${postfix}'
   location: location
@@ -143,6 +144,7 @@ resource frontend 'Microsoft.Web/staticSites@2022-03-01' = {
     }
   }
 }
+*/
 
 resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
   name: 'appsettings'
