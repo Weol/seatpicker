@@ -13,10 +13,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         name: Checkout code
-      - uses: azure/login@v1
-        name: Login to Azure
+      - name: Azure Login
+        uses: Azure/login@v1.4.6
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: {{ secrets.AZURE_CREDENTIALS }}
       - name: Run template deployment
         uses: azure/arm-deploy@v1
         with:
