@@ -1,10 +1,8 @@
-﻿using System.ComponentModel.Design;
-using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 using NSubstitute;
 
-namespace IntegrationTests.Host;
+namespace Seatpicker.IntegrationTests.Host;
 
 public class HttpRequestFaker
 {

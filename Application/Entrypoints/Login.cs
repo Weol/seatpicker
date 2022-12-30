@@ -3,9 +3,9 @@ using FluentValidation;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using Seatpicker.Domain.Domain.Registration;
+using Seatpicker.UserContext.Domain.Registration;
 
-namespace Application.Entrypoints;
+namespace Seatpicker.Application.Entrypoints;
 
 public class Login
 {

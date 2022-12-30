@@ -1,10 +1,11 @@
-﻿using Application;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Logging;
 using Seatpicker.Adapters;
-using Seatpicker.Domain;
+using Seatpicker.Application;
+using Seatpicker.IntegrationTests.Host.Adapters;
+using Seatpicker.UserContext;
 
-namespace IntegrationTests.Host;
+namespace Seatpicker.IntegrationTests.Host;
 
 public partial class Host
 {

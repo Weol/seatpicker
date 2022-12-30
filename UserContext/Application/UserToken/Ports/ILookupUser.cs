@@ -1,6 +1,6 @@
-﻿using Seatpicker.Domain.Domain;
+﻿using Seatpicker.UserContext.Domain;
 
-namespace Seatpicker.Domain.Application.UserToken.Ports;
+namespace Seatpicker.UserContext.Application.UserToken.Ports;
 
 public interface ILookupUser
 {

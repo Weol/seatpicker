@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography.X509Certificates;
 
-namespace Seatpicker.Domain.Application.UserToken.Ports;
+namespace Seatpicker.UserContext.Application.UserToken.Ports;
 
 public interface IAuthCertificateProvider
 {

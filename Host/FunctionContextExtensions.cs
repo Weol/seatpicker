@@ -1,6 +1,6 @@
 ﻿using Microsoft.Azure.Functions.Worker;
 
-namespace Functions;
+namespace Seatpicker.Host;
 
 public static class FunctionContextExtensions
 {

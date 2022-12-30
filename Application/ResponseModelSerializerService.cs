@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Microsoft.Azure.Functions.Worker.Http;
 
-namespace Application;
+namespace Seatpicker.Application;
 
 public interface IResponseModelSerializerService
 {

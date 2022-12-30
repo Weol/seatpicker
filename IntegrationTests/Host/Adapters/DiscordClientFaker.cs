@@ -1,9 +1,9 @@
 ﻿using System.Net;
 using Bogus;
 using Microsoft.Extensions.DependencyInjection;
-using Seatpicker.Domain.Application.UserToken;
+using Seatpicker.UserContext.Application.UserToken;
 
-namespace IntegrationTests.Host;
+namespace Seatpicker.IntegrationTests.Host.Adapters;
 
 public class DiscordClientFaker
 {

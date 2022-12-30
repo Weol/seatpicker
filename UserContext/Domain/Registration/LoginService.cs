@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Seatpicker.Domain.Application.UserToken;
-using Seatpicker.Domain.Application.UserToken.Ports;
-using Seatpicker.Domain.Domain.Registration.Ports;
+using Seatpicker.UserContext.Application.UserToken;
+using Seatpicker.UserContext.Application.UserToken.Ports;
+using Seatpicker.UserContext.Domain.Registration.Ports;
 
-namespace Seatpicker.Domain.Domain.Registration;
+namespace Seatpicker.UserContext.Domain.Registration;
 
 public interface ILoginService
 {

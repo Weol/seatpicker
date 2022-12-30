@@ -4,7 +4,7 @@ using Azure.Security.KeyVault.Secrets;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Seatpicker.Domain.Application.UserToken.Ports;
+using Seatpicker.UserContext.Application.UserToken.Ports;
 
 namespace Seatpicker.Adapters.Adapters;
 

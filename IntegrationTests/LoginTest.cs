@@ -1,18 +1,9 @@
-using System.Collections.Concurrent;
-using System.Net;
-using System.Security.Cryptography.X509Certificates;
-using Azure;
-using Azure.Data.Tables;
-using IntegrationTests.Host;
-using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using NSubstitute;
-using Seatpicker.Adapters.Adapters;
-using Seatpicker.Domain.Domain.Registration;
+using Seatpicker.IntegrationTests.Host.Adapters;
+using Seatpicker.UserContext.Domain.Registration;
 using Xunit;
 
-namespace IntegrationTests;
+namespace Seatpicker.IntegrationTests;
 
 public class LoginTest
 {

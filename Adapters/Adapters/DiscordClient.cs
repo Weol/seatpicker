@@ -3,8 +3,8 @@ using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Seatpicker.Domain.Application.UserToken;
-using Seatpicker.Domain.Domain.Registration.Ports;
+using Seatpicker.UserContext.Application.UserToken;
+using Seatpicker.UserContext.Domain.Registration.Ports;
 
 namespace Seatpicker.Adapters.Adapters;
 

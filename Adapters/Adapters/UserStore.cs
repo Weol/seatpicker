@@ -4,9 +4,9 @@ using Azure.Data.Tables;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Seatpicker.Domain.Application.UserToken.Ports;
-using Seatpicker.Domain.Domain;
-using Seatpicker.Domain.Domain.Registration.Ports;
+using Seatpicker.UserContext.Application.UserToken.Ports;
+using Seatpicker.UserContext.Domain;
+using Seatpicker.UserContext.Domain.Registration.Ports;
 
 namespace Seatpicker.Adapters.Adapters;
 

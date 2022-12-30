@@ -1,9 +1,9 @@
 ﻿using System.Text.Json;
-using Application.Middleware;
 using FluentValidation;
 using Microsoft.Azure.Functions.Worker.Http;
+using Seatpicker.Application.Middleware;
 
-namespace Application;
+namespace Seatpicker.Application;
 
 public interface IRequestModelDeserializerService
 {

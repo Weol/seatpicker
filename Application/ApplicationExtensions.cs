@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Application;
+namespace Seatpicker.Application;
 
 public static class ApplicationExtensions
 {

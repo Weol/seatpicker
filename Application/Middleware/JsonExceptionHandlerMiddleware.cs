@@ -1,10 +1,9 @@
 ﻿using System.Net;
-using System.Text.Json;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.Functions.Worker.Middleware;
 
-namespace Application.Middleware;
+namespace Seatpicker.Application.Middleware;
 
 public class JsonExceptionHandlerMiddleware : IFunctionsWorkerMiddleware
 {

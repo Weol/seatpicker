@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Seatpicker.Domain.Application.UserToken;
+namespace Seatpicker.UserContext.Application.UserToken;
 
 public record DiscordAccessToken(
     [property: JsonPropertyName("access_token")] string AccessToken, 

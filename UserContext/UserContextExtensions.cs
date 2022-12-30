@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Seatpicker.Domain.Application.UserToken;
-using Seatpicker.Domain.Domain.Registration;
+using Seatpicker.UserContext.Application.UserToken;
+using Seatpicker.UserContext.Domain.Registration;
 
-namespace Seatpicker.Domain;
+namespace Seatpicker.UserContext;
 
 public interface IUserContextConfiguration
 {

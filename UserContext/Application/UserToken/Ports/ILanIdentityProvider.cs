@@ -1,4 +1,4 @@
-﻿namespace Seatpicker.Domain.Application.UserToken.Ports;
+﻿namespace Seatpicker.UserContext.Application.UserToken.Ports;
 
 public interface ILanIdentityProvider
 {

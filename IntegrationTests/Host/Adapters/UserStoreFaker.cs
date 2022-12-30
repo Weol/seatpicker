@@ -6,7 +6,7 @@ using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 
-namespace IntegrationTests.Host;
+namespace Seatpicker.IntegrationTests.Host.Adapters;
 
 public class InMemoryTableClient : TableClient
 {

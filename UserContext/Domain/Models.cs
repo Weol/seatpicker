@@ -1,4 +1,4 @@
-﻿namespace Seatpicker.Domain.Domain;
+﻿namespace Seatpicker.UserContext.Domain;
 
 public record User(
     string Id, 

@@ -5,11 +5,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Seatpicker.Domain.Application.UserToken.Ports;
-using Seatpicker.Domain.Domain;
-using Seatpicker.Domain.Domain.Registration.Ports;
+using Seatpicker.UserContext.Application.UserToken.Ports;
+using Seatpicker.UserContext.Domain;
+using Seatpicker.UserContext.Domain.Registration.Ports;
 
-namespace Seatpicker.Domain.Application.UserToken;
+namespace Seatpicker.UserContext.Application.UserToken;
 
 public interface IUserTokenService
 {

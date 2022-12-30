@@ -5,6 +5,7 @@
         <OutputType>Exe</OutputType>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <RootNamespace>Seatpicker.Host</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="FluentValidation" Version="11.2.2" />

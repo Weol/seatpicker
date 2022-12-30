@@ -1,6 +1,6 @@
-﻿using Seatpicker.Domain.Application.UserToken;
+﻿using Seatpicker.UserContext.Application.UserToken;
 
-namespace Seatpicker.Domain.Domain.Registration.Ports;
+namespace Seatpicker.UserContext.Domain.Registration.Ports;
 
 public interface IDiscordAccessTokenProvider
 {
