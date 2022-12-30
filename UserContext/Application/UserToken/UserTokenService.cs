@@ -41,7 +41,13 @@ internal class UserTokenService : IUserTokenService
         logger.LogDebug("Using auth certificate with thumbprint {Thumbprint}", certificate.Thumbprint);
 
         using var rsa = certificate.GetRSAPrivateKey();
-        var rsaSecurityKey = new RsaSecurityKey(rsa);
+        var rsaSecurityKey = new RsaSecurityKey(rsa)
+        {
+            CryptoProviderFactory = new CryptoProviderFactory()
+            {
+                CacheSignatureProviders = false
+            }
+        };
         
         var userClaims = CreateClaimsForUser(user);
 
@@ -54,18 +60,20 @@ internal class UserTokenService : IUserTokenService
             new Claim("lan_id", lanId.ToString()),
         };
 
+        var handler = new JwtSecurityTokenHandler();
+        
         var now = DateTime.UtcNow;
-        var token = new JwtSecurityToken
-        (
+        var token = handler.CreateJwtSecurityToken(
             options.ClientId,
             user.Id,
-            claims.Concat(userClaims),
+            new ClaimsIdentity(claims.Concat(userClaims)),
             now.AddMilliseconds(-30),
             now.AddDays(30),
+            now,
             new SigningCredentials(rsaSecurityKey, SecurityAlgorithms.RsaSha256)
         );
-
-        return token.ToString();
+        
+        return handler.WriteToken(token);
     }
 
     private static IEnumerable<Claim> CreateClaimsForUser(User user)
@@ -78,7 +86,7 @@ internal class UserTokenService : IUserTokenService
             new Claim("spu_nick", user.Nick),
             new Claim("spu_avatar", user.Avatar),
             new Claim("spu_created_at_utc", unixTimeCreated),
-            new Claim("spu_roles", string.Join(",", user.Roles)),
+            new Claim("spu_roles", string.Join(",", user.Roles.Select(x => (int) x))),
         };
     }
 

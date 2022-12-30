@@ -15,7 +15,8 @@ internal class DiscordClient : IDiscordAccessTokenProvider, IDiscordLookupUser
     private readonly DiscordClientOptions options;
     private readonly ILogger<DiscordClient> logger;
 
-    public DiscordClient(HttpClient httpClient, IOptions<DiscordClientOptions> options, JsonSerializerOptions jsonSerializerOptions, ILogger<DiscordClient> logger)
+    public DiscordClient(HttpClient httpClient, IOptions<DiscordClientOptions> options,
+        JsonSerializerOptions jsonSerializerOptions, ILogger<DiscordClient> logger)
     {
         this.httpClient = httpClient;
         this.jsonSerializerOptions = jsonSerializerOptions;
@@ -39,11 +40,11 @@ internal class DiscordClient : IDiscordAccessTokenProvider, IDiscordLookupUser
 
     public async Task<DiscordUser> Lookup(string accessToken)
     {
-        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/users/@me");
-        
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "users/@me");
+
         requestMessage.Headers.Authorization =
             new AuthenticationHeaderValue("Bearer", accessToken);
-    
+
         var response = await httpClient.SendAsync(requestMessage);
         return await DeserializeContent<DiscordUser>(response);
     }
@@ -53,9 +54,17 @@ internal class DiscordClient : IDiscordAccessTokenProvider, IDiscordLookupUser
         var body = await response.Content.ReadAsStringAsync();
         if (response.IsSuccessStatusCode)
         {
+            logger.LogInformation("Discord API responded with code {StatusCode} and body {body}", response.StatusCode, body);
+            
             return JsonSerializer.Deserialize<TModel>(body, jsonSerializerOptions)
                    ?? throw new NullReferenceException($"Could not deserialize Discord response to {nameof(TModel)}");
         }
+
+        logger.LogError("Non-successful response code from Discord {@ResponseInfo}", new
+        {
+            response.StatusCode,
+            Body = body,
+        });
 
         throw new DiscordException($"Non-successful response code from Discord {response.StatusCode}");
     }
@@ -64,7 +73,7 @@ internal class DiscordClient : IDiscordAccessTokenProvider, IDiscordLookupUser
 internal class DiscordException : Exception
 {
     public Exception? Exception { get; set; }
-    
+
     public DiscordException(string message, Exception innerException) : base(message, innerException)
     {
     }
@@ -84,24 +93,23 @@ internal class DiscordClientOptions
 
     private static int GetVersionFromDiscordUri(Uri baseUri)
     {
-        var version = baseUri.Segments[Index.FromEnd(1)];
-        if (version.StartsWith("v"))
+        var version = baseUri.Segments.Single(x => x.StartsWith("v"));
+        if (int.TryParse(version.Trim('v').Trim('/'), out var number))
         {
-            if (int.TryParse(version[Range.StartAt(1)], out var number))
-            {
-                return number;
-            }
+            return number;
         }
+
         throw new UriFormatException("Invalid discord uri");
     }
 }
 
-internal static class DiscordHttpClientExtensions 
+internal static class DiscordHttpClientExtensions
 {
-    internal static IServiceCollection AddDiscordClient(this IServiceCollection services, Action<DiscordClientOptions> configureAction)
+    internal static IServiceCollection AddDiscordClient(this IServiceCollection services,
+        Action<DiscordClientOptions> configureAction)
     {
         services.Configure(configureAction);
-        
+
         //https://discord.com/api/v{version_number}
         services.AddHttpClient<DiscordClient>((provider, client) =>
         {
@@ -110,7 +118,7 @@ internal static class DiscordHttpClientExtensions
             var version = options.Value.Version;
 
             var userAgent = $"DiscordBot ({baseUrl}, {version})";
-            
+
             client.BaseAddress = options.Value.BaseUri;
             client.DefaultRequestHeaders.Add("User-Agent", userAgent);
         });

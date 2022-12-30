@@ -71,8 +71,14 @@ internal class UserStore : IStoreUser, ILookupUser
         public string Avatar { get; set; } = null!;
         public string Roles { get; set; } = null!;
         public DateTimeOffset CreatedAt { get; set; }
-        public DateTimeOffset? Timestamp { get => DateTimeOffset.Now; set => throw new NotSupportedException(); }
-        
+        public DateTimeOffset? Timestamp
+        {
+            get => DateTimeOffset.Now;
+            set
+            {
+            }
+        }
+
         public ETag ETag { get; set; }
     }
     

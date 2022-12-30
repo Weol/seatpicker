@@ -14,7 +14,7 @@ public class JsonExceptionHandlerMiddleware : IFunctionsWorkerMiddleware
         {
             await next(context);
         }
-        catch (AggregateException aggregateException) when (aggregateException.InnerException is JsonException e)
+        catch (Exception e)
         {
             var requestData = await context.GetHttpRequestDataAsync();
             if (requestData is not null)
@@ -26,6 +26,8 @@ public class JsonExceptionHandlerMiddleware : IFunctionsWorkerMiddleware
                 var invocationResult = context.GetInvocationResult();
                 invocationResult.Value = response;
             }
+
+            throw;
         }
     }
 }

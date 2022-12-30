@@ -2,7 +2,9 @@ using Application;
 using Application.Middleware;
 using Functions;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Seatpicker.Adapters;
 using Seatpicker.Domain;
 
@@ -25,35 +27,32 @@ var host = new HostBuilder()
 
 host.Run();
 
-namespace Functions
+internal class AdapterConfiguration : IAdapterConfiguration
 {
-    internal class AdapterConfiguration : IAdapterConfiguration
+    public AdapterConfiguration(IConfiguration configuration)
     {
-        public AdapterConfiguration(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
-
-        private IConfiguration Configuration { get; }
-    
-        public Uri DiscordBaseUri => new(Configuration["BaseUri"]);
-        public Uri DiscordRedirectUri => new(Configuration["RedirectUri"]);
-        public string ClientId => Configuration["ClientId"];
-        public string ClientSecret => Configuration["ClientSecret"];
-        public Guid LanId => Guid.Parse(Configuration["LanId"]);
-        public Uri KeyvaultUri => new(Configuration["KeyvaultUri"]);
-        public string StorageEndpoint => Configuration["StorageEndpoint"];
+        Configuration = configuration;
     }
 
-    internal class UserContextConfiguration : IUserContextConfiguration
-    {
-        public UserContextConfiguration(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+    private IConfiguration Configuration { get; }
 
-        private IConfiguration Configuration { get; }
-    
-        public string ClientId => Configuration["ClientId"];
+    public Uri DiscordBaseUri => new(Configuration["DiscordBaseUri"].TrimEnd('/') + "/");
+    public Uri DiscordRedirectUri => new(Configuration["DiscordRedirectUri"]);
+    public string ClientId => Configuration["ClientId"];
+    public string ClientSecret => Configuration["ClientSecret"];
+    public Guid LanId => Guid.Parse(Configuration["LanId"]);
+    public Uri KeyvaultUri => new(Configuration["KeyvaultUri"]);
+    public string StorageEndpoint => Configuration["StorageEndpoint"];
+}
+
+internal class UserContextConfiguration : IUserContextConfiguration
+{
+    public UserContextConfiguration(IConfiguration configuration)
+    {
+        Configuration = configuration;
     }
+
+    private IConfiguration Configuration { get; }
+
+    public string ClientId => Configuration["ClientId"];
 }

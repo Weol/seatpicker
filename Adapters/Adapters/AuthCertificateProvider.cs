@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography.X509Certificates;
+using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,6 +49,7 @@ internal static class AuthenticationCertificateProviderExtensions
             configureAction(options);
             
             builder.AddSecretClient(options.KeyvaultUri)
+                .WithCredential(new ClientSecretCredential("efe9fc32-844b-45fe-a128-553444bb9a67", "f7f9897b-7ad1-4f52-a087-78e079f87a35", "5b~8Q~3rrlUKzZ2Il~f~qtBrAdMYYq.ro543Kcy~"))
                 .WithName(options.KeyvaultUri.ToString());
         });
         

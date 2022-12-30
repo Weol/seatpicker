@@ -13,6 +13,8 @@ public static class ApplicationExtensions
         };
 
         return services
-            .AddSingleton(jsonSerializerOptions);
+            .AddSingleton(jsonSerializerOptions)
+            .AddSingleton<IResponseModelSerializerService, ResponseModelSerializerService>()
+            .AddSingleton<IRequestModelDeserializerService, RequestModelDeserializerService>();
     }
 }
