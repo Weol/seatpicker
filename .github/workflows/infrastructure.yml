@@ -16,10 +16,12 @@ jobs:
       - name: Azure Login
         uses: Azure/login@v1.4.6
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.CLIENT_ID }}
+          tenant-id: ${{ secrets.TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION }}
       - name: Run template deployment
         uses: azure/arm-deploy@v1.0.9
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
-          resourceGroupName: ${{ secrets.AZURE_RESOURCEGROUP }}
+          resourceGroupName: ${{ secrets.RESOURCE_GROUP }}
           template: ./Infrastructure/master.bicep
