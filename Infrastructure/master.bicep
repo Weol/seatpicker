@@ -87,16 +87,6 @@ resource dbServer 'Microsoft.Sql/servers@2022-02-01-preview' = {
   properties: {
     administratorLogin: 'CloudSA0b670279'
     administratorLoginPassword: databaseAdminPassword
-    minimalTlsVersion: '1.2'
-    administrators: {
-      administratorType: 'ActiveDirectory'
-      principalType: 'User'
-      login: 'erik.nysto.rahka@itera.com'
-      sid: 'b386dac1-d488-44c4-8dab-391517679fca'
-      tenantId: subscription().tenantId
-      azureADOnlyAuthentication: true
-    }
-    restrictOutboundNetworkAccess: 'Disabled'
   }
 }
 
