@@ -28,4 +28,4 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ secrets.RESOURCE_GROUP }}
           template: ./Infrastructure/master.bicep
-          parameters: databaseAdminPassword=${{ secrets.DATABASE_ADMIN_PASSWORD }}
+          parameters: databaseAdminPassword=${{ secrets.DATABASE_SERVER_PASSWORD }}
