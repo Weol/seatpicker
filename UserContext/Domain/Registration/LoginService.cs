@@ -50,11 +50,11 @@ internal class LoginService : ILoginService
 
         if (user is not null)
         {
-            user = new User(discordUser.Id, discordUser.Username, discordUser.Avatar, null, user.Roles, DateTime.Now);
+            user = new User(discordUser.Id, discordUser.Username, discordUser.Avatar, user.Roles, DateTime.Now);
         }
         else
         {
-            user = new User(discordUser.Id, discordUser.Username, discordUser.Avatar, null, DefaultRoles, DateTime.Now);
+            user = new User(discordUser.Id, discordUser.Username, discordUser.Avatar, DefaultRoles, DateTime.Now);
         }
 
         await storeUser.Store(user);

@@ -15,6 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\SeatContext\SeatContext.csproj" />
       <ProjectReference Include="..\UserContext\UserContext.csproj" />
     </ItemGroup>
 

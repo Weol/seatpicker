@@ -9,14 +9,12 @@ namespace Seatpicker.Application.Entrypoints;
 
 public class Login
 {
-    private readonly ILogger<Login> logger;
     private readonly ILoginService loginService;
     private readonly IRequestModelDeserializerService requestModelDeserializer;
     private readonly IResponseModelSerializerService responseModelSerializerService;
 
     public Login(ILogger<Login> logger, IRequestModelDeserializerService requestModelDeserializer, ILoginService loginService, IResponseModelSerializerService responseModelSerializerService)
     {
-        this.logger = logger;
         this.requestModelDeserializer = requestModelDeserializer;
         this.loginService = loginService;
         this.responseModelSerializerService = responseModelSerializerService;
@@ -46,5 +44,4 @@ public class Login
             RuleFor(x => x.Token).NotEmpty();
         }
     }
-
 }

@@ -32,7 +32,6 @@ internal class UserStore : IStoreUser, ILookupUser
         {
             RowKey= user.Id,
             Nick = user.Nick,
-            Name = user.Name,
             Avatar = user.Avatar,
             Roles = jsonRoles,
             CreatedAt = user.CreatedAt
@@ -52,7 +51,6 @@ internal class UserStore : IStoreUser, ILookupUser
                 entity.RowKey,
                 entity.Nick,
                 entity.Avatar,
-                entity.Name,
                 roles,
                 entity.CreatedAt);
         }

@@ -64,17 +64,14 @@ resource api 'Microsoft.Web/sites@2018-02-01' = {
   }
 }
 
-resource keyVault 'Microsoft.KeyVault/vaults@2021-10-01' = {
-  name: 'keyvault-${postfix}'
-  location: location
-  properties: {
-    tenantId: subscription().tenantId
-    sku: {
-      family: 'A'
-      name: 'standard'
-    }
-    enableSoftDelete: true
-    enableRbacAuthorization: true
+module keyvaultModule 'keyvault.bicep' = {
+  name: 'keyvault'
+  params: {
+    location: location
+    postfix: postfix
+    readers: [
+      api.identity.principalId
+    ]
   }
 }
 
@@ -180,5 +177,25 @@ resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
     APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.properties.InstrumentationKey
     FUNCTIONS_WORKER_RUNTIME: 'dotnet'
     FUNCTIONS_EXTENSION_VERSION: '~4'
+
+    KeyvaultUri: keyVault.properties.vaultUri
+    DatabaseUri: dbServer.properties.fullyQualifiedDomainName
+  }
+}
+
+var roleAssignments = [
+  {
+    identity: api.identity.principalId
+    scope: keyVault
+  }
+]
+
+resource apiKeyvaultReaderRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  scope: keyVault 
+  name: guid(keyVault.id, api.id)
+  properties: {
+    roleDefinitionId: 
+    principalId: api.identity.principalId 
+    principalType: 'ServicePrincipal'
   }
 }
