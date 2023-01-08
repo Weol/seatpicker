@@ -1,6 +1,6 @@
 namespace Seatpicker.SeatContext.Domain.Layout.Ports;
 
-public interface IGetTables
+public interface ILookupTables
 {
-    Task<IEnumerable<Table>> Get();
+    Task<IEnumerable<Table>> Get(Guid id);
 }

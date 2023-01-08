@@ -18,7 +18,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2021-10-01' = {
 }
 
 var readerRole = '4633458b-17de-408a-b874-0445c86b69e6'
-resource apiKeyvaultReaderRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = [for reader in readers: {
+resource roleAssignmnets 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = [for reader in readers: {
   scope: keyVault 
   name: guid(keyVault.id, reader, readerRole)
   properties: {

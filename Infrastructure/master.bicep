@@ -75,6 +75,8 @@ module keyvaultModule 'keyvault.bicep' = {
   }
 }
 
+var databaseAdminUsername = 'CloudSA0b670279'
+
 resource dbServer 'Microsoft.Sql/servers@2022-02-01-preview' = {
   location: location
   name: 'dbserver-${postfix}'
@@ -82,7 +84,7 @@ resource dbServer 'Microsoft.Sql/servers@2022-02-01-preview' = {
     type: 'SystemAssigned'
   }
   properties: {
-    administratorLogin: 'CloudSA0b670279'
+    administratorLogin: databaseAdminUsername
     administratorLoginPassword: databaseAdminPassword
   }
 }
@@ -94,6 +96,17 @@ resource database 'Microsoft.Sql/servers/databases@2022-02-01-preview' = {
   sku: {
     name: 'Basic'
     tier: 'Basic'
+  }
+}
+
+module serviceBusModule 'serviceBus.bicep' = {
+  name: 'serviceBus'
+  params: {
+    location: location
+    postfix: postfix
+    contributors: [
+      api.identity.principalId
+    ]
   }
 }
 
@@ -136,13 +149,7 @@ resource signalr 'Microsoft.SignalRService/signalR@2022-02-01' = {
 }
 */
 
-resource serviceBus 'Microsoft.ServiceBus/namespaces@2022-01-01-preview' = {
-  name: 'servicebus-${postfix}'
-  location: location
-  sku: {
-    name: ''
-  }
-}
+
 
 /*
 resource frontend 'Microsoft.Web/staticSites@2022-03-01' = {
@@ -177,6 +184,11 @@ resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
     FUNCTIONS_EXTENSION_VERSION: '~4'
 
     KeyvaultUri: keyvaultModule.outputs.keyvaultUri
-    DatabaseUri: dbServer.properties.fullyQualifiedDomainName
+    TableStorageUri: storageAccount.properties.primaryEndpoints.table
+    service: storageAccount.properties.primaryEndpoints.table
+
+    App_Database_Username: databaseAdminUsername
+    App_Database_Password: databaseAdminPassword
+    App_Database_Uri: dbServer.properties.fullyQualifiedDomainName
   }
 }

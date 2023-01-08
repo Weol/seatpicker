@@ -12,18 +12,18 @@ internal class LayoutService : ILayoutService
 {
     private static readonly Guid LayoutId = Guid.Parse("cb3e4df0-691a-4057-a207-238417d4e1e5");
     
-    private readonly IGetTables getTables;
+    private readonly ILookupTables lookupTables;
     private readonly IGetLayoutBackground getLayoutBackground;
 
-    public LayoutService(IGetTables getTables, IGetLayoutBackground getLayoutBackground)
+    public LayoutService(ILookupTables lookupTables, IGetLayoutBackground getLayoutBackground)
     {
-        this.getTables = getTables;
+        this.lookupTables = lookupTables;
         this.getLayoutBackground = getLayoutBackground;
     }
 
     public async Task<TableLayout> GetActiveLayout()
     {
-        var (tables, background) = await WhenBoth(getTables.Get(), getLayoutBackground.Get());
+        var (tables, background) = await WhenBoth(lookupTables.Get(), getLayoutBackground.Get());
 
         return new TableLayout(LayoutId, tables, background);
     }

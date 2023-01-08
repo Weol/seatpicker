@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Azure;
 using Azure.Data.Tables;
+using Azure.Storage.Blobs;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -13,31 +14,32 @@ using User = Seatpicker.UserContext.Domain.User;
 
 namespace Seatpicker.Adapters.Adapters;
 
-internal class TableStore : IGetTables
+internal class TableStore : ILookupTables
 {
-    private readonly TableClient tableClient;
+    private readonly BlobClient tableClient;
 
-    public TableStore(IAzureClientFactory<TableServiceClient> tableClientFactory, IOptions<Options> options)
+    public TableStore(IAzureClientFactory<BlobServiceClient> blovServiceClientFactory, IOptions<Options> options)
     {
-        var tableServiceClient = tableClientFactory.CreateClient(options.Value.Endpoint);
+        var tableServiceClient = blovServiceClientFactory.CreateClient(options.Value.Endpoint);
 
-        tableServiceClient.CreateTableIfNotExists(options.Value.TableName);
+        tableServiceClient.CreateBlobContainer();
         
         tableClient = tableServiceClient
             .GetTableClient(options.Value.TableName);
     }
     
-    public async Task<IEnumerable<Table>> Get()
+    public async Task<IEnumerable<Table>> Get(Guid id)
     {
         try
         {
-            var userEntity = await tableClient.GetEntityAsync<UserEntity>("Default", id);
+            var userEntity = await tableClient.GetEntityAsync<TableEntity>("Default", id);
             var entity = userEntity.Value;
 
             var roles = JsonSerializer.Deserialize<IEnumerable<Role>>(entity.Roles) ?? throw new NullReferenceException();
 
-            return new User(
+            return new Table(
                 entity.RowKey,
+                id
                 entity.Nick,
                 entity.Avatar,
                 roles,
@@ -49,7 +51,7 @@ internal class TableStore : IGetTables
         }
     }
 
-    internal class UserEntity : ITableEntity 
+    private class TableEntity : ITableEntity 
     {
         public string RowKey { get; set; }
         public string PartitionKey { get; set; };
@@ -75,9 +77,9 @@ internal class TableStore : IGetTables
     }
 }
 
-internal static class UserStoreExtensions
+internal static class TableStoreExtensions
 {
-    internal static IServiceCollection AddUserStore(this IServiceCollection services, Action<UserStore.Options> configureAction)
+    internal static IServiceCollection AddTableStore(this IServiceCollection services, Action<TableStore.Options> configureAction)
     {
         services.Configure(configureAction);
         
@@ -89,10 +91,9 @@ internal static class UserStoreExtensions
             builder.AddTableServiceClient(options.Endpoint)
                 .WithName(options.Endpoint);
         });
-            
+
         services
-            .AddSingletonPortMapping<IStoreUser, UserStore>()
-            .AddSingletonPortMapping<ILookupUser, UserStore>();
+            .AddSingletonPortMapping<ILookupTables, TableStore>();
 
         return services;
     }
