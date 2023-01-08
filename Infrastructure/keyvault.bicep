@@ -27,3 +27,5 @@ resource apiKeyvaultReaderRoleAssignment 'Microsoft.Authorization/roleAssignment
     principalType: 'ServicePrincipal'
   }
 }]
+
+output keyvaultUri string = keyVault.properties.vaultUri

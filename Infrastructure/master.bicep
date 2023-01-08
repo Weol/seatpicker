@@ -176,24 +176,7 @@ resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
     FUNCTIONS_WORKER_RUNTIME: 'dotnet'
     FUNCTIONS_EXTENSION_VERSION: '~4'
 
-    KeyvaultUri: keyVault.properties.vaultUri
+    KeyvaultUri: keyvaultModule.outputs.keyvaultUri
     DatabaseUri: dbServer.properties.fullyQualifiedDomainName
-  }
-}
-
-var roleAssignments = [
-  {
-    identity: api.identity.principalId
-    scope: keyVault
-  }
-]
-
-resource apiKeyvaultReaderRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
-  scope: keyVault 
-  name: guid(keyVault.id, api.id)
-  properties: {
-    roleDefinitionId: 
-    principalId: api.identity.principalId 
-    principalType: 'ServicePrincipal'
   }
 }
