@@ -136,15 +136,13 @@ resource signalr 'Microsoft.SignalRService/signalR@2022-02-01' = {
 }
 */
 
-/*
 resource serviceBus 'Microsoft.ServiceBus/namespaces@2022-01-01-preview' = {
   name: 'servicebus-${postfix}'
   location: location
   sku: {
-    name: 'Standard'
+    name: ''
   }
 }
-*/
 
 /*
 resource frontend 'Microsoft.Web/staticSites@2022-03-01' = {

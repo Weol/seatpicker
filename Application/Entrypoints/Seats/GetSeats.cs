@@ -1,10 +1,9 @@
 using System.Net;
-using FluentValidation;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using Seatpicker.SeatContext.Domain.Seat;
+using Seatpicker.SeatContext.Domain.Seats;
 
-namespace Seatpicker.Application.Entrypoints;
+namespace Seatpicker.Application.Entrypoints.Seats;
 
 public class GetSeats
 {
