@@ -11,12 +11,12 @@ resource serviceBus 'Microsoft.ServiceBus/namespaces@2022-01-01-preview' = {
   }
 }
 
-var readerRole = '090c5cfd-751d-490a-894a-3ce6f1109419'
+var ownerRole = '090c5cfd-751d-490a-894a-3ce6f1109419'
 resource roleAssignments 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = [for contributor in contributors: {
   scope: serviceBus 
-  name: guid(serviceBus.id, contributor, readerRole)
+  name: guid(serviceBus.id, contributor, ownerRole)
   properties: {
-    roleDefinitionId: readerRole
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', ownerRole)
     principalId: contributor
     principalType: 'ServicePrincipal'
   }

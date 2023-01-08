@@ -22,7 +22,7 @@ resource roleAssignmnets 'Microsoft.Authorization/roleAssignments@2020-04-01-pre
   scope: keyVault 
   name: guid(keyVault.id, reader, readerRole)
   properties: {
-    roleDefinitionId: readerRole
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', readerRole)
     principalId: reader
     principalType: 'ServicePrincipal'
   }
