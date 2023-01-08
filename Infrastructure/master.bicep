@@ -182,11 +182,8 @@ resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
     APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.properties.InstrumentationKey
     FUNCTIONS_WORKER_RUNTIME: 'dotnet'
     FUNCTIONS_EXTENSION_VERSION: '~4'
-
+   
     KeyvaultUri: keyvaultModule.outputs.keyvaultUri
-    TableStorageUri: storageAccount.properties.primaryEndpoints.table
-    service: storageAccount.properties.primaryEndpoints.table
-
     App_Database_Username: databaseAdminUsername
     App_Database_Password: databaseAdminPassword
     App_Database_Uri: dbServer.properties.fullyQualifiedDomainName
