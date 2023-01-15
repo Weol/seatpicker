@@ -39,7 +39,7 @@ internal class TableStore : ILookupTables
 
             return new Table(
                 entity.RowKey,
-                id
+                id,
                 entity.Nick,
                 entity.Avatar,
                 roles,

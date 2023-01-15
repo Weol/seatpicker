@@ -183,9 +183,12 @@ resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
     FUNCTIONS_WORKER_RUNTIME: 'dotnet'
     FUNCTIONS_EXTENSION_VERSION: '~4'
    
-    KeyvaultUri: keyvaultModule.outputs.keyvaultUri
-    App_Database_Username: databaseAdminUsername
-    App_Database_Password: databaseAdminPassword
-    App_Database_Uri: dbServer.properties.fullyQualifiedDomainName
+    App_Keyvault__Uri: keyvaultModule.outputs.keyvaultUri
+
+    App_Database__Username: databaseAdminUsername
+    App_Database__Password: databaseAdminPassword
+    App_Database__Uri: dbServer.properties.fullyQualifiedDomainName
+
+    App_ServiceBus__Uri: serviceBusModule.outputs.serviceBusEndpoint
   }
 }
