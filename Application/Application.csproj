@@ -1,22 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>Seatpicker.Application</RootNamespace>
+        <RootNamespace>UserContext.Application</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="FluentValidation" Version="11.2.2" />
-      <PackageReference Include="Microsoft.Azure.Functions.Worker.Core" Version="1.8.0" />
-      <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.0.12" />
-      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.25.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\SeatContext\SeatContext.csproj" />
-      <ProjectReference Include="..\UserContext\UserContext.csproj" />
+      <Folder Include="Features\Login" />
     </ItemGroup>
 
 </Project>
