@@ -1,56 +1,30 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Seatpicker.Host.Adapters;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Seatpicker.Infrastructure.Adapters;
 
-namespace Seatpicker.Host;
-
-public interface IAdapterConfiguration
-{
-    Uri DiscordBaseUri { get; }
-    Uri DiscordRedirectUri { get; }
-    string ClientId { get; }
-    string ClientSecret { get; }
-    Guid LanId { get; }
-    Uri KeyvaultUri { get; }
-    string StorageEndpoint { get; }
-}
+namespace Seatpicker.Infrastructure;
 
 public static class AdapterExtensions
 {
-    private static IAdapterConfiguration Configuration { get; set; } = null!;
+    private static IConfiguration Config { get; set; } = null!;
 
-    public static IServiceCollection AddAdapters(this IServiceCollection services, IAdapterConfiguration configuration)
+    public static IServiceCollection AddAdapters(this IServiceCollection services, IConfiguration configuration)
     {
-        Configuration = configuration;
+        Config = configuration;
 
         return services
-            .AddUserStore(ConfigureUserStore)
+            .AddCreateJwtToken()
             .AddAuthenticationCertificateProvider(ConfigureAuthenticationCertificateProvider)
-            .AddLanIdentityProvider(ConfigureLanIdentityProvider)
             .AddDiscordClient(ConfigureDiscordClient);
     }
 
     private static void ConfigureDiscordClient(DiscordClientOptions options)
     {
-        options.BaseUri = Configuration.DiscordBaseUri;
-        options.RedirectUri = Configuration.DiscordRedirectUri;
-        options.ClientId = Configuration.ClientId;
-        options.ClientSecret = Configuration.ClientSecret;
-    }
-
-    private static void ConfigureLanIdentityProvider(LanIdentityProvider.Options options)
-    {
-        options.LanId = Configuration.LanId;
+        Config.GetSection("Discord").Bind(options);
     }
 
     private static void ConfigureAuthenticationCertificateProvider(AuthCertificateProvider.Options options)
     {
-        options.SecretName = "AuthenticationCertificate";
-        options.KeyvaultUri = Configuration.KeyvaultUri;
-    }
-
-    private static void ConfigureUserStore(UserStore.Options options)
-    {
-        options.Endpoint = Configuration.StorageEndpoint;
-        options.TableName = "Users";
+        Config.GetSection("Keyvault").Bind(options);
     }
 }

@@ -3,7 +3,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.Functions.Worker.Middleware;
 
-namespace Seatpicker.Host.Middleware;
+namespace Seatpicker.Infrastructure.Middleware;
 
 public class JsonExceptionHandlerMiddleware : IFunctionsWorkerMiddleware
 {

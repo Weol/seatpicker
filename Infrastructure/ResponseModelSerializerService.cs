@@ -1,11 +1,11 @@
 ﻿using System.Text.Json;
 using Microsoft.Azure.Functions.Worker.Http;
 
-namespace Seatpicker.Host;
+namespace Seatpicker.Infrastructure;
 
 public interface IResponseModelSerializerService
 {
-    Task<HttpResponseData> Serialize<TModel>(HttpResponseData createResponse, TModel loginResponseModel);
+    Task<string> Serialize<TModel>(TModel loginResponseModel);
 }
 
 public class ResponseModelSerializerService : IResponseModelSerializerService
@@ -17,9 +17,8 @@ public class ResponseModelSerializerService : IResponseModelSerializerService
         this.jsonSerializerOptions = jsonSerializerOptions;
     }
 
-    public async Task<HttpResponseData> Serialize<TModel>(HttpResponseData response, TModel loginResponseModel)
+    public Task<string> Serialize<TModel>(TModel loginResponseModel)
     {
-        await JsonSerializer.SerializeAsync(response.Body, loginResponseModel, jsonSerializerOptions);
-        return response;
+        return Task.FromResult(JsonSerializer.Serialize(loginResponseModel, jsonSerializerOptions));
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Seatpicker.SeatContext;
+﻿namespace Seatpicker.Domain;
 
 public class Floorplan 
 {

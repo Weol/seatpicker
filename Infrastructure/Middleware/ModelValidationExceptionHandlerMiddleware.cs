@@ -4,7 +4,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.Functions.Worker.Middleware;
 
-namespace Seatpicker.Host.Middleware;
+namespace Seatpicker.Infrastructure.Middleware;
 
 public class ModelValidationExceptionHandlerMiddleware : IFunctionsWorkerMiddleware
 {
@@ -14,10 +14,8 @@ public class ModelValidationExceptionHandlerMiddleware : IFunctionsWorkerMiddlew
         {
             await next(context);
         }
-        catch (AggregateException e)
+        catch (AggregateException e) when (e.InnerException is ModelValidationException validationException)
         {
-            if (e.InnerException is not ModelValidationException validationException) throw;
-            
             var errors = validationException.ValidationResult.Errors.Select(error => new
             {
                 Property = error.PropertyName,

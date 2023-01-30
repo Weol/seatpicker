@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Seatpicker.SeatContext.Registration.Ports;
+using Microsoft.Extensions.Logging;
+using Seatpicker.Application.Features.Login.Ports;
+using Seatpicker.Domain;
 
-namespace Seatpicker.SeatContext.Registration;
+namespace Seatpicker.Application.Features.Login;
 
 public interface ILoginService
 {
@@ -10,53 +12,38 @@ public interface ILoginService
 
 internal class LoginService : ILoginService
 {
-    private static readonly Role[] DefaultRoles =
-    {
-        Role.SeatReserver,
-        Role.ReservedSeatsViewer
-    };
-
     private readonly ILogger<LoginService> logger;
-    private readonly IStoreUser storeUser;
     private readonly ICreateJwtToken createJwtToken;
-    private readonly ILookupUser lookupUser;
     private readonly IDiscordAccessTokenProvider discordAccessTokenProvider;
     private readonly IDiscordLookupUser discordUserLookup;
+    private readonly IAuthCertificateProvider authCertificateProvider;
 
     public LoginService(ILogger<LoginService> logger,
         IDiscordAccessTokenProvider discordAccessTokenProvider, 
         IDiscordLookupUser discordUserLookup,
         ICreateJwtToken createJwtToken, 
-        IStoreUser storeUser, 
-        ILookupUser lookupUser)
+        IAuthCertificateProvider authCertificateProvider)
     {
         this.logger = logger;
-        this.storeUser = storeUser;
-        this.lookupUser = lookupUser;
         this.discordAccessTokenProvider = discordAccessTokenProvider;
         this.discordUserLookup = discordUserLookup;
         this.createJwtToken = createJwtToken;
+        this.authCertificateProvider = authCertificateProvider;
     }
 
     public async Task<string> GetFor(string discordToken)
     {
         var accessToken = await discordAccessTokenProvider.GetFor(discordToken);
-        var discordUser = await discordUserLookup.Lookup(accessToken.AccessToken);
+        var discordUser = await discordUserLookup.Lookup(accessToken);
 
-        var user = await lookupUser.Lookup(discordUser.Id);
+        var user = new User {
+            Id = discordUser.Id, 
+            Nick = discordUser.Username,
+            Avatar = discordUser.Avatar
+        };
 
-        if (user is not null)
-        {
-            user = new User(discordUser.Id, discordUser.Username, discordUser.Avatar, user.Roles, DateTime.Now);
-        }
-        else
-        {
-            user = new User(discordUser.Id, discordUser.Username, discordUser.Avatar, DefaultRoles, DateTime.Now);
-        }
-
-        await storeUser.Store(user);
-
-        var token = await createJwtToken.ForUser(user);
+        var authCertificate = await authCertificateProvider.Get();
+        var token = await createJwtToken.CreateFor(user, authCertificate);
 
         return token;
     }

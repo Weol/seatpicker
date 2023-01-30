@@ -1,6 +1,8 @@
 ﻿using System.Net;
 using Bogus;
 using Microsoft.Extensions.DependencyInjection;
+using Seatpicker.Application;
+using Seatpicker.Application.Features.Login;
 
 namespace Seatpicker.IntegrationTests.Host.Adapters;
 
@@ -17,7 +19,7 @@ public class DiscordClientFaker
 
     public void SetupDiscordUser(string accessToken, string loginToken, DiscordUser discordUser)
     {
-        var accessTokenUri = new Uri(host.AdapterConfiguration.DiscordBaseUri + "/ouath2/token");
+        var accessTokenUri = new Uri("/ouath2/token");
         httpRequestFaker.WhenUri(accessTokenUri, request =>
         {
             var formContent = (FormUrlEncodedContent)request.Content!;
@@ -28,7 +30,7 @@ public class DiscordClientFaker
             };
         });
         
-        var usersUri = new Uri(host.AdapterConfiguration.DiscordBaseUri + "users/@me");
+        var usersUri = new Uri("users/@me");
         httpRequestFaker.WhenUri(usersUri, request =>
         {
             return new HttpResponseMessage

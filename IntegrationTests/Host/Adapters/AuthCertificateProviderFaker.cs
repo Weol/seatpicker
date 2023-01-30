@@ -34,9 +34,6 @@ public class AuthCertificateProviderFaker
                 return Response.FromValue(new KeyVaultSecret(secretName, b64AuthCertificate), null!);
             });
         
-        var clientName = host.AdapterConfiguration.KeyvaultUri.ToString();
-        factory.CreateClient(clientName).Returns(secretClient);
-
         return authCertificate;
     }
 }

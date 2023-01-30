@@ -1,10 +1,14 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Seatpicker.Application;
+using Seatpicker.Application.Features.Login;
+using Seatpicker.Application.Features.Login.Ports;
 
-namespace Seatpicker.Host.Adapters;
+namespace Seatpicker.Infrastructure.Adapters;
 
 internal class DiscordClient : IDiscordAccessTokenProvider, IDiscordLookupUser
 {
@@ -22,7 +26,7 @@ internal class DiscordClient : IDiscordAccessTokenProvider, IDiscordLookupUser
         this.logger = logger;
     }
 
-    public async Task<DiscordAccessToken> GetFor(string discordToken)
+    public async Task<string> GetFor(string discordToken)
     {
         var response = await httpClient.PostAsync("oauth2/token", new FormUrlEncodedContent(new[]
         {
@@ -33,7 +37,8 @@ internal class DiscordClient : IDiscordAccessTokenProvider, IDiscordLookupUser
             new KeyValuePair<string, string>("code", discordToken),
         }));
 
-        return await DeserializeContent<DiscordAccessToken>(response);
+        var dto = await DeserializeContent<DiscordAccessTokenDto>(response);
+        return dto.AccessToken;
     }
 
     public async Task<DiscordUser> Lookup(string accessToken)
@@ -66,6 +71,24 @@ internal class DiscordClient : IDiscordAccessTokenProvider, IDiscordLookupUser
 
         throw new DiscordException($"Non-successful response code from Discord {response.StatusCode}");
     }
+
+    private class DiscordAccessTokenDto
+    {
+        [JsonPropertyName("access_token")]
+        public string AccessToken { get; set; }
+        
+        [JsonPropertyName("expires_in")]
+        public int ExpiresIn { get; set; }
+        
+        [JsonPropertyName("refresh_token")]
+        public string RefreshToken { get; set; }
+        
+        [JsonPropertyName("scopes")]
+        public IEnumerable<string> Scopes { get; set; }
+        
+        [JsonPropertyName("token_type")]
+        public string TokenType { get; set; }
+    }
 }
 
 internal class DiscordException : Exception
@@ -86,8 +109,8 @@ internal class DiscordClientOptions
     public string ClientId { get; set; } = null!;
     public string ClientSecret { get; set; } = null!;
     public Uri RedirectUri { get; set; } = null!;
-    public Uri BaseUri { get; set; } = null!;
-    public int Version => GetVersionFromDiscordUri(BaseUri);
+    public Uri Uri { get; set; } = null!;
+    public int Version => GetVersionFromDiscordUri(Uri);
 
     private static int GetVersionFromDiscordUri(Uri baseUri)
     {
@@ -112,12 +135,12 @@ internal static class DiscordHttpClientExtensions
         services.AddHttpClient<DiscordClient>((provider, client) =>
         {
             var options = provider.GetRequiredService<IOptions<DiscordClientOptions>>();
-            var baseUrl = options.Value.BaseUri;
+            var baseUrl = options.Value.Uri;
             var version = options.Value.Version;
 
             var userAgent = $"DiscordBot ({baseUrl}, {version})";
 
-            client.BaseAddress = options.Value.BaseUri;
+            client.BaseAddress = options.Value.Uri;
             client.DefaultRequestHeaders.Add("User-Agent", userAgent);
         });
 

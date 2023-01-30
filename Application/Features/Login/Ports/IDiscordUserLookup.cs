@@ -1,4 +1,4 @@
-﻿namespace Seatpicker.SeatContext.Registration.Ports;
+﻿namespace Seatpicker.Application.Features.Login.Ports;
 
 public interface IDiscordLookupUser
 {
