@@ -17,7 +17,7 @@ public class Seat
     
     public Seat? PositionRelativeTo { get; set; }
     
-    public int? UserId { get; set; }
+    public User? UserId { get; set; }
 
     public double X { get; set; }
     

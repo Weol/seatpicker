@@ -1,4 +1,6 @@
-﻿using System.Security.Cryptography.X509Certificates;
+﻿using System;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Microsoft.Extensions.Azure;
@@ -40,7 +42,7 @@ internal class AuthCertificateProvider : IAuthCertificateProvider
         {
             public Guid TenantId { get; set; }
             public Guid ClientId { get; set; }
-            public string ClientSecret { get; set; }
+            public string ClientSecret { get; set; } = null!;
         }
     }
 }

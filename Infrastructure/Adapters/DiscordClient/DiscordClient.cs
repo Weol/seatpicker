@@ -1,10 +1,14 @@
-﻿using System.Net.Http.Headers;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Seatpicker.Application;
 using Seatpicker.Application.Features.Login;
 using Seatpicker.Application.Features.Login.Ports;
 
@@ -75,19 +79,19 @@ internal class DiscordClient : IDiscordAccessTokenProvider, IDiscordLookupUser
     private class DiscordAccessTokenDto
     {
         [JsonPropertyName("access_token")]
-        public string AccessToken { get; set; }
-        
+        public string AccessToken { get; set; } = null!;
+
         [JsonPropertyName("expires_in")]
         public int ExpiresIn { get; set; }
         
         [JsonPropertyName("refresh_token")]
-        public string RefreshToken { get; set; }
-        
+        public string RefreshToken { get; set; } = null!;
+
         [JsonPropertyName("scopes")]
-        public IEnumerable<string> Scopes { get; set; }
-        
+        public IEnumerable<string> Scopes { get; set; } = null!;
+
         [JsonPropertyName("token_type")]
-        public string TokenType { get; set; }
+        public string TokenType { get; set; } = null!;
     }
 }
 
@@ -101,51 +105,5 @@ internal class DiscordException : Exception
 
     public DiscordException(string message) : base(message)
     {
-    }
-}
-
-internal class DiscordClientOptions
-{
-    public string ClientId { get; set; } = null!;
-    public string ClientSecret { get; set; } = null!;
-    public Uri RedirectUri { get; set; } = null!;
-    public Uri Uri { get; set; } = null!;
-    public int Version => GetVersionFromDiscordUri(Uri);
-
-    private static int GetVersionFromDiscordUri(Uri baseUri)
-    {
-        var version = baseUri.Segments.Single(x => x.StartsWith("v"));
-        if (int.TryParse(version.Trim('v').Trim('/'), out var number))
-        {
-            return number;
-        }
-
-        throw new UriFormatException("Invalid discord uri");
-    }
-}
-
-internal static class DiscordHttpClientExtensions
-{
-    internal static IServiceCollection AddDiscordClient(this IServiceCollection services,
-        Action<DiscordClientOptions> configureAction)
-    {
-        services.Configure(configureAction);
-
-        //https://discord.com/api/v{version_number}
-        services.AddHttpClient<DiscordClient>((provider, client) =>
-        {
-            var options = provider.GetRequiredService<IOptions<DiscordClientOptions>>();
-            var baseUrl = options.Value.Uri;
-            var version = options.Value.Version;
-
-            var userAgent = $"DiscordBot ({baseUrl}, {version})";
-
-            client.BaseAddress = options.Value.Uri;
-            client.DefaultRequestHeaders.Add("User-Agent", userAgent);
-        });
-
-        return services
-            .AddSingletonPortMapping<IDiscordLookupUser, DiscordClient>()
-            .AddSingletonPortMapping<IDiscordAccessTokenProvider, DiscordClient>();
     }
 }

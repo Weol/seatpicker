@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using Bogus;
 using Microsoft.Extensions.DependencyInjection;
-using Seatpicker.Application;
 using Seatpicker.Application.Features.Login;
 
 namespace Seatpicker.IntegrationTests.Host.Adapters;
