@@ -1,5 +1,8 @@
 using System.Text.Json;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Seatpicker.Application;
+using Seatpicker.Application.Features.Login.Ports;
 using Seatpicker.Infrastructure;
 using Seatpicker.Infrastructure.Middleware;
 using Seatpicker.Infrastructure.ModelValidation;
@@ -22,6 +25,18 @@ builder.Services.AddControllers(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddOptions<JwtBearerOptions>()
+    .PostConfigure<IAuthCertificateProvider>(async (options, provider) =>
+    {
+        var certificate = await provider.Get();
+        var key = new X509SecurityKey(certificate);
+        options.TokenValidationParameters.IssuerSigningKey = key;
+    });
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer();
+    
 
 var jsonSerializerOptions = new JsonSerializerOptions
 {
