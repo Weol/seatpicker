@@ -14,7 +14,6 @@
         <PackageReference Include="Bogus" Version="34.0.2" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.12" />
         <PackageReference Include="Microsoft.Extensions.Azure" Version="1.6.0" />
-        <PackageReference Include="Microsoft.IdentityModel.Logging" Version="6.25.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
         <PackageReference Include="NSubstitute" Version="4.4.0" />
         <PackageReference Include="xunit" Version="2.4.1" />
@@ -30,6 +29,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Application\Application.csproj" />
+      <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

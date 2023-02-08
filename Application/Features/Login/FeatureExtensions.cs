@@ -6,6 +6,8 @@ internal static class Feature
 {
     public static IServiceCollection AddLoginFeature(this IServiceCollection services)
     {
-        return services.AddSingleton<ILoginService, LoginService>();
+        return services
+            .AddSingleton<ILoginService, LoginService>()
+            .AddSingleton<IJwtTokenService, JwtTokenService>();
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Seatpicker.Infrastructure.Entrypoints;
+namespace Seatpicker.Infrastructure.Controllers;
 
 [ApiController]
 [Route("[controller]")]

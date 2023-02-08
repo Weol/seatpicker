@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Seatpicker.Application.Features.Login;
 using Seatpicker.Application.Features.Login.Ports;
 
-namespace Seatpicker.Infrastructure.Adapters;
+namespace Seatpicker.Infrastructure.Adapters.DiscordClient;
 
 internal class DiscordClient : IDiscordAccessTokenProvider, IDiscordLookupUser
 {

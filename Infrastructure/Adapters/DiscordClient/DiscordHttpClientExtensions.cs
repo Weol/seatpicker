@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Seatpicker.Application.Features.Login.Ports;
 
-namespace Seatpicker.Infrastructure.Adapters;
+namespace Seatpicker.Infrastructure.Adapters.DiscordClient;
 
 internal static class DiscordHttpClientExtensions
 {

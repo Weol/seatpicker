@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Seatpicker.Application;
 using Seatpicker.Application.Features.Login.Ports;
-using Seatpicker.Infrastructure;
+using Seatpicker.Infrastructure.Adapters;
 using Seatpicker.Infrastructure.Middleware;
 using Seatpicker.Infrastructure.ModelValidation;
 
@@ -36,7 +36,7 @@ builder.Services.AddOptions<JwtBearerOptions>()
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer();
-    
+
 
 var jsonSerializerOptions = new JsonSerializerOptions
 {
@@ -47,7 +47,7 @@ builder.Services
     .AddSingleton(jsonSerializerOptions)
     .AddModelValidator()
     .AddAdapters(builder.Configuration)
-    .AddApplication(builder.Configuration);
+    .AddApplication();
 
 var app = builder.Build();
 
@@ -62,3 +62,8 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+namespace Seatpicker.Infrastructure
+{
+    public partial class Program {}
+}

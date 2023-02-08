@@ -13,15 +13,15 @@ public interface ILoginService
 internal class LoginService : ILoginService
 {
     private readonly ILogger<LoginService> logger;
-    private readonly ICreateJwtToken createJwtToken;
+    private readonly IJwtTokenService createJwtToken;
     private readonly IDiscordAccessTokenProvider discordAccessTokenProvider;
     private readonly IDiscordLookupUser discordUserLookup;
     private readonly IAuthCertificateProvider authCertificateProvider;
 
     public LoginService(ILogger<LoginService> logger,
-        IDiscordAccessTokenProvider discordAccessTokenProvider, 
+        IDiscordAccessTokenProvider discordAccessTokenProvider,
         IDiscordLookupUser discordUserLookup,
-        ICreateJwtToken createJwtToken, 
+        IJwtTokenService createJwtToken,
         IAuthCertificateProvider authCertificateProvider)
     {
         this.logger = logger;
@@ -37,7 +37,7 @@ internal class LoginService : ILoginService
         var discordUser = await discordUserLookup.Lookup(accessToken);
 
         var user = new User {
-            Id = discordUser.Id, 
+            Id = discordUser.Id,
             Nick = discordUser.Username,
             Avatar = discordUser.Avatar
         };
@@ -46,13 +46,5 @@ internal class LoginService : ILoginService
         var token = await createJwtToken.CreateFor(user, authCertificate);
 
         return token;
-    }
-}
-
-internal static class LoginServiceExtensions
-{
-    public static IServiceCollection AddLoginService(this IServiceCollection services)
-    {
-        return services.AddScoped<ILoginService, LoginService>();
     }
 }

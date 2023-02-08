@@ -6,7 +6,7 @@ namespace Seatpicker.Application;
 
 public static class ApplicationExtensions
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         return services
             .AddLoginFeature();

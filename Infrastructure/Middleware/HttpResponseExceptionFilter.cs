@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Seatpicker.Infrastructure.Adapters;
+using Seatpicker.Infrastructure.Adapters.DiscordClient;
 using Seatpicker.Infrastructure.ModelValidation;
 
 namespace Seatpicker.Infrastructure.Middleware;

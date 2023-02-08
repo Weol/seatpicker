@@ -1,4 +1,4 @@
-﻿namespace Seatpicker.Infrastructure.Adapters;
+﻿namespace Seatpicker.Infrastructure.Adapters.DiscordClient;
 
 internal class DiscordClientOptions
 {

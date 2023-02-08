@@ -4,16 +4,20 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Seatpicker.Application.Features.Login.Ports;
 using Seatpicker.Domain;
 
-namespace Seatpicker.Infrastructure.Adapters;
+namespace Seatpicker.Application.Features.Login;
 
-internal class CreateJwtToken : ICreateJwtToken 
+public interface IJwtTokenService
 {
-    private readonly ILogger<CreateJwtToken> logger;
+    public Task<string> CreateFor(User user, X509Certificate2 certificate);
+}
 
-    public CreateJwtToken(ILogger<CreateJwtToken> logger)
+internal class JwtTokenService : IJwtTokenService
+{
+    private readonly ILogger<JwtTokenService> logger;
+
+    public JwtTokenService(ILogger<JwtTokenService> logger)
     {
         this.logger = logger;
     }
@@ -30,7 +34,7 @@ internal class CreateJwtToken : ICreateJwtToken
                 CacheSignatureProviders = false
             }
         };
-        
+
         var userClaims = CreateClaimsForUser(user);
 
         var claims = new[]
@@ -39,7 +43,7 @@ internal class CreateJwtToken : ICreateJwtToken
         };
 
         var handler = new JwtSecurityTokenHandler();
-        
+
         var now = DateTime.UtcNow;
         var token = handler.CreateJwtSecurityToken(
             certificate.FriendlyName,
@@ -50,7 +54,7 @@ internal class CreateJwtToken : ICreateJwtToken
             now,
             new SigningCredentials(rsaSecurityKey, SecurityAlgorithms.RsaSha256)
         );
-        
+
         return Task.FromResult(handler.WriteToken(token));
     }
 
@@ -62,13 +66,5 @@ internal class CreateJwtToken : ICreateJwtToken
             new Claim("spu_nick", user.Nick),
             new Claim("spu_avatar", user.Avatar),
         };
-    }
-}
-
-internal static class CreateJwtTokenExtensions
-{
-    public static IServiceCollection AddCreateJwtToken(this IServiceCollection services)
-    {
-        return services.AddSingleton<ICreateJwtToken, CreateJwtToken>();
     }
 }

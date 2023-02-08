@@ -1,8 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Seatpicker.Infrastructure.Adapters;
+﻿using Seatpicker.Infrastructure.Adapters.DiscordClient;
 
-namespace Seatpicker.Infrastructure;
+namespace Seatpicker.Infrastructure.Adapters;
 
 public static class AdapterExtensions
 {
@@ -13,7 +11,6 @@ public static class AdapterExtensions
         Config = configuration;
 
         return services
-            .AddCreateJwtToken()
             .AddAuthenticationCertificateProvider(ConfigureAuthenticationCertificateProvider)
             .AddDiscordClient(ConfigureDiscordClient);
     }
