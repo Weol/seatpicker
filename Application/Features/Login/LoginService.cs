@@ -36,11 +36,7 @@ internal class LoginService : ILoginService
         var accessToken = await discordAccessTokenProvider.GetFor(discordToken);
         var discordUser = await discordUserLookup.Lookup(accessToken);
 
-        var user = new User {
-            Id = discordUser.Id,
-            Nick = discordUser.Username,
-            Avatar = discordUser.Avatar
-        };
+        var user = new User(discordUser.Id, discordUser.Username, discordUser.Avatar);
 
         var authCertificate = await authCertificateProvider.Get();
         var token = await createJwtToken.CreateFor(user, authCertificate);
