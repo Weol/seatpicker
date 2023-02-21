@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Login;
-using Seatpicker.Infrastructure.ModelValidation;
+using Seatpicker.Infrastructure.Utils;
 
 namespace Seatpicker.Infrastructure.Controllers;
 

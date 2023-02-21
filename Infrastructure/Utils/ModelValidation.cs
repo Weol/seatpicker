@@ -1,9 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace Seatpicker.Infrastructure.ModelValidation;
+namespace Seatpicker.Infrastructure.Utils;
 
 public interface IModelValidator
 {

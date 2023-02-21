@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Seatpicker.Domain;
 
 namespace Seatpicker.Infrastructure.Adapters.Database;
 
@@ -9,6 +10,11 @@ public class SeatpickerContext : DbContext
     public DbSet<SeatDao> Seat { get; set;  }
 
     public DbSet<FloorplanDao> Floorplans { get; set;  }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseInMemoryDatabase("InMemory");
+    }
 }
 
 public class FloorplanDao
@@ -17,8 +23,6 @@ public class FloorplanDao
     public int Id { get; set; }
 
     public byte[] Backdrop { get; set; }
-
-    public
 }
 
 public class SeatDao

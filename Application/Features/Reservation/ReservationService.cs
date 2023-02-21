@@ -22,6 +22,8 @@ internal class ReservationService : IReservationService
         seat.User = user;
 
         floorplanRepository.Save(seat);
+
+        return null;
     }
 }
 

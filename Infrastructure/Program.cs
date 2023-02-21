@@ -5,7 +5,7 @@ using Seatpicker.Application;
 using Seatpicker.Application.Features.Login.Ports;
 using Seatpicker.Infrastructure.Adapters;
 using Seatpicker.Infrastructure.Middleware;
-using Seatpicker.Infrastructure.ModelValidation;
+using Seatpicker.Infrastructure.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,9 +34,9 @@ builder.Services.AddOptions<JwtBearerOptions>()
         options.TokenValidationParameters.IssuerSigningKey = key;
     });
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer();
-
 
 var jsonSerializerOptions = new JsonSerializerOptions
 {
@@ -46,6 +46,7 @@ var jsonSerializerOptions = new JsonSerializerOptions
 builder.Services
     .AddSingleton(jsonSerializerOptions)
     .AddModelValidator()
+    .AddLoggedInUserAccessor()
     .AddAdapters(builder.Configuration)
     .AddApplication();
 
