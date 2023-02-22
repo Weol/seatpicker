@@ -39,11 +39,12 @@ internal class SeatRepository : ISeatRepository
 
     public async Task<ICollection<Reservation>> GetAll()
     {
-        var seats = new Collection<Reservation>();
-
         var enumerator = tableClient.QueryAsync<SeatEntity>()
             .GetAsyncEnumerator();
 
+        if (enumerator.Current is null) return Array.Empty<Reservation>();
+
+        var seats = new Collection<Reservation>();
         do
         {
             var entity = enumerator.Current;

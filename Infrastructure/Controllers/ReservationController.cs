@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Reservation;
 using Seatpicker.Application.Features.Reservation.Ports;
@@ -23,6 +24,7 @@ public class ReservationController
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(AllReservationsResponse), (int) HttpStatusCode.OK)]
     public async Task<IActionResult> Get()
     {
         var allReservations = await seatRepository.GetAll();
@@ -31,6 +33,8 @@ public class ReservationController
 
     [HttpPut("{seatId:guid}")]
     [Authorize]
+    [ProducesResponseType(typeof(Reservation), (int) HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(Reservation), (int) HttpStatusCode.NotFound)]
     public async Task<IActionResult> Put([FromRoute] Guid seatId)
     {
         var user = loggedInUserAccessor.Get();
@@ -40,6 +44,7 @@ public class ReservationController
     }
 
     [HttpDelete("{seatId:guid}")]
+    [ProducesResponseType((int) HttpStatusCode.NotFound)]
     [Authorize]
     public async Task<IActionResult> Delete([FromRoute] Guid seatId)
     {
@@ -48,6 +53,8 @@ public class ReservationController
 
         return new OkResult();
     }
+
+    private record ReservationNotFoundResponse(Guid SeatId);
 
     private record AllReservationsResponse(IEnumerable<Reservation> Reservations);
 }

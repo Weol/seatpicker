@@ -39,8 +39,18 @@ internal class LoginService : ILoginService
         var user = new User(discordUser.Id, discordUser.Username, discordUser.Avatar);
 
         var authCertificate = await authCertificateProvider.Get();
-        var token = await createJwtToken.CreateFor(user, authCertificate);
+
+        var claims = GetClaimsForUser(user);
+        var token = await createJwtToken.CreateFor(user, authCertificate, claims);
 
         return token;
+    }
+
+    private Claim[] GetClaimsForUser(User user)
+    {
+        if (user.Id == "376129925780078592") // Weol's user id
+            return new[] { Claim.ManageSeat, Claim.ReserveSeat };
+
+        return new[] { Claim.ReserveSeat };
     }
 }
