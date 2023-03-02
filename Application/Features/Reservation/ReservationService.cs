@@ -6,7 +6,7 @@ namespace Seatpicker.Application.Features.Reservation;
 
 public interface IReservationService
 {
-    public Task Reserve(User user, Guid seatId);
+    public Task<Seat> Reserve(User user, Guid seatId);
 }
 
 internal class ReservationService : IReservationService
@@ -14,14 +14,18 @@ internal class ReservationService : IReservationService
     private readonly ILogger<ReservationService> logger;
     private readonly ISeatRepository seatRepository;
 
-    public async Task Reserve(User user, Guid seatId)
+    public async Task<Seat> Reserve(User user, Guid seatId)
     {
-        var seat = await seatRepository.Get(seatId);
-        if (seat is null) throw new ApplicationException("Seat not found");
+        var seat = await seatRepository.Get(seatId) ?? new Seat
+        {
+            Id = seatId,
+        };
 
         seat.User = user;
 
         await seatRepository.Store(seat);
+
+        return seat;
     }
 }
 

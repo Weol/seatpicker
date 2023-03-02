@@ -31,16 +31,15 @@ public class ReservationController
         return new OkObjectResult(new AllReservationsResponse(allReservations));
     }
 
-    [HttpPut("{seatId:guid}")]
+    [HttpPost("{seatId:guid}")]
     [Authorize]
-    [ProducesResponseType(typeof(Reservation), (int) HttpStatusCode.OK)]
-    [ProducesResponseType(typeof(Reservation), (int) HttpStatusCode.NotFound)]
-    public async Task<IActionResult> Put([FromRoute] Guid seatId)
+    [ProducesResponseType(typeof(Seat), (int) HttpStatusCode.OK)]
+    public async Task<IActionResult> Post([FromRoute] Guid seatId)
     {
         var user = loggedInUserAccessor.Get();
-        var response = reservationService.Reserve(user, seatId);
+        var seat = await reservationService.Reserve(user, seatId);
 
-        return new OkResult();
+        return new OkObjectResult(seat);
     }
 
     [HttpDelete("{seatId:guid}")]
@@ -55,6 +54,5 @@ public class ReservationController
     }
 
     private record ReservationNotFoundResponse(Guid SeatId);
-
-    private record AllReservationsResponse(IEnumerable<Reservation> Reservations);
+    private record AllReservationsResponse(IEnumerable<Seat> Reservations);
 }

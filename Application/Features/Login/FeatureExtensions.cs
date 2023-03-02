@@ -8,6 +8,6 @@ internal static class Feature
     {
         return services
             .AddSingleton<ILoginService, LoginService>()
-            .AddSingleton<IJwtTokenService, JwtTokenService>();
+            .AddSingleton<ITokenService, TokenService>();
     }
 }

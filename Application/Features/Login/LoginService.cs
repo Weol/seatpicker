@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Security.Claims;
 using Microsoft.Extensions.Logging;
 using Seatpicker.Application.Features.Login.Ports;
 using Seatpicker.Domain;
@@ -13,7 +13,7 @@ public interface ILoginService
 internal class LoginService : ILoginService
 {
     private readonly ILogger<LoginService> logger;
-    private readonly IJwtTokenService createJwtToken;
+    private readonly ITokenService createToken;
     private readonly IDiscordAccessTokenProvider discordAccessTokenProvider;
     private readonly IDiscordLookupUser discordUserLookup;
     private readonly IAuthCertificateProvider authCertificateProvider;
@@ -21,13 +21,13 @@ internal class LoginService : ILoginService
     public LoginService(ILogger<LoginService> logger,
         IDiscordAccessTokenProvider discordAccessTokenProvider,
         IDiscordLookupUser discordUserLookup,
-        IJwtTokenService createJwtToken,
+        ITokenService createToken,
         IAuthCertificateProvider authCertificateProvider)
     {
         this.logger = logger;
         this.discordAccessTokenProvider = discordAccessTokenProvider;
         this.discordUserLookup = discordUserLookup;
-        this.createJwtToken = createJwtToken;
+        this.createToken = createToken;
         this.authCertificateProvider = authCertificateProvider;
     }
 
@@ -40,17 +40,17 @@ internal class LoginService : ILoginService
 
         var authCertificate = await authCertificateProvider.Get();
 
-        var claims = GetClaimsForUser(user);
-        var token = await createJwtToken.CreateFor(user, authCertificate, claims);
+        var claims = GetRolesForUser(user);
+        var token = await createToken.CreateFor(user, authCertificate, claims);
 
         return token;
     }
 
-    private Claim[] GetClaimsForUser(User user)
+    private Role[] GetRolesForUser(User user)
     {
         if (user.Id == "376129925780078592") // Weol's user id
-            return new[] { Claim.ManageSeat, Claim.ReserveSeat };
+            return new[] { Role.Admin, Role.User };
 
-        return new[] { Claim.ReserveSeat };
+        return new[] { Role.User };
     }
 }

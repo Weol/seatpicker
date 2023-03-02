@@ -7,12 +7,12 @@ namespace Seatpicker.Infrastructure.Controllers;
 
 [ApiController]
 [Route("token")]
-public class LoginTokenController
+public class TokenController
 {
     private readonly ILoginService loginService;
     private readonly IModelValidator modelValidator;
 
-    public LoginTokenController(ILoginService loginService, IModelValidator modelValidator)
+    public TokenController(ILoginService loginService, IModelValidator modelValidator)
     {
         this.loginService = loginService;
         this.modelValidator = modelValidator;
@@ -22,7 +22,7 @@ public class LoginTokenController
     public async Task<ActionResult<TokenResponseModel>> Create(TokenRequestModel model)
     {
         await modelValidator.Validate<TokenRequestModel, TokenRequestModelValidator>(model);
-        
+
         var token = await loginService.GetFor(model.Token);
 
         return new OkObjectResult(new TokenResponseModel(token));

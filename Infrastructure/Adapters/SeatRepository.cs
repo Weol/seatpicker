@@ -1,10 +1,8 @@
 ﻿using System.Collections.ObjectModel;
-using System.Text.Json;
 using Azure;
 using Azure.Data.Tables;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Options;
-using Microsoft.VisualBasic;
 using Seatpicker.Application.Features.Reservation.Ports;
 using Seatpicker.Domain;
 
@@ -24,27 +22,27 @@ internal class SeatRepository : ISeatRepository
             .GetTableClient(options.Value.TableName);
     }
 
-    public async Task Store(Reservation reservation)
+    public async Task Store(Seat seat)
     {
-        if (reservation.User == null) throw new ApplicationException("Cannot store seat without user");
+        if (seat.User == null) throw new ApplicationException("Cannot store seat without user");
         await tableClient.UpsertEntityAsync(new SeatEntity
         {
-            RowKey= reservation.Id.ToString(),
-            UserId = reservation.User.Id,
-            UserNick = reservation.User.Nick,
-            UserAvatar = reservation.User.Avatar,
+            RowKey= seat.Id.ToString(),
+            UserId = seat.User.Id,
+            UserNick = seat.User.Nick,
+            UserAvatar = seat.User.Avatar,
             ReservedAt = DateTimeOffset.UtcNow,
         });
     }
 
-    public async Task<ICollection<Reservation>> GetAll()
+    public async Task<ICollection<Seat>> GetAll()
     {
         var enumerator = tableClient.QueryAsync<SeatEntity>()
             .GetAsyncEnumerator();
 
-        if (enumerator.Current is null) return Array.Empty<Reservation>();
+        if (enumerator.Current is null) return Array.Empty<Seat>();
 
-        var seats = new Collection<Reservation>();
+        var seats = new Collection<Seat>();
         do
         {
             var entity = enumerator.Current;
@@ -54,7 +52,7 @@ internal class SeatRepository : ISeatRepository
         return seats;
     }
 
-    public async Task<Reservation?> Get(Guid seatId)
+    public async Task<Seat?> Get(Guid seatId)
     {
         try
         {
@@ -89,11 +87,16 @@ internal class SeatRepository : ISeatRepository
             set {}
         }
 
-        public Reservation ToSeat()
+        public Seat ToSeat()
         {
             var user = new User(UserId, UserNick, UserAvatar);
 
-            return new Reservation(Guid.Parse(RowKey), user, ReservedAt.UtcDateTime);
+            return new Seat
+            {
+                Id = Guid.Parse(RowKey),
+                User = user,
+                ReservedAt = ReservedAt.UtcDateTime,
+            };
         }
     }
 

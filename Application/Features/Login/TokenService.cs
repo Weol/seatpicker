@@ -7,21 +7,21 @@ using Seatpicker.Domain;
 
 namespace Seatpicker.Application.Features.Login;
 
-public interface IJwtTokenService
+public interface ITokenService
 {
-    public Task<string> CreateFor(User user, X509Certificate2 certificate, ICollection<Domain.Claim> domainClaims);
+    public Task<string> CreateFor(User user, X509Certificate2 certificate, ICollection<Role> roles);
 }
 
-internal class JwtTokenService : IJwtTokenService
+internal class TokenService : ITokenService
 {
-    private readonly ILogger<JwtTokenService> logger;
+    private readonly ILogger<TokenService> logger;
 
-    public JwtTokenService(ILogger<JwtTokenService> logger)
+    public TokenService(ILogger<TokenService> logger)
     {
         this.logger = logger;
     }
 
-    public Task<string> CreateFor(User user, X509Certificate2 certificate, ICollection<Domain.Claim> domainClaims)
+    public Task<string> CreateFor(User user, X509Certificate2 certificate, ICollection<Role> roles)
     {
         logger.LogInformation("Using certificate with thumbprint {Thumbprint} to create JWT", certificate.Thumbprint);
 
@@ -42,7 +42,7 @@ internal class JwtTokenService : IJwtTokenService
             new ("spu_avatar", user.Avatar),
         };
 
-        var userClaims = domainClaims.Select(claim => new System.Security.Claims.Claim("roles", (int) claim));
+        var roleClaims = roles.Select(role => new Claim("roles", role.ToString()));
 
         var handler = new JwtSecurityTokenHandler();
 
@@ -50,7 +50,7 @@ internal class JwtTokenService : IJwtTokenService
         var token = handler.CreateJwtSecurityToken(
             certificate.FriendlyName,
             user.Id,
-            new ClaimsIdentity(),
+            new ClaimsIdentity(roleClaims.Concat(defaultClaims)),
             now.AddMilliseconds(-30),
             now.AddDays(30),
             now,
