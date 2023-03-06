@@ -1,10 +1,7 @@
-﻿using System;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
+﻿using System.Security.Cryptography.X509Certificates;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Microsoft.Extensions.Azure;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Seatpicker.Application.Features.Login.Ports;
 

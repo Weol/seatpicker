@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using Seatpicker.Domain;
+﻿using Seatpicker.Domain;
 
 namespace Seatpicker.Infrastructure.Utils;
 

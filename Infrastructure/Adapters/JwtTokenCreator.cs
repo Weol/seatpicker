@@ -1,22 +1,17 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Seatpicker.Application.Features.Login.Ports;
 using Seatpicker.Domain;
 
-namespace Seatpicker.Application.Features.Login;
+namespace Seatpicker.Infrastructure.Adapters;
 
-public interface ITokenService
+internal class JwtTokenCreator : IJwtTokenCreator
 {
-    public Task<string> CreateFor(User user, X509Certificate2 certificate, ICollection<Role> roles);
-}
+    private readonly ILogger<JwtTokenCreator> logger;
 
-internal class TokenService : ITokenService
-{
-    private readonly ILogger<TokenService> logger;
-
-    public TokenService(ILogger<TokenService> logger)
+    public JwtTokenCreator(ILogger<JwtTokenCreator> logger)
     {
         this.logger = logger;
     }
@@ -28,13 +23,13 @@ internal class TokenService : ITokenService
         using var rsa = certificate.GetRSAPrivateKey();
         var rsaSecurityKey = new RsaSecurityKey(rsa)
         {
-            CryptoProviderFactory = new CryptoProviderFactory()
+            CryptoProviderFactory = new CryptoProviderFactory
             {
-                CacheSignatureProviders = false
+                CacheSignatureProviders = false,
             },
         };
 
-        var defaultClaims = new System.Security.Claims.Claim[]
+        var defaultClaims = new Claim[]
         {
             new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new ("spu_id", user.Id),
@@ -42,13 +37,13 @@ internal class TokenService : ITokenService
             new ("spu_avatar", user.Avatar),
         };
 
-        var roleClaims = roles.Select(role => new Claim("roles", role.ToString()));
+        var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role.ToString()));
 
         var handler = new JwtSecurityTokenHandler();
 
         var now = DateTime.UtcNow;
         var token = handler.CreateJwtSecurityToken(
-            certificate.FriendlyName,
+            certificate.Thumbprint,
             user.Id,
             new ClaimsIdentity(roleClaims.Concat(defaultClaims)),
             now.AddMilliseconds(-30),
@@ -58,5 +53,13 @@ internal class TokenService : ITokenService
         );
 
         return Task.FromResult(handler.WriteToken(token));
+    }
+}
+
+internal static class JwtTokenCreatorExtensions
+{
+    internal static IServiceCollection AddJwtTokenCreator(this IServiceCollection services)
+    {
+        return services.AddSingleton<IJwtTokenCreator, JwtTokenCreator>();
     }
 }

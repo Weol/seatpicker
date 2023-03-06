@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Seatpicker.Application.Features.Login;
 
 namespace Seatpicker.Application.Features.Reservation;
 

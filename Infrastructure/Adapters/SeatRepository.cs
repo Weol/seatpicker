@@ -24,13 +24,16 @@ internal class SeatRepository : ISeatRepository
 
     public async Task Store(Seat seat)
     {
-        if (seat.User == null) throw new ApplicationException("Cannot store seat without user");
         await tableClient.UpsertEntityAsync(new SeatEntity
         {
             RowKey= seat.Id.ToString(),
-            UserId = seat.User.Id,
-            UserNick = seat.User.Nick,
-            UserAvatar = seat.User.Avatar,
+            UserId = seat.User?.Id,
+            UserNick = seat.User?.Nick,
+            UserAvatar = seat.User?.Avatar,
+            X = seat.X,
+            Y = seat.Y,
+            Width = seat.Width,
+            Height = seat.Height,
             ReservedAt = DateTimeOffset.UtcNow,
         });
     }
@@ -71,13 +74,17 @@ internal class SeatRepository : ISeatRepository
         }
     }
 
-    private class SeatEntity : ITableEntity
+    private record SeatEntity : ITableEntity
     {
         public string RowKey { get; set; } = null!;
         public string PartitionKey { get; set; } = "Default";
-        public string UserId { get; set; } = null!;
-        public string UserNick { get; set; } = null!;
-        public string UserAvatar { get; set; } = null!;
+        public string? UserId { get; set; }
+        public string? UserNick { get; set; }
+        public string? UserAvatar { get; set; }
+        public double X { get; set; }
+        public double Y { get; set; }
+        public double Width { get; set; }
+        public double Height { get; set; }
         public DateTimeOffset ReservedAt { get; set; }
         public ETag ETag { get; set; }
 
@@ -89,13 +96,28 @@ internal class SeatRepository : ISeatRepository
 
         public Seat ToSeat()
         {
-            var user = new User(UserId, UserNick, UserAvatar);
+            var user = GetUser();
 
             return new Seat
             {
                 Id = Guid.Parse(RowKey),
                 User = user,
+                X = X,
+                Y = Y,
+                Width = Width,
+                Height = Height,
                 ReservedAt = ReservedAt.UtcDateTime,
+            };
+        }
+
+        private User? GetUser()
+        {
+            if (UserId is null || UserNick is null || UserAvatar is null) return null;
+
+            return new User {
+                Id = UserId,
+                Nick = UserNick,
+                Avatar = UserAvatar,
             };
         }
     }

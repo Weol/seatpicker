@@ -13,6 +13,7 @@ public static class AdapterExtensions
         return services
             .AddSeatRepository(ConfigureSeatRepository)
             .AddAuthenticationCertificateProvider(ConfigureAuthenticationCertificateProvider)
+            .AddJwtTokenCreator()
             .AddDiscordClient(ConfigureDiscordClient);
     }
 

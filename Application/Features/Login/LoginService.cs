@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-using Microsoft.Extensions.Logging;
-using Seatpicker.Application.Features.Login.Ports;
+﻿using Seatpicker.Application.Features.Login.Ports;
 using Seatpicker.Domain;
 
 namespace Seatpicker.Application.Features.Login;
@@ -12,22 +10,20 @@ public interface ILoginService
 
 internal class LoginService : ILoginService
 {
-    private readonly ILogger<LoginService> logger;
-    private readonly ITokenService createToken;
+    private readonly IJwtTokenCreator tokenCreator;
     private readonly IDiscordAccessTokenProvider discordAccessTokenProvider;
     private readonly IDiscordLookupUser discordUserLookup;
     private readonly IAuthCertificateProvider authCertificateProvider;
 
-    public LoginService(ILogger<LoginService> logger,
+    public LoginService(
         IDiscordAccessTokenProvider discordAccessTokenProvider,
         IDiscordLookupUser discordUserLookup,
-        ITokenService createToken,
+        IJwtTokenCreator tokenCreator,
         IAuthCertificateProvider authCertificateProvider)
     {
-        this.logger = logger;
         this.discordAccessTokenProvider = discordAccessTokenProvider;
         this.discordUserLookup = discordUserLookup;
-        this.createToken = createToken;
+        this.tokenCreator = tokenCreator;
         this.authCertificateProvider = authCertificateProvider;
     }
 
@@ -36,12 +32,16 @@ internal class LoginService : ILoginService
         var accessToken = await discordAccessTokenProvider.GetFor(discordToken);
         var discordUser = await discordUserLookup.Lookup(accessToken);
 
-        var user = new User(discordUser.Id, discordUser.Username, discordUser.Avatar);
+        var user = new User{
+            Id = discordUser.Id,
+            Nick = discordUser.Username,
+            Avatar = discordUser.Avatar,
+        };
 
         var authCertificate = await authCertificateProvider.Get();
 
         var claims = GetRolesForUser(user);
-        var token = await createToken.CreateFor(user, authCertificate, claims);
+        var token = await tokenCreator.CreateFor(user, authCertificate, claims);
 
         return token;
     }

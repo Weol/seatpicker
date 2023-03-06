@@ -10,13 +10,13 @@ namespace Seatpicker.Infrastructure.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ReservationController
+public class SeatController
 {
     private readonly IReservationService reservationService;
     private readonly ISeatRepository seatRepository;
     private readonly ILoggedInUserAccessor loggedInUserAccessor;
 
-    public ReservationController(IReservationService reservationService, ISeatRepository seatRepository, ILoggedInUserAccessor loggedInUserAccessor)
+    public SeatController(IReservationService reservationService, ISeatRepository seatRepository, ILoggedInUserAccessor loggedInUserAccessor)
     {
         this.reservationService = reservationService;
         this.seatRepository = seatRepository;
@@ -31,10 +31,10 @@ public class ReservationController
         return new OkObjectResult(new AllReservationsResponse(allReservations));
     }
 
-    [HttpPost("{seatId:guid}")]
-    [Authorize]
+    [HttpPost("reserve/{seatId:guid}")]
     [ProducesResponseType(typeof(Seat), (int) HttpStatusCode.OK)]
-    public async Task<IActionResult> Post([FromRoute] Guid seatId)
+    [Authorize]
+    public async Task<IActionResult> Reserve([FromRoute] Guid seatId)
     {
         var user = loggedInUserAccessor.Get();
         var seat = await reservationService.Reserve(user, seatId);
@@ -42,10 +42,10 @@ public class ReservationController
         return new OkObjectResult(seat);
     }
 
-    [HttpDelete("{seatId:guid}")]
+    [HttpDelete("unreserve/{seatId:guid}")]
     [ProducesResponseType((int) HttpStatusCode.NotFound)]
     [Authorize]
-    public async Task<IActionResult> Delete([FromRoute] Guid seatId)
+    public async Task<IActionResult> Unreserve([FromRoute] Guid seatId)
     {
         var user = loggedInUserAccessor.Get();
         var response = reservationService.Reserve(user, seatId);
