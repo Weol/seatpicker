@@ -25,7 +25,12 @@ public class LoggedInUserAccessor : ILoggedInUserAccessor
         var nick = HttpContext.User.Claims.First(x => x.Type == "spu_nick").Value;
         var avatar = HttpContext.User.Claims.First(x => x.Type == "spu_avatar").Value;
 
-        return new User(id, nick, avatar);
+        return new User
+        {
+            Id = id,
+            Avatar = avatar,
+            Nick = nick,
+        };
     }
 }
 
