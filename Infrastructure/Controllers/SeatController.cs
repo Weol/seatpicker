@@ -24,11 +24,11 @@ public class SeatController
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(AllReservationsResponse), (int) HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(IEnumerable<Seat>), (int) HttpStatusCode.OK)]
     public async Task<IActionResult> Get()
     {
-        var allReservations = await seatRepository.GetAll();
-        return new OkObjectResult(new AllReservationsResponse(allReservations));
+        var allSeats = await seatRepository.GetAll();
+        return new OkObjectResult(allSeats);
     }
 
     [HttpPost("reserve/{seatId:guid}")]
@@ -40,19 +40,27 @@ public class SeatController
         var seat = await reservationService.Reserve(user, seatId);
 
         return new OkObjectResult(seat);
-    }
+     }
 
-    [HttpDelete("unreserve/{seatId:guid}")]
+    [HttpPost("replace/{currentSeatId:guid}/{newSeatId:guid}")]
+    [ProducesResponseType(typeof(Seat), (int) HttpStatusCode.OK)]
+    [Authorize]
+    public async Task<IActionResult> Replace([FromRoute] Guid currentSeatId, [FromRoute] Guid newSeatId)
+    {
+        var user = loggedInUserAccessor.Get();
+        var seat = await reservationService.ReplaceReservation(user, currentSeatId, newSeatId);
+
+        return new OkObjectResult(seat);
+     }
+
+    [HttpPost("unreserve/{seatId:guid}")]
     [ProducesResponseType((int) HttpStatusCode.NotFound)]
     [Authorize]
     public async Task<IActionResult> Unreserve([FromRoute] Guid seatId)
     {
         var user = loggedInUserAccessor.Get();
-        var response = reservationService.Reserve(user, seatId);
+        var response = reservationService.UnReserve(user, seatId);
 
         return new OkResult();
     }
-
-    private record ReservationNotFoundResponse(Guid SeatId);
-    private record AllReservationsResponse(IEnumerable<Seat> Reservations);
 }

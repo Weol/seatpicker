@@ -8,5 +8,7 @@ public interface ISeatRepository
 
     Task<Seat?> Get(Guid seatId);
 
+    Task<Seat?> GetByUser(string userId);
+
     Task Store(Seat seat);
 }

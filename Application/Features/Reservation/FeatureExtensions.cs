@@ -2,7 +2,7 @@
 
 namespace Seatpicker.Application.Features.Reservation;
 
-internal static class Feature
+internal static class FeatureExtension
 {
     public static IServiceCollection AddReservationFeature(this IServiceCollection services)
     {

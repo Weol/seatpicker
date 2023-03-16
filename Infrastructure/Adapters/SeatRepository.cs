@@ -3,6 +3,7 @@ using Azure;
 using Azure.Data.Tables;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Seatpicker.Application.Features.Reservation.Ports;
 using Seatpicker.Domain;
 
@@ -27,9 +28,10 @@ internal class SeatRepository : ISeatRepository
         await tableClient.UpsertEntityAsync(new SeatEntity
         {
             RowKey= seat.Id.ToString(),
-            UserId = seat.User?.Id,
-            UserNick = seat.User?.Nick,
-            UserAvatar = seat.User?.Avatar,
+            UserId = seat.User?.Id ?? "",
+            UserNick = seat.User?.Nick ?? "",
+            UserAvatar = seat.User?.Avatar ?? "",
+            Title = seat.Title,
             X = seat.X,
             Y = seat.Y,
             Width = seat.Width,
@@ -43,7 +45,7 @@ internal class SeatRepository : ISeatRepository
         var enumerator = tableClient.QueryAsync<SeatEntity>()
             .GetAsyncEnumerator();
 
-        if (enumerator.Current is null) return Array.Empty<Seat>();
+        await enumerator.MoveNextAsync();
 
         var seats = new Collection<Seat>();
         do
@@ -74,6 +76,23 @@ internal class SeatRepository : ISeatRepository
         }
     }
 
+    public async Task<Seat?> GetByUser(string userId)
+    {
+        try
+        {
+            var enumerator = tableClient.QueryAsync<SeatEntity>(entity => entity.UserId == userId)
+                .GetAsyncEnumerator();
+
+            await enumerator.MoveNextAsync();
+
+            return enumerator.Current.ToSeat();
+        }
+        catch (RequestFailedException e) when (e.Status == 404)
+        {
+            return null;
+        }
+    }
+
     private record SeatEntity : ITableEntity
     {
         public string RowKey { get; set; } = null!;
@@ -81,6 +100,7 @@ internal class SeatRepository : ISeatRepository
         public string? UserId { get; set; }
         public string? UserNick { get; set; }
         public string? UserAvatar { get; set; }
+        public string Title { get; set; } = null!;
         public double X { get; set; }
         public double Y { get; set; }
         public double Width { get; set; }
@@ -102,6 +122,7 @@ internal class SeatRepository : ISeatRepository
             {
                 Id = Guid.Parse(RowKey),
                 User = user,
+                Title = Title,
                 X = X,
                 Y = Y,
                 Width = Width,
@@ -113,6 +134,7 @@ internal class SeatRepository : ISeatRepository
         private User? GetUser()
         {
             if (UserId is null || UserNick is null || UserAvatar is null) return null;
+            if (UserId.IsNullOrEmpty() || UserNick.IsNullOrEmpty() || UserAvatar.IsNullOrEmpty()) return null;
 
             return new User {
                 Id = UserId,

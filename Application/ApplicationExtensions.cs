@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Seatpicker.Application.Features.Floorplan;
 using Seatpicker.Application.Features.Login;
 using Seatpicker.Application.Features.Reservation;
 
@@ -10,6 +11,7 @@ public static class ApplicationExtensions
     {
         return services
             .AddLoginFeature()
+            .AddFloorplanFeature()
             .AddReservationFeature();
     }
 }

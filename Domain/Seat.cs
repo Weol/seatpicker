@@ -2,10 +2,11 @@
 
 public class Seat
 {
-
     public Guid Id { get; init; }
 
     public User? User { get; set; }
+
+    public string Title { get; set; }
 
     public double X { get; set; }
 
