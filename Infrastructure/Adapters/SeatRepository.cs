@@ -46,6 +46,7 @@ internal class SeatRepository : ISeatRepository
             .GetAsyncEnumerator();
 
         await enumerator.MoveNextAsync();
+        if (enumerator.Current is null) return Array.Empty<Seat>();
 
         var seats = new Collection<Seat>();
         do
@@ -84,8 +85,7 @@ internal class SeatRepository : ISeatRepository
                 .GetAsyncEnumerator();
 
             await enumerator.MoveNextAsync();
-
-            return enumerator.Current.ToSeat();
+            return enumerator.Current?.ToSeat();
         }
         catch (RequestFailedException e) when (e.Status == 404)
         {
