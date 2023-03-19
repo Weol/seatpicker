@@ -22,11 +22,14 @@ internal class ReservationService : IReservationService
     public async Task<Seat> Reserve(User user, Guid seatId)
     {
         var seat = await seatRepository.Get(seatId) ?? throw new SeatNotFoundException(seatId);
+        var reservedSeat = await seatRepository.GetByUser(user.Id);
+
+        if (reservedSeat is not null) throw new DuplicateSeatReservationException(user);
 
         if (seat.User is null)
             seat.User = user;
         else
-            throw new SeatAlreadyReservedException(seatId);
+            throw new SeatUnavailableException(seatId);
 
         await seatRepository.Store(seat);
 
@@ -37,7 +40,7 @@ internal class ReservationService : IReservationService
     {
         var seat = await seatRepository.Get(seatId) ?? throw new SeatNotFoundException(seatId);
 
-        if (seat.User is null || seat.User.Id != user.Id) throw new SeatAlreadyReservedException(seatId);
+        if (seat.User is null || seat.User.Id != user.Id) throw new SeatUnavailableException(seatId);
         seat.User = null;
 
         await seatRepository.Store(seat);
@@ -53,8 +56,8 @@ internal class ReservationService : IReservationService
         var oldSeat = oldSeatTask.Result ?? throw new SeatNotFoundException(oldSeatId);
         var newSeat = newSeatTask.Result ?? throw new SeatNotFoundException(newSeatId);
 
-        if (newSeat.User is not null) throw new SeatAlreadyReservedException(newSeatId);
-        if (oldSeat.User is not null && oldSeat.User.Id != user.Id) throw new SeatAlreadyReservedException(oldSeatId);
+        if (newSeat.User is not null) throw new SeatUnavailableException(newSeatId);
+        if (oldSeat.User is not null && oldSeat.User.Id != user.Id) throw new SeatUnavailableException(oldSeatId);
         newSeat.User = user;
         oldSeat.User = null;
 
@@ -64,7 +67,7 @@ internal class ReservationService : IReservationService
     }
 }
 
-public class SeatNotFoundException : Exception {
+public class SeatNotFoundException : DomainException {
 
     public Guid SeatId { get; }
 
@@ -74,13 +77,23 @@ public class SeatNotFoundException : Exception {
     }
 }
 
-public class SeatAlreadyReservedException : Exception {
+public class SeatUnavailableException : DomainException {
 
     public Guid SeatId { get; }
 
-    public SeatAlreadyReservedException(Guid seatId) : base($"Seat with ID ${seatId} is already reserved")
+    public SeatUnavailableException(Guid seatId) : base($"Seat with ID ${seatId} is unavailable")
     {
         SeatId = seatId;
+    }
+}
+
+public class DuplicateSeatReservationException : DomainException {
+
+    public User User { get; }
+
+    public DuplicateSeatReservationException(User user) : base($"User {user.Nick} has already reserved a seat")
+    {
+        User = user;
     }
 }
 

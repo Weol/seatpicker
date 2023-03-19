@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Seatpicker.Application;
 using Seatpicker.Infrastructure.Adapters.DiscordClient;
 using Seatpicker.Infrastructure.Utils;
 
@@ -27,20 +28,33 @@ public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
 
     private ObjectResult? HandleException(Exception exception)
     {
+        if (exception is DomainException domainException)
+        {
+            return HandleDomainException(domainException);
+        }
+
         if (exception is DiscordException)
         {
             return HandleDiscordException();
         }
 
-        if (exception is ModelValidationException e)
+        if (exception is ModelValidationException modelValidationException)
         {
-            return HandleModelValidationException(e);
+            return HandleModelValidationException(modelValidationException);
         }
 
         return null;
     }
 
-    private static ObjectResult? HandleModelValidationException(ModelValidationException e)
+    private ObjectResult HandleDomainException(DomainException e)
+    {
+        return new ObjectResult(e.Message)
+        {
+            StatusCode = 422,
+        };
+    }
+
+    private static ObjectResult HandleModelValidationException(ModelValidationException e)
     {
         var errors = e.ValidationResultErrors.Select(x =>
             new
@@ -53,7 +67,7 @@ public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
         return new UnprocessableEntityObjectResult(errors);
     }
 
-    private static ObjectResult? HandleDiscordException()
+    private static ObjectResult HandleDiscordException()
     {
         return new ObjectResult("Discord API responded with non-successful status")
         {
