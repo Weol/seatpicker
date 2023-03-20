@@ -1,21 +1,56 @@
-name: Deploy template
+name: Deploy API and Frontend
 
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
-  workflow_dispatch:
 jobs:
-  deploy:
+  buildFrontend:
     runs-on: ubuntu-latest
-    name: Deploy infrastructure
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      - run: npm install
+      - run: npm build
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend
+          path: build
+
+  buildApi:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet publish --configuration Release -o api
+      - name: Upload API artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: api
+          path: api
+
+  deployInfrastructure:
+    runs-on: ubuntu-latest
+    name: Deploy Infrastructure
     permissions:
       contents: 'read'
       id-token: 'write'
     steps:
-      - uses: actions/checkout@v3
-        name: Checkout code
+      - name: Download API artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: api
+      - name: Download frontend articat
+        uses: actions/download-artifact@v2
+        with:
+          name: frontend
       - name: Azure Login
         uses: Azure/login@v1.4.6
         with:
@@ -23,9 +58,16 @@ jobs:
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION }}
       - name: Run template deployment
+        id: template
         uses: azure/arm-deploy@v1.0.9
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ secrets.RESOURCE_GROUP }}
           template: ./Infrastructure/master.bicep
           parameters: databaseAdminPassword=${{ secrets.DATABASE_SERVER_PASSWORD }}
+      - run: echo ${{ steps.template.outputs.appServiceName }}
+      - name: Azure WebApp
+        uses: Azure/webapps-deploy@v2.2.6
+        with:
+          app-name: ${{ steps.template.outputs.appServiceName }}
+          package: api

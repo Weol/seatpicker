@@ -37,7 +37,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-resource api 'Microsoft.Web/sites@2018-02-01' = {
+resource appService 'Microsoft.Web/sites@2018-02-01' = {
   name: 'api-${postfix}'
   location: location
   kind: 'functionapp'
@@ -70,125 +70,22 @@ module keyvaultModule 'keyvault.bicep' = {
     location: location
     postfix: postfix
     readers: [
-      api.identity.principalId
+      appService.identity.principalId
     ]
   }
 }
-
-var databaseAdminUsername = 'CloudSA0b670279'
-
-resource dbServer 'Microsoft.Sql/servers@2022-02-01-preview' = {
-  location: location
-  name: 'dbserver-${postfix}'
-  identity: {
-    type: 'SystemAssigned'
-  }
-  properties: {
-    administratorLogin: databaseAdminUsername
-    administratorLoginPassword: databaseAdminPassword
-  }
-}
-
-resource database 'Microsoft.Sql/servers/databases@2022-02-01-preview' = {
-  location: location
-  name: 'database-${postfix}'
-  parent: dbServer
-  sku: {
-    name: 'Basic'
-    tier: 'Basic'
-  }
-}
-
-module serviceBusModule 'serviceBus.bicep' = {
-  name: 'serviceBus'
-  params: {
-    location: location
-    postfix: postfix
-    contributors: [
-      api.identity.principalId
-    ]
-  }
-}
-
-/**
-resource signalr 'Microsoft.SignalRService/signalR@2022-02-01' = {
-  name: 'signalr-${postfix}' 
-  location: location
-  sku: {
-    tier: 'Standard'
-    name: 'Standard_S1'
-    capacity: 1
-  }
-  kind: 'SignalR'
-  identity: {
-    type: 'SystemAssigned'
-  }
-  properties: {
-    tls: {
-      clientCertEnabled: false
-    }
-    features: [
-      {
-        flag: 'ServiceMode'
-        value: 'Serverless'
-      }
-      {
-        flag: 'EnableConnectivityLogs'
-        value: 'false'
-      }
-      {
-        flag: 'EnableMessagingLogs'
-        value: 'false'
-      }
-      {
-        flag: 'EnableLiveTrace'
-        value: 'false'
-      }
-    ]
-  }
-}
-*/
-
-
-
-/*
-resource frontend 'Microsoft.Web/staticSites@2022-03-01' = {
-  name: 'frontend-${postfix}'
-  location: location
-  sku: {
-    name: 'Free'
-    tier: 'Free'
-  }
-  properties: {
-    allowConfigFileUpdates: true
-    stagingEnvironmentPolicy: 'Disabled'
-  }
-
-  resource appsettings 'config' = {
-    name: 'appsettings'
-    properties: {
-      BACKEND_URL: 'https://${api.properties.defaultHostName}/api'
-    }
-  }
-}
-*/
 
 resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
   name: 'appsettings'
-  parent: api
+  parent: appService
   properties: {
     AzureWebJobsStorage: storageAccountConnectionString
     WEBSITE_CONTENTAZUREFILECONNECTIONSTRING: storageAccountConnectionString
     APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.properties.InstrumentationKey
     FUNCTIONS_WORKER_RUNTIME: 'dotnet'
     FUNCTIONS_EXTENSION_VERSION: '~4'
-   
     App_Keyvault__Uri: keyvaultModule.outputs.keyvaultUri
-
-    App_Database__Username: databaseAdminUsername
-    App_Database__Password: databaseAdminPassword
-    App_Database__Uri: dbServer.properties.fullyQualifiedDomainName
-
-    App_ServiceBus__Uri: serviceBusModule.outputs.serviceBusEndpoint
   }
 }
+
+output appServiceName string = appService.name
