@@ -11,13 +11,15 @@ jobs:
         with:
           node-version: '14'
           cache: 'npm'
-      - run: npm install
-      - run: npm build
+      - run: |
+          cd Frontend
+          npm install
+          npm run build
       - name: Upload frontend artifact
         uses: actions/upload-artifact@v3
         with:
           name: frontend
-          path: build
+          path: Frontend/build
 
   buildApi:
     runs-on: ubuntu-latest
