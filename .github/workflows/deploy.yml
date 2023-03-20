@@ -106,10 +106,8 @@ jobs:
           client-id: ${{ secrets.CLIENT_ID }}
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION }}
-      - run: cat outputs.json
-      - run: |
-          outputs=$(cat "./outputs.json")
-          echo "outputJson=$outputs" >> $GITHUB_OUTPUT
+      - run: cat ./outputs.json
+      - run: echo "outputJson=$(cat ./outputs.json)" >> $GITHUB_OUTPUT
         id: setTemplateOutputVariable
       - run: echo "templateOutput=${{ fromJson(steps.setTemplateOutputVariable.outputs.outputJson) }}" >> $GITHUB_OUTPUT
         id: templateOutputs
