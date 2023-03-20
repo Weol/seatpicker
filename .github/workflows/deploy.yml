@@ -13,6 +13,7 @@ jobs:
         with:
           node-version: '14'
           cache: 'npm'
+          cache-dependency-path: Frontend/package-lock.json
       - run: |
           cd Frontend
           npm install
