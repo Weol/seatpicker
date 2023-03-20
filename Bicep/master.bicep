@@ -1,9 +1,6 @@
 param location string = resourceGroup().location
 param postfix string = uniqueString(resourceGroup().name)
 
-@secure()
-param databaseAdminPassword string
-
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-06-01' = {
   name: 'storage${postfix}'
   location: location
