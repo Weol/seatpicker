@@ -69,7 +69,8 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ secrets.RESOURCE_GROUP }}
           template: ./Bicep/master.bicep
-      - run: echo "${{ steps.template.outputs }}" >> templateOutputs
+      - run: echo ${{ steps.template.outputs.appServiceName }} >> templateOutputs
+      - run: echo ${{ toJson(steps.template.outputs) }}
       - name: Upload temple outputs artifact
         uses: actions/upload-artifact@v3
         with:
@@ -94,7 +95,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: frontend
-          path: app/fronten      
+          path: app/frontend
       - name: Download outputs artifcate
         uses: actions/download-artifact@v2
         with:
@@ -107,7 +108,7 @@ jobs:
           client-id: ${{ secrets.CLIENT_ID }}
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION }}
-      - run: cat templeOutputs
+      - run: cat templateOutputs
       - name: Azure WebApp
         uses: Azure/webapps-deploy@v2.2.6
         with:
