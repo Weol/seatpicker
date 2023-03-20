@@ -101,6 +101,7 @@ jobs:
         with:
           name: templateOutputs 
           path: templateOutputs
+      - run: ls templateOutputs
       - run: ls -r
       - name: Azure Login
         uses: Azure/login@v1.4.6
@@ -108,7 +109,7 @@ jobs:
           client-id: ${{ secrets.CLIENT_ID }}
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION }}
-      - run: cat templateOutputs
+      - run: cat templateOutputs/templateOutputs
       - name: Azure WebApp
         uses: Azure/webapps-deploy@v2.2.6
         with:
