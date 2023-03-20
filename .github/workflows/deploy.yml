@@ -69,7 +69,7 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ secrets.RESOURCE_GROUP }}
           template: ./Bicep/master.bicep
-      - run: steps.template.outputs.appServiceName }}
+      - run: echo ${{ steps.template.outputs.appServiceName }}
 
   deployApp:
     runs-on: ubuntu-latest
