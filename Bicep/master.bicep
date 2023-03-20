@@ -32,6 +32,14 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
+resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
+  name: 'plan-${postfix}'
+  location: location
+  sku: {
+    name: 'D1'
+  }
+}
+
 resource appService 'Microsoft.Web/sites@2018-02-01' = {
   name: 'saltenlan'
   location: location
@@ -40,6 +48,7 @@ resource appService 'Microsoft.Web/sites@2018-02-01' = {
   }
   properties: {
     httpsOnly: true
+    serverFarmId: appServicePlan.id
   }
 }
 
