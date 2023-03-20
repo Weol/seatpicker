@@ -69,7 +69,12 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ secrets.RESOURCE_GROUP }}
           template: ./Bicep/master.bicep
-      - run: echo "Testy=${{ steps.template.outputs.appServiceName }}" >> $GITHUB_OUTPUT
+      - run: echo "${{ steps.template.outputs }}" >> templateOutputs
+      - name: Upload temple outputs artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: templateOutputs 
+          path: templateOutputs
       
 
   deployApp:
@@ -84,12 +89,17 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: api
-          path: api
+          path: app/api
       - name: Download frontend artifact
         uses: actions/download-artifact@v2
         with:
           name: frontend
-          path: frontend
+          path: app/fronten      
+      - name: Download outputs artifcate
+        uses: actions/download-artifact@v2
+        with:
+          name: templateOutputs 
+          path: templateOutputs
       - run: ls -r
       - name: Azure Login
         uses: Azure/login@v1.4.6
@@ -97,7 +107,7 @@ jobs:
           client-id: ${{ secrets.CLIENT_ID }}
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION }}
-      - run: echo ${{ needs.deployInfrastructure.outputs.Testy }}
+      - run: cat templeOutputs
       - name: Azure WebApp
         uses: Azure/webapps-deploy@v2.2.6
         with:
