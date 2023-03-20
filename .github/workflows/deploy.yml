@@ -52,7 +52,7 @@ jobs:
       contents: 'read'
       id-token: 'write'
     outputs:
-      appServiceName: ${{ steps.template.outputs.appServiceName }}
+      appServiceName: ${{ steps.template.outputs.Testy }}
     steps:
       - uses: actions/checkout@master
       - run: ls -r
@@ -69,7 +69,8 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ secrets.RESOURCE_GROUP }}
           template: ./Bicep/master.bicep
-      - run: echo ${{ steps.template.outputs.appServiceName }}
+      - run: echo "Testy=${{ steps.template.outputs.appServiceName }}" >> $GITHUB_OUTPUT
+      
 
   deployApp:
     runs-on: ubuntu-latest
@@ -96,7 +97,7 @@ jobs:
           client-id: ${{ secrets.CLIENT_ID }}
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION }}
-      - run: echo ${{ needs.deployInfrastructure.outputs.appServiceName }}
+      - run: echo ${{ needs.deployInfrastructure.outputs.Testy }}
       - name: Azure WebApp
         uses: Azure/webapps-deploy@v2.2.6
         with:
