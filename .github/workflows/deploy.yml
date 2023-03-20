@@ -69,8 +69,8 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ secrets.RESOURCE_GROUP }}
           template: ./Bicep/master.bicep
-      - run: echo ${{ steps.template.outputs.appServiceName }} >> templateOutputs
-      - run: echo ${{ toJson(steps.template.outputs) }}
+      - run: echo "${{ steps.template.outputs.appServiceName }}"" >> templateOutputs
+      - run: echo "${{ toJson(steps.template.outputs) }}"
       - name: Upload temple outputs artifact
         uses: actions/upload-artifact@v3
         with:

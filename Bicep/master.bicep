@@ -68,6 +68,7 @@ resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
   parent: appService
   properties: {
     APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.properties.InstrumentationKey
+    ASPNETCORE_ENVIRONMENT: 'Production'
     App_Keyvault__Uri: keyvaultModule.outputs.keyvaultUri
   }
 }
