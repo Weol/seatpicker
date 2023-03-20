@@ -6,6 +6,7 @@ on:
 jobs:
   buildFrontend:
     runs-on: ubuntu-latest
+    name: Build frontend
     steps:
       - uses: actions/checkout@master
       - run: ls -r
@@ -26,6 +27,7 @@ jobs:
 
   buildApi:
     runs-on: ubuntu-latest
+    name: Build API
     steps:
       - uses: actions/checkout@master
       - run: ls -r
@@ -49,6 +51,30 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
+    outputs:
+      appServiceName: ${{ steps.template.outputs.appServiceName }}
+    steps:
+      - run: ls -r
+      - name: Azure Login
+        uses: Azure/login@v1.4.6
+        with:
+          client-id: ${{ secrets.CLIENT_ID }}
+          tenant-id: ${{ secrets.TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION }}
+      - name: Run template deployment
+        id: template
+        uses: azure/arm-deploy@v1.0.9
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          resourceGroupName: ${{ secrets.RESOURCE_GROUP }}
+          template: ./Bicep/master.bicep
+
+  deployApp:
+    runs-on: ubuntu-latest
+    name: Deploy Infrastructure
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     steps:
       - name: Download API artifact
         uses: actions/download-artifact@v2
@@ -65,17 +91,9 @@ jobs:
           client-id: ${{ secrets.CLIENT_ID }}
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION }}
-      - name: Run template deployment
-        id: template
-        uses: azure/arm-deploy@v1.0.9
-        with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
-          resourceGroupName: ${{ secrets.RESOURCE_GROUP }}
-          template: ./Infrastructure/master.bicep
-          parameters: databaseAdminPassword=${{ secrets.DATABASE_SERVER_PASSWORD }}
       - run: echo ${{ steps.template.outputs.appServiceName }}
       - name: Azure WebApp
         uses: Azure/webapps-deploy@v2.2.6
         with:
-          app-name: ${{ steps.template.outputs.appServiceName }}
+          app-name: ${{ jobs.deployInfrastructure.outputs.appServiceName }}
           package: api
