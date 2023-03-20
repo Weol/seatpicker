@@ -29,3 +29,4 @@ resource roleAssignmnets 'Microsoft.Authorization/roleAssignments@2020-04-01-pre
 }]
 
 output keyvaultUri string = keyVault.properties.vaultUri
+output keyvaultName string = keyVault.name

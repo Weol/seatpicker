@@ -63,13 +63,21 @@ module keyvaultModule 'keyvault.bicep' = {
   }
 }
 
+var keyvaultReferenceFormat = '@Microsoft.KeyVault(VaultName=${keyvaultModule.outputs.keyvaultName};SecretName={0})'
+
 resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
   name: 'appsettings'
   parent: appService
   properties: {
     APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.properties.InstrumentationKey
     ASPNETCORE_ENVIRONMENT: 'Production'
-    App_Keyvault__Uri: keyvaultModule.outputs.keyvaultUri
+
+    App_AuthCertificateProvider__Uri: keyvaultModule.outputs.keyvaultUri
+    App_AuthCertificateProvider__IsFake: 'true'
+
+    App_Discord__ClientId: format(keyvaultReferenceFormat, 'DiscordClientId')
+    App_Discord__ClientSecret: format(keyvaultReferenceFormat, 'DiscordClientSecret')
+    App_Discord__RedirectUri: 'https://${appService.properties.defaultHostName}/redirect-login'
   }
 }
 

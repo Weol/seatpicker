@@ -1,5 +1,4 @@
-﻿using Seatpicker.Application.Features.Reservation.Ports;
-using Seatpicker.Domain;
+﻿using Seatpicker.Domain;
 
 namespace Seatpicker.Application.Features.Floorplan;
 

@@ -1,6 +1,6 @@
 ﻿using Seatpicker.Domain;
 
-namespace Seatpicker.Application.Features.Reservation.Ports;
+namespace Seatpicker.Application.Features;
 
 public interface ISeatRepository
 {

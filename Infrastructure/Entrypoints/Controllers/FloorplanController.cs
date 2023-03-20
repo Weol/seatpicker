@@ -2,12 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Floorplan;
-using Seatpicker.Application.Features.Reservation;
-using Seatpicker.Application.Features.Reservation.Ports;
-using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Utils;
 
-namespace Seatpicker.Infrastructure.Controllers;
+namespace Seatpicker.Infrastructure.Entrypoints.Controllers;
 
 [ApiController]
 [Route("[controller]")]

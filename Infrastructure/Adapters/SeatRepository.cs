@@ -4,7 +4,7 @@ using Azure.Data.Tables;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Seatpicker.Application.Features.Reservation.Ports;
+using Seatpicker.Application.Features;
 using Seatpicker.Domain;
 
 namespace Seatpicker.Infrastructure.Adapters;

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Login;
 using Seatpicker.Infrastructure.Utils;
 
-namespace Seatpicker.Infrastructure.Controllers;
+namespace Seatpicker.Infrastructure.Entrypoints.Controllers;
 
 [ApiController]
 [Route("token")]
