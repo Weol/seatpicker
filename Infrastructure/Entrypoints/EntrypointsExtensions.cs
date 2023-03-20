@@ -12,6 +12,8 @@ public static class EntrypointsExtensions
             .AddEndpointsApiExplorer()
             .AddSwaggerGen()
             .AddModelValidator()
+            .AddHealthChecks()
+            .Services
             .AddControllers(ConfigureMvcOptions);
 
         return services;

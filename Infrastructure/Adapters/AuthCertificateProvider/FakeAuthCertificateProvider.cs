@@ -1,8 +1,4 @@
-﻿using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using Azure.Security.KeyVault.Secrets;
-using Microsoft.Extensions.Azure;
-using Microsoft.Extensions.Options;
+﻿using System.Security.Cryptography.X509Certificates;
 using Seatpicker.Application.Features.Login.Ports;
 
 namespace Seatpicker.Infrastructure.Adapters.AuthCertificateProvider;

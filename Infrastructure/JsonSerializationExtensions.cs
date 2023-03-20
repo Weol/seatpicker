@@ -1,7 +1,5 @@
 ﻿using System.Text.Json;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Seatpicker.Application.Features.Login.Ports;
+using System.Text.Json.Serialization;
 
 namespace Seatpicker.Infrastructure;
 
@@ -12,6 +10,9 @@ public static class JsonSerializationExtensions
         var jsonSerializerOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
+            Converters ={
+                new JsonStringEnumConverter(),
+            }
         };
 
         return services.AddSingleton(jsonSerializerOptions);
