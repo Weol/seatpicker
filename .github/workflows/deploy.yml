@@ -9,7 +9,6 @@ jobs:
     name: Build frontend
     steps:
       - uses: actions/checkout@master
-      - run: ls -r
       - uses: actions/setup-node@v3
         with:
           node-version: '14'
@@ -55,7 +54,6 @@ jobs:
       appServiceName: ${{ steps.template.outputs.Testy }}
     steps:
       - uses: actions/checkout@master
-      - run: ls -r
       - name: Azure Login
         uses: Azure/login@v1.4.6
         with:
@@ -69,13 +67,6 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ secrets.RESOURCE_GROUP }}
           template: ./Bicep/master.bicep
-      - run: echo "${{ toJson(steps.template.outputs) }}" >> outputs.json 
-      - name: Upload temple outputs artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: templateOutputs 
-          path: outputs.json
-      
 
   deployApp:
     runs-on: ubuntu-latest
@@ -89,29 +80,18 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: api
-          path: app/api
+          path: api
       - name: Download frontend artifact
         uses: actions/download-artifact@v2
         with:
           name: frontend
-          path: app/frontend
-      - name: Download outputs artifcate
-        uses: actions/download-artifact@v2
-        with:
-          name: templateOutputs 
-      - run: ls -r
+          path: frontend
       - name: Azure Login
         uses: Azure/login@v1.4.6
         with:
           client-id: ${{ secrets.CLIENT_ID }}
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION }}
-      - run: cat ./outputs.json
-      - run: echo "outputJson=$(cat ./outputs.json)" >> $GITHUB_OUTPUT
-        id: setTemplateOutputVariable
-      - run: echo "templateOutput=${{ fromJson(steps.setTemplateOutputVariable.outputs.outputJson) }}" >> $GITHUB_OUTPUT
-        id: templateOutputs
-      - run: echo "${{ steps.templateOutputs.outputs.templateOutput }}"
       - name: Azure WebApp
         uses: Azure/webapps-deploy@v2.2.6
         with:
