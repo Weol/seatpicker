@@ -7,6 +7,7 @@ jobs:
   buildFrontend:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@master
       - uses: actions/setup-node@v3
         with:
           node-version: '14'
@@ -24,6 +25,7 @@ jobs:
   buildApi:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@master
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
         with:
