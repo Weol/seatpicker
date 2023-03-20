@@ -72,7 +72,7 @@ jobs:
 
   deployApp:
     runs-on: ubuntu-latest
-    name: Deploy Infrastructure
+    name: Deploy application
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -82,10 +82,12 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: api
-      - name: Download frontend articat
+          path: api
+      - name: Download frontend artifact
         uses: actions/download-artifact@v2
         with:
           name: frontend
+          path: frontend
       - run: ls -r
       - name: Azure Login
         uses: Azure/login@v1.4.6
@@ -93,7 +95,7 @@ jobs:
           client-id: ${{ secrets.CLIENT_ID }}
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION }}
-      - run: echo ${{ steps.template.outputs.appServiceName }}
+      - run: echo ${{ needs.deployInfrastructure.outputs.appServiceName }}
       - name: Azure WebApp
         uses: Azure/webapps-deploy@v2.2.6
         with:
