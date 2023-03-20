@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+      - run: ls -r
       - uses: actions/setup-node@v3
         with:
           node-version: '14'
@@ -26,6 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+      - run: ls -r
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
         with:
@@ -55,6 +57,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: frontend
+      - run: ls -r
       - name: Azure Login
         uses: Azure/login@v1.4.6
         with:
