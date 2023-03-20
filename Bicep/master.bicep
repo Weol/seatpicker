@@ -49,6 +49,18 @@ resource appService 'Microsoft.Web/sites@2018-02-01' = {
   properties: {
     httpsOnly: true
     serverFarmId: appServicePlan.id
+    siteConfig: {
+      virtualApplications: [
+        {
+            virtualPath: '/'
+            physicalPath: 'site\\wwwroot\\frontend'
+        }
+        {
+            virtualPath: '/api'
+            physicalPath: 'site\\wwwroot\\api'
+        }
+      ]
+    }
   }
 }
 
