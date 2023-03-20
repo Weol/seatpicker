@@ -69,13 +69,12 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ secrets.RESOURCE_GROUP }}
           template: ./Bicep/master.bicep
-      - run: echo "${{ steps.template.outputs.appServiceName }}" >> templateOutputs
-      - run: echo "${{ toJson(steps.template.outputs) }}"
+      - run: echo "${{ toJson(steps.template.outputs) }}" >> outputs.json 
       - name: Upload temple outputs artifact
         uses: actions/upload-artifact@v3
         with:
           name: templateOutputs 
-          path: templateOutputs
+          path: outputs.json
       
 
   deployApp:
@@ -100,7 +99,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: templateOutputs 
-          path: templateOutputs
       - run: ls templateOutputs
       - run: ls -r
       - name: Azure Login
@@ -109,7 +107,12 @@ jobs:
           client-id: ${{ secrets.CLIENT_ID }}
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION }}
-      - run: cat templateOutputs/templateOutputs
+      - run: cat outputs.json
+      - run: echo "outputJson=${{ fromJson(outputs.json) }}" >> $GITHUB_OUTPUT
+        id: setTemplateOutputVariable
+      - run: echo "templateOutput=${{ fromJson(steps.setTemplateOuteputVariable.outputs.outputJson) }}" >> $GITHUB_OUTPUT
+        id: templateOutputs
+      - run: echo "${{ steps.templateOutputs.outputs.templateOutput }}"
       - name: Azure WebApp
         uses: Azure/webapps-deploy@v2.2.6
         with:
