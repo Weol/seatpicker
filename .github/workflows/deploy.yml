@@ -75,6 +75,7 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
+    needs: [deployInfrastructure, buildApi, buildFrontend]
     steps:
       - name: Download API artifact
         uses: actions/download-artifact@v2
