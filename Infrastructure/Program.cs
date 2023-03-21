@@ -11,6 +11,7 @@ builder.Configuration
     .AddEnvironmentVariables("App_");
 
 builder.Services
+    .AddApplicationInsightsTelemetry()
     .AddAuth()
     .ConfigureJsonSerialization()
     .AddLoggedInUserAccessor()
