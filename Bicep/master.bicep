@@ -64,6 +64,17 @@ resource appService 'Microsoft.Web/sites@2018-02-01' = {
   }
 }
 
+module serviceBusModule 'serviceBus.bicep' = {
+  name: 'serviceBus'
+  params: {
+    location: location
+    postfix: postfix
+    contributors: [
+      appService.identity.principalId
+    ]
+  }
+}
+
 module keyvaultModule 'keyvault.bicep' = {
   name: 'keyvault'
   params: {
@@ -89,6 +100,10 @@ resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
     App_Discord__ClientId: format(keyvaultReferenceFormat, 'DiscordClientId')
     App_Discord__ClientSecret: format(keyvaultReferenceFormat, 'DiscordClientSecret')
     App_Discord__RedirectUri: 'https://${appService.properties.defaultHostName}/redirect-login'
+
+    app_MassTransit__ServiceBusEndpoint: serviceBusModule.outputs.serviceBusEndpoint
+
+    app_SeatRepository__Endpoint: storageAccount.properties.primaryEndpoints.table
   }
 }
 

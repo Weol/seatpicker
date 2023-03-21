@@ -11,6 +11,7 @@ public static class AdapterExtensions
         Config = configuration;
 
         return services
+            .AddDomainEventPublisher()
             .AddSeatRepository(ConfigureSeatRepository)
             .AddAuthCertificateProvider(ConfigureAuthCertificateProvider)
             .AddJwtTokenCreator()

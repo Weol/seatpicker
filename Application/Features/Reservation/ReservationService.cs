@@ -1,4 +1,5 @@
 ﻿using Seatpicker.Domain;
+using Shared;
 
 namespace Seatpicker.Application.Features.Reservation;
 
@@ -12,10 +13,12 @@ public interface IReservationService
 internal class ReservationService : IReservationService
 {
     private readonly ISeatRepository seatRepository;
+    private readonly IDomainEventPublisher domainEventPublisher;
 
-    public ReservationService(ISeatRepository seatRepository)
+    public ReservationService(ISeatRepository seatRepository, IDomainEventPublisher domainEventPublisher)
     {
         this.seatRepository = seatRepository;
+        this.domainEventPublisher = domainEventPublisher;
     }
 
     public async Task<Seat> Reserve(User user, Guid seatId)
@@ -31,6 +34,8 @@ internal class ReservationService : IReservationService
             throw new SeatUnavailableException(seatId);
 
         await seatRepository.Store(seat);
+
+        await domainEventPublisher.Publish(new SeatReservedEvent(seat.Id, user));
 
         return seat;
     }

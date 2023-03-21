@@ -16,7 +16,7 @@ builder.Services
     .AddAuth()
     .ConfigureJsonSerialization()
     .AddLoggedInUserAccessor()
-    .AddEntrypoints()
+    .AddEntrypoints(builder.Configuration)
     .AddApplication();
 
 var app = builder.Build();
