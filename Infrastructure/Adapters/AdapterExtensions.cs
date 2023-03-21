@@ -1,5 +1,4 @@
-﻿using Seatpicker.Infrastructure.Adapters.AuthCertificateProvider;
-using Seatpicker.Infrastructure.Adapters.DiscordClient;
+﻿using Seatpicker.Infrastructure.Adapters.DiscordClient;
 
 namespace Seatpicker.Infrastructure.Adapters;
 
@@ -28,7 +27,7 @@ public static class AdapterExtensions
         Config.GetSection("Discord").Bind(options);
     }
 
-    private static void ConfigureAuthCertificateProvider(AuthCertificateProviderOptions options)
+    private static void ConfigureAuthCertificateProvider(AuthCertificateProvider.Options options)
     {
         Config.GetSection("AuthCertificateProvider").Bind(options);
     }

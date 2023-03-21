@@ -84,8 +84,7 @@ resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
     APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.properties.InstrumentationKey
     ASPNETCORE_ENVIRONMENT: 'Production'
 
-    App_AuthCertificateProvider__Uri: keyvaultModule.outputs.keyvaultUri
-    App_AuthCertificateProvider__IsFake: 'true'
+    App_AuthCertificateProvider__Base64Certificate: format(keyvaultReferenceFormat, 'AuthenticationCertificate')
 
     App_Discord__ClientId: format(keyvaultReferenceFormat, 'DiscordClientId')
     App_Discord__ClientSecret: format(keyvaultReferenceFormat, 'DiscordClientSecret')
