@@ -16,8 +16,6 @@ internal class AuthCertificateProvider : IAuthCertificateProvider
     public Task<X509Certificate2> Get()
     {
         throw new Exception("Base64: " + options.Base64Certificate);
-        var bytes = Convert.FromBase64String(options.Base64Certificate);
-        return Task.FromResult(new X509Certificate2(bytes, string.Empty, X509KeyStorageFlags.MachineKeySet));
     }
 
     internal class Options

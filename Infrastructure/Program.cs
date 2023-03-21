@@ -12,11 +12,11 @@ builder.Configuration
 
 builder.Services
     .AddApplicationInsightsTelemetry()
+    .AddAdapters(builder.Configuration)
     .AddAuth()
     .ConfigureJsonSerialization()
     .AddLoggedInUserAccessor()
     .AddEntrypoints()
-    .AddAdapters(builder.Configuration)
     .AddApplication();
 
 var app = builder.Build();
