@@ -12,7 +12,7 @@ internal class AuthCertificateProvider : IAuthCertificateProvider
         IOptions<Options> options)
     {
         var bytes = Convert.FromBase64String(options.Value.Base64Certificate);
-        certificate = new X509Certificate2(bytes);
+        certificate = new X509Certificate2(bytes, "", X509KeyStorageFlags.EphemeralKeySet);
     }
 
     public Task<X509Certificate2> Get()
