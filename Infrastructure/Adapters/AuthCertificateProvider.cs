@@ -7,19 +7,15 @@ namespace Seatpicker.Infrastructure.Adapters;
 internal class AuthCertificateProvider : IAuthCertificateProvider
 {
     private readonly Options options;
-    private readonly ILogger<AuthCertificateProvider> logger;
 
-    public AuthCertificateProvider(
-        IOptions<Options> options,
-        ILogger<AuthCertificateProvider> logger)
+    public AuthCertificateProvider(IOptions<Options> options)
     {
-        this.logger = logger;
         this.options = options.Value;
-        logger.LogWarning(options.Value.Base64Certificate);
     }
 
     public Task<X509Certificate2> Get()
     {
+        throw new Exception("Base64: " + options.Base64Certificate);
         var bytes = Convert.FromBase64String(options.Base64Certificate);
         return Task.FromResult(new X509Certificate2(bytes, string.Empty, X509KeyStorageFlags.MachineKeySet));
     }
