@@ -15,13 +15,13 @@ internal class AuthCertificateProvider : IAuthCertificateProvider
     {
         this.logger = logger;
         this.options = options.Value;
+        logger.LogWarning(options.Value.Base64Certificate);
     }
 
     public Task<X509Certificate2> Get()
     {
-        logger.LogWarning(options.Base64Certificate);
         var bytes = Convert.FromBase64String(options.Base64Certificate);
-        return Task.FromResult(new X509Certificate2(bytes, "", X509KeyStorageFlags.MachineKeySet));
+        return Task.FromResult(new X509Certificate2(bytes, string.Empty, X509KeyStorageFlags.MachineKeySet));
     }
 
     internal class Options
