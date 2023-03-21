@@ -97,3 +97,7 @@ jobs:
         with:
           app-name: saltenlan
           package: ./
+      - name: Azure CLI Action
+        uses: Azure/cli@v1.0.7
+        with:
+          inlineScript: az webapp restart --name saltenlan --resource-group ${{ secrets.RESOURCE_GROUP }}
