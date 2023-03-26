@@ -101,9 +101,9 @@ resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
     App_Discord__ClientSecret: format(keyvaultReferenceFormat, 'DiscordClientSecret')
     App_Discord__RedirectUri: 'https://${appService.properties.defaultHostName}/redirect-login'
 
-    app_MassTransit__ServiceBusEndpoint: serviceBusModule.outputs.serviceBusEndpoint
+    App_MassTransit__ServiceBusEndpoint: serviceBusModule.outputs.serviceBusEndpoint
 
-    app_SeatRepository__Endpoint: storageAccount.properties.primaryEndpoints.table
+    App_SeatRepository__Endpoint: storageAccount.properties.primaryEndpoints.table
   }
 }
 
