@@ -66,11 +66,23 @@ resource appService 'Microsoft.Web/sites@2018-02-01' = {
   }
 }
 
-module serviceBusModule 'serviceBus.bicep' = {
-  name: 'serviceBus'
-  params: {
-    location: location
-    postfix: postfix
+resource serviceBus 'Microsoft.ServiceBus/namespaces@2022-01-01-preview' = {
+  name: 'servicebus-${postfix}'
+  location: location
+  sku: {
+    name: 'Standard'
+  }
+}
+
+resource busSharedAccessKeyAuthRule 'Microsoft.ServiceBus/namespaces/AuthorizationRules@2017-04-01' = {
+  parent: serviceBus
+  name: 'SharedAccessKey'
+  properties: {
+    rights: [
+      'Send'
+      'Listen'
+      'Manage'
+    ]
   }
 }
 
@@ -100,7 +112,7 @@ resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
     App_Discord__ClientSecret: format(keyvaultReferenceFormat, 'DiscordClientSecret')
     App_Discord__RedirectUri: 'https://${appService.properties.defaultHostName}/redirect-login'
 
-    App_MassTransit__ServiceBusConnectionString: serviceBusModule.outputs.serviceBusConnectionString 
+    App_MassTransit__ServiceBusConnectionString: busSharedAccessKeyAuthRule.listKeys().primaryConnectionString
 
     App_SeatRepository__StorageConnectionString: storageAccountConnectionString
   }
