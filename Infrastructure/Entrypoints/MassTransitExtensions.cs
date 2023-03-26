@@ -8,7 +8,7 @@ namespace Seatpicker.Infrastructure.Entrypoints;
 
 public class MassTransitOptions
 {
-    public string ServiceBusEndpoint { get; set; } = null!;
+    public string ServiceBusConnectionString { get; set; } = null!;
 }
 
 public static class MassTransitExtensions
@@ -23,10 +23,7 @@ public static class MassTransitExtensions
                 configurator.UsingAzureServiceBus(
                     (context, cfg) =>
                     {
-                        if (Uri.TryCreate(options.ServiceBusEndpoint, UriKind.Absolute, out var uri))
-                            cfg.Host(uri);
-                        else
-                            cfg.Host(options.ServiceBusEndpoint);
+                        cfg.Host(options.ServiceBusConnectionString);
 
                         cfg.ConfigureEndpoints(context);
                     });

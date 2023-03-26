@@ -15,7 +15,7 @@ internal class SeatRepository : ISeatRepository
 
     public SeatRepository(IAzureClientFactory<TableServiceClient> tableClientFactory, IOptions<Options> options)
     {
-        var tableServiceClient = tableClientFactory.CreateClient(options.Value.Endpoint);
+        var tableServiceClient = tableClientFactory.CreateClient("SeatRepository");
 
         tableServiceClient.CreateTableIfNotExists(options.Value.TableName);
 
@@ -146,7 +146,7 @@ internal class SeatRepository : ISeatRepository
 
     public class Options
     {
-        public string Endpoint { get; set; } = null!;
+        public string StorageConnectionString { get; set; } = null!;
         public string TableName { get; set; } = null!;
     }
 }
@@ -162,8 +162,8 @@ internal static class SeatRepositoryExtensions
             var options = new SeatRepository.Options();
             configureAction(options);
 
-            builder.AddTableServiceClient(options.Endpoint)
-                .WithName(options.Endpoint);
+            builder.AddTableServiceClient(options.StorageConnectionString)
+                .WithName("SeatRepository");
         });
 
         services.AddSingleton<ISeatRepository, SeatRepository>();
