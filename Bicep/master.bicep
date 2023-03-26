@@ -11,6 +11,8 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-06-01' = {
   properties: {}
 }
 
+var storageAccountConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value}'
+
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
   name: 'loganalytics-${postfix}'
   location: location
@@ -69,9 +71,6 @@ module serviceBusModule 'serviceBus.bicep' = {
   params: {
     location: location
     postfix: postfix
-    contributors: [
-      appService.identity.principalId
-    ]
   }
 }
 
@@ -101,9 +100,9 @@ resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
     App_Discord__ClientSecret: format(keyvaultReferenceFormat, 'DiscordClientSecret')
     App_Discord__RedirectUri: 'https://${appService.properties.defaultHostName}/redirect-login'
 
-    App_MassTransit__ServiceBusEndpoint: serviceBusModule.outputs.serviceBusEndpoint
+    App_MassTransit__ServiceBusConnectionString: serviceBusModule.outputs.serviceBusConnectionString 
 
-    App_SeatRepository__Endpoint: storageAccount.properties.primaryEndpoints.table
+    App_SeatRepository__StorageConnectionString: storageAccountConnectionString
   }
 }
 

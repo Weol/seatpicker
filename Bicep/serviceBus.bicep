@@ -1,8 +1,6 @@
 param location string
 param postfix string
 
-param contributors array
-
 resource serviceBus 'Microsoft.ServiceBus/namespaces@2022-01-01-preview' = {
   name: 'servicebus-${postfix}'
   location: location
@@ -11,15 +9,16 @@ resource serviceBus 'Microsoft.ServiceBus/namespaces@2022-01-01-preview' = {
   }
 }
 
-var ownerRole = '090c5cfd-751d-490a-894a-3ce6f1109419'
-resource roleAssignments 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = [for contributor in contributors: {
-  scope: serviceBus 
-  name: guid(serviceBus.id, contributor, ownerRole)
+resource busSharedAccessKeyAuthRule 'Microsoft.ServiceBus/namespaces/AuthorizationRules@2017-04-01' = {
+  parent: serviceBus
+  name: 'SharedAccessKey'
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', ownerRole)
-    principalId: contributor
-    principalType: 'ServicePrincipal'
+    rights: [
+      'Send'
+      'Listen'
+      'Manage'
+    ]
   }
-}]
+}
 
-output serviceBusEndpoint string = serviceBus.properties.serviceBusEndpoint
+output serviceBusConnectionString string = busSharedAccessKeyAuthRule.listKeys().primaryConnectionString
