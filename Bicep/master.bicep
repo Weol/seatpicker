@@ -11,7 +11,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-06-01' = {
   properties: {}
 }
 
-var storageAccountConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value}'
+var storageAccountConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value}'
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
   name: 'loganalytics-${postfix}'
