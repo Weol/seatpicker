@@ -85,7 +85,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: frontend
-          path: frontend
+          path: ./
       - name: Azure Login
         uses: Azure/login@v1.4.6
         with:
