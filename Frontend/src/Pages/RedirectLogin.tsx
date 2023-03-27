@@ -1,12 +1,13 @@
 import * as React from 'react';
 import {useContext, useEffect, useState} from 'react';
 import Typography from '@mui/material/Typography';
-import {useSearchParams} from 'react-router-dom';
+import {Link, useSearchParams} from 'react-router-dom';
 import LoginWithDiscordToken from '../Adapters/LoginWithDiscordToken'
 import Config from "../config"
 import {CircularProgress, Stack} from '@mui/material';
 import User from '../Models/User';
 import {UserContext} from '../UserContext';
+import Button from "@mui/material/Button";
 
 export default function RedirectLogin() {
   const [user, setUser] = useState<User | null>(null)
@@ -32,9 +33,9 @@ export default function RedirectLogin() {
 
       <img src={Config.DiscordAvatarBaseUrl + user?.id + "/" + user?.avatar} style={{maxWidth: '150px', borderRadius: '50%'}}/>
 
-      <Typography variant="subtitle1" component="p" gutterBottom>
-        {"Velkommen, " + user?.nick}
-      </Typography>
+      <Button component={Link} to="/" variant="contained">
+        Gå til sete resercasjon
+      </Button>
     </Stack>)
   }
 

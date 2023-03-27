@@ -35,7 +35,7 @@ internal class LoginService : ILoginService
         var user = new User{
             Id = discordUser.Id,
             Nick = discordUser.Username,
-            Avatar = discordUser.Avatar,
+            Avatar = discordUser.Avatar ?? "0",
         };
 
         var authCertificate = await authCertificateProvider.Get();
