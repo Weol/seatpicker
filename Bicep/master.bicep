@@ -38,7 +38,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   name: 'plan-${postfix}'
   location: location
   sku: {
-    name: 'D1'
+    name: 'S1'
   }
 }
 
