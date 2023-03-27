@@ -1,6 +1,8 @@
-﻿namespace Seatpicker.Application.Features.Login.Ports;
+﻿using Seatpicker.Domain;
+
+namespace Seatpicker.Application.Features.Login.Ports;
 
 public interface IDiscordLookupUser
 {
-    Task<DiscordUser> Lookup(string accessToken);
+    Task<User> Lookup(string accessToken);
 }

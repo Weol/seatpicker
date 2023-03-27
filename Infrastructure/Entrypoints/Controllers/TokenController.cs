@@ -6,7 +6,7 @@ using Seatpicker.Infrastructure.Utils;
 namespace Seatpicker.Infrastructure.Entrypoints.Controllers;
 
 [ApiController]
-[Route("token")]
+[Route("api/token")]
 public class TokenController
 {
     private readonly ILoginService loginService;

@@ -7,11 +7,16 @@ import Config from "../config"
 import {CircularProgress, Stack} from '@mui/material';
 import User from '../Models/User';
 import {UserContext} from '../UserContext';
+import Button from "@mui/material/Button";
 
 export default function RedirectLogin() {
   const [user, setUser] = useState<User | null>(null)
   const userContext = useContext(UserContext)
   const [searchParams] = useSearchParams()
+
+  const goToRoot = () => {
+    history.push("/")
+  }
 
   useEffect(() => {
     let code = searchParams.get("code")
@@ -32,9 +37,7 @@ export default function RedirectLogin() {
 
       <img src={Config.DiscordAvatarBaseUrl + user?.id + "/" + user?.avatar} style={{maxWidth: '150px', borderRadius: '50%'}}/>
 
-      <Typography variant="subtitle1" component="p" gutterBottom>
-        {"Velkommen, " + user?.nick}
-      </Typography>
+      <Button variant="contained" onClick={() => goToRoot()}>Reserver et sete</Button>
     </Stack>)
   }
 

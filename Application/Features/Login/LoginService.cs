@@ -13,35 +13,36 @@ internal class LoginService : ILoginService
     private readonly IJwtTokenCreator tokenCreator;
     private readonly IDiscordAccessTokenProvider discordAccessTokenProvider;
     private readonly IDiscordLookupUser discordUserLookup;
+    private readonly IInviteDiscordUser inviteDiscordUser;
     private readonly IAuthCertificateProvider authCertificateProvider;
 
     public LoginService(
         IDiscordAccessTokenProvider discordAccessTokenProvider,
         IDiscordLookupUser discordUserLookup,
         IJwtTokenCreator tokenCreator,
-        IAuthCertificateProvider authCertificateProvider)
+        IAuthCertificateProvider authCertificateProvider,
+        IInviteDiscordUser inviteDiscordUser)
     {
         this.discordAccessTokenProvider = discordAccessTokenProvider;
         this.discordUserLookup = discordUserLookup;
         this.tokenCreator = tokenCreator;
         this.authCertificateProvider = authCertificateProvider;
+        this.inviteDiscordUser = inviteDiscordUser;
     }
 
     public async Task<string> GetFor(string discordToken)
     {
         var accessToken = await discordAccessTokenProvider.GetFor(discordToken);
-        var discordUser = await discordUserLookup.Lookup(accessToken);
+        var user = await discordUserLookup.Lookup(accessToken);
 
-        var user = new User{
-            Id = discordUser.Id,
-            Nick = discordUser.Username,
-            Avatar = discordUser.Avatar,
-        };
+        var inviteTask = inviteDiscordUser.Invite(user, accessToken);
 
         var authCertificate = await authCertificateProvider.Get();
 
         var claims = GetRolesForUser(user);
         var token = await tokenCreator.CreateFor(user, authCertificate, claims);
+
+        await inviteTask;
 
         return token;
     }

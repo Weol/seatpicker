@@ -23,6 +23,8 @@ public class Seat : Entity<Guid>
         User = user;
         Raise(new SeatReservedEvent(Id, user));
     }
+
+
 }
 
 public record SeatReservedEvent(Guid SeatId, User User) : IDomainEvent;

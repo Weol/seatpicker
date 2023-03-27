@@ -2,9 +2,9 @@
 
 public class User
 {
-    public string Id { get; init; }
+    public string Id { get; set;  }
 
-    public string Nick { get; init; }
+    public string Nick { get; set; }
 
-    public string Avatar { get; init; }
+    public string? Avatar { get; set; }
 }

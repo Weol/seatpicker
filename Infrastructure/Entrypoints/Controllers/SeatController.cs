@@ -9,7 +9,7 @@ using Seatpicker.Infrastructure.Utils;
 namespace Seatpicker.Infrastructure.Entrypoints.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class SeatController
 {
     private readonly IReservationService reservationService;
