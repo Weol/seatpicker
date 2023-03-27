@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option csharp_namespace = "Seatpicker.Infrastructure.Entrypoints.Grpc";
+
+package frontend;
+
+service Frontened {
+  rpc SubscribeToSeatReserved (SubscribeRequest) returns (stream SeatReservedResponse);
+  rpc SubscribeToSeatUnreserved (SubscribeRequest) returns (stream SeatUnreservedResponse);
+}
+
+message SubscribeRequest {}
+
+message SeatReservedResponse {
+  string seatId = 1;
+  User user = 2;
+}
+
+message SeatUnreservedResponse {
+  string seatId = 1;
+  User user = 2;
+}
+
+message User {
+  string id = 1;
+  string nick = 2;
+  string avatar = 3;
+}
