@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Rest;
+using Discord.WebSocket;
 using Microsoft.Extensions.Options;
 using Seatpicker.Application.Features.Reservation.EventHandlers;
 
@@ -12,14 +13,14 @@ public static class DiscordRestClientExtensions
         services.Configure(configureAction);
 
         return services
-            .AddSingleton(CreateDiscordRestClient)
+            .AddSingleton(CreateDiscordSocketClient)
             .AddSingleton<IDiscordClient, DiscordClient>();
     }
 
-    private static DiscordRestClient CreateDiscordRestClient(IServiceProvider provider)
+    private static DiscordSocketClient CreateDiscordSocketClient(IServiceProvider provider)
     {
         var options = provider.GetRequiredService<IOptions<DiscordClientOptions>>();
-        var client = new DiscordRestClient();
+        var client = new DiscordSocketClient();
 
         client.LoginAsync(TokenType.Bot, options.Value.Token)
             .GetAwaiter()

@@ -48,7 +48,7 @@ public class SeatController
     public async Task<IActionResult> Replace([FromRoute] Guid currentSeatId, [FromRoute] Guid newSeatId)
     {
         var user = loggedInUserAccessor.Get();
-        var seat = await reservationService.ReplaceReservation(user, currentSeatId, newSeatId);
+        var seat = await reservationService.SwitchReservation(user, currentSeatId, newSeatId);
 
         return new OkObjectResult(seat);
      }

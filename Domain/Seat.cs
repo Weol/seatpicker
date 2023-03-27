@@ -1,9 +1,9 @@
-﻿namespace Seatpicker.Domain;
+﻿using Shared;
 
-public class Seat
+namespace Seatpicker.Domain;
+
+public class Seat : Entity<Guid>
 {
-    public Guid Id { get; init; }
-
     public User? User { get; set; }
 
     public string Title { get; set; }
@@ -17,4 +17,16 @@ public class Seat
     public double Height { get; set; }
 
     public DateTime? ReservedAt { get; set; }
+
+    public void Reserve(User user)
+    {
+        User = user;
+        Raise(new SeatReservedEvent(Id, user));
+    }
 }
+
+public record SeatReservedEvent(Guid SeatId, User User) : IDomainEvent;
+
+public record SeatUnreservedEvent(Guid SeatId, User User) : IDomainEvent;
+
+public record SeatReservationSwitch(Guid previousSeatId, Guid newSeatId, User User) : IDomainEvent;

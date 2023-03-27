@@ -7,7 +7,7 @@ public interface IReservationService
 {
     public Task<Seat> Reserve(User user, Guid seatId);
     public Task UnReserve(User user, Guid seatId);
-    public Task<Seat> ReplaceReservation(User user, Guid oldSeatId, Guid newSeatId);
+    public Task<Seat> SwitchReservation(User user, Guid oldSeatId, Guid newSeatId);
 }
 
 internal class ReservationService : IReservationService
@@ -50,7 +50,7 @@ internal class ReservationService : IReservationService
         await seatRepository.Store(seat);
     }
 
-    public Task<Seat> ReplaceReservation(User user, Guid oldSeatId, Guid newSeatId)
+    public Task<Seat> SwitchReservation(User user, Guid oldSeatId, Guid newSeatId)
     {
         var oldSeatTask = seatRepository.Get(oldSeatId);
         var newSeatTask = seatRepository.Get(newSeatId);
