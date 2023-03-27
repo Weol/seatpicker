@@ -55,7 +55,7 @@ resource appService 'Microsoft.Web/sites@2018-02-01' = {
       virtualApplications: [
         {
             virtualPath: '/'
-            physicalPath: 'site\\wwwroot\\frontend'
+            physicalPath: 'site\\wwwroot'
         }
         {
             virtualPath: '/api'
