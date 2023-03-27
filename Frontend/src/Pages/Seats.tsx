@@ -39,6 +39,7 @@ export default function Seats() {
   const {setAlert} = useAlertContext()
 
   useEffect(() => {
+    fetchAllSeats()
     const interval = setInterval(() => {
       fetchAllSeats()
     }, 5000);
