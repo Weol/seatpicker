@@ -22,7 +22,6 @@ public static class EntrypointsExtensions
 
     private static void ConfigureMvcOptions(MvcOptions options)
     {
-        options.UseRoutePrefix("api");
         options.Filters.Add<HttpResponseExceptionFilter>();
     }
 
@@ -31,42 +30,5 @@ public static class EntrypointsExtensions
         var options = new MassTransitOptions();
         configuration.GetSection("MassTransit").Bind(options);
         return options;
-    }
-}
-
-public static class MvcOptionsExtensions
-{
-    public static void UseRoutePrefix(this MvcOptions opts, IRouteTemplateProvider routeAttribute)
-    {
-        opts.Conventions.Add(new RoutePrefixConvention(routeAttribute));
-    }
-
-    public static void UseRoutePrefix(this MvcOptions opts, string
-        prefix)
-    {
-        opts.UseRoutePrefix(new RouteAttribute(prefix));
-    }
-}
-public class RoutePrefixConvention : IApplicationModelConvention
-{
-    private readonly AttributeRouteModel routePrefix;
-
-    public RoutePrefixConvention(IRouteTemplateProvider route)
-    {
-        routePrefix = new AttributeRouteModel(route);
-    }
-    public void Apply(ApplicationModel application)
-    {
-        foreach (var selector in application.Controllers.SelectMany(c => c.Selectors))
-        {
-            if (selector.AttributeRouteModel != null)
-            {
-                selector.AttributeRouteModel = AttributeRouteModel.CombineAttributeRouteModel(routePrefix, selector.AttributeRouteModel);
-            }
-            else
-            {
-                selector.AttributeRouteModel = routePrefix;
-            }
-        }
     }
 }

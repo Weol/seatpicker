@@ -2,7 +2,20 @@
 
 public class DiscordClientOptions
 {
-    public string GuildId { get; set; } = null!;
+    public string ClientId { get; set; } = null!;
+    public string ClientSecret { get; set; } = null!;
+    public Uri RedirectUri { get; set; } = null!;
+    public Uri Uri { get; set; } = null!;
+    public int Version => GetVersionFromDiscordUri(Uri);
 
-    public string Token { get; set; } = null!;
+    private static int GetVersionFromDiscordUri(Uri baseUri)
+    {
+        var version = baseUri.Segments.Single(x => x.StartsWith("v"));
+        if (int.TryParse(version.Trim('v').Trim('/'), out var number))
+        {
+            return number;
+        }
+
+        throw new UriFormatException("Invalid discord uri");
+    }
 }

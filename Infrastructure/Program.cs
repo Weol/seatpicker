@@ -30,3 +30,8 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+namespace Seatpicker.Infrastructure
+{
+    public partial class Program { }
+}

@@ -3,17 +3,17 @@ using Seatpicker.Application.Features.Login.Ports;
 
 namespace Seatpicker.Infrastructure.Adapters;
 
-internal static class DiscordLoginClientExtensions
+internal static class DiscordClientExtensions
 {
-    internal static IServiceCollection AddDiscordLoginClient(this IServiceCollection services,
-        Action<DiscordLoginClientOptions> configureAction)
+    internal static IServiceCollection AddDiscordClient(this IServiceCollection services,
+        Action<DiscordClientOptions> configureAction)
     {
         services.Configure(configureAction);
 
         //https://discord.com/api/v{version_number}
-        services.AddHttpClient<Adapters.DiscordLoginClient>((provider, client) =>
+        services.AddHttpClient<DiscordClient>((provider, client) =>
         {
-            var options = provider.GetRequiredService<IOptions<DiscordLoginClientOptions>>();
+            var options = provider.GetRequiredService<IOptions<DiscordClientOptions>>();
             var baseUrl = options.Value.Uri;
             var version = options.Value.Version;
 
@@ -24,7 +24,7 @@ internal static class DiscordLoginClientExtensions
         });
 
         return services
-            .AddPortMapping<IDiscordLookupUser, Adapters.DiscordLoginClient>()
-            .AddPortMapping<IDiscordAccessTokenProvider, Adapters.DiscordLoginClient>();
+            .AddPortMapping<IDiscordLookupUser, DiscordClient>()
+            .AddPortMapping<IDiscordAccessTokenProvider, DiscordClient>();
     }
 }
