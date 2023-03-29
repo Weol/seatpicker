@@ -3,12 +3,8 @@ using DiscordBot.DiscordBot;
 
 namespace DiscordBot.Handlers;
 
-public class ConsoleLogOnMessageReceived : IDiscordEventHandler<SocketMessage>
+public class ConsoleLogOnMessageReceived : IDiscordEventHandler<MessageRecieved>
 {
-    public void Register(DiscordSocketClient discordSocketClient)
-    {
-        discordSocketClient.MessageReceived +=
-    }
 
 
 }

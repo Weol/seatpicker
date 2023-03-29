@@ -7,30 +7,30 @@ public static class DiscordBotExtensions
 {
     public static WebApplicationBuilder AddDiscordBot(this WebApplicationBuilder builder)
     {
-        var discordSocketClient = new DiscordSocketClient();
-        builder.Services
-            .AddSingleton(discordSocketClient)
-            .RegisterDiscordEventHandlers(discordSocketClient)
-            .AddHostedService<DiscordBot>();
+        builder.Services.AddSingleton(CreateDiscordSocketClient).AddHostedService<DiscordBot>();
 
         return builder;
     }
 
-    private static IServiceCollection RegisterDiscordEventHandlers(this IServiceCollection services, DiscordSocketClient discordSocketClient)
+    public static DiscordSocketClient CreateDiscordSocketClient(IServiceProvider provider)
     {
-        discordSocketClient.MessageReceived +=
-        foreach (var handler in GetAllDiscordEventHandlers())
-        {
-            handler.
-        }
+        var client = new DiscordSocketClient();
+
+        client.MessageReceived += HandleMessageRecieved(provider);
+
+        return client;
     }
 
-    public static Type[] GetAllDiscordEventHandlers()
+    private static Func<SocketMessage, Task> HandleMessageRecieved(IServiceProvider provider)
     {
-        return typeof(Program)
-            .Assembly
-            .GetTypes()
-            .Where(type => !type.IsAbstract && type.IsAssignableTo(typeof(IDiscordEventHandler)))
-            .ToArray();
+        provider.GetHandlers<MessageReceivedEvent>()
+    }
+
+    private Func<Task<T, Task>> ForAll()
+
+    private static IEnumerable<IDiscordEventHandler<T>> GetHandlers<T>(this IServiceProvider provider)
+        where T : IDiscordEvent
+    {
+        return provider.GetRequiredService<IEnumerable<IDiscordEventHandler<T>>>();
     }
 }
