@@ -3,13 +3,12 @@ using DiscordBot.DiscordBot;
 
 namespace DiscordBot.Handlers;
 
-public class ConsoleLogOnMessageReceived : IDiscordEventHandler<MessageRecieved>
+public class ConsoleLogOnMessageReceived : IDiscordEventHandler<MessageReceivedEvent>
 {
+    public Task Handle(MessageReceivedEvent discordEvent)
+    {
+        Console.WriteLine(discordEvent.Message.Content);
 
-
-}
-
-public interface IDiscordEventHandler<TParameter>
-{
-    public void Register(DiscordSocketClient discordSocketClient);
+        return Task.CompletedTask;
+    }
 }

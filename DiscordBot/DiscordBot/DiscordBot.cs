@@ -40,6 +40,11 @@ public class DiscordBot : BackgroundService
 
                 await Task.WhenAny(Task.Delay(Timeout.Infinite, cancellationTokenSource.Token));
             }
+            catch (InvalidOperationException e) when (e.Message == "Cannot start an already running client.")
+            {
+                logger.LogCritical(e, "Failed to start Discord bot");
+                break;
+            }
             catch (Exception e)
             {
                 logger.LogError(e, "Encountered exception on Discord bot startup");
