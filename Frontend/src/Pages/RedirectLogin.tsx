@@ -34,7 +34,7 @@ export default function RedirectLogin() {
       <img src={Config.DiscordAvatarBaseUrl + user?.id + "/" + user?.avatar} style={{maxWidth: '150px', borderRadius: '50%'}}/>
 
       <Button component={Link} to="/" variant="contained">
-        Gå til sete resercasjon
+        Gå til sete reservasjon
       </Button>
     </Stack>)
   }
