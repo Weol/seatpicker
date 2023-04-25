@@ -106,7 +106,6 @@ module databaseModule 'database.bicep' = {
   }
 }
 
-
 var keyvaultReferenceFormat = '@Microsoft.KeyVault(VaultName=${keyvaultModule.outputs.keyvaultName};SecretName={0})'
 
 resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
