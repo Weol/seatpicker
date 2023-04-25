@@ -1,7 +1,7 @@
 param location string
 param postfix string
 param keyvaultName string
-param adminUsername string = 'admin'
+param adminUsername string = 'CoolGuy95'
 
 resource passwordGenerator 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: 'generate-password-${postfix}'
