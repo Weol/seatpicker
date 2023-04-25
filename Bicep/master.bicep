@@ -66,6 +66,14 @@ resource appService 'Microsoft.Web/sites@2018-02-01' = {
   }
 }
 
+module databaseModule 'database.bicep' = {
+  name: 'database'
+  params: {
+    location: location
+    postfix: postfix
+  }
+}
+
 resource serviceBus 'Microsoft.ServiceBus/namespaces@2022-01-01-preview' = {
   name: 'servicebus-${postfix}'
   location: location
