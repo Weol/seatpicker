@@ -4,6 +4,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bicep", "Bicep", "{1AE7415C
 	ProjectSection(SolutionItems) = preProject
 		Bicep\keyvault.bicep = Bicep\keyvault.bicep
 		Bicep\master.bicep = Bicep\master.bicep
+		Bicep\database.bicep = Bicep\database.bicep
+		Bicep\DatabasePasswordGenerator.ps1 = Bicep\DatabasePasswordGenerator.ps1
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{E0DE7D98-9495-4DCC-BA01-026F6163C44F}"
