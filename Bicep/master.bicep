@@ -102,7 +102,7 @@ module databaseModule 'database.bicep' = {
   params: {
     location: location
     postfix: postfix
-    keyvault: keyvaultModule.outputs.keyvaultName
+    keyvaultName: keyvaultModule.outputs.keyvaultName
   }
 }
 
