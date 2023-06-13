@@ -33,9 +33,7 @@ internal class ReservationService : IReservationService
         else
             throw new SeatUnavailableException(seatId);
 
-        await seatRepository.Store(seat);
-
-        await domainEventPublisher.Publish(new SeatReservedEvent(seat.Id, user));
+        await seatRepository.Save(seat);
 
         return seat;
     }
@@ -47,7 +45,7 @@ internal class ReservationService : IReservationService
         if (seat.User is null || seat.User.Id != user.Id) throw new SeatUnavailableException(seatId);
         seat.User = null;
 
-        await seatRepository.Store(seat);
+        await seatRepository.Save(seat);
     }
 
     public Task<Seat> SwitchReservation(User user, Guid oldSeatId, Guid newSeatId)
@@ -65,7 +63,7 @@ internal class ReservationService : IReservationService
         newSeat.User = user;
         oldSeat.User = null;
 
-        Task.WaitAll(seatRepository.Store(oldSeat), seatRepository.Store(newSeat));
+        Task.WaitAll(seatRepository.Save(oldSeat), seatRepository.Save(newSeat));
 
         return Task.FromResult(newSeat);
     }

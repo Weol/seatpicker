@@ -9,7 +9,7 @@ using Seatpicker.Infrastructure.Utils;
 namespace Seatpicker.Infrastructure.Entrypoints.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("[controller]")]
 public class SeatController
 {
     private readonly IReservationService reservationService;
@@ -31,7 +31,7 @@ public class SeatController
         return new OkObjectResult(allSeats);
     }
 
-    [HttpPost("reserve/{seatId:guid}")]
+    [HttpPost("{seatId:guid}")]
     [ProducesResponseType(typeof(Seat), (int) HttpStatusCode.OK)]
     [Authorize]
     public async Task<IActionResult> Reserve([FromRoute] Guid seatId)
@@ -42,7 +42,7 @@ public class SeatController
         return new OkObjectResult(seat);
      }
 
-    [HttpPost("replace/{currentSeatId:guid}/{newSeatId:guid}")]
+    [HttpPost("{newSeatId:guid}/replace/{currentSeatId:guid}")]
     [ProducesResponseType(typeof(Seat), (int) HttpStatusCode.OK)]
     [Authorize]
     public async Task<IActionResult> Replace([FromRoute] Guid currentSeatId, [FromRoute] Guid newSeatId)
@@ -53,7 +53,7 @@ public class SeatController
         return new OkObjectResult(seat);
      }
 
-    [HttpPost("unreserve/{seatId:guid}")]
+    [HttpDelete("{seatId:guid}")]
     [ProducesResponseType((int) HttpStatusCode.NotFound)]
     [Authorize]
     public async Task<IActionResult> Unreserve([FromRoute] Guid seatId)

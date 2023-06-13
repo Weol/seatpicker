@@ -2,8 +2,10 @@
 
 namespace Seatpicker.Domain;
 
-public class Seat : Entity<Guid>
+public class Seat : Entity
 {
+    public Guid Id { get; set; }
+
     public User? User { get; set; }
 
     public string Title { get; set; }

@@ -23,7 +23,7 @@ internal class SeatRepository : ISeatRepository
             .GetTableClient(options.Value.TableName);
     }
 
-    public async Task Store(Seat seat)
+    public async Task Save(Seat seat)
     {
         await tableClient.UpsertEntityAsync(new SeatEntity
         {

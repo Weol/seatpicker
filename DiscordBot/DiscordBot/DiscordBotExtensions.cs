@@ -25,21 +25,6 @@ public static class DiscordBotExtensions
         return builder;
     }
 
-    private static IServiceCollection AddDiscordEventHandlers(this IServiceCollection services)
-    {
-        var events = typeof(Program).Assembly.GetTypes().Where(type => !type.IsAbstract && type.IsAssignableTo(typeof(IDiscordEvent)));
-        foreach (var evt in events)
-        {
-            var consumers = typeof(Program).Assembly.GetTypes().Where(type => !type.IsAbstract && type.IsAssignableTo(typeof(IDiscordEventHandler<>)));
-            foreach (var consumer in consumers)
-            {
-                var interfaces = consumer.GetInterfaces();
-            }
-        }
-
-        return services;
-    }
-
     [SuppressMessage("ReSharper", "ArrangeObjectCreationWhenTypeNotEvident")]
     private static DiscordSocketClient CreateDiscordSocketClient(IServiceProvider provider)
     {
@@ -50,10 +35,33 @@ public static class DiscordBotExtensions
         return client;
     }
 
+    private static IServiceCollection AddDiscordEventHandlers(this IServiceCollection services)
+    {
+        var events = typeof(Program).Assembly.GetTypes().Where(type => !type.IsAbstract && type.IsAssignableTo(typeof(IDiscordEvent)));
+        foreach (var evt in events)
+        {
+            var mi = typeof(DiscordBotExtensions).GetMethod(nameof(AddHandlers));
+            mi!.MakeGenericMethod(evt).Invoke(null, new object?[] { services });
+        }
+
+        return services;
+    }
+
+    public static void AddHandlers<T>(IServiceCollection services)
+        where T : IDiscordEvent
+    {
+        var consumers = typeof(Program).Assembly.GetTypes().Where(type => !type.IsAbstract && type.IsAssignableTo(typeof(IDiscordEventHandler<T>)));
+        foreach (var consumer in consumers)
+        {
+            services.Add(new ServiceDescriptor(typeof(IDiscordEventHandler<T>), consumer, ServiceLifetime.Transient));
+        }
+    }
+
     private static Func<T, Task> ForAll<T, G>(IServiceProvider provider, Func<T, G> creator)
         where G : IDiscordEvent
     {
         var handlers  = provider.GetHandlers<G>();
+        var logger = provider.GetRequiredService<ILogger<DiscordBot>>();
 
         return t =>
         {
