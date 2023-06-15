@@ -1,6 +1,5 @@
 param location string
 param postfix string
-param subnetId string
 
 param readers array
 
