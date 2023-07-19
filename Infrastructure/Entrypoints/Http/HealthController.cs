@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Controllers;
+namespace Seatpicker.Infrastructure.Entrypoints.Http;
 
 [ApiController]
 [Route("[controller]")]

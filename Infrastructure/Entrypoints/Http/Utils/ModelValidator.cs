@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
 
-namespace Seatpicker.Infrastructure.Utils;
+namespace Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
 public interface IValidateModel
 {

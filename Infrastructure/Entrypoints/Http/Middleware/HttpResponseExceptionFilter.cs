@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Seatpicker.Application;
+using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.DiscordClient;
-using Seatpicker.Infrastructure.Utils;
+using Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
-namespace Seatpicker.Infrastructure.Middleware;
+namespace Seatpicker.Infrastructure.Entrypoints.Http.Middleware;
 
 public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
 {

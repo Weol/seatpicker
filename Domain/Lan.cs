@@ -2,7 +2,7 @@
 
 namespace Seatpicker.Domain;
 
-public class Lan : AggregateRoot
+public class Lan : AggregateBase
 {
     public Lan(Guid lanId, string title, byte[] background)
     {

@@ -1,4 +1,4 @@
-﻿namespace Seatpicker.Application;
+﻿namespace Seatpicker.Domain;
 
 public abstract class DomainException : Exception
 {

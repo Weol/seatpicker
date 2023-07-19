@@ -1,4 +1,5 @@
 ﻿using Marten;
+using Seatpicker.Domain;
 
 namespace Seatpicker.Application.Features.Lan;
 
@@ -13,46 +14,46 @@ public interface ILanService
 
 internal class LanService : ILanService
 {
-    private readonly IDocumentStore store;
+    private readonly IAggregateRepository repository;
 
-    public LanService(IDocumentStore store)
+    public LanService(IAggregateRepository repository)
     {
-        this.store = store;
+        this.repository = repository;
     }
 
     public async Task Create(CreateLan createLan)
     {
-        await using var session = store.LightweightSession();
+        await using var transaction = repository.CreateTransaction();
 
-        var lan = session.Events.AggregateStream<Domain.Lan>(createLan.Id);
-        if (lan is not null) throw new LanAlreadyExistsException { LanId = lan.Id };
+        var exists = await transaction.Exists<Domain.Lan>(createLan.Id);
+        if (exists) throw new LanAlreadyExistsException { LanId = createLan.Id };
 
-        lan = new Domain.Lan(createLan.Id, createLan.Title, createLan.Background);
+        var lan = new Domain.Lan(createLan.Id, createLan.Title, createLan.Background);
 
-        session.Events.StartStream<Domain.Lan>(lan.Id, lan.RaisedEvents);
+        transaction.Create(lan);
 
-        await session.SaveChangesAsync();
+        transaction.Commit();
     }
 
     public async Task Update(UpdateLan updateLan)
     {
-        await using var session = store.LightweightSession();
+        await using var transaction = repository.CreateTransaction();
 
-        var lan = session.Events.AggregateStream<Domain.Lan>(updateLan.Id);
+        var lan = await transaction.Aggregate<Domain.Lan>(updateLan.Id);
         if (lan is null) throw new LanNotFoundException { LanId = updateLan.Id };
 
         if (updateLan.Title is not null) lan.ChangeTitle(updateLan.Title);
         if (updateLan.Background is not null) lan.ChangeBackground(updateLan.Background);
 
-        session.Events.Append(lan.Id, lan.RaisedEvents);
-        await session.SaveChangesAsync();
+        transaction.Update(lan);
+        transaction.Commit();
     }
 
     public async Task<Domain.Lan> Get(Guid lanId)
     {
-        await using var session = store.LightweightSession();
+        await using var reader = repository.CreateReader();
 
-        var lan = session.Events.AggregateStream<Domain.Lan>(lanId);
+        var lan = await reader.Aggregate<Domain.Lan>(lanId);
         if (lan is null) throw new LanNotFoundException { LanId = lanId };
 
         return lan;

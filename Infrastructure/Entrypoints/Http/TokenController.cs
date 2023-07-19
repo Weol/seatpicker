@@ -1,9 +1,9 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Login;
-using Seatpicker.Infrastructure.Utils;
+using Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Controllers;
+namespace Seatpicker.Infrastructure.Entrypoints.Http;
 
 [ApiController]
 [Route("token")]

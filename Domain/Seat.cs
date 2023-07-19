@@ -1,10 +1,9 @@
-﻿using Seatpicker.Application;
-using Shared;
+﻿using Shared;
 
 namespace Seatpicker.Domain;
 
 #pragma warning disable CS1998 // Disable warning about async methods missing awaits
-public class Seat : AggregateRoot
+public class Seat : AggregateBase
 {
     public string Title { get; set; }
 

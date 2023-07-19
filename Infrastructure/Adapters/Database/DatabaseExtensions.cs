@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Marten;
 using Microsoft.Extensions.Options;
+using Seatpicker.Application.Features;
 using Weasel.Core;
 
 namespace Seatpicker.Infrastructure.Adapters.Database;
@@ -10,6 +11,8 @@ internal static class DatabaseExtensions
     public static IServiceCollection AddDatabase(this IServiceCollection services, Action<DatabaseOptions> configureAction)
     {
         services.AddValidatedOptions(configureAction);
+
+        services.AddSingleton<IAggregateRepository, AggregateRepository>();
 
         services.AddMarten(provider =>
         {

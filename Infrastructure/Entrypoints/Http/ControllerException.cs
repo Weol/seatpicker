@@ -1,4 +1,4 @@
-﻿namespace Seatpicker.Infrastructure.Entrypoints.Controllers;
+﻿namespace Seatpicker.Infrastructure.Entrypoints.Http;
 
 public class ControllerException : Exception
 {

@@ -2,7 +2,7 @@ using Seatpicker.Application;
 using Seatpicker.Infrastructure;
 using Seatpicker.Infrastructure.Adapters;
 using Seatpicker.Infrastructure.Entrypoints;
-using Seatpicker.Infrastructure.Utils;
+using Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,4 +31,7 @@ app.MapControllers();
 
 app.Run();
 
-public partial class Program {}
+namespace Seatpicker.Infrastructure
+{
+    public partial class Program {}
+}

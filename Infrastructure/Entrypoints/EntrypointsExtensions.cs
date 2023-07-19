@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Seatpicker.Infrastructure.Middleware;
-using Seatpicker.Infrastructure.Utils;
+using Seatpicker.Infrastructure.Entrypoints.Http.Middleware;
+using Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints;
 

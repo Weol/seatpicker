@@ -18,7 +18,7 @@ public class IdentityGenerator
 
     public async Task<TestIdentity> GenerateWithRoles(params Role[] roles)
     {
-        var user = new User { Id = "123456789", Nick = "ToreTang420", };
+        var user = new User { Id = "123456789", Nick = "ToreTang420", Avatar = "123"};
 
         var certificate = await authCertificateProvider.Get();
         var token = await jwtTokenCreator.CreateFor(user, certificate, roles);

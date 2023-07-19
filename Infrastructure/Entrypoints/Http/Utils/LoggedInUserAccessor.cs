@@ -1,6 +1,6 @@
 ﻿using Seatpicker.Domain;
 
-namespace Seatpicker.Infrastructure.Utils;
+namespace Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
 public interface ILoggedInUserAccessor
 {

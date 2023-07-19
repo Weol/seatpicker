@@ -1,6 +1,6 @@
 ﻿namespace Shared;
 
-public abstract class AggregateRoot
+public abstract class AggregateBase
 {
     public Guid Id { get; set; }
 
