@@ -13,7 +13,6 @@ public static class AdapterExtensions
 
         return services
             .AddDatabase(ConfigureDatabase)
-            .AddSeatRepository()
             .AddAuthCertificateProvider(ConfigureAuthCertificateProvider)
             .AddJwtTokenCreator()
             .AddDiscordClient(ConfigureDiscordClient);
