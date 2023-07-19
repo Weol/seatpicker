@@ -1,0 +1,7 @@
+
+### Login with discord token
+
+POST http://localhost:7071/token/
+Content-Type: application/json
+
+{ "token" : "GitgNsPhKLd4tYl6cxMifBKfjGnFSy" }

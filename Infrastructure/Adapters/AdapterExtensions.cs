@@ -1,4 +1,5 @@
-﻿using Seatpicker.Infrastructure.Adapters.DiscordClient;
+﻿using Seatpicker.Infrastructure.Adapters.Database;
+using Seatpicker.Infrastructure.Adapters.DiscordClient;
 
 namespace Seatpicker.Infrastructure.Adapters;
 
@@ -11,16 +12,16 @@ public static class AdapterExtensions
         Config = configuration;
 
         return services
-            .AddDomainEventPublisher()
-            .AddSeatRepository(ConfigureSeatRepository)
+            .AddDatabase(ConfigureDatabase)
+            .AddSeatRepository()
             .AddAuthCertificateProvider(ConfigureAuthCertificateProvider)
             .AddJwtTokenCreator()
             .AddDiscordClient(ConfigureDiscordClient);
     }
 
-    private static void ConfigureSeatRepository(SeatRepository.Options options)
+    private static void ConfigureDatabase(DatabaseOptions options)
     {
-        Config.GetSection("SeatRepository").Bind(options);
+        Config.GetSection("Database").Bind(options);
     }
 
     private static void ConfigureDiscordClient(DiscordClientOptions options)

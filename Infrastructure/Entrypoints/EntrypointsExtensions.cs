@@ -12,7 +12,6 @@ public static class EntrypointsExtensions
             .AddEndpointsApiExplorer()
             .AddSwaggerGen()
             .AddModelValidator()
-            .AddBus(GetMassTransitOptions(configuration))
             .AddHealthChecks()
             .Services
             .AddControllers(ConfigureMvcOptions);
@@ -23,12 +22,5 @@ public static class EntrypointsExtensions
     private static void ConfigureMvcOptions(MvcOptions options)
     {
          options.Filters.Add<HttpResponseExceptionFilter>();
-    }
-
-    private static MassTransitOptions GetMassTransitOptions(IConfiguration configuration)
-    {
-        var options = new MassTransitOptions();
-        configuration.GetSection("MassTransit").Bind(options);
-        return options;
     }
 }

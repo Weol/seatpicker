@@ -8,7 +8,7 @@ internal static class DiscordHttpClientExtensions
     internal static IServiceCollection AddDiscordClient(this IServiceCollection services,
         Action<DiscordClientOptions> configureAction)
     {
-        services.Configure(configureAction);
+        services.AddValidatedOptions(configureAction);
 
         //https://discord.com/api/v{version_number}
         services.AddHttpClient<DiscordClient>((provider, client) =>

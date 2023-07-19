@@ -18,6 +18,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{D2179D00-E6D5-4F59-AE4D-8D8945724E47}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Requests", "Requests", "{733D3761-A45F-47DF-B8B8-993FEFB37978}"
+	ProjectSection(SolutionItems) = preProject
+		Requests\Lan.http = Requests\Lan.http
+		Requests\Login.http = Requests\Login.http
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|Any CPU = Release|Any CPU

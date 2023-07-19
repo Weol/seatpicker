@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography.X509Certificates;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Options;
 using Seatpicker.Application.Features.Login.Ports;
 
@@ -22,6 +23,8 @@ internal class AuthCertificateProvider : IAuthCertificateProvider
 
     internal class Options
     {
+        [Required]
+        [RegularExpression("[a-zA-Z0-9+/]+={0,2}")]
         public string Base64Certificate { get; set; } = null!;
     }
 }

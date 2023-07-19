@@ -3,13 +3,13 @@ using FluentValidation.Results;
 
 namespace Seatpicker.Infrastructure.Utils;
 
-public interface IModelValidator
+public interface IValidateModel
 {
     Task Validate<TModel, TModelValidator>(TModel model)
         where TModelValidator : IValidator<TModel>, new();
 }
 
-public class ModelValidator : IModelValidator
+public class ValidateModel : IValidateModel
 {
     public async Task Validate<TModel, TModelValidator>(TModel model) where TModelValidator : IValidator<TModel>, new()
     {
@@ -36,6 +36,6 @@ public static class ModelValidatorExtensions
 {
     public static IServiceCollection AddModelValidator(this IServiceCollection serviceCollection)
     {
-        return serviceCollection.AddSingleton<IModelValidator, ModelValidator>();
+        return serviceCollection.AddSingleton<IValidateModel, ValidateModel>();
     }
 }

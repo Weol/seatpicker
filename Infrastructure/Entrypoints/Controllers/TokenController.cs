@@ -10,18 +10,18 @@ namespace Seatpicker.Infrastructure.Entrypoints.Controllers;
 public class TokenController
 {
     private readonly ILoginService loginService;
-    private readonly IModelValidator modelValidator;
+    private readonly IValidateModel validateModel;
 
-    public TokenController(ILoginService loginService, IModelValidator modelValidator)
+    public TokenController(ILoginService loginService, IValidateModel validateModel)
     {
         this.loginService = loginService;
-        this.modelValidator = modelValidator;
+        this.validateModel = validateModel;
     }
 
     [HttpPost]
     public async Task<ActionResult<TokenResponseModel>> Create(TokenRequestModel model)
     {
-        await modelValidator.Validate<TokenRequestModel, TokenRequestModelValidator>(model);
+        await validateModel.Validate<TokenRequestModel, TokenRequestModelValidator>(model);
 
         var token = await loginService.GetFor(model.Token);
 
@@ -36,7 +36,8 @@ public class TokenController
     {
         public TokenRequestModelValidator()
         {
-            RuleFor(x => x.Token).NotEmpty();
+            RuleFor(x => x.Token)
+                .NotEmpty();
         }
     }
 }

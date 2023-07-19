@@ -13,4 +13,17 @@ public static class ServiceCollectionExtensions
         return serviceCollection
             .AddSingleton<TPort>(provider => provider.GetRequiredService<TImpl>());
     }
+
+    public static IServiceCollection AddValidatedOptions<TOptions>(
+        this IServiceCollection serviceCollection,
+        Action<TOptions> configureAction)
+        where TOptions : class
+    {
+        serviceCollection.AddOptions<TOptions>()
+            .Configure(configureAction)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        return serviceCollection;
+    }
 }

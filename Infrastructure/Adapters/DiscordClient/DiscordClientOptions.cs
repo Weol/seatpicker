@@ -1,11 +1,22 @@
-﻿namespace Seatpicker.Infrastructure.Adapters.DiscordClient;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Seatpicker.Infrastructure.Adapters.DiscordClient;
 
 internal class DiscordClientOptions
 {
+    [Required]
     public string ClientId { get; set; } = null!;
+
+    [Required]
     public string ClientSecret { get; set; } = null!;
+
+    [Required]
     public Uri RedirectUri { get; set; } = null!;
+
+    [Required]
     public Uri Uri { get; set; } = null!;
+
+    [Required]
     public int Version => GetVersionFromDiscordUri(Uri);
 
     private static int GetVersionFromDiscordUri(Uri baseUri)
