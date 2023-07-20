@@ -6,7 +6,8 @@ public class Lan : AggregateBase
 {
     public Lan(Guid lanId, string title, byte[] background)
     {
-        var evt = new LanCreated(lanId, title);
+        var evt = new LanCreated(lanId, title, background);
+        Apply(evt);
     }
 
     private Lan()
@@ -35,6 +36,7 @@ public class Lan : AggregateBase
     {
         Id = evt.LanId;
         Title = evt.Title;
+        Background = evt.Background;
     }
 
     public void Apply(LanTitleChanged evt)
@@ -48,7 +50,7 @@ public class Lan : AggregateBase
     }
 }
 
-public record LanCreated(Guid LanId, string Title);
+public record LanCreated(Guid LanId, string Title, byte[] Background);
 
 public record LanTitleChanged(string Title);
 

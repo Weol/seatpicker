@@ -34,19 +34,19 @@ public class Seat : AggregateBase
     /**
      * Apply methods automatically used by Marten
      */
-    private async Task Apply(SeatCreated evt)
+    private async void Apply(SeatCreated evt)
     {
         Id = evt.Id;
         Title = evt.Title;
         Bounds = evt.Bounds;
     }
 
-    private async Task Apply(SeatReserved evt)
+    private async void Apply(SeatReserved evt)
     {
         ReservedBy = evt.User;
     }
 
-    private async Task Apply(SeatUnreserved evt)
+    private async void Apply(SeatUnreserved evt)
     {
         ReservedBy = null;
     }

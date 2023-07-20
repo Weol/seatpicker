@@ -8,14 +8,14 @@ using Xunit;
 
 namespace Seatpicker.IntegrationTests.Tests;
 
-public class LoginTest : IntegrationTestBase,  IClassFixture<TestWebApplicationFactory>
+public class LanManagementTests : IntegrationTestBase,  IClassFixture<TestWebApplicationFactory>
 {
-    public LoginTest(TestWebApplicationFactory factory) : base(factory)
+    public LanManagementTests(TestWebApplicationFactory factory) : base(factory)
     {
     }
 
     [Fact]
-    public async Task Test1()
+    public async Task GetLan()
     {
         // Arrange
         var identity = await CreateIdentity(Role.Admin);
@@ -25,7 +25,7 @@ public class LoginTest : IntegrationTestBase,  IClassFixture<TestWebApplicationF
         SetupAggregates(existingLan);
 
         //Act
-        var response = await client.PostAsync("lan", Generator.CreateLanRequestModel(existingLan));
+        var response = await client.GetAsync($"lan/{existingLan.Id}");
         var responseModel = await response.Content.ReadFromJsonAsync<LanController.LanResponseModel>();
 
         //Assert
@@ -35,9 +35,9 @@ public class LoginTest : IntegrationTestBase,  IClassFixture<TestWebApplicationF
             {
                 responseModel.Should().NotBeNull();
                 Assert.Multiple(
-                    () => responseModel.Id.Should().Be(existingLan.Id),
-                    () => responseModel.Title.Should().Be(existingLan.Title),
-                    () => responseModel.Background.Should().Be(Convert.ToBase64String(existingLan.Background))
+                    () => responseModel!.Id.Should().Be(existingLan.Id),
+                    () => responseModel!.Title.Should().Be(existingLan.Title),
+                    () => responseModel!.Background.Should().Be(Convert.ToBase64String(existingLan.Background))
                 );
             }
         );
