@@ -1,9 +1,8 @@
 ﻿using System.Text;
-using System.Text.Json;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Entrypoints.Http.Management.Lan;
 
-namespace Seatpicker.IntegrationTests.Tests.Management;
+namespace Seatpicker.IntegrationTests.Tests.LanManagement;
 
 public static class LanGenerator
 {

@@ -2,19 +2,14 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
 using FluentAssertions;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NSubstitute;
 using Seatpicker.Application.Features.Token;
-using Seatpicker.Application.Features.Token.Ports;
-using Seatpicker.Infrastructure.Adapters.DiscordClient;
 using Seatpicker.Infrastructure.Entrypoints.Http;
-using Seatpicker.IntegrationTests.Tests.Management;
 using Xunit;
 
-namespace Seatpicker.IntegrationTests.Tests.Token;
+namespace Seatpicker.IntegrationTests.Tests;
 
 // ReSharper disable once InconsistentNaming
 public class Token : IntegrationTestBase, IClassFixture<TestWebApplicationFactory>

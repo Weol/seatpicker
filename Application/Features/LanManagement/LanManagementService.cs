@@ -1,7 +1,6 @@
-﻿using Marten;
-using Seatpicker.Domain;
+﻿using Seatpicker.Domain;
 
-namespace Seatpicker.Application.Features.Lan;
+namespace Seatpicker.Application.Features.LanManagement;
 
 public interface ILanManagementService
 {

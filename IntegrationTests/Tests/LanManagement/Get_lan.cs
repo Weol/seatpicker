@@ -1,12 +1,11 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Resources;
 using FluentAssertions;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Entrypoints.Http.Management.Lan;
 using Xunit;
 
-namespace Seatpicker.IntegrationTests.Tests.Management;
+namespace Seatpicker.IntegrationTests.Tests.LanManagement;
 
 // ReSharper disable once InconsistentNaming
 public class Get_lan : IntegrationTestBase,  IClassFixture<TestWebApplicationFactory>

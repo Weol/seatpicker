@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using Seatpicker.Application.Features.Lan;
+using Seatpicker.Application.Features.LanManagement;
 using Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Management.Lan;

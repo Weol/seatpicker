@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace Seatpicker.Application.Features.Lan;
+namespace Seatpicker.Application.Features.LanManagement;
 
 internal static class FeatureExtension
 {
