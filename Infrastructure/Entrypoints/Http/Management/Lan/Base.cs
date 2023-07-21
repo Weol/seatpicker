@@ -12,12 +12,12 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Management.Lan;
 [Authorize(Roles = "Admin")]
 public partial class LanController
 {
-    private readonly ILanService lanService;
+    private readonly ILanManagementService lanManagementService;
     private readonly IValidateModel validateModel;
 
-    public LanController(ILanService lanService, IValidateModel validateModel)
+    public LanController(ILanManagementService lanManagementService, IValidateModel validateModel)
     {
-        this.lanService = lanService;
+        this.lanManagementService = lanManagementService;
         this.validateModel = validateModel;
     }
 

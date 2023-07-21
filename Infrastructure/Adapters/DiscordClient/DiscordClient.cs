@@ -2,8 +2,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
-using Seatpicker.Application.Features.Login;
-using Seatpicker.Application.Features.Login.Ports;
+using Seatpicker.Application.Features.Token;
+using Seatpicker.Application.Features.Token.Ports;
 
 namespace Seatpicker.Infrastructure.Adapters.DiscordClient;
 
@@ -54,8 +54,8 @@ internal class DiscordClient : IDiscordAccessTokenProvider, IDiscordLookupUser
         var body = await response.Content.ReadAsStringAsync();
         if (response.IsSuccessStatusCode)
         {
-            logger.LogInformation("Discord API responded with code {StatusCode} and body {body}", response.StatusCode, body);
-            
+            logger.LogInformation("Discord API responded with code {StatusCode} and body {Body}", response.StatusCode, body);
+
             return JsonSerializer.Deserialize<TModel>(body, jsonSerializerOptions)
                    ?? throw new NullReferenceException($"Could not deserialize Discord response to {nameof(TModel)}");
         }
@@ -76,7 +76,7 @@ internal class DiscordClient : IDiscordAccessTokenProvider, IDiscordLookupUser
 
         [JsonPropertyName("expires_in")]
         public int ExpiresIn { get; set; }
-        
+
         [JsonPropertyName("refresh_token")]
         public string RefreshToken { get; set; } = null!;
 

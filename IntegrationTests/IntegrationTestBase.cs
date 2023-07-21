@@ -7,17 +7,19 @@ using Xunit;
 
 namespace Seatpicker.IntegrationTests;
 
-public abstract class IntegrationTestBase
+public abstract class IntegrationTestBase : IDisposable
 {
     private readonly TestWebApplicationFactory factory;
-
-    private readonly HttpClient anonymousClient;
 
     protected IntegrationTestBase(TestWebApplicationFactory factory)
     {
         this.factory = factory;
+    }
 
-        anonymousClient = this.factory.CreateClient();
+    protected TService GetService<TService>()
+        where TService : notnull
+    {
+        return factory.Services.GetRequiredService<TService>();
     }
 
     protected HttpClient GetClient(TestIdentity identity)
@@ -34,7 +36,10 @@ public abstract class IntegrationTestBase
         return identityGenerator.GenerateWithRoles(roles);
     }
 
-    protected HttpClient GetAnonymousClient() => anonymousClient;
+    protected HttpClient GetAnonymousClient() => factory.CreateClient();
+
+    protected InterceptingHttpMessageHandler InterceptingHttpMessageHandler =>
+        factory.Services.GetRequiredService<InterceptingHttpMessageHandler>();
 
     protected void SetupAggregates(params AggregateBase[] aggregates)
     {
@@ -45,7 +50,14 @@ public abstract class IntegrationTestBase
         }
     }
 
-    protected void CleanupAggregates(params AggregateBase[] aggregates)
+    protected IEnumerable<TAggregate> GetCommittedAggregates<TAggregate>()
+        where TAggregate : AggregateBase
+    {
+        var repository = factory.Services.GetRequiredService<TestAggregateRepository>();
+        return repository.Aggregates.Values.OfType<TAggregate>();
+    }
+
+    public void Dispose()
     {
         var repository = factory.Services.GetRequiredService<TestAggregateRepository>();
         repository.Aggregates.Clear();

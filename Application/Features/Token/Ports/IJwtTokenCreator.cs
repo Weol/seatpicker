@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography.X509Certificates;
 using Seatpicker.Domain;
 
-namespace Seatpicker.Application.Features.Login.Ports;
+namespace Seatpicker.Application.Features.Token.Ports;
 
 public interface IJwtTokenCreator
 {

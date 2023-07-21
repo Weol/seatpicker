@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Seatpicker.Application.Features.Login;
+using Seatpicker.Application.Features.Token;
 using Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http;
@@ -26,6 +27,13 @@ public class TokenController
         var token = await loginService.GetFor(model.Token);
 
         return new OkObjectResult(new TokenResponseModel(token));
+    }
+
+    [HttpGet("test")]
+    [Authorize]
+    public Task<ActionResult> Test()
+    {
+        return Task.FromResult<ActionResult>(new OkResult());
     }
 
     public record TokenRequestModel(string Token);

@@ -7,8 +7,9 @@ using Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration
-    .AddJsonFile("appsettings.local.json", true)
     .AddEnvironmentVariables("App_");
+
+if (builder.Environment.IsDevelopment()) builder.Configuration.AddJsonFile("appsettings.local.json");
 
 builder.Services
     .AddApplicationInsightsTelemetry()

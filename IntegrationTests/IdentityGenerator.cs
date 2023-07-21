@@ -1,4 +1,4 @@
-﻿using Seatpicker.Application.Features.Login.Ports;
+﻿using Seatpicker.Application.Features.Token.Ports;
 using Seatpicker.Domain;
 
 namespace Seatpicker.IntegrationTests;

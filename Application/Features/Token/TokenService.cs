@@ -1,21 +1,21 @@
-﻿using Seatpicker.Application.Features.Login.Ports;
+﻿using Seatpicker.Application.Features.Token.Ports;
 using Seatpicker.Domain;
 
-namespace Seatpicker.Application.Features.Login;
+namespace Seatpicker.Application.Features.Token;
 
 public interface ILoginService
 {
     public Task<string> GetFor(string discordToken);
 }
 
-internal class LoginService : ILoginService
+internal class TokenService : ILoginService
 {
     private readonly IJwtTokenCreator tokenCreator;
     private readonly IDiscordAccessTokenProvider discordAccessTokenProvider;
     private readonly IDiscordLookupUser discordUserLookup;
     private readonly IAuthCertificateProvider authCertificateProvider;
 
-    public LoginService(
+    public TokenService(
         IDiscordAccessTokenProvider discordAccessTokenProvider,
         IDiscordLookupUser discordUserLookup,
         IJwtTokenCreator tokenCreator,
@@ -35,7 +35,7 @@ internal class LoginService : ILoginService
         var user = new User{
             Id = discordUser.Id,
             Nick = discordUser.Username,
-            Avatar = discordUser.Avatar ?? "0",
+            Avatar = discordUser.Avatar,
         };
 
         var authCertificate = await authCertificateProvider.Get();

@@ -2,7 +2,7 @@
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tokens;
-using Seatpicker.Application.Features.Login.Ports;
+using Seatpicker.Application.Features.Token.Ports;
 using Seatpicker.Domain;
 
 namespace Seatpicker.Infrastructure.Adapters;
@@ -29,13 +29,14 @@ internal class JwtTokenCreator : IJwtTokenCreator
             },
         };
 
-        var defaultClaims = new Claim[]
+        var defaultClaims = new List<Claim>
         {
             new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new ("spu_id", user.Id),
             new ("spu_nick", user.Nick),
-            new ("spu_avatar", user.Avatar),
         };
+
+        if (user.Avatar is not null) defaultClaims.Add(new Claim("spu_avatar", user.Avatar));
 
         var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role.ToString()));
 

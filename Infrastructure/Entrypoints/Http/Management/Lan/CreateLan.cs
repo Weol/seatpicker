@@ -11,9 +11,9 @@ public partial class LanController
     {
         await validateModel.Validate<CreateLanRequestModel, CreateLanRequestModelValidator>(model);
 
-        await lanService.Create(new CreateLan(model.Id, model.Title, model.Background));
+        await lanManagementService.Create(new CreateLan(model.Id, model.Title, model.Background));
 
-        return new OkResult();
+        return new CreatedResult(model.Id.ToString(), null);
     }
 
     public record CreateLanRequestModel(Guid Id, string Title, byte[] Background);

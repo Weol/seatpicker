@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Options;
-using Seatpicker.Application.Features.Login.Ports;
+using Seatpicker.Application.Features.Token.Ports;
 
 namespace Seatpicker.Infrastructure.Adapters;
 

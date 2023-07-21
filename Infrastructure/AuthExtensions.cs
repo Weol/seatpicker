@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Seatpicker.Application.Features.Login.Ports;
+using Seatpicker.Application.Features.Token.Ports;
 
 namespace Seatpicker.Infrastructure;
 

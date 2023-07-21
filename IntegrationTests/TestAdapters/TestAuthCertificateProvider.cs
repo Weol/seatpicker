@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Seatpicker.Application.Features.Login.Ports;
+using Seatpicker.Application.Features.Token.Ports;
 
 namespace Seatpicker.IntegrationTests.TestAdapters;
 

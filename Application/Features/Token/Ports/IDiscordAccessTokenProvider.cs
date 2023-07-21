@@ -1,6 +1,6 @@
 ﻿using Shared;
 
-namespace Seatpicker.Application.Features.Login.Ports;
+namespace Seatpicker.Application.Features.Token.Ports;
 
 public interface IDiscordAccessTokenProvider : IPort
 {

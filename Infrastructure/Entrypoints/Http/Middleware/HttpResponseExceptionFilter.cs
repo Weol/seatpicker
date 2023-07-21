@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Dynamic;
+using System.Reflection;
+using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.DiscordClient;
@@ -43,15 +46,48 @@ public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
             return HandleModelValidationException(modelValidationException);
         }
 
+        if (exception is BadRequestException badRequestException)
+        {
+            return HandleBadRequestException(badRequestException);
+        }
+
         return null;
     }
 
     private ObjectResult HandleDomainException(DomainException e)
     {
-        return new ObjectResult(e.Message)
+        var exceptionName = e.GetType()
+            .Name;
+
+        var statusCode = 422;
+        if (exceptionName.Contains("NotFound")) statusCode = 404;
+        if (exceptionName.Contains("Already")) statusCode = 409;
+
+        var props = e.GetType()
+            .GetProperties()
+            .Where(prop => prop.DeclaringType == e.GetType());
+
+        var response = new Dictionary<string, object>();
+        foreach (var property in props)
         {
-            StatusCode = 422,
+            var value = property.GetValue(e);
+            var name = property.Name;
+
+            response[name] = value;
+        }
+
+        return new ObjectResult(response)
+        {
+            StatusCode = statusCode,
         };
+    }
+
+    private ObjectResult HandleBadRequestException(BadRequestException badRequestException)
+    {
+        return new BadRequestObjectResult(new
+        {
+            badRequestException.Message,
+        });
     }
 
     private static ObjectResult HandleModelValidationException(ModelValidationException e)
@@ -61,10 +97,10 @@ public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
             {
                 x.PropertyName,
                 x.ErrorMessage,
-                x.AttemptedValue
+                x.AttemptedValue,
             });
 
-        return new UnprocessableEntityObjectResult(errors);
+        return new BadRequestObjectResult(errors);
     }
 
     private static ObjectResult HandleDiscordException()

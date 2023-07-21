@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace Seatpicker.Application.Features.Login;
+namespace Seatpicker.Application.Features.Token;
 
 internal static class FeatureExtension
 {
     public static IServiceCollection AddLoginFeature(this IServiceCollection services)
     {
-        return services.AddSingleton<ILoginService, LoginService>();
+        return services.AddSingleton<ILoginService, TokenService>();
     }
 }

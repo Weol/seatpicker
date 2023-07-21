@@ -63,9 +63,11 @@ public record SeatReserved(Guid Id, User User);
 
 public record SeatUnreserved(Guid Id, User User);
 
+/**
+ * Exceptions
+ */
 public class SeatAlreadyReservedException : DomainException
 {
     public required Guid SeatId { get; init; }
-
     public override string Message => $"Seat with id {SeatId} is already reserved";
 }

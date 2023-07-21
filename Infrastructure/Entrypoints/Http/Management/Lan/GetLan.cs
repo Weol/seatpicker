@@ -12,7 +12,7 @@ public partial class LanController
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> Get(Guid id)
     {
-        var lan = await lanService.Get(id);
+        var lan = await lanManagementService.Get(id);
 
         return new OkObjectResult(new LanResponseModel(lan.Id, lan.Title, Convert.ToBase64String(lan.Background)));
     }

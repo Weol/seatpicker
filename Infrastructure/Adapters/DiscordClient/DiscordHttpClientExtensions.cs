@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
-using Seatpicker.Application.Features.Login.Ports;
+using Seatpicker.Application.Features.Token.Ports;
 
 namespace Seatpicker.Infrastructure.Adapters.DiscordClient;
 

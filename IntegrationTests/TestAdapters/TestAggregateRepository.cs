@@ -24,7 +24,9 @@ public class TestAggregateRepository : IAggregateRepository
 public class TestAggregateTransaction : IAggregateTransaction
 {
     private readonly IDictionary<Guid, AggregateBase> aggregates;
+
     private readonly TestAggregateReader reader;
+    private readonly IList<AggregateBase> stagedAggregates = new List<AggregateBase>();
 
     public TestAggregateTransaction(IDictionary<Guid,AggregateBase> aggregates)
     {
@@ -40,7 +42,7 @@ public class TestAggregateTransaction : IAggregateTransaction
         var exists = Exists<TAggregate>(aggregate.Id).GetAwaiter().GetResult();
         if (!exists) throw new AggregateDoesNotExistException { Id = aggregate.Id, Type = typeof(TAggregate)};
 
-        aggregates[aggregate.Id] = aggregate;
+        stagedAggregates.Add(aggregate);
     }
 
     public void Create<TAggregate>(TAggregate aggregate)
@@ -51,10 +53,16 @@ public class TestAggregateTransaction : IAggregateTransaction
         var exists = Exists<TAggregate>(aggregate.Id).GetAwaiter().GetResult();
         if (exists) throw new AggregateAlreadyExistsException{ Id = aggregate.Id, Type = typeof(TAggregate)};
 
-        aggregates[aggregate.Id] = aggregate;
+        stagedAggregates.Add(aggregate);
     }
 
-    public void Commit() { }
+    public void Commit()
+    {
+        foreach (var aggregate in stagedAggregates)
+        {
+            aggregates[aggregate.Id] = aggregate;
+        }
+    }
 
     public Task<TAggregate?> Aggregate<TAggregate>(Guid id)
         where TAggregate : AggregateBase =>

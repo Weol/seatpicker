@@ -3,7 +3,7 @@ using Seatpicker.Domain;
 
 namespace Seatpicker.Application.Features.Lan;
 
-public interface ILanService
+public interface ILanManagementService
 {
     public Task Create(CreateLan createLan);
 
@@ -12,11 +12,11 @@ public interface ILanService
     public Task<Domain.Lan> Get(Guid lanId);
 }
 
-internal class LanService : ILanService
+internal class LanManagementManagementService : ILanManagementService
 {
     private readonly IAggregateRepository repository;
 
-    public LanService(IAggregateRepository repository)
+    public LanManagementManagementService(IAggregateRepository repository)
     {
         this.repository = repository;
     }
