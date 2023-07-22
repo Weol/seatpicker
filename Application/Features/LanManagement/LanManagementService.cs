@@ -8,7 +8,7 @@ public interface ILanManagementService
 
     public Task Update(UpdateLan updateLan);
 
-    public Task<Domain.Lan> Get(Guid lanId);
+    public Task<Lan> Get(Guid lanId);
 }
 
 internal class LanManagementManagementService : ILanManagementService
@@ -24,10 +24,10 @@ internal class LanManagementManagementService : ILanManagementService
     {
         await using var transaction = repository.CreateTransaction();
 
-        var exists = await transaction.Exists<Domain.Lan>(createLan.Id);
+        var exists = await transaction.Exists<Lan>(createLan.Id);
         if (exists) throw new LanAlreadyExistsException { LanId = createLan.Id };
 
-        var lan = new Domain.Lan(createLan.Id, createLan.Title, createLan.Background);
+        var lan = new Lan(createLan.Id, createLan.Title, createLan.Background);
 
         transaction.Create(lan);
 
@@ -38,21 +38,22 @@ internal class LanManagementManagementService : ILanManagementService
     {
         await using var transaction = repository.CreateTransaction();
 
-        var lan = await transaction.Aggregate<Domain.Lan>(updateLan.Id);
+        var lan = await transaction.Aggregate<Lan>(updateLan.Id);
         if (lan is null) throw new LanNotFoundException { LanId = updateLan.Id };
 
         if (updateLan.Title is not null) lan.ChangeTitle(updateLan.Title);
         if (updateLan.Background is not null) lan.ChangeBackground(updateLan.Background);
 
         transaction.Update(lan);
+
         transaction.Commit();
     }
 
-    public async Task<Domain.Lan> Get(Guid lanId)
+    public async Task<Lan> Get(Guid lanId)
     {
         await using var reader = repository.CreateReader();
 
-        var lan = await reader.Aggregate<Domain.Lan>(lanId);
+        var lan = await reader.Aggregate<Lan>(lanId);
         if (lan is null) throw new LanNotFoundException { LanId = lanId };
 
         return lan;

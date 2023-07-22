@@ -17,6 +17,9 @@ public interface IAggregateReader : IAsyncDisposable
 
     public Task<bool> Exists<TAggregate>(Guid id)
         where TAggregate : AggregateBase;
+
+    public IQueryable<TAggregate> Query<TAggregate>()
+        where TAggregate : AggregateBase;
 }
 
 public interface IAggregateTransaction : IAggregateReader, IAsyncDisposable

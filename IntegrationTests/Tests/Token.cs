@@ -8,13 +8,16 @@ using NSubstitute;
 using Seatpicker.Application.Features.Token;
 using Seatpicker.Infrastructure.Entrypoints.Http;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Seatpicker.IntegrationTests.Tests;
 
 // ReSharper disable once InconsistentNaming
 public class Token : IntegrationTestBase, IClassFixture<TestWebApplicationFactory>
 {
-    public Token(TestWebApplicationFactory factory) : base(factory)
+    public Token(TestWebApplicationFactory factory, ITestOutputHelper testOutputHelper) : base(
+        factory,
+        testOutputHelper)
     {
     }
 
@@ -45,12 +48,12 @@ public class Token : IntegrationTestBase, IClassFixture<TestWebApplicationFactor
                     Content = new StringContent(
                         $$"""
                         {
-                          "id": " {{discordUser.Id}}",
-                          "username": "{{discordUser.Username}}",
+                          "id": " {{ discordUser.Id}} ",
+                          "username": "{{ discordUser.Username}} ",
                           "discriminator": "1337",
-                          "avatar": {{discordUser.Avatar ?? "null"}}
+                          "avatar": {{ discordUser.Avatar ?? "null"}}
                         }
-                    """),
+                    """ ),
                 });
     }
 

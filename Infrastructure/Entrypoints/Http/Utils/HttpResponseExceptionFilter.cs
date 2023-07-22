@@ -1,17 +1,20 @@
-﻿using System.Dynamic;
-using System.Reflection;
-using System.Text.Json;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.DiscordClient;
-using Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Http.Middleware;
+namespace Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
 public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
 {
     public int Order => int.MaxValue - 10;
+
+    public readonly ILogger<HttpResponseExceptionFilter> logger;
+
+    public HttpResponseExceptionFilter(ILogger<HttpResponseExceptionFilter> logger)
+    {
+        this.logger = logger;
+    }
 
     public void OnActionExecuting(ActionExecutingContext context)
     {
@@ -20,6 +23,8 @@ public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
     public void OnActionExecuted(ActionExecutedContext context)
     {
         if (context.Exception is null) return;
+
+        logger.LogError(context.Exception, context.Exception.Message);
 
         var result = HandleException(context.Exception);
         if (result is not null)
@@ -62,6 +67,7 @@ public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
         var statusCode = 422;
         if (exceptionName.Contains("NotFound")) statusCode = 404;
         if (exceptionName.Contains("Already")) statusCode = 409;
+        if (exceptionName.Contains("Conflict")) statusCode = 409;
 
         var props = e.GetType()
             .GetProperties()

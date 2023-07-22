@@ -19,6 +19,8 @@ public class Lan : AggregateBase
 
     public byte[] Background { get; private set; }
 
+    public override string ToString() => $"Lan {Title} ({Id})";
+
     public void ChangeBackground(byte[] newBackground)
     {
         var evt = new LanBackgroundChanged(newBackground);

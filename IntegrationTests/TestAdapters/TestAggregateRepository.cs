@@ -72,6 +72,10 @@ public class TestAggregateTransaction : IAggregateTransaction
         where TAggregate : AggregateBase =>
         reader.Exists<TAggregate>(id);
 
+    public IQueryable<TAggregate> Query<TAggregate>()
+        where TAggregate : AggregateBase =>
+        reader.Query<TAggregate>();
+
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }
 
@@ -112,6 +116,12 @@ public class TestAggregateReader : IAggregateReader
         };
 
         return true;
+    }
+
+    public IQueryable<TAggregate> Query<TAggregate>()
+        where TAggregate : AggregateBase
+    {
+        return aggregates.Values.OfType<TAggregate>().AsQueryable();
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;

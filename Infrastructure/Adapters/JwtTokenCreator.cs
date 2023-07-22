@@ -18,7 +18,7 @@ internal class JwtTokenCreator : IJwtTokenCreator
 
     public Task<string> CreateFor(User user, X509Certificate2 certificate, ICollection<Role> roles)
     {
-        logger.LogInformation("Using certificate with thumbprint {Thumbprint} to create JWT", certificate.Thumbprint);
+        logger.LogDebug("Using certificate with thumbprint {Thumbprint} to create JWT", certificate.Thumbprint);
 
         using var rsa = certificate.GetRSAPrivateKey();
         var rsaSecurityKey = new RsaSecurityKey(rsa)

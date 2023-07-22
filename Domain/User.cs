@@ -7,4 +7,6 @@ public class User
     public string Nick { get; init; }
 
     public string? Avatar { get; init; }
+
+    public override string ToString() => $"User {Nick} ({Id})";
 }

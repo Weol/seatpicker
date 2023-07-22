@@ -32,6 +32,9 @@ public class TestWebApplicationFactory : WebApplicationFactory<Infrastructure.Pr
                 ["Discord:RedirectUri"] = "http://localhost.discord.redirect",
 
                 ["Database:ConnectionString"] = "Server=postgres.local;Database=;Port=5432;Database=postgres;Username=username;Password=password;Ssl Mode=Allow;",
+
+                ["Logging:LogLevel:Default"] = "Error",
+                ["Logging:LogLevel:Seatpicker"] = "Trace",
             }))
             .ConfigureServices(services =>
             {

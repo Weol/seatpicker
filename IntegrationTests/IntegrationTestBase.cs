@@ -1,19 +1,23 @@
 ﻿using System.Net.Http.Headers;
+using System.Text;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Seatpicker.Domain;
 using Seatpicker.IntegrationTests.TestAdapters;
 using Shared;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Seatpicker.IntegrationTests;
 
 public abstract class IntegrationTestBase : IDisposable
 {
-    private readonly TestWebApplicationFactory factory;
+    private readonly WebApplicationFactory<Infrastructure.Program> factory;
 
-    protected IntegrationTestBase(TestWebApplicationFactory factory)
+    protected IntegrationTestBase(TestWebApplicationFactory factory, ITestOutputHelper testOutputHelper)
     {
-        this.factory = factory;
+        this.factory = factory.WithTestLogging(testOutputHelper);
     }
 
     protected TService GetService<TService>()
@@ -62,4 +66,5 @@ public abstract class IntegrationTestBase : IDisposable
         var repository = factory.Services.GetRequiredService<TestAggregateRepository>();
         repository.Aggregates.Clear();
     }
+
 }

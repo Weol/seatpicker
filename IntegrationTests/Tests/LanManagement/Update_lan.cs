@@ -4,29 +4,30 @@ using FluentAssertions;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Entrypoints.Http.Management.Lan;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Seatpicker.IntegrationTests.Tests.LanManagement;
 
 // ReSharper disable once InconsistentNaming
 public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationFactory>
 {
-    public Update_lan(TestWebApplicationFactory factory) : base(factory)
+    public Update_lan(TestWebApplicationFactory factory, ITestOutputHelper testOutputHelper) : base(factory, testOutputHelper)
     {
     }
 
     public static IEnumerable<object[]> ValidUpdateRequestModels = new[]
     {
-        new object[] { LanGenerator.UpdateLanRequestModel(id: Guid.NewGuid(), title: "updated title") },
+        new object[] { Generator.UpdateLanRequestModel(id: Guid.NewGuid(), title: "updated title") },
         new object[]
         {
-            LanGenerator.UpdateLanRequestModel(id: Guid.NewGuid(), background: LanGenerator.CreateValidBackround()),
+            Generator.UpdateLanRequestModel(id: Guid.NewGuid(), background: AggregateGenerator.CreateValidBackround()),
         },
         new object[]
         {
-            LanGenerator.UpdateLanRequestModel(
+            Generator.UpdateLanRequestModel(
                 id: Guid.NewGuid(),
                 title: "updated title",
-                background: LanGenerator.CreateValidBackround()),
+                background: AggregateGenerator.CreateValidBackround()),
         },
     };
 
@@ -38,7 +39,7 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
         var identity = await CreateIdentity(Role.Admin);
         var client = GetClient(identity);
 
-        var existingLan = LanGenerator.CreateLan(updateModel.Id);
+        var existingLan = AggregateGenerator.CreateLan(updateModel.Id);
         SetupAggregates(existingLan);
 
         //Act
@@ -69,9 +70,9 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
 
     public static IEnumerable<object[]> InvalidUpdateRequestModels = new[]
     {
-        new object[] { LanGenerator.UpdateLanRequestModel(id: Guid.NewGuid()) },
-        new object[] { LanGenerator.UpdateLanRequestModel(id: Guid.NewGuid(), title: "") },
-        new object[] { LanGenerator.UpdateLanRequestModel(id: Guid.NewGuid(), background: LanGenerator.InvalidBackround) },
+        new object[] { Generator.UpdateLanRequestModel(id: Guid.NewGuid()) },
+        new object[] { Generator.UpdateLanRequestModel(id: Guid.NewGuid(), title: "") },
+        new object[] { Generator.UpdateLanRequestModel(id: Guid.NewGuid(), background: Generator.InvalidBackround) },
     };
 
     [Theory]
@@ -82,7 +83,7 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
         var identity = await CreateIdentity(Role.Admin);
         var client = GetClient(identity);
 
-        var existingLan = LanGenerator.CreateLan(updateModel.Id);
+        var existingLan = AggregateGenerator.CreateLan(updateModel.Id);
         SetupAggregates(existingLan);
 
         //Act
@@ -101,11 +102,11 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
         var identity = await CreateIdentity(Role.Admin);
         var client = GetClient(identity);
 
-        var existingLan = LanGenerator.CreateLan();
+        var existingLan = AggregateGenerator.CreateLan();
         SetupAggregates(existingLan);
 
         //Act
-        var updateModel = LanGenerator.UpdateLanRequestModel(id: Guid.NewGuid(), background: LanGenerator.InvalidBackround);
+        var updateModel = Generator.UpdateLanRequestModel(id: Guid.NewGuid(), background: Generator.InvalidBackround);
         var response = await client.PutAsync(
              $"lan/{existingLan.Id}",
             JsonContent.Create(updateModel));

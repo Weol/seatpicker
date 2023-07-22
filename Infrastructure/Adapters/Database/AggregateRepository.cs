@@ -62,6 +62,10 @@ public class AggregateTransaction : IAggregateTransaction
         where TAggregate : AggregateBase =>
         reader.Exists<TAggregate>(id);
 
+    public IQueryable<TAggregate> Query<TAggregate>()
+        where TAggregate : AggregateBase =>
+        reader.Query<TAggregate>();
+
     public ValueTask DisposeAsync()
     {
         return session.DisposeAsync();
@@ -87,6 +91,12 @@ public class AggregateReader : IAggregateReader
         where TAggregate : AggregateBase
     {
         return await session.Events.FetchStreamStateAsync(id) is not null;
+    }
+
+    public IQueryable<TAggregate> Query<TAggregate>()
+        where TAggregate : AggregateBase
+    {
+        return session.Query<TAggregate>();
     }
 
     public ValueTask DisposeAsync()

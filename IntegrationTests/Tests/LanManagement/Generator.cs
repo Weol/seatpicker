@@ -4,21 +4,9 @@ using Seatpicker.Infrastructure.Entrypoints.Http.Management.Lan;
 
 namespace Seatpicker.IntegrationTests.Tests.LanManagement;
 
-public static class LanGenerator
+public static class Generator
 {
-
-    public static byte[] InvalidBackround = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
-
-    public static byte[] CreateValidBackround()
-    {
-        var svg = $"<svg>{Random.Shared.NextInt64().ToString()}</svg>";
-        return Encoding.UTF8.GetBytes(svg);
-    }
-
-    public static Lan CreateLan(Guid? id = null, string? title = null, byte[]? background = null)
-    {
-        return new Lan(id ?? Guid.NewGuid(), title ?? "Test title", background ?? CreateValidBackround());
-    }
+    public static byte[] InvalidBackround = { 1, 2, 3, 4, 5, 6, 7, 8 };
 
     public static LanController.CreateLanRequestModel CreateLanRequestModel(Lan lan)
     {
