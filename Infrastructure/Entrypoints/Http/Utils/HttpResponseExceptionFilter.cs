@@ -9,7 +9,7 @@ public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
 {
     public int Order => int.MaxValue - 10;
 
-    public readonly ILogger<HttpResponseExceptionFilter> logger;
+    private readonly ILogger<HttpResponseExceptionFilter> logger;
 
     public HttpResponseExceptionFilter(ILogger<HttpResponseExceptionFilter> logger)
     {

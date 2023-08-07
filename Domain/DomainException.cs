@@ -2,11 +2,11 @@
 
 public abstract class DomainException : Exception
 {
-    protected DomainException()
+    protected internal DomainException()
     {
     }
 
-    protected DomainException(string message) : base(message)
+    protected internal DomainException(string message) : base(message)
     {
     }
 }

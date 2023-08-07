@@ -1,12 +1,5 @@
-﻿namespace Seatpicker.Domain;
+﻿using Shared;
 
-public class User
-{
-    public string Id { get; init; }
+namespace Seatpicker.Domain;
 
-    public string Nick { get; init; }
-
-    public string? Avatar { get; init; }
-
-    public override string ToString() => $"User {Nick} ({Id})";
-}
+public record User(string Id);

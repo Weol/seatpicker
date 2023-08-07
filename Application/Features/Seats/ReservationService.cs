@@ -52,7 +52,7 @@ public class ReservationService : IReservationService
         var seat = await transaction.Aggregate<Seat>(seatId);
         if (seat is null) throw new SeatNotFoundException { SeatId = seatId };
 
-        seat.Unreserve(user);
+        seat.UnReserve(user);
 
         transaction.Update(seat);
 

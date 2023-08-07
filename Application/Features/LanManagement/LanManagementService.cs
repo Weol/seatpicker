@@ -67,14 +67,14 @@ public record UpdateLan(Guid Id, string? Title, byte[]? Background);
 /**
  * Exceptions
  */
-public class LanAlreadyExistsException : DomainException
+public class LanAlreadyExistsException : ApplicationException
 {
     public required Guid LanId { get; init; }
 
     public override string Message => $"Lan with id {LanId} already exists";
 }
 
-public class LanNotFoundException : DomainException
+public class LanNotFoundException : ApplicationException
 {
     public required Guid LanId { get; init; }
 

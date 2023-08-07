@@ -32,12 +32,7 @@ internal class TokenService : ILoginService
         var accessToken = await discordAccessTokenProvider.GetFor(discordToken);
         var discordUser = await discordUserLookup.Lookup(accessToken);
 
-        var user = new User{
-            Id = discordUser.Id,
-            Nick = discordUser.Username,
-            Avatar = discordUser.Avatar,
-        };
-
+        var user = new User(user);
         var authCertificate = await authCertificateProvider.Get();
 
         var claims = GetRolesForUser(user);

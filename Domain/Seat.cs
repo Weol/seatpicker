@@ -4,6 +4,7 @@ using Shared;
 namespace Seatpicker.Domain;
 
 #pragma warning disable CS1998 // Disable warning about async methods missing awaits
+#pragma warning disable CS8618 // Disable warning about uninitialized properties
 public class Seat : AggregateBase
 {
     public string Title { get; set; }
@@ -36,7 +37,7 @@ public class Seat : AggregateBase
         Apply(evt);
     }
 
-    public void Unreserve(User user)
+    public void UnReserve(User user)
     {
         if (ReservedBy is null) return;
 
@@ -124,7 +125,7 @@ public class SeatReservationConflictException : DomainException
         Seat = seat;
     }
 
-    public override string Message => $"{Seat} is reserved by {ReservedUser} cannot be changed by {AttemptedUser} ";
+    public override string Message => $"{Seat} is reserved by {ReservedUser}, cannot be changed by {AttemptedUser} ";
 }
 
 public class SeatReservationNotFoundException : DomainException
@@ -132,4 +133,14 @@ public class SeatReservationNotFoundException : DomainException
     public required Seat Seat { get; init; }
 
     public override string Message => $"{Seat} has no reservation";
+}
+
+public class DuplicateSeatReservationException : DomainException
+{
+    public required Seat AttemptedSeatReservation { get; init; }
+    public required Seat ExistingSeatReservation { get; init; }
+    public required User User { get; init; }
+
+    public override string Message =>
+        $"{User} tried to reserve {AttemptedSeatReservation} but already has a reservation on {ExistingSeatReservation}";
 }

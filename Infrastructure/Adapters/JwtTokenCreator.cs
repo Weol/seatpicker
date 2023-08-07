@@ -33,7 +33,6 @@ internal class JwtTokenCreator : IJwtTokenCreator
         {
             new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new ("spu_id", user.Id),
-            new ("spu_nick", user.Nick),
         };
 
         if (user.Avatar is not null) defaultClaims.Add(new Claim("spu_avatar", user.Avatar));
