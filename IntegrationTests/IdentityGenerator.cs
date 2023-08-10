@@ -1,5 +1,6 @@
-﻿using Seatpicker.Application.Features.Token.Ports;
+﻿using JasperFx.CodeGeneration.Frames;
 using Seatpicker.Domain;
+using Seatpicker.Infrastructure.Authentication.Discord;
 
 namespace Seatpicker.IntegrationTests;
 
@@ -7,22 +8,26 @@ public record TestIdentity(User User, Role[] Roles, string Token);
 
 public class IdentityGenerator
 {
-    private readonly IAuthCertificateProvider authCertificateProvider;
-    private readonly IJwtTokenCreator jwtTokenCreator;
+    private readonly DiscordJwtTokenCreator jwtTokenCreator;
 
-    public IdentityGenerator(IAuthCertificateProvider authCertificateProvider, IJwtTokenCreator jwtTokenCreator)
+    public IdentityGenerator(DiscordJwtTokenCreator jwtTokenCreator)
     {
-        this.authCertificateProvider = authCertificateProvider;
         this.jwtTokenCreator = jwtTokenCreator;
     }
 
     public async Task<TestIdentity> GenerateWithRoles(params Role[] roles)
     {
-        var user = new User { Id = "123456789", Nick = "ToreTang420", Avatar = "123"};
+        var discordToken = new DiscordToken(
+            Id: "123",
+            Nick: "Tore Tang",
+            RefreshToken: "8ioq3",
+            ExpiresAtUtc: DateTimeOffset.UtcNow.AddDays(1),
+            Avatar: null
+        );
 
-        var certificate = await authCertificateProvider.Get();
-        var token = await jwtTokenCreator.CreateFor(user, certificate, roles);
+        var token = await jwtTokenCreator.CreateToken(discordToken, roles);
 
+        var user = new User(discordToken.Id, discordToken.Nick);
         return new TestIdentity(user, roles, token);
     }
 }

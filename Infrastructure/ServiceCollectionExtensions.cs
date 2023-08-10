@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddValidatedOptions<TOptions>(
         this IServiceCollection serviceCollection,
-        Action<TOptions> configureAction)
+        Action<TOptions, IConfiguration> configureAction)
         where TOptions : class
     {
         serviceCollection.AddOptions<TOptions>()

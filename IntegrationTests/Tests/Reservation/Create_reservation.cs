@@ -78,11 +78,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         var identity = await CreateIdentity();
         var client = GetClient(identity);
 
-        var alreadyReservedBy = new User
-        {
-            Id = "999",
-            Nick = "Test User",
-        };
+        var alreadyReservedBy = new User("999", "Test user");
 
         var seat = AggregateGenerator.CreateSeat(reservedBy: alreadyReservedBy);
 

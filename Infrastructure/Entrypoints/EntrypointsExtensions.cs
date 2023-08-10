@@ -10,6 +10,7 @@ public static class EntrypointsExtensions
         services
             .AddEndpointsApiExplorer()
             .AddSwaggerGen()
+            .AddLoggedInUserAccessor()
             .AddModelValidator()
             .AddHealthChecks()
             .Services

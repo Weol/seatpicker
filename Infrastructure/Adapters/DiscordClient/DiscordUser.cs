@@ -1,4 +1,4 @@
-﻿namespace Seatpicker.Application.Features.Token;
+﻿namespace Seatpicker.Infrastructure.Entrypoints.Http;
 
 public record DiscordUser(
     string Id,

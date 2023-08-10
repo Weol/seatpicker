@@ -1,4 +1,5 @@
-﻿using Seatpicker.Domain;
+﻿using System.Security.Claims;
+using Seatpicker.Domain;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
@@ -21,16 +22,10 @@ public class LoggedInUserAccessor : ILoggedInUserAccessor
 
     public User Get()
     {
-        var id  = HttpContext.User.Claims.First(x => x.Type == "spu_id").Value;
-        var nick = HttpContext.User.Claims.First(x => x.Type == "spu_nick").Value;
-        var avatar = HttpContext.User.Claims.First(x => x.Type == "spu_avatar").Value;
+        var id  = HttpContext.User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
+        var nick = HttpContext.User.Claims.First(x => x.Type == ClaimTypes.Name).Value;
 
-        return new User
-        {
-            Id = id,
-            Avatar = avatar,
-            Nick = nick,
-        };
+        return new User(id, nick);
     }
 }
 

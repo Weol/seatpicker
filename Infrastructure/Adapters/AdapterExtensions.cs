@@ -5,31 +5,24 @@ namespace Seatpicker.Infrastructure.Adapters;
 
 public static class AdapterExtensions
 {
-    private static IConfiguration Config { get; set; } = null!;
-
-    public static IServiceCollection AddAdapters(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddAdapters(this IServiceCollection services)
     {
-        Config = configuration;
-
         return services
             .AddDatabase(ConfigureDatabase)
-            .AddAuthCertificateProvider(ConfigureAuthCertificateProvider)
-            .AddJwtTokenCreator()
             .AddDiscordClient(ConfigureDiscordClient);
     }
 
-    private static void ConfigureDatabase(DatabaseOptions options)
+    private static void ConfigureDatabase(DatabaseOptions options, IConfiguration configuration)
     {
-        Config.GetSection("Database").Bind(options);
+        configuration.GetSection("Database").Bind(options);
     }
 
-    private static void ConfigureDiscordClient(DiscordClientOptions options)
+    private static void ConfigureDiscordClient(DiscordClientOptions options, IConfiguration configuration)
     {
-        Config.GetSection("Discord").Bind(options);
-    }
+        configuration.GetSection("Discord").Bind(options);
 
-    private static void ConfigureAuthCertificateProvider(AuthCertificateProvider.Options options)
-    {
-        Config.GetSection("AuthCertificateProvider").Bind(options);
+        // Configuration values from key vault
+        options.ClientId = configuration["DiscordClientId"] ?? throw new NullReferenceException();
+        options.ClientSecret = configuration["DiscordClientSecret"] ?? throw new NullReferenceException();
     }
 }

@@ -8,28 +8,30 @@ namespace Seatpicker.Infrastructure.Adapters.Database;
 
 internal static class DatabaseExtensions
 {
-    public static IServiceCollection AddDatabase(this IServiceCollection services, Action<DatabaseOptions> configureAction)
+    public static IServiceCollection AddDatabase(
+        this IServiceCollection services,
+        Action<DatabaseOptions, IConfiguration> configureAction)
     {
         services.AddValidatedOptions(configureAction);
 
         services.AddSingleton<IAggregateRepository, AggregateRepository>();
 
-        services.AddMarten(provider =>
-        {
-            var options = new StoreOptions();
-            var databaseOptions = provider.GetRequiredService<IOptions<DatabaseOptions>>()
-                .Value;
-
-            options.Connection(databaseOptions.ConnectionString);
-
-            var environment = provider.GetRequiredService<IHostEnvironment>();
-            if (environment.IsDevelopment())
+        services.AddMarten(
+            provider =>
             {
-                options.AutoCreateSchemaObjects = AutoCreate.All;
-            }
+                var options = new StoreOptions();
+                var databaseOptions = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
 
-            return options;
-        });
+                options.Connection(databaseOptions.ConnectionString);
+
+                var environment = provider.GetRequiredService<IHostEnvironment>();
+                if (environment.IsDevelopment())
+                {
+                    options.AutoCreateSchemaObjects = AutoCreate.All;
+                }
+
+                return options;
+            });
 
         return services;
     }
@@ -37,6 +39,5 @@ internal static class DatabaseExtensions
 
 internal class DatabaseOptions
 {
-    [Required]
-    public string ConnectionString { get; set; } = null!;
+    [Required] public string ConnectionString { get; set; } = null!;
 }

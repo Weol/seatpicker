@@ -1,7 +1,16 @@
 
 ### Login with discord token
 
-POST http://localhost:7071/token/
+POST http://localhost:7071/discord/login
 Content-Type: application/json
 
-{ "token" : "GitgNsPhKLd4tYl6cxMifBKfjGnFSy" }
+{ "token" : "5PZvcJvi6PziLvfg8npMpM3V6lTy1l" }
+
+### Renew with refresh token
+
+POST http://localhost:7071/discord/renew
+Content-Type: application/json
+
+{
+  "refreshToken": "XxdCP33Calzyh17r6IAmChBcJtHBiA"
+}

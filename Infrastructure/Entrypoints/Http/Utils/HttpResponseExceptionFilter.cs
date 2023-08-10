@@ -24,6 +24,7 @@ public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
     {
         if (context.Exception is null) return;
 
+        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
         logger.LogError(context.Exception, context.Exception.Message);
 
         var result = HandleException(context.Exception);
@@ -38,7 +39,12 @@ public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
     {
         if (exception is DomainException domainException)
         {
-            return HandleDomainException(domainException);
+            return HandleDomainOrApplicationException(domainException);
+        }
+
+        if (exception is Application.ApplicationException applicationException)
+        {
+            return HandleDomainOrApplicationException(applicationException);
         }
 
         if (exception is DiscordException)
@@ -59,7 +65,7 @@ public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
         return null;
     }
 
-    private ObjectResult HandleDomainException(DomainException e)
+    private ObjectResult HandleDomainOrApplicationException(Exception e)
     {
         var exceptionName = e.GetType()
             .Name;
@@ -79,7 +85,7 @@ public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
             var value = property.GetValue(e);
             var name = property.Name;
 
-            response[name] = value;
+            if (value is not null) response[name] = value;
         }
 
         return new ObjectResult(response)

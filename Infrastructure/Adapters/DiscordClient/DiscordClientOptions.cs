@@ -2,7 +2,7 @@
 
 namespace Seatpicker.Infrastructure.Adapters.DiscordClient;
 
-internal class DiscordClientOptions
+public class DiscordClientOptions
 {
     [Required]
     public string ClientId { get; set; } = null!;

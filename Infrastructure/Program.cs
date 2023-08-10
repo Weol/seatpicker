@@ -1,22 +1,22 @@
 using Seatpicker.Application;
 using Seatpicker.Infrastructure;
 using Seatpicker.Infrastructure.Adapters;
+using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Entrypoints;
 using Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration
-    .AddEnvironmentVariables("App_");
-
 if (builder.Environment.IsDevelopment()) builder.Configuration.AddJsonFile("appsettings.local.json");
 
-builder.Services
-    .AddApplicationInsightsTelemetry()
-    .AddAdapters(builder.Configuration)
-    .AddAuth()
+builder.Configuration
+    .AddSeatpickerKeyvault()
+    .AddEnvironmentVariables("App_");
+
+builder.Services.AddApplicationInsightsTelemetry()
+    .AddAdapters()
+    .AddSeatpickerAuthentication()
     .ConfigureJsonSerialization()
-    .AddLoggedInUserAccessor()
     .AddEntrypoints(builder.Configuration)
     .AddApplication();
 
@@ -26,13 +26,15 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseRouting();
+app.UseSeatpickerAuthentication();
 app.MapControllers();
 
 app.Run();
 
 namespace Seatpicker.Infrastructure
 {
-    public partial class Program {}
+    public partial class Program
+    {
+    }
 }
