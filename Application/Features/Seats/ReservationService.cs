@@ -1,4 +1,5 @@
-﻿using Seatpicker.Domain;
+﻿using System.Collections.Immutable;
+using Seatpicker.Domain;
 
 namespace Seatpicker.Application.Features.Seats;
 
@@ -24,21 +25,14 @@ public class ReservationService : IReservationService
     {
         await using var transaction = aggregateRepository.CreateTransaction();
 
-        var seatToReserve = await transaction.Aggregate<Seat>(seatId);
-        if (seatToReserve is null) throw new SeatNotFoundException { SeatId = seatId };
+        var seatToReserve = await transaction.Aggregate<Seat>(seatId) ??
+                            throw new SeatNotFoundException { SeatId = seatId };
 
-        var alreadyReservedSeat = transaction.Query<Seat>()
-            .SingleOrDefault(seat => seat.ReservedBy != null && seat.ReservedBy.Id == user.Id);
+        var seatsReservedByUser = transaction.Query<Seat>()
+            .Where(seat => seat.ReservedBy != null && seat.ReservedBy.Id == user.Id)
+            .ToImmutableList();
 
-        if (alreadyReservedSeat is not null && alreadyReservedSeat.Id == seatToReserve.Id) return;
-        if (alreadyReservedSeat is not null) throw new DuplicateSeatReservationException
-        {
-            ExistingSeatReservation = seatToReserve,
-            AttemptedSeatReservation = alreadyReservedSeat,
-            User = user,
-        };
-
-        seatToReserve.Reserve(user);
+        ReservationPolicy.EnsureCanReserve(user, seatToReserve, seatsReservedByUser);
 
         transaction.Update(seatToReserve);
 
@@ -49,8 +43,9 @@ public class ReservationService : IReservationService
     {
         await using var transaction = aggregateRepository.CreateTransaction();
 
-        var seat = await transaction.Aggregate<Seat>(seatId);
-        if (seat is null) throw new SeatNotFoundException { SeatId = seatId };
+        var seat = await transaction.Aggregate<Seat>(seatId) ?? throw new SeatNotFoundException { SeatId = seatId };
+
+        ReservationPolicy.EnsureCanUnreserve(user, seatToReserve, seatsReservedByUser);
 
         seat.UnReserve(user);
 
@@ -63,11 +58,11 @@ public class ReservationService : IReservationService
     {
         await using var transaction = aggregateRepository.CreateTransaction();
 
-        var fromSeat = await transaction.Aggregate<Seat>(fromSeatId);
-        if (fromSeat is null) throw new SeatNotFoundException { SeatId = fromSeatId };
+        var fromSeat = await transaction.Aggregate<Seat>(fromSeatId) ??
+                       throw new SeatNotFoundException { SeatId = fromSeatId };
 
-        var toSeat = await transaction.Aggregate<Seat>(toSeatId);
-        if (toSeat is null) throw new SeatNotFoundException { SeatId = toSeatId };
+        var toSeat = await transaction.Aggregate<Seat>(toSeatId) ??
+                     throw new SeatNotFoundException { SeatId = toSeatId };
 
         toSeat.MoveReservation(fromSeat, user);
 
