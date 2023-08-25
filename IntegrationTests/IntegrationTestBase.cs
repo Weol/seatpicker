@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
+using JasperFx.Core;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -42,9 +43,6 @@ public abstract class IntegrationTestBase : IDisposable
 
     protected HttpClient GetAnonymousClient() => factory.CreateClient();
 
-    protected InterceptingHttpMessageHandler InterceptingHttpMessageHandler =>
-        factory.Services.GetRequiredService<InterceptingHttpMessageHandler>();
-
     protected void SetupAggregates(params AggregateBase[] aggregates)
     {
         var repository = factory.Services.GetRequiredService<TestAggregateRepository>();
@@ -61,10 +59,19 @@ public abstract class IntegrationTestBase : IDisposable
         return repository.Aggregates.Values.OfType<TAggregate>();
     }
 
+    protected void MockOutgoingHttpRequest(
+        Predicate<HttpRequestMessage> matcher,
+        Func<HttpRequestMessage, HttpResponseMessage> responder)
+    {
+        GetService<InterceptingHttpMessageHandler>()
+            .Interceptors.Add(new InterceptingHttpMessageHandler.Interceptor(matcher, responder));
+    }
+
     public void Dispose()
     {
-        var repository = factory.Services.GetRequiredService<TestAggregateRepository>();
-        repository.Aggregates.Clear();
+        GetService<InterceptingHttpMessageHandler>().Interceptors.Clear();
+        GetService<TestAggregateRepository>().Aggregates.Clear();
+        factory.Dispose();
     }
 
 }

@@ -23,10 +23,9 @@ public class DiscordLogin : IntegrationTestBase, IClassFixture<TestWebApplicatio
 
     private void SetupRefreshResponse()
     {
-        InterceptingHttpMessageHandler
-            .Handle(Arg.Is<HttpRequestMessage>(h => h.RequestUri!.ToString().EndsWith("oauth2/token")))
-            .Returns(
-                info => new HttpResponseMessage(HttpStatusCode.OK)
+        MockOutgoingHttpRequest(
+                request => request.RequestUri!.ToString().EndsWith("oauth2/token"),
+                _ => new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(
                         """
@@ -43,30 +42,28 @@ public class DiscordLogin : IntegrationTestBase, IClassFixture<TestWebApplicatio
 
     private void SetupAccessTokenResponse()
     {
-        InterceptingHttpMessageHandler
-            .Handle(Arg.Is<HttpRequestMessage>(h => h.RequestUri!.ToString().EndsWith("oauth2/token")))
-            .Returns(
-                info => new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(
-                        """
+        MockOutgoingHttpRequest(
+            request => request.RequestUri!.ToString().EndsWith("oauth2/token"),
+            _ => new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(
+                    """
                         {
-                            "access_token": "6qrZcUqja7812RVdnEKjpzOL4CvHBFG",
+                            "access_token": "auiywbfuiksdflkaelkiuadsf",
                             "token_type": "Bearer",
                             "expires_in": 604800,
-                            "refresh_token": "D43f5y0ahjqew82jZ4NViEr2YafMKhue",
+                            "refresh_token": "asdoi32hdkah3kiafwa3fadf",
                             "scope": "identify"
                         }
                     """),
-                });
+            });
     }
 
     private void SetupLookupResponse(DiscordUser discordUser)
     {
-        InterceptingHttpMessageHandler
-            .Handle(Arg.Is<HttpRequestMessage>(h => h.RequestUri!.ToString().EndsWith("users/@me")))
-            .Returns(
-                new HttpResponseMessage(HttpStatusCode.OK)
+        MockOutgoingHttpRequest(
+            request => request.RequestUri!.ToString().EndsWith("users/@me"),
+            _ => new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(
                         $$"""

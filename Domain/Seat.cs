@@ -102,11 +102,6 @@ public class Seat : AggregateBase
         ReservedBy = null;
     }
 
-    private async void Apply(SeatReservationRemoved evt)
-    {
-        ReservedBy = null;
-    }
-
     private async void Apply(SeatReservationMoved evt)
     {
         if (evt.ToSeatId == Id) ReservedBy = evt.User;
@@ -124,8 +119,6 @@ public record SeatCreated(Guid Id, string Title, Bounds Bounds);
 public record SeatReserved(User User);
 
 public record SeatUnreserved(User User);
-
-public record SeatReservationRemoved(User Initiator);
 
 public record SeatReservationMoved(Guid FromSeatId, Guid ToSeatId, User User);
 

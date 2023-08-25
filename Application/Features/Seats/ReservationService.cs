@@ -34,6 +34,7 @@ public class ReservationService : IReservationService
 
         ReservationPolicy.EnsureCanReserve(user, seatToReserve, seatsReservedByUser);
 
+
         transaction.Update(seatToReserve);
 
         transaction.Commit();
@@ -46,7 +47,6 @@ public class ReservationService : IReservationService
         var seat = await transaction.Aggregate<Seat>(seatId) ?? throw new SeatNotFoundException { SeatId = seatId };
 
         ReservationPolicy.EnsureCanUnreserve(user, seatToReserve, seatsReservedByUser);
-
         seat.UnReserve(user);
 
         transaction.Update(seat);

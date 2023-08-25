@@ -50,7 +50,7 @@ public class TestWebApplicationFactory : WebApplicationFactory<Infrastructure.Pr
                 services.AddSingleton<IdentityGenerator>();
 
                 // Add intercepting http message handler
-                var interceptingHandler = Substitute.ForPartsOf<InterceptingHttpMessageHandler>();
+                var interceptingHandler = new InterceptingHttpMessageHandler();
                 services.AddSingleton(interceptingHandler);
                 services.ConfigureAll<HttpClientFactoryOptions>(
                     options => options.HttpMessageHandlerBuilderActions.Add(

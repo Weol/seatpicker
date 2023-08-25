@@ -1,20 +1,26 @@
 namespace Seatpicker.IntegrationTests;
 
-public abstract class InterceptingHttpMessageHandler : HttpMessageHandler
+public class InterceptingHttpMessageHandler : HttpMessageHandler
 {
-    protected override Task<HttpResponseMessage> SendAsync(
-        HttpRequestMessage request,
-        CancellationToken cancellationToken)
+    public ICollection<Interceptor> Interceptors = new List<Interceptor>();
+
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         return Task.FromResult(Handle(request));
     }
 
-    public virtual HttpResponseMessage Handle(HttpRequestMessage request)
+    public HttpResponseMessage Handle(HttpRequestMessage request)
     {
-        throw new HttpRequestNotMockedException();
+        try
+        {
+            var interceptor = Interceptors.First(interceptor => interceptor.Matcher(request));
+            return interceptor.Generator(request);
+        }
+        catch (InvalidOperationException)
+        {
+            throw new Exception($"No interceptor found that matches request: {new { request.RequestUri, request.Method }}");
+        }
     }
-}
 
-public class HttpRequestNotMockedException : Exception
-{
+    public record Interceptor(Predicate<HttpRequestMessage> Matcher, Func<HttpRequestMessage, HttpResponseMessage> Generator);
 }
