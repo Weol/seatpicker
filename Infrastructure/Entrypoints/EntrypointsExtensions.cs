@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Seatpicker.Infrastructure.Adapters.Database;
 using Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints;
@@ -17,6 +18,17 @@ public static class EntrypointsExtensions
             .AddControllers(ConfigureMvcOptions);
 
         return services;
+    }
+
+    public static WebApplication UseEntrypoints(this WebApplication app)
+    {
+        app.UseMiddleware<RequestScopedAggregateTransactionMiddleware>();
+
+        app.UseHttpsRedirection();
+        app.UseRouting();
+        app.MapControllers();
+
+        return app;
     }
 
     private static void ConfigureMvcOptions(MvcOptions options)

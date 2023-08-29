@@ -15,6 +15,7 @@ internal static class DatabaseExtensions
         services.AddValidatedOptions(configureAction);
 
         services.AddSingleton<IAggregateRepository, AggregateRepository>();
+        services.AddSingleton<IAggregateTransaction>(CreateAggregateTransaction);
 
         services.AddMarten(
             provider =>
@@ -34,6 +35,12 @@ internal static class DatabaseExtensions
             });
 
         return services;
+    }
+
+    private static IAggregateTransaction CreateAggregateTransaction(IServiceProvider provider)
+    {
+        var repository = provider.GetRequiredService<IAggregateRepository>();
+        return repository.CreateTransaction();
     }
 }
 

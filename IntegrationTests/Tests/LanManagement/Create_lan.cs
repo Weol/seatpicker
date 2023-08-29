@@ -24,7 +24,7 @@ public class Create_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
         var client = GetClient(identity);
 
         //Act
-        var lanToCreate = AggregateGenerator.CreateLan();
+        var lanToCreate = LanGenerator.Create();
         var response = await client.PostAsync("lan", JsonContent.Create(Generator.CreateLanRequestModel(lanToCreate)));
 
         //Assert
@@ -49,8 +49,8 @@ public class Create_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
         var identity = await CreateIdentity(Role.Admin);
         var client = GetClient(identity);
 
-        var existingLan = AggregateGenerator.CreateLan(title: "Existing");
-        var lanToCreate = AggregateGenerator.CreateLan(id: existingLan.Id, title: "Create");
+        var existingLan = LanGenerator.Create(title: "Existing");
+        var lanToCreate = LanGenerator.Create(id: existingLan.Id, title: "Create");
         SetupAggregates(existingLan);
 
         //Act
@@ -73,7 +73,7 @@ public class Create_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
         var identity = await CreateIdentity(Role.Admin);
         var client = GetClient(identity);
 
-        var lanToCreate = AggregateGenerator.CreateLan(background: Generator.InvalidBackround);
+        var lanToCreate = LanGenerator.Create(background: Generator.InvalidBackround);
 
         //Act
         var response = await client.PostAsync("lan", JsonContent.Create(Generator.CreateLanRequestModel(lanToCreate)));

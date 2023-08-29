@@ -22,10 +22,21 @@ public class LoggedInUserAccessor : ILoggedInUserAccessor
 
     public User Get()
     {
+        Role RoleFromClaim(Claim claim)
+        {
+            if (!Enum.TryParse<Role>(claim.Value, out var role))
+                throw new Exception("Cannot parse role claim to Role enum");
+            return role;
+        }
+
         var id  = HttpContext.User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
         var nick = HttpContext.User.Claims.First(x => x.Type == ClaimTypes.Name).Value;
+        var roles = HttpContext.User.Claims
+            .Where(x => x.Type == ClaimTypes.Role)
+            .Select(RoleFromClaim)
+            .ToArray();
 
-        return new User(id, nick);
+        return new User(new UserId(id), nick, roles);
     }
 }
 

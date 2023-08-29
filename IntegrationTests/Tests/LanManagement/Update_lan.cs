@@ -20,14 +20,14 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
         new object[] { Generator.UpdateLanRequestModel(id: Guid.NewGuid(), title: "updated title") },
         new object[]
         {
-            Generator.UpdateLanRequestModel(id: Guid.NewGuid(), background: AggregateGenerator.CreateValidBackround()),
+            Generator.UpdateLanRequestModel(id: Guid.NewGuid(), background: LanGenerator.CreateValidBackround()),
         },
         new object[]
         {
             Generator.UpdateLanRequestModel(
                 id: Guid.NewGuid(),
                 title: "updated title",
-                background: AggregateGenerator.CreateValidBackround()),
+                background: LanGenerator.CreateValidBackround()),
         },
     };
 
@@ -39,7 +39,7 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
         var identity = await CreateIdentity(Role.Admin);
         var client = GetClient(identity);
 
-        var existingLan = AggregateGenerator.CreateLan(updateModel.Id);
+        var existingLan = LanGenerator.Create(updateModel.Id);
         SetupAggregates(existingLan);
 
         //Act
@@ -83,7 +83,7 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
         var identity = await CreateIdentity(Role.Admin);
         var client = GetClient(identity);
 
-        var existingLan = AggregateGenerator.CreateLan(updateModel.Id);
+        var existingLan = LanGenerator.Create(updateModel.Id);
         SetupAggregates(existingLan);
 
         //Act
@@ -102,7 +102,7 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
         var identity = await CreateIdentity(Role.Admin);
         var client = GetClient(identity);
 
-        var existingLan = AggregateGenerator.CreateLan();
+        var existingLan = LanGenerator.Create();
         SetupAggregates(existingLan);
 
         //Act

@@ -8,3 +8,4 @@ public class SeatNotFoundException : ApplicationException
 
     public override string Message => $"Seat with id {SeatId} not found";
 }
+

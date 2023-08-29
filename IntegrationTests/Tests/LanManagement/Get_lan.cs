@@ -24,7 +24,7 @@ public class Get_lan : IntegrationTestBase, IClassFixture<TestWebApplicationFact
         var identity = await CreateIdentity(Role.Admin);
         var client = GetClient(identity);
 
-        var existingLan = AggregateGenerator.CreateLan();
+        var existingLan = LanGenerator.Create();
         SetupAggregates(existingLan);
 
         //Act

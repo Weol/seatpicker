@@ -25,10 +25,8 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
-app.UseRouting();
+app.UseEntrypoints();
 app.UseSeatpickerAuthentication();
-app.MapControllers();
 
 app.Run();
 

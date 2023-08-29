@@ -24,7 +24,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         var identity = await CreateIdentity();
         var client = GetClient(identity);
 
-        var seat = AggregateGenerator.CreateSeat();
+        var seat = SeatGenerator.Create();
 
         SetupAggregates(seat);
 
@@ -51,7 +51,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         var identity = await CreateIdentity();
         var client = GetClient(identity);
 
-        var seat = AggregateGenerator.CreateSeat(reservedBy: identity.User);
+        var seat = SeatGenerator.Create(reservedBy: identity.User);
 
         SetupAggregates(seat);
 
@@ -78,9 +78,9 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         var identity = await CreateIdentity();
         var client = GetClient(identity);
 
-        var alreadyReservedBy = new User("999", "Test user");
+        var alreadyReservedBy = UserGenerator.Create();
 
-        var seat = AggregateGenerator.CreateSeat(reservedBy: alreadyReservedBy);
+        var seat = SeatGenerator.Create(reservedBy: alreadyReservedBy);
 
         SetupAggregates(seat);
 
@@ -107,7 +107,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         var identity = await CreateIdentity();
         var client = GetClient(identity);
 
-        var seat = AggregateGenerator.CreateSeat();
+        var seat = SeatGenerator.Create();
 
         //Act
         var response = await client.PostAsync(
