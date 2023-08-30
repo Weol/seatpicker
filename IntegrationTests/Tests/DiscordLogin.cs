@@ -5,6 +5,7 @@ using System.Security.Claims;
 using FluentAssertions;
 using Microsoft.IdentityModel.Tokens;
 using NSubstitute;
+using Seatpicker.Infrastructure.Adapters.DiscordClient;
 using Seatpicker.Infrastructure.Authentication.Discord;
 using Seatpicker.Infrastructure.Entrypoints.Http;
 using Xunit;

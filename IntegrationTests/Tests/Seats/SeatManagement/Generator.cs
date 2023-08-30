@@ -1,14 +1,12 @@
-﻿using System.Text;
-using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Entrypoints.Http.Management.Lan;
+﻿using Seatpicker.Domain;
+using Seatpicker.Infrastructure.Entrypoints.Http.Lan;
+using Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 
-namespace Seatpicker.IntegrationTests.Tests.LanManagement;
+namespace Seatpicker.IntegrationTests.Tests.Seats.SeatManagement;
 
 public static class Generator
 {
-    public static byte[] InvalidBackround = { 1, 2, 3, 4, 5, 6, 7, 8 };
-
-    public static LanController.CreateLanRequestModel CreateLanRequestModel(Lan lan)
+    public static SeatController.CreateSeatRequestModel (Seat seat)
     {
         return new LanController.CreateLanRequestModel(Id: lan.Id, Title: lan.Title, Background: lan.Background);
     }

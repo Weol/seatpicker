@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Http.Management.Lan;
+namespace Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 
 public partial class LanController
 {

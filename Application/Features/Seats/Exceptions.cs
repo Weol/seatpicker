@@ -6,6 +6,6 @@ public class SeatNotFoundException : ApplicationException
 {
     public required Guid SeatId { get; init; }
 
-    public override string Message => $"Seat with id {SeatId} not found";
+    protected override string ErrorMessage => $"Seat with id {SeatId} not found";
 }
 

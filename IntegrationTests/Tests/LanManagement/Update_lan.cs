@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
 using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Entrypoints.Http.Management.Lan;
+using Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -17,14 +17,14 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
 
     public static IEnumerable<object[]> ValidUpdateRequestModels = new[]
     {
-        new object[] { Generator.UpdateLanRequestModel(id: Guid.NewGuid(), title: "updated title") },
+        new object[] { LanRequestGenerator.UpdateLanRequestModel(id: Guid.NewGuid(), title: "updated title") },
         new object[]
         {
-            Generator.UpdateLanRequestModel(id: Guid.NewGuid(), background: LanGenerator.CreateValidBackround()),
+            LanRequestGenerator.UpdateLanRequestModel(id: Guid.NewGuid(), background: LanGenerator.CreateValidBackround()),
         },
         new object[]
         {
-            Generator.UpdateLanRequestModel(
+            LanRequestGenerator.UpdateLanRequestModel(
                 id: Guid.NewGuid(),
                 title: "updated title",
                 background: LanGenerator.CreateValidBackround()),
@@ -70,9 +70,9 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
 
     public static IEnumerable<object[]> InvalidUpdateRequestModels = new[]
     {
-        new object[] { Generator.UpdateLanRequestModel(id: Guid.NewGuid()) },
-        new object[] { Generator.UpdateLanRequestModel(id: Guid.NewGuid(), title: "") },
-        new object[] { Generator.UpdateLanRequestModel(id: Guid.NewGuid(), background: Generator.InvalidBackround) },
+        new object[] { LanRequestGenerator.UpdateLanRequestModel(id: Guid.NewGuid()) },
+        new object[] { LanRequestGenerator.UpdateLanRequestModel(id: Guid.NewGuid(), title: "") },
+        new object[] { LanRequestGenerator.UpdateLanRequestModel(id: Guid.NewGuid(), background: LanRequestGenerator.InvalidBackround) },
     };
 
     [Theory]
@@ -106,7 +106,7 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
         SetupAggregates(existingLan);
 
         //Act
-        var updateModel = Generator.UpdateLanRequestModel(id: Guid.NewGuid(), background: Generator.InvalidBackround);
+        var updateModel = LanRequestGenerator.UpdateLanRequestModel(id: Guid.NewGuid(), background: LanRequestGenerator.InvalidBackround);
         var response = await client.PutAsync(
              $"lan/{existingLan.Id}",
             JsonContent.Create(updateModel));

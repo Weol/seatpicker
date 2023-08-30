@@ -71,12 +71,12 @@ public class LanAlreadyExistsException : ApplicationException
 {
     public required Guid LanId { get; init; }
 
-    public override string Message => $"Lan with id {LanId} already exists";
+    protected override string ErrorMessage => $"Lan with id {LanId} already exists";
 }
 
 public class LanNotFoundException : ApplicationException
 {
     public required Guid LanId { get; init; }
 
-    public override string Message => $"Lan with id {LanId} was not found";
+    protected override string ErrorMessage => $"Lan with id {LanId} was not found";
 }

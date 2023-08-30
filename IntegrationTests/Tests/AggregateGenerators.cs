@@ -6,13 +6,18 @@ namespace Seatpicker.IntegrationTests.Tests;
 
 public static class SeatGenerator
 {
-    public static Seat Create(Guid? id = null, string? title = null, Bounds? bounds = null, User? reservedBy = null)
+    public static Seat Create(
+        Guid? id = null,
+        string? title = null,
+        Bounds? bounds = null,
+        User? reservedBy = null,
+        User? initiator = null)
     {
         var seat = new Seat(
             id ?? Guid.NewGuid(),
             title ?? "Test title",
             bounds ?? new Bounds(0, 0, 1, 1),
-            UserGenerator.Create(Role.Admin));
+            initiator ?? UserGenerator.Create(Role.Admin));
 
         if (reservedBy is not null) seat.Reserve(reservedBy, new List<Seat>(), reservedBy);
 

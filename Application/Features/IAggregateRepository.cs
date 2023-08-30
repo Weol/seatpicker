@@ -30,5 +30,8 @@ public interface IAggregateTransaction : IAggregateReader, IAsyncDisposable
     public void Create<TAggregate>(TAggregate aggregate)
         where TAggregate : AggregateBase;
 
+    public void Archive<TAggregate>(TAggregate aggregate)
+        where TAggregate : AggregateBase;
+
     public void Commit();
 }

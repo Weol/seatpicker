@@ -1,4 +1,4 @@
-﻿namespace Seatpicker.Infrastructure.Entrypoints.Http;
+﻿namespace Seatpicker.Infrastructure.Adapters.DiscordClient;
 
 public record DiscordUser(
     string Id,

@@ -27,6 +27,7 @@ public class TestAggregateTransaction : IAggregateTransaction
 
     private readonly TestAggregateReader reader;
     private readonly IList<AggregateBase> stagedAggregates = new List<AggregateBase>();
+    private readonly IList<AggregateBase> stagedForArchive = new List<AggregateBase>();
 
     public TestAggregateTransaction(IDictionary<Guid,AggregateBase> aggregates)
     {
@@ -56,11 +57,22 @@ public class TestAggregateTransaction : IAggregateTransaction
         stagedAggregates.Add(aggregate);
     }
 
+    public void Archive<TAggregate>(TAggregate aggregate)
+        where TAggregate : AggregateBase
+    {
+        stagedForArchive.Add(aggregate);
+    }
+
     public void Commit()
     {
         foreach (var aggregate in stagedAggregates)
         {
             aggregates[aggregate.Id] = aggregate;
+        }
+
+        foreach (var aggregate in stagedForArchive)
+        {
+            aggregates.Remove(aggregate.Id);
         }
     }
 

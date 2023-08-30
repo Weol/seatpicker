@@ -4,12 +4,12 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Reservation;
 
 public partial class ReservationController
 {
-    [HttpDelete("{seatId:guid}")]
-    public async Task<IActionResult> Remove([FromRoute] Guid seatId)
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Remove([FromRoute] Guid id)
     {
         var user = loggedInUserAccessor.Get();
 
-        await reservationService.Remove(seatId, user);
+        await reservationService.Remove(id, user);
 
         return new OkResult();
     }

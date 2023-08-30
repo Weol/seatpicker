@@ -16,6 +16,8 @@ public class Seat : AggregateBase
 
     public Seat(Guid id, string title, Bounds bounds, User initiator)
     {
+        if (title.Length == 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
+
         var evt = new SeatCreated(id, title, bounds, initiator.Id);
         Raise(evt);
         Apply(evt);
@@ -24,6 +26,24 @@ public class Seat : AggregateBase
     private Seat()
     {
         // Marten needs this
+    }
+
+    public void SetTitle(string title, User initiator)
+    {
+        if (title.Length == 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
+
+        var evt = new TitleChanged(title, initiator.Id);
+
+        Raise(evt);
+        Apply(evt);
+    }
+
+    public void SetBounds(Bounds bounds, User initiator)
+    {
+        var evt = new BoundsChanged(bounds, initiator.Id);
+
+        Raise(evt);
+        Apply(evt);
     }
 
     public void Reserve(User user, ICollection<Seat> seatsReservedByUser, User initiator)
@@ -84,29 +104,62 @@ public class Seat : AggregateBase
         Bounds = evt.Bounds;
     }
 
-    private async void Apply(SeatReserved evt)
+    private void Apply(SeatReserved evt)
     {
         ReservedBy = evt.User;
     }
 
-    private async void Apply(SeatUnreserved evt)
+    private void Apply(SeatUnreserved evt)
     {
         ReservedBy = null;
     }
 
-    private async void Apply(SeatReservationMoved evt)
+    private void Apply(SeatReservationMoved evt)
     {
         if (evt.ToSeatId == Id) ReservedBy = evt.User;
         if (evt.FromSeatId == Id) ReservedBy = null;
     }
+
+    private void Apply(TitleChanged evt)
+    {
+        Title = evt.Title;
+    }
+
+    private void Apply(BoundsChanged evt)
+    {
+        Bounds = evt.Bounds;
+    }
 }
 
-public record Bounds(double X, double Y, double Width, double Height);
+public class Bounds
+{
+    public double X { get; }
+    public double Y { get; }
+    public double Width { get; }
+    public double Height { get; }
+
+    public Bounds(double x, double y, double width, double height)
+    {
+        if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width), width, "Width must be greater than zero");
+        if (height <= 0) throw new ArgumentOutOfRangeException(nameof(height), height, "Height must be greater than zero");
+
+        X = x;
+        Y = y;
+        Width = width;
+        Height = height;
+    }
+
+    public override string ToString() => $"Bounds {nameof(X)}: {X}, {nameof(Y)}: {Y}, {nameof(Width)}: {Width}, {nameof(Height)}: {Height}";
+}
 
 /**
  * Events
  */
 public record SeatCreated(Guid Id, string Title, Bounds Bounds, UserId InitiatorId);
+
+public record TitleChanged(string Title, UserId InitiatorId);
+
+public record BoundsChanged(Bounds Bounds, UserId InitiatorId);
 
 public record SeatReserved(User User, UserId InitiatorId);
 
@@ -131,14 +184,14 @@ public class SeatReservationConflictException : DomainException
         Seat = seat;
     }
 
-    public override string Message => $"{Seat} is reserved by {ReservedUser}, cannot be changed by {AttemptedUser} ";
+    protected override string ErrorMessage => $"{Seat} is reserved by {ReservedUser}, cannot be changed by {AttemptedUser} ";
 }
 
 public class SeatReservationNotFoundException : DomainException
 {
     public required Seat Seat { get; init; }
 
-    public override string Message => $"{Seat} has no reservation";
+    protected override string ErrorMessage => $"{Seat} has no reservation";
 }
 
 public class DuplicateSeatReservationException : DomainException
@@ -158,6 +211,6 @@ public class DuplicateSeatReservationException : DomainException
         User = user;
     }
 
-    public override string Message =>
+    protected override string ErrorMessage =>
         $"{User} tried to reserve {AttemptedSeatReservation} but already has a reservation on {ExistingSeatReservations}";
 }

@@ -49,6 +49,12 @@ public class AggregateTransaction : IAggregateTransaction
         session.Events.StartStream<TAggregate>(aggregate.Id, aggregate.RaisedEvents);
     }
 
+    public void Archive<TAggregate>(TAggregate aggregate)
+        where TAggregate : AggregateBase
+    {
+        session.Events.ArchiveStream(aggregate.Id);
+    }
+
     public void Commit()
     {
         session.SaveChanges();

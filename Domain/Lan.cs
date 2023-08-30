@@ -7,6 +7,7 @@ public class Lan : AggregateBase
     public Lan(Guid lanId, string title, byte[] background)
     {
         var evt = new LanCreated(lanId, title, background);
+
         Raise(evt);
         Apply(evt);
     }
