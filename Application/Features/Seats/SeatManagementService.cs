@@ -27,7 +27,7 @@ public class SeatManagementService : ISeatManagementService
         if (title is not null) seat.SetTitle(title, initiator);
         if (bounds is not null) seat.SetBounds(bounds, initiator);
 
-        transaction.Create(seat);
+        transaction.Update(seat);
     }
 
     public async Task Create(Guid seatId, string title, Bounds bounds, User initiator)

@@ -9,64 +9,76 @@ using Xunit.Abstractions;
 namespace Seatpicker.IntegrationTests.Tests.Seats.SeatManagement;
 
 // ReSharper disable once InconsistentNaming
-public class Create_seat : IntegrationTestBase, IClassFixture<TestWebApplicationFactory>
+public class Update_seat : IntegrationTestBase, IClassFixture<TestWebApplicationFactory>
 {
-    public Create_seat(TestWebApplicationFactory factory, ITestOutputHelper testOutputHelper) : base(
+    public Update_seat(TestWebApplicationFactory factory, ITestOutputHelper testOutputHelper) : base(
         factory,
         testOutputHelper)
     {
     }
 
-    [Fact]
-    public async Task succeeds_when_creating_new_seat()
+    public static IEnumerable<object[]> ValidUpdateRequestModels = new[]
     {
-        // Arrange
-        var identity = await CreateIdentity(Role.Operator);
-        var client = GetClient(identity);
+        new object[] { Generator.UpdateSeatRequestModel() },
+        new object[]
+        {
+            Generator.UpdateSeatRequestModel() with { Title = null },
+        },
+        new object[]
+        {
+            Generator.UpdateSeatRequestModel() with { Bounds = null },
+        },
+    };
 
-        var model = Generator.CreateSeatRequestModel();
-
-        //Act
-        var response = await client.PostAsJsonAsync("seat", model);
-
-        //Assert
-        Assert.Multiple(
-            () => response.StatusCode.Should().Be(HttpStatusCode.OK),
-            () =>
-            {
-                var committedSeat = GetCommittedAggregates<Seat>().Should().ContainSingle().Subject;
-                committedSeat.Id.Should().Be(model.SeatId);
-                committedSeat.Title.Should().Be(model.Title);
-                committedSeat.Bounds.Should().BeEquivalentTo(model.Bounds);
-            });
-    }
-
-    [Fact]
-    public async Task fails_when_seat_with_same_id_already_exists()
+    [Theory]
+    [MemberData(nameof(ValidUpdateRequestModels))]
+    public async Task succeeds_when_valid(SeatController.UpdateSeatRequestModel model)
     {
         // Arrange
         var identity = await CreateIdentity(Role.Operator);
         var client = GetClient(identity);
 
         var existingSeat = SeatGenerator.Create();
-
         SetupAggregates(existingSeat);
 
-        var seat = SeatGenerator.Create(id: existingSeat.Id, title: "another title", initiator: identity.User);
-
         //Act
-        var response = await client.PostAsJsonAsync(
-            "seat",
-            Generator.CreateSeatRequestModel() with { SeatId = existingSeat.Id });
+        var response = await client.PutAsJsonAsync($"seat/{existingSeat.Id}", model with { SeatId = existingSeat.Id });
 
         //Assert
         Assert.Multiple(
-            () => response.StatusCode.Should().Be(HttpStatusCode.Conflict),
+            () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                var committedSeat = GetCommittedAggregates<Seat>().Should().ContainSingle().Subject;
-                committedSeat.Should().NotBeEquivalentTo(seat);
+                var seat = GetCommittedAggregates<Seat>().Should().ContainSingle().Subject;
+                Assert.Multiple(
+                    () =>
+                    {
+                        if (model.Title is not null) seat.Title.Should().Be(seat.Title);
+                    },
+                    () =>
+                    {
+                        if (model.Bounds is not null) seat.Bounds.Should().BeEquivalentTo(seat.Bounds);
+                    });
             });
+    }
+
+    [Fact]
+    public async Task fails_when_seat_does_not_exists()
+    {
+        // Arrange
+        var identity = await CreateIdentity(Role.Operator);
+        var client = GetClient(identity);
+
+
+        var model = Generator.CreateSeatRequestModel();
+
+        //Act
+        var response = await client.PutAsJsonAsync(
+            $"seat/{model.SeatId}",
+            model);
+
+        //Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     public static IEnumerable<object[]> InvalidUpdateRequestModels = new[]

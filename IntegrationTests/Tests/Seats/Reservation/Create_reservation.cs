@@ -40,7 +40,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
             {
                 var committedSeat = GetCommittedAggregates<Seat>().Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().NotBeNull();
-                committedSeat.ReservedBy!.Id.Should().Be(identity.User.Id);
+                committedSeat.ReservedBy!.Should().Be(identity.User.Id);
             });
     }
 
@@ -56,9 +56,9 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         SetupAggregates(seat);
 
         //Act
-        var response = await client.PostAsync(
+        var response = await client.PostAsJsonAsync(
             "reservation",
-            JsonContent.Create(new ReservationController.CreateReservationRequestModel(seat.Id)));
+            new ReservationController.CreateReservationRequestModel(seat.Id));
 
         //Assert
         Assert.Multiple(
@@ -67,7 +67,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
             {
                 var committedSeat = GetCommittedAggregates<Seat>().Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().NotBeNull();
-                committedSeat.ReservedBy!.Id.Should().Be(identity.User.Id);
+                committedSeat.ReservedBy!.Should().Be(identity.User.Id);
             });
     }
 
@@ -85,9 +85,9 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         SetupAggregates(seat);
 
         //Act
-        var response = await client.PostAsync(
+        var response = await client.PostAsJsonAsync(
             "reservation",
-            JsonContent.Create(new ReservationController.CreateReservationRequestModel(seat.Id)));
+            new ReservationController.CreateReservationRequestModel(seat.Id));
 
         //Assert
         Assert.Multiple(
@@ -96,7 +96,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
             {
                 var committedSeat = GetCommittedAggregates<Seat>().Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().NotBeNull();
-                committedSeat.ReservedBy!.Id.Should().Be(alreadyReservedBy.Id);
+                committedSeat.ReservedBy!.Should().Be(alreadyReservedBy.Id);
             });
     }
 
@@ -110,9 +110,9 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         var seat = SeatGenerator.Create();
 
         //Act
-        var response = await client.PostAsync(
+        var response = await client.PostAsJsonAsync(
             "reservation",
-            JsonContent.Create(new ReservationController.CreateReservationRequestModel(seat.Id)));
+            new ReservationController.CreateReservationRequestModel(seat.Id));
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);

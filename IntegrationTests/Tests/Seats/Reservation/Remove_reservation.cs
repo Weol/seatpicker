@@ -83,7 +83,7 @@ public class Remove_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
             {
                 var committedSeat = GetCommittedAggregates<Seat>().Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().NotBeNull();
-                committedSeat.ReservedBy!.Id.Should().Be(alreadyReservedBy.Id);
+                committedSeat.ReservedBy!.Should().Be(alreadyReservedBy.Id);
             });
     }
 
@@ -94,10 +94,8 @@ public class Remove_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         var identity = await CreateIdentity();
         var client = GetClient(identity);
 
-        var seat = SeatGenerator.Create();
-
         //Act
-        var response = await client.DeleteAsync($"reservation/{seat.Id}");
+        var response = await client.DeleteAsync($"reservation/{Guid.NewGuid()}");
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);

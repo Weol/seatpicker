@@ -11,23 +11,22 @@ namespace Seatpicker.IntegrationTests.Tests.LanManagement;
 // ReSharper disable once InconsistentNaming
 public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationFactory>
 {
-    public Update_lan(TestWebApplicationFactory factory, ITestOutputHelper testOutputHelper) : base(factory, testOutputHelper)
+    public Update_lan(TestWebApplicationFactory factory, ITestOutputHelper testOutputHelper) : base(
+        factory,
+        testOutputHelper)
     {
     }
 
     public static IEnumerable<object[]> ValidUpdateRequestModels = new[]
     {
-        new object[] { LanRequestGenerator.UpdateLanRequestModel(id: Guid.NewGuid(), title: "updated title") },
+        new object[] { Generator.UpdateLanRequestModel() with { Title = null } },
         new object[]
         {
-            LanRequestGenerator.UpdateLanRequestModel(id: Guid.NewGuid(), background: LanGenerator.CreateValidBackround()),
+            Generator.UpdateLanRequestModel() with { Background = null },
         },
         new object[]
         {
-            LanRequestGenerator.UpdateLanRequestModel(
-                id: Guid.NewGuid(),
-                title: "updated title",
-                background: LanGenerator.CreateValidBackround()),
+            Generator.UpdateLanRequestModel(),
         },
     };
 
@@ -43,9 +42,7 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
         SetupAggregates(existingLan);
 
         //Act
-        var response = await client.PutAsync(
-            $"lan/{updateModel.Id}",
-            JsonContent.Create(updateModel));
+        var response = await client.PutAsJsonAsync($"lan/{updateModel.Id}", updateModel);
 
         //Assert
         var committedAggregates = GetCommittedAggregates<Lan>();
@@ -70,9 +67,10 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
 
     public static IEnumerable<object[]> InvalidUpdateRequestModels = new[]
     {
-        new object[] { LanRequestGenerator.UpdateLanRequestModel(id: Guid.NewGuid()) },
-        new object[] { LanRequestGenerator.UpdateLanRequestModel(id: Guid.NewGuid(), title: "") },
-        new object[] { LanRequestGenerator.UpdateLanRequestModel(id: Guid.NewGuid(), background: LanRequestGenerator.InvalidBackround) },
+        new object[] { Generator.UpdateLanRequestModel() with { Background = null, Title = null } },
+        new object[] { Generator.UpdateLanRequestModel() with { Title = "" } },
+        new object[] { Generator.UpdateLanRequestModel() with { Background = Array.Empty<byte>() } },
+        new object[] { Generator.UpdateLanRequestModel() with { Background = new byte[] { 1, 2, 3, 4 } } },
     };
 
     [Theory]
@@ -87,9 +85,7 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
         SetupAggregates(existingLan);
 
         //Act
-        var response = await client.PutAsync(
-             $"lan/{existingLan.Id}",
-            JsonContent.Create(updateModel));
+        var response = await client.PutAsJsonAsync($"lan/{existingLan.Id}", updateModel);
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -106,10 +102,8 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
         SetupAggregates(existingLan);
 
         //Act
-        var updateModel = LanRequestGenerator.UpdateLanRequestModel(id: Guid.NewGuid(), background: LanRequestGenerator.InvalidBackround);
-        var response = await client.PutAsync(
-             $"lan/{existingLan.Id}",
-            JsonContent.Create(updateModel));
+        var updateModel = Generator.UpdateLanRequestModel();
+        var response = await client.PutAsJsonAsync($"lan/{existingLan.Id}", updateModel);
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

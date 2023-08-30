@@ -27,7 +27,7 @@ public class ReservationService : IReservationService
                             throw new SeatNotFoundException { SeatId = seatId };
 
         var seatsReservedByUser = transaction.Query<Seat>()
-            .Where(seat => seat.ReservedBy != null && seat.ReservedBy.Id == user.Id)
+            .Where(seat => seat.ReservedBy != null && seat.ReservedBy== user.Id)
             .ToImmutableList();
 
         seatToReserve.Reserve(user, seatsReservedByUser, user);

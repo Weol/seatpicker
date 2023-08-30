@@ -39,6 +39,7 @@ public class Get_lan : IntegrationTestBase, IClassFixture<TestWebApplicationFact
                 responseModel.Should().NotBeNull();
                 Assert.Multiple(
                     () => responseModel!.Id.Should().Be(existingLan.Id),
+
                     () => responseModel!.Title.Should().Be(existingLan.Title),
                     () => responseModel!.Background.Should().Be(Convert.ToBase64String(existingLan.Background)));
             });

@@ -31,9 +31,9 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
         SetupAggregates(fromSeat, toSeat);
 
         //Act
-        var response = await client.PutAsync(
+        var response = await client.PutAsJsonAsync(
             $"reservation/{fromSeat.Id}",
-            JsonContent.Create(new ReservationController.MoveReservationRequestModel(fromSeat.Id, toSeat.Id)));
+            new ReservationController.MoveReservationRequestModel(fromSeat.Id, toSeat.Id));
 
         //Assert
         Assert.Multiple(
@@ -53,7 +53,44 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
                 committedFromSeat.ReservedBy.Should().BeNull();
                 committedToSeat.ReservedBy.Should().NotBeNull();
 
-                committedToSeat.ReservedBy!.Id.Should().Be(identity.User.Id);
+                committedToSeat.ReservedBy!.Should().Be(identity.User.Id);
+            });
+    }
+
+    [Fact]
+    public async Task fails_when_seat_is_reserved_by_another_user()
+    {
+        // Arrange
+        var identity = await CreateIdentity();
+        var client = GetClient(identity);
+
+        var fromSeat = SeatGenerator.Create(reservedBy: UserGenerator.Create());
+        var toSeat = SeatGenerator.Create();
+
+        SetupAggregates(fromSeat, toSeat);
+
+        //Act
+        var response = await client.PutAsJsonAsync(
+            $"reservation/{fromSeat.Id}",
+            new ReservationController.MoveReservationRequestModel(fromSeat.Id, toSeat.Id));
+
+        //Assert
+        Assert.Multiple(
+            () => response.StatusCode.Should().Be(HttpStatusCode.Conflict),
+            () =>
+            {
+                var committedFromSeat = GetCommittedAggregates<Seat>()
+                    .Should()
+                    .ContainSingle(seat => seat.Id == fromSeat.Id)
+                    .Subject;
+
+                var committedToSeat = GetCommittedAggregates<Seat>()
+                    .Should()
+                    .ContainSingle(seat => seat.Id == toSeat.Id)
+                    .Subject;
+
+                committedFromSeat.ReservedBy.Should().Be(fromSeat.ReservedBy);
+                committedToSeat.ReservedBy.Should().BeNull();
             });
     }
 }

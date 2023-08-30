@@ -8,11 +8,11 @@ namespace Seatpicker.Domain;
 #pragma warning disable CS8618 // Disable warning about uninitialized properties
 public class Seat : AggregateBase
 {
-    public string Title { get; set; }
+    public string Title { get; private set; }
 
-    public Bounds Bounds { get; set; }
+    public Bounds Bounds { get; private set; }
 
-    public User? ReservedBy { get; private set; }
+    public UserId? ReservedBy { get; private set; }
 
     public Seat(Guid id, string title, Bounds bounds, User initiator)
     {
@@ -48,14 +48,14 @@ public class Seat : AggregateBase
 
     public void Reserve(User user, ICollection<Seat> seatsReservedByUser, User initiator)
     {
-        if (user == ReservedBy) return;
+        if (user.Id == ReservedBy) return;
 
         if (seatsReservedByUser.Any()) throw new DuplicateSeatReservationException(this, seatsReservedByUser, user);
 
         if (ReservedBy is not null)
-            throw new SeatReservationConflictException(this, ReservedBy, user);
+            throw new SeatReservationConflictException(this, ReservedBy, user.Id);
 
-        var evt = new SeatReserved(user, initiator.Id);
+        var evt = new SeatReserved(user.Id, initiator.Id);
         Raise(evt);
         Apply(evt);
     }
@@ -64,8 +64,8 @@ public class Seat : AggregateBase
     {
         if (ReservedBy is null) return;
 
-        if (ReservedBy.Id != initator.Id)
-            throw new SeatReservationConflictException(this, ReservedBy, initator);
+        if (ReservedBy != initator.Id)
+            throw new SeatReservationConflictException(this, ReservedBy, initator.Id);
 
         var evt = new SeatUnreserved(ReservedBy, initator.Id);
         Raise(evt);
@@ -75,15 +75,15 @@ public class Seat : AggregateBase
     public void MoveReservation(Seat fromSeat, User user, User initiator)
     {
         if (ReservedBy is not null)
-            throw new SeatReservationConflictException(this, ReservedBy, user);
+            throw new SeatReservationConflictException(this, ReservedBy, user.Id);
 
         if (fromSeat.ReservedBy is null)
             throw new SeatReservationNotFoundException { Seat = fromSeat };
 
-        if (fromSeat.ReservedBy.Id != user.Id)
-            throw new SeatReservationConflictException(this, fromSeat.ReservedBy, user);
+        if (fromSeat.ReservedBy != user.Id)
+            throw new SeatReservationConflictException(this, fromSeat.ReservedBy, user.Id);
 
-        var evt = new SeatReservationMoved(user, fromSeat.Id, Id, initiator.Id);
+        var evt = new SeatReservationMoved(user.Id, fromSeat.Id, Id, initiator.Id);
 
         fromSeat.Raise(evt);
         fromSeat.Apply(evt);
@@ -106,7 +106,7 @@ public class Seat : AggregateBase
 
     private void Apply(SeatReserved evt)
     {
-        ReservedBy = evt.User;
+        ReservedBy = evt.UserId;
     }
 
     private void Apply(SeatUnreserved evt)
@@ -116,7 +116,7 @@ public class Seat : AggregateBase
 
     private void Apply(SeatReservationMoved evt)
     {
-        if (evt.ToSeatId == Id) ReservedBy = evt.User;
+        if (evt.ToSeatId == Id) ReservedBy = evt.UserId;
         if (evt.FromSeatId == Id) ReservedBy = null;
     }
 
@@ -161,11 +161,11 @@ public record TitleChanged(string Title, UserId InitiatorId);
 
 public record BoundsChanged(Bounds Bounds, UserId InitiatorId);
 
-public record SeatReserved(User User, UserId InitiatorId);
+public record SeatReserved(UserId UserId, UserId InitiatorId);
 
-public record SeatUnreserved(User User, UserId InitiatorId);
+public record SeatUnreserved(UserId UserId, UserId InitiatorId);
 
-public record SeatReservationMoved(User User, Guid FromSeatId, Guid ToSeatId, UserId InitiatorId);
+public record SeatReservationMoved(UserId UserId, Guid FromSeatId, Guid ToSeatId, UserId InitiatorId);
 
 /**
  * Exceptions
@@ -173,11 +173,11 @@ public record SeatReservationMoved(User User, Guid FromSeatId, Guid ToSeatId, Us
 public class SeatReservationConflictException : DomainException
 {
     public required Seat Seat { get; init; }
-    public required User ReservedUser { get; init; }
-    public required User AttemptedUser { get; init; }
+    public required UserId ReservedUser { get; init; }
+    public required UserId AttemptedUser { get; init; }
 
     [SetsRequiredMembers]
-    public SeatReservationConflictException(Seat seat, User reservedUser, User attemptedUser)
+    public SeatReservationConflictException(Seat seat, UserId reservedUser, UserId attemptedUser)
     {
         ReservedUser = reservedUser;
         AttemptedUser = attemptedUser;
