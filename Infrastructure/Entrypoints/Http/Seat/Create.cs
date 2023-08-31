@@ -13,23 +13,20 @@ public partial class SeatController
 
         var user = loggedInUserAccessor.Get();
 
-        await seatManagementService.Create(
-            model.SeatId,
+        var seatId = await seatManagementService.Create(
             model.Title,
             model.Bounds.ToDomainBounds(),
             user);
 
-        return new OkResult();
+        return new CreatedResult(seatId.ToString(), null);
     }
 
-    public record CreateSeatRequestModel(Guid SeatId, string Title, BoundsModel Bounds);
+    public record CreateSeatRequestModel(string Title, BoundsModel Bounds);
 
     private class CreateSeatRequestModelModelValidator : AbstractValidator<CreateSeatRequestModel>
     {
         public CreateSeatRequestModelModelValidator()
         {
-            RuleFor(x => x.SeatId).NotEmpty();
-
             RuleFor(x => x.Title).NotEmpty();
 
             RuleFor(x => x.Bounds).SetValidator(new BoundsModelValidator());

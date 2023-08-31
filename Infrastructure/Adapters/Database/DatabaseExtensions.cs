@@ -15,7 +15,7 @@ internal static class DatabaseExtensions
         services.AddValidatedOptions(configureAction);
 
         services.AddSingleton<IAggregateRepository, AggregateRepository>();
-        services.AddSingleton<IAggregateTransaction>(CreateAggregateTransaction);
+        services.AddScoped(CreateAggregateTransaction);
 
         services.AddMarten(
             provider =>

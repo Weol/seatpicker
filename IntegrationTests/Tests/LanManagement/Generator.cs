@@ -8,7 +8,6 @@ public static class Generator
     public static LanController.CreateLanRequestModel CreateLanRequestModel()
     {
         return new LanController.CreateLanRequestModel(
-            Guid.NewGuid(),
             new Faker().Hacker.Noun(),
             LanGenerator.CreateValidBackround());
     }

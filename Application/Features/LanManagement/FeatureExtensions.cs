@@ -7,6 +7,6 @@ internal static class FeatureExtension
     public static IServiceCollection AddLanManagementFeature(this IServiceCollection services)
     {
         return services
-            .AddSingleton<ILanManagementService, LanManagementManagementService>();
+            .AddScoped<ILanManagementService, LanManagementManagementService>();
     }
 }

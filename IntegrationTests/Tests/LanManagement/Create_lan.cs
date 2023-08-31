@@ -38,34 +38,8 @@ public class Create_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
             {
                 var lan = committedAggregates.Should().ContainSingle().Subject;
                 Assert.Multiple(
-                    () => lan.Id.Should().Be(requestModel.Id),
                     () => lan.Title.Should().Be(requestModel.Title),
                     () => lan.Background.Should().Equal(requestModel.Background));
-            });
-    }
-
-    [Fact]
-    public async Task fails_when_lan_with_same_id_already_exists()
-    {
-        // Arrange
-        var identity = await CreateIdentity(Role.Admin);
-        var client = GetClient(identity);
-
-        var existingLan = LanGenerator.Create(title: "Existing");
-        SetupAggregates(existingLan);
-
-        //Act
-        var response = await client.PostAsJsonAsync(
-            "lan",
-            Generator.CreateLanRequestModel() with { Id = existingLan.Id });
-
-        //Assert
-        Assert.Multiple(
-            () => response.StatusCode.Should().Be(HttpStatusCode.Conflict),
-            () =>
-            {
-                var lan = GetCommittedAggregates<Lan>().Should().ContainSingle().Subject;
-                lan.Title.Should().Be(existingLan.Title);
             });
     }
 

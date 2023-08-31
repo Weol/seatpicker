@@ -9,8 +9,8 @@ internal static class FeatureExtension
     public static IServiceCollection AddSeatsFeature(this IServiceCollection services)
     {
         return services
-            .AddSingleton<ISeatManagementService, SeatManagementService>()
-            .AddSingleton<IReservationManagement, ReservationManagement>()
-            .AddSingleton<IReservationService, ReservationService>();
+            .AddScoped<ISeatManagementService, SeatManagementService>()
+            .AddScoped<IReservationManagement, ReservationManagement>()
+            .AddScoped<IReservationService, ReservationService>();
     }
 }

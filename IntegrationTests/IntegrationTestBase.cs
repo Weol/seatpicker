@@ -4,6 +4,7 @@ using JasperFx.Core;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Seatpicker.Application.Features;
 using Seatpicker.Domain;
 using Seatpicker.IntegrationTests.TestAdapters;
 using Shared;
@@ -46,17 +47,19 @@ public abstract class IntegrationTestBase : IDisposable
     protected void SetupAggregates(params AggregateBase[] aggregates)
     {
         var repository = factory.Services.GetRequiredService<TestAggregateRepository>();
+        var transaction = repository.CreateTransaction();
         foreach (var aggregate in aggregates)
         {
-            repository.Aggregates[aggregate.Id] = aggregate;
+            transaction.Create(aggregate);
         }
+        transaction.Commit();
     }
 
     protected IEnumerable<TAggregate> GetCommittedAggregates<TAggregate>()
         where TAggregate : AggregateBase
     {
         var repository = factory.Services.GetRequiredService<TestAggregateRepository>();
-        return repository.Aggregates.Values.OfType<TAggregate>();
+        return repository.CreateReader().Query<TAggregate>();
     }
 
     protected void MockOutgoingHttpRequest(

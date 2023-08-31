@@ -1,13 +1,10 @@
 ﻿using System.Net;
-using System.Net.Http.Json;
 using FluentAssertions;
 using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Entrypoints.Http.Reservation;
-using Seatpicker.IntegrationTests.Tests.LanManagement;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Seatpicker.IntegrationTests.Tests.Reservation;
+namespace Seatpicker.IntegrationTests.Tests.Seats.Reservation;
 
 // ReSharper disable once InconsistentNaming
 public class Remove_reservation : IntegrationTestBase, IClassFixture<TestWebApplicationFactory>

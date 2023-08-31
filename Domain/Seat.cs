@@ -14,6 +14,8 @@ public class Seat : AggregateBase
 
     public UserId? ReservedBy { get; private set; }
 
+    public bool IsArchived { get; private set; }
+
     public Seat(Guid id, string title, Bounds bounds, User initiator)
     {
         if (title.Length == 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
@@ -32,7 +34,7 @@ public class Seat : AggregateBase
     {
         if (title.Length == 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
 
-        var evt = new TitleChanged(title, initiator.Id);
+        var evt = new SeatTitleChanged(title, initiator.Id);
 
         Raise(evt);
         Apply(evt);
@@ -40,7 +42,15 @@ public class Seat : AggregateBase
 
     public void SetBounds(Bounds bounds, User initiator)
     {
-        var evt = new BoundsChanged(bounds, initiator.Id);
+        var evt = new SeatBoundsChanged(bounds, initiator.Id);
+
+        Raise(evt);
+        Apply(evt);
+    }
+
+    public void Archive(User initiator)
+    {
+        var evt = new SeatArchived(initiator.Id);
 
         Raise(evt);
         Apply(evt);
@@ -120,14 +130,19 @@ public class Seat : AggregateBase
         if (evt.FromSeatId == Id) ReservedBy = null;
     }
 
-    private void Apply(TitleChanged evt)
+    private void Apply(SeatTitleChanged evt)
     {
         Title = evt.Title;
     }
 
-    private void Apply(BoundsChanged evt)
+    private void Apply(SeatBoundsChanged evt)
     {
         Bounds = evt.Bounds;
+    }
+
+    private void Apply(SeatArchived evt)
+    {
+        IsArchived = true;
     }
 }
 
@@ -157,15 +172,17 @@ public class Bounds
  */
 public record SeatCreated(Guid Id, string Title, Bounds Bounds, UserId InitiatorId);
 
-public record TitleChanged(string Title, UserId InitiatorId);
+public record SeatTitleChanged(string Title, UserId InitiatorId);
 
-public record BoundsChanged(Bounds Bounds, UserId InitiatorId);
+public record SeatBoundsChanged(Bounds Bounds, UserId InitiatorId);
 
 public record SeatReserved(UserId UserId, UserId InitiatorId);
 
 public record SeatUnreserved(UserId UserId, UserId InitiatorId);
 
 public record SeatReservationMoved(UserId UserId, Guid FromSeatId, Guid ToSeatId, UserId InitiatorId);
+
+public record SeatArchived(UserId InitiatorId);
 
 /**
  * Exceptions

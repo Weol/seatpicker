@@ -6,7 +6,7 @@ using Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Seatpicker.IntegrationTests.Tests.Seats.SeatManagement;
+namespace Seatpicker.IntegrationTests.Tests.Seats.Management;
 
 // ReSharper disable once InconsistentNaming
 public class Update_seat : IntegrationTestBase, IClassFixture<TestWebApplicationFactory>
@@ -69,8 +69,7 @@ public class Update_seat : IntegrationTestBase, IClassFixture<TestWebApplication
         var identity = await CreateIdentity(Role.Operator);
         var client = GetClient(identity);
 
-
-        var model = Generator.CreateSeatRequestModel();
+        var model = Generator.UpdateSeatRequestModel();
 
         //Act
         var response = await client.PutAsJsonAsync(

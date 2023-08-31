@@ -6,7 +6,7 @@ using Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Seatpicker.IntegrationTests.Tests.Seats.SeatManagement;
+namespace Seatpicker.IntegrationTests.Tests.Seats.Management;
 
 // ReSharper disable once InconsistentNaming
 public class Create_seat : IntegrationTestBase, IClassFixture<TestWebApplicationFactory>
@@ -31,41 +31,12 @@ public class Create_seat : IntegrationTestBase, IClassFixture<TestWebApplication
 
         //Assert
         Assert.Multiple(
-            () => response.StatusCode.Should().Be(HttpStatusCode.OK),
+            () => response.StatusCode.Should().Be(HttpStatusCode.Created),
             () =>
             {
                 var committedSeat = GetCommittedAggregates<Seat>().Should().ContainSingle().Subject;
-                committedSeat.Id.Should().Be(model.SeatId);
                 committedSeat.Title.Should().Be(model.Title);
                 committedSeat.Bounds.Should().BeEquivalentTo(model.Bounds);
-            });
-    }
-
-    [Fact]
-    public async Task fails_when_seat_with_same_id_already_exists()
-    {
-        // Arrange
-        var identity = await CreateIdentity(Role.Operator);
-        var client = GetClient(identity);
-
-        var existingSeat = SeatGenerator.Create();
-
-        SetupAggregates(existingSeat);
-
-        var seat = SeatGenerator.Create(id: existingSeat.Id, title: "another title", initiator: identity.User);
-
-        //Act
-        var response = await client.PostAsJsonAsync(
-            "seat",
-            Generator.CreateSeatRequestModel() with { SeatId = existingSeat.Id });
-
-        //Assert
-        Assert.Multiple(
-            () => response.StatusCode.Should().Be(HttpStatusCode.Conflict),
-            () =>
-            {
-                var committedSeat = GetCommittedAggregates<Seat>().Should().ContainSingle().Subject;
-                committedSeat.Should().NotBeEquivalentTo(seat);
             });
     }
 

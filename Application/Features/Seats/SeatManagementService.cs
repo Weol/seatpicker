@@ -6,7 +6,7 @@ public interface ISeatManagementService
 {
     public Task Update(Guid seatId, string? title, Bounds? bounds, User initiator);
 
-    public Task Create(Guid seatId, string title, Bounds bounds, User initiator);
+    public Task<Guid> Create(string title, Bounds bounds, User initiator);
 
     public Task Remove(Guid seatId, User initiator);
 }
@@ -30,26 +30,23 @@ public class SeatManagementService : ISeatManagementService
         transaction.Update(seat);
     }
 
-    public async Task Create(Guid seatId, string title, Bounds bounds, User initiator)
+    public async Task<Guid> Create(string title, Bounds bounds, User initiator)
     {
-        if (await transaction.Exists<Seat>(seatId)) throw new SeatAlreadyExistsException { SeatId = seatId };
+        var id = Guid.NewGuid();
 
-        var seat = new Seat(seatId, title, bounds, initiator);
+        var seat = new Seat(id, title, bounds, initiator);
 
         transaction.Create(seat);
+
+        return id;
     }
 
     public async Task Remove(Guid seatId, User initiator)
     {
         var seat = await transaction.Aggregate<Seat>(seatId) ?? throw new SeatNotFoundException{ SeatId = seatId };
 
+        seat.Archive(initiator);
+
         transaction.Archive(seat);
     }
-}
-
-public class SeatAlreadyExistsException: ApplicationException
-{
-    public required Guid SeatId { get; init; }
-
-    protected override string ErrorMessage => $"Seat with id {SeatId} already exists";
 }

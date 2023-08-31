@@ -11,20 +11,17 @@ public partial class LanController
     {
         await validateModel.Validate<CreateLanRequestModel, CreateLanRequestModelValidator>(model);
 
-        await lanManagementService.Create(new CreateLan(model.Id, model.Title, model.Background));
+        var lanId = await lanManagementService.Create(model.Title, model.Background);
 
-        return new CreatedResult(model.Id.ToString(), null);
+        return new CreatedResult(lanId.ToString(), null);
     }
 
-    public record CreateLanRequestModel(Guid Id, string Title, byte[] Background);
+    public record CreateLanRequestModel(string Title, byte[] Background);
 
     private class CreateLanRequestModelValidator : AbstractValidator<CreateLanRequestModel>
     {
         public CreateLanRequestModelValidator()
         {
-            RuleFor(x => x.Id)
-                .NotEmpty();
-
             RuleFor(x => x.Title)
                 .NotEmpty();
 

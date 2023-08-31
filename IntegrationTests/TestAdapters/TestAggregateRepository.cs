@@ -1,4 +1,5 @@
 ﻿using Marten;
+using NSubstitute;
 using Seatpicker.Application.Features;
 using Shared;
 
@@ -8,7 +9,8 @@ namespace Seatpicker.IntegrationTests.TestAdapters;
 
 public class TestAggregateRepository : IAggregateRepository
 {
-    public IDictionary<Guid, AggregateBase> Aggregates { get; }= new Dictionary<Guid, AggregateBase>();
+    public IDictionary<Guid, (AggregateBase Aggregate, bool IsArchived)> Aggregates { get; }
+        = new Dictionary<Guid, (AggregateBase Aggregate, bool IsArchived)>();
 
     public IAggregateTransaction CreateTransaction()
     {
@@ -23,13 +25,13 @@ public class TestAggregateRepository : IAggregateRepository
 
 public class TestAggregateTransaction : IAggregateTransaction
 {
-    private readonly IDictionary<Guid, AggregateBase> aggregates;
+    private readonly IDictionary<Guid, (AggregateBase Aggregate, bool IsArchived)> aggregates;
 
     private readonly TestAggregateReader reader;
     private readonly IList<AggregateBase> stagedAggregates = new List<AggregateBase>();
     private readonly IList<AggregateBase> stagedForArchive = new List<AggregateBase>();
 
-    public TestAggregateTransaction(IDictionary<Guid,AggregateBase> aggregates)
+    public TestAggregateTransaction(IDictionary<Guid,(AggregateBase Aggregate, bool IsArchived)> aggregates)
     {
         this.aggregates = aggregates;
         reader = new TestAggregateReader(aggregates);
@@ -51,7 +53,9 @@ public class TestAggregateTransaction : IAggregateTransaction
     {
         if (!aggregate.RaisedEvents.Any()) throw new NoRaisedEventsException { Id = aggregate.Id, Type = typeof(TAggregate) };
 
-        var exists = Exists<TAggregate>(aggregate.Id).GetAwaiter().GetResult();
+        // we don't use the Exists() method because we need to fail if we try to create an aggregate that has the
+        // same id as an archived aggregate.
+        var exists = aggregates.Values.Any(tuple => tuple.Aggregate.Id == aggregate.Id);
         if (exists) throw new AggregateAlreadyExistsException{ Id = aggregate.Id, Type = typeof(TAggregate)};
 
         stagedAggregates.Add(aggregate);
@@ -60,6 +64,9 @@ public class TestAggregateTransaction : IAggregateTransaction
     public void Archive<TAggregate>(TAggregate aggregate)
         where TAggregate : AggregateBase
     {
+        var exists = Exists<TAggregate>(aggregate.Id).GetAwaiter().GetResult();
+        if (!exists) throw new AggregateDoesNotExistException { Id = aggregate.Id, Type = typeof(TAggregate)};
+
         stagedForArchive.Add(aggregate);
     }
 
@@ -67,12 +74,12 @@ public class TestAggregateTransaction : IAggregateTransaction
     {
         foreach (var aggregate in stagedAggregates)
         {
-            aggregates[aggregate.Id] = aggregate;
+            aggregates[aggregate.Id] = (aggregate, false);
         }
 
         foreach (var aggregate in stagedForArchive)
         {
-            aggregates.Remove(aggregate.Id);
+            aggregates[aggregate.Id] = (aggregate, true);
         }
     }
 
@@ -93,9 +100,9 @@ public class TestAggregateTransaction : IAggregateTransaction
 
 public class TestAggregateReader : IAggregateReader
 {
-    private readonly IDictionary<Guid, AggregateBase> aggregates;
+    private readonly IDictionary<Guid, (AggregateBase Aggregate, bool IsArchived)> aggregates;
 
-    public TestAggregateReader(IDictionary<Guid, AggregateBase> aggregates)
+    public TestAggregateReader(IDictionary<Guid, (AggregateBase Aggregate, bool IsArchived)> aggregates)
     {
         this.aggregates = aggregates;
     }
@@ -103,37 +110,31 @@ public class TestAggregateReader : IAggregateReader
     public async Task<TAggregate?> Aggregate<TAggregate>(Guid id)
         where TAggregate : AggregateBase
     {
-        if (!aggregates.TryGetValue(id, out var aggregate)) return null;
+        if (!aggregates.TryGetValue(id, out var tuple)) return null;
 
-        if (aggregate is not TAggregate typedAggregate) throw new TypeMismatchException
+        if (tuple.Aggregate is not TAggregate typedAggregate) throw new TypeMismatchException
         {
             Id = id,
             ExpectedType = typeof(TAggregate),
-            ActualType = aggregate.GetType(),
+            ActualType = tuple.Aggregate.GetType(),
         };
 
-        return typedAggregate;
+        return tuple.IsArchived ? null : typedAggregate;
     }
 
     public async Task<bool> Exists<TAggregate>(Guid id)
         where TAggregate : AggregateBase
     {
-        if (!aggregates.TryGetValue(id, out var aggregate)) return false;
-
-        if (aggregate is not TAggregate) throw new TypeMismatchException
-        {
-            Id = id,
-            ExpectedType = typeof(TAggregate),
-            ActualType = aggregate.GetType(),
-        };
-
-        return true;
+        return await Aggregate<TAggregate>(id) is not null;
     }
 
     public IQueryable<TAggregate> Query<TAggregate>()
         where TAggregate : AggregateBase
     {
-        return aggregates.Values.OfType<TAggregate>().AsQueryable();
+        return aggregates.Values
+            .Where(tuple => !tuple.IsArchived)
+            .Select(tuple => tuple.Aggregate)
+            .OfType<TAggregate>().AsQueryable();
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;

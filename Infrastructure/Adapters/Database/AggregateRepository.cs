@@ -96,7 +96,9 @@ public class AggregateReader : IAggregateReader
     public async Task<bool> Exists<TAggregate>(Guid id)
         where TAggregate : AggregateBase
     {
-        return await session.Events.FetchStreamStateAsync(id) is not null;
+        var streamState = await session.Events.FetchStreamStateAsync(id);
+        if (streamState is null) return false;
+        return !streamState.IsArchived;
     }
 
     public IQueryable<TAggregate> Query<TAggregate>()

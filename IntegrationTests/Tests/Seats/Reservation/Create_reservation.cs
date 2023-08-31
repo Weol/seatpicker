@@ -6,7 +6,7 @@ using Seatpicker.Infrastructure.Entrypoints.Http.Reservation;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Seatpicker.IntegrationTests.Tests.Reservation;
+namespace Seatpicker.IntegrationTests.Tests.Seats.Reservation;
 
 // ReSharper disable once InconsistentNaming
 public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebApplicationFactory>

@@ -1,12 +1,10 @@
 ﻿using System.Net;
-using System.Net.Http.Json;
 using FluentAssertions;
 using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Seatpicker.IntegrationTests.Tests.Seats.SeatManagement;
+namespace Seatpicker.IntegrationTests.Tests.Seats.Management;
 
 // ReSharper disable once InconsistentNaming
 public class Remove_seat : IntegrationTestBase, IClassFixture<TestWebApplicationFactory>
