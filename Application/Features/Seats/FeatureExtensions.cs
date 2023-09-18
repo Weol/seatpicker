@@ -10,7 +10,7 @@ internal static class FeatureExtension
     {
         return services
             .AddScoped<ISeatManagementService, SeatManagementService>()
-            .AddScoped<IReservationManagement, ReservationManagement>()
+            .AddScoped<IReservationManagementService, ReservationManagementService>()
             .AddScoped<IReservationService, ReservationService>();
     }
 }

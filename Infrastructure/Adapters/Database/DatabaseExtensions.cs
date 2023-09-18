@@ -16,6 +16,10 @@ internal static class DatabaseExtensions
 
         services.AddSingleton<IAggregateRepository, AggregateRepository>();
         services.AddScoped(CreateAggregateTransaction);
+        services.AddScoped(CreateAggregateReader);
+        services.AddSingleton<IDocumentRepository, DocumentRepository>();
+        services.AddScoped(CreateDocumentTransaction);
+        services.AddScoped(CreateDocumentReader);
 
         services.AddMarten(
             provider =>
@@ -41,6 +45,24 @@ internal static class DatabaseExtensions
     {
         var repository = provider.GetRequiredService<IAggregateRepository>();
         return repository.CreateTransaction();
+    }
+
+    private static IAggregateReader CreateAggregateReader(IServiceProvider provider)
+    {
+        var repository = provider.GetRequiredService<IAggregateRepository>();
+        return repository.CreateReader();
+    }
+
+    private static IDocumentTransaction CreateDocumentTransaction(IServiceProvider provider)
+    {
+        var repository = provider.GetRequiredService<IDocumentRepository>();
+        return repository.CreateTransaction();
+    }
+
+    private static IDocumentReader CreateDocumentReader(IServiceProvider provider)
+    {
+        var repository = provider.GetRequiredService<IDocumentRepository>();
+        return repository.CreateReader();
     }
 }
 

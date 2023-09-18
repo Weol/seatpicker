@@ -16,7 +16,9 @@ public partial class LanController
         if (model.Title is null && model.Background is null)
             throw new BadRequestException("At least one property besides id must be set");
 
-        await lanManagementService.Update(model.Id, model.Title, model.Background);
+        var user = loggedInUserAccessor.Get();
+
+        await lanManagementService.Update(model.Id, model.Title, model.Background, user);
 
         return new OkResult();
     }

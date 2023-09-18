@@ -1,10 +1,10 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
+using JasperFx.Core;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Entrypoints.Http;
 
 namespace Seatpicker.Infrastructure.Authentication.Discord;
 
@@ -49,7 +49,7 @@ public class DiscordJwtTokenCreator
 
         var now = DateTime.UtcNow;
         var token = handler.CreateJwtSecurityToken(
-            options.Issuer,
+            options.GuildId,
             discordToken.Id,
             new ClaimsIdentity(roleClaims.Concat(defaultClaims)),
             now.AddMilliseconds(-30),

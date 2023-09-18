@@ -1,8 +1,9 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Seatpicker.Infrastructure.Authentication.Discord;
+using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
+using Seatpicker.Infrastructure.Authentication.UserStore;
 
 namespace Seatpicker.Infrastructure.Authentication;
 
@@ -12,7 +13,7 @@ public static class AuthenticationExtensions
         this IServiceCollection services)
     {
         services
-            .AddDiscordLogin(ConfigureDiscordAuthentication)
+            .AddDiscordLogin(ConfigureDiscordAuthentication, ConfigureDiscordClient)
             .AddAuthorization()
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer();
@@ -28,8 +29,7 @@ public static class AuthenticationExtensions
     {
         return app
             .UseAuthentication()
-            .UseAuthorization()
-            .MapDiscordAuthenticationEndpoints();
+            .UseAuthorization();
     }
 
     private static void ConfigureJwtBearerOptions(
@@ -38,7 +38,7 @@ public static class AuthenticationExtensions
     {
         var securityKey = new X509SecurityKey(discordOptions.Value.SigningCertificate);
 
-        options.TokenValidationParameters.ValidIssuer = discordOptions.Value.Issuer;
+        options.TokenValidationParameters.ValidIssuer = discordOptions.Value.GuildId;
         options.TokenValidationParameters.IssuerSigningKey = securityKey;
         options.TokenValidationParameters.ValidateAudience = false;
     }
@@ -51,5 +51,15 @@ public static class AuthenticationExtensions
 
         // Configuration values from key vault
         options.Base64SigningCertificate = configuration["SigningCertificate"] ?? throw new NullReferenceException();
+    }
+
+    private static void ConfigureDiscordClient(DiscordClientOptions options, IConfiguration configuration)
+    {
+        configuration.GetSection("Discord").Bind(options);
+
+        // Configuration values from key vault
+        options.ClientId = configuration["DiscordClientId"] ?? throw new NullReferenceException();
+        options.ClientSecret = configuration["DiscordClientSecret"] ?? throw new NullReferenceException();
+        options.BotToken = configuration["DiscordBotToken"] ?? throw new NullReferenceException();
     }
 }

@@ -5,8 +5,8 @@ using System.Security.Claims;
 using FluentAssertions;
 using Microsoft.IdentityModel.Tokens;
 using NSubstitute;
-using Seatpicker.Infrastructure.Adapters.DiscordClient;
 using Seatpicker.Infrastructure.Authentication.Discord;
+using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 using Seatpicker.Infrastructure.Entrypoints.Http;
 using Xunit;
 using Xunit.Abstractions;
@@ -107,8 +107,8 @@ public class DiscordLogin : IntegrationTestBase, IClassFixture<TestWebApplicatio
         //Act
         var response = await client.PostAsync(
             "discord/login",
-            JsonContent.Create(new DiscordLoginEndpoints.TokenRequestModel(token)));
-        var responseModel = await response.Content.ReadFromJsonAsync<DiscordLoginEndpoints.TokenResponseModel>();
+            JsonContent.Create(new DiscordAuthenticationController.TokenRequestModel(token)));
+        var responseModel = await response.Content.ReadFromJsonAsync<DiscordAuthenticationController.TokenResponseModel>();
 
         // Assert
         Assert.Multiple(
@@ -140,8 +140,8 @@ public class DiscordLogin : IntegrationTestBase, IClassFixture<TestWebApplicatio
         //Act
         var response = await client.PostAsync(
             "discord/renew",
-            JsonContent.Create(new DiscordLoginEndpoints.TokenRenewModel(refreshToken)));
-        var responseModel = await response.Content.ReadFromJsonAsync<DiscordLoginEndpoints.TokenResponseModel>();
+            JsonContent.Create(new DiscordAuthenticationController.TokenRenewModel(refreshToken)));
+        var responseModel = await response.Content.ReadFromJsonAsync<DiscordAuthenticationController.TokenResponseModel>();
 
         // Assert
         Assert.Multiple(

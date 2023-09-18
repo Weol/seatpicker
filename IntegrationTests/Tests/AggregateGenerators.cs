@@ -19,7 +19,7 @@ public static class SeatGenerator
             bounds ?? new Bounds(0, 0, 1, 1),
             initiator ?? UserGenerator.Create(Role.Admin));
 
-        if (reservedBy is not null) seat.Reserve(reservedBy, new List<Seat>(), reservedBy);
+        if (reservedBy is not null) seat.MakeReservation(reservedBy, new List<Seat>());
 
         return seat;
     }
@@ -33,9 +33,13 @@ public static class LanGenerator
         return Encoding.UTF8.GetBytes(svg);
     }
 
-    public static Lan Create(Guid? id = null, string? title = null, byte[]? background = null)
+    public static Lan Create(Guid? id = null, string? title = null, byte[]? background = null, User? initiator = null)
     {
-        return new Lan(id ?? Guid.NewGuid(), title ?? "Test title", background ?? CreateValidBackround());
+        return new Lan(
+            id ?? Guid.NewGuid(),
+            title ?? "Test title",
+            background ?? CreateValidBackround(),
+            initiator ?? UserGenerator.Create(Role.Admin));
     }
 }
 

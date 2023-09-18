@@ -1,5 +1,10 @@
-﻿namespace Seatpicker.Domain;
+﻿using Shared;
 
-public record User(UserId Id, string Name, ICollection<Role> Roles);
+namespace Seatpicker.Domain;
 
-public record UserId(string Id);
+public record User(UserId UserId, string Name);
+
+public record UserId(string Id)
+{
+    public static implicit operator string(UserId id) => id.Id;
+}

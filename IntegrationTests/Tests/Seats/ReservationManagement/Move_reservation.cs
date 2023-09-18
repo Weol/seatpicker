@@ -3,10 +3,11 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Entrypoints.Http.Reservation;
+using Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Seatpicker.IntegrationTests.Tests.Seats.Reservation;
+namespace Seatpicker.IntegrationTests.Tests.Seats.ReservationManagement;
 
 // ReSharper disable once InconsistentNaming
 public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplicationFactory>
@@ -31,8 +32,8 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
 
         //Act
         var response = await client.PutAsJsonAsync(
-            $"reservation/{fromSeat.Id}",
-            new ReservationController.MoveReservationRequestModel(fromSeat.Id, toSeat.Id));
+            $"reservationmanagement/{fromSeat.Id}",
+            new ReservationManagementController.MoveReservationForRequestModel(fromSeat.Id, toSeat.Id));
 
         //Assert
         Assert.Multiple(
@@ -70,8 +71,8 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
 
         //Act
         var response = await client.PutAsJsonAsync(
-            $"reservation/{fromSeat.Id}",
-            new ReservationController.MoveReservationRequestModel(fromSeat.Id, toSeat.Id));
+            $"reservationmanagement/{fromSeat.Id}",
+            new ReservationManagementController.MoveReservationForRequestModel(fromSeat.Id, toSeat.Id));
 
         //Assert
         Assert.Multiple(

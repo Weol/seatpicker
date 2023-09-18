@@ -2,10 +2,12 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Discord;
+using Discord.Net.Rest;
+using Discord.Rest;
 using Microsoft.Extensions.Options;
-using Seatpicker.Infrastructure.Entrypoints.Http;
 
-namespace Seatpicker.Infrastructure.Adapters.DiscordClient;
+namespace Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 
 public class DiscordClient
 {
@@ -62,11 +64,30 @@ public class DiscordClient
     public async Task<DiscordUser> Lookup(string accessToken)
     {
         using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "users/@me");
-
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
         var response = await httpClient.SendAsync(requestMessage);
         return await DeserializeContent<DiscordUser>(response);
+    }
+
+    public async Task<IEnumerable<GuildRole>> GetGuildRoles(string guildId)
+    {
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"guilds/{guildId}/roles");
+
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
+
+        var response = await httpClient.SendAsync(requestMessage);
+        return await DeserializeContent<GuildRole[]>(response);
+    }
+
+    public async Task<GuildMember> GetGuildMember(string guildId, string memberId)
+    {
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"guilds/{guildId}/members/{memberId}");
+
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
+
+        var response = await httpClient.SendAsync(requestMessage);
+        return await DeserializeContent<GuildMember>(response);
     }
 
     private async Task<TModel> DeserializeContent<TModel>(HttpResponseMessage response)
@@ -106,6 +127,28 @@ public class DiscordAccessToken
     [JsonPropertyName("scopes")] public IEnumerable<string> Scopes { get; set; } = null!;
 
     [JsonPropertyName("token_type")] public string TokenType { get; set; } = null!;
+}
+
+public class GuildMember
+{
+    [JsonPropertyName("user")] public DiscordUser DiscordUser { get; set; } = null!;
+
+    [JsonPropertyName("nick")] public string Nick { get; set; } = null!;
+
+    [JsonPropertyName("avatar")] public string Avatar { get; set; } = null!;
+
+    [JsonPropertyName("roles")] public IEnumerable<string> Roles { get; set; } = null!;
+}
+
+public class GuildRole
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = null!;
+
+    [JsonPropertyName("name")] public string Name { get; set; } = null!;
+
+    [JsonPropertyName("color")] public int Color { get; set; }
+
+    [JsonPropertyName("icon")] public string? Icon { get; set; } = null!;
 }
 
 internal class DiscordException : Exception

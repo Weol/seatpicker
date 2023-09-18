@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Seatpicker.Infrastructure.Adapters.DiscordClient;
+namespace Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 
 public class DiscordClientOptions
 {
@@ -9,6 +9,9 @@ public class DiscordClientOptions
 
     [Required]
     public string ClientSecret { get; set; } = null!;
+
+    [Required]
+    public string BotToken { get; set; } = null!;
 
     [Required]
     public Uri RedirectUri { get; set; } = null!;

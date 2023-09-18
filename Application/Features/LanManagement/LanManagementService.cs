@@ -4,11 +4,9 @@ namespace Seatpicker.Application.Features.LanManagement;
 
 public interface ILanManagementService
 {
-    public Task<Guid> Create(string title, byte[] background);
+    public Task<Guid> Create(string title, byte[] background, User initiator);
 
-    public Task Update(Guid id, string? title, byte[]? background);
-
-    public Task<Lan> Get(Guid lanId);
+    public Task Update(Guid id, string? title, byte[]? background, User initiator);
 }
 
 internal class LanManagementManagementService : ILanManagementService
@@ -20,34 +18,26 @@ internal class LanManagementManagementService : ILanManagementService
         this.transaction = transaction;
     }
 
-    public async Task<Guid> Create(string title, byte[] background)
+    public async Task<Guid> Create(string title, byte[] background, User initiator)
     {
         var id = Guid.NewGuid();
 
-        var lan = new Lan(id, title, background);
+        var lan = new Lan(id, title, background, initiator);
 
         transaction.Create(lan);
 
         return id;
     }
 
-    public async Task Update(Guid id, string? title, byte[]? background)
+    public async Task Update(Guid id, string? title, byte[]? background, User initiator)
     {
         var lan = await transaction.Aggregate<Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
 
-        if (title is not null) lan.ChangeTitle(title);
-        if (background is not null) lan.ChangeBackground(background);
+        if (title is not null) lan.ChangeTitle(title, initiator);
+        if (background is not null) lan.ChangeBackground(background, initiator);
 
         transaction.Update(lan);
-    }
-
-    public async Task<Lan> Get(Guid lanId)
-    {
-        var lan = await transaction.Aggregate<Lan>(lanId);
-        if (lan is null) throw new LanNotFoundException { LanId = lanId };
-
-        return lan;
     }
 }
 

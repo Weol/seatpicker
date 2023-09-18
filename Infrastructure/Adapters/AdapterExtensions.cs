@@ -1,5 +1,5 @@
 ﻿using Seatpicker.Infrastructure.Adapters.Database;
-using Seatpicker.Infrastructure.Adapters.DiscordClient;
+using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 
 namespace Seatpicker.Infrastructure.Adapters;
 
@@ -7,9 +7,7 @@ public static class AdapterExtensions
 {
     public static IServiceCollection AddAdapters(this IServiceCollection services)
     {
-        return services
-            .AddDatabase(ConfigureDatabase)
-            .AddDiscordClient(ConfigureDiscordClient);
+        return services.AddDatabase(ConfigureDatabase).AddUserProvider();
     }
 
     private static void ConfigureDatabase(DatabaseOptions options, IConfiguration configuration)
@@ -17,12 +15,4 @@ public static class AdapterExtensions
         configuration.GetSection("Database").Bind(options);
     }
 
-    private static void ConfigureDiscordClient(DiscordClientOptions options, IConfiguration configuration)
-    {
-        configuration.GetSection("Discord").Bind(options);
-
-        // Configuration values from key vault
-        options.ClientId = configuration["DiscordClientId"] ?? throw new NullReferenceException();
-        options.ClientSecret = configuration["DiscordClientSecret"] ?? throw new NullReferenceException();
-    }
 }

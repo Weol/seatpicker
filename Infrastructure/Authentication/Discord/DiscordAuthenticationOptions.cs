@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography.X509Certificates;
-using Newtonsoft.Json;
 
 namespace Seatpicker.Infrastructure.Authentication.Discord;
 
@@ -16,5 +15,8 @@ public class DiscordAuthenticationOptions
     public int TokenLifetime { get; set; }
 
     [Required]
-    public string Issuer { get; set; } = null!;
+    public string GuildId { get; set; } = null!;
+
+    [Required]
+    public IEnumerable<string> Admins = null!;
 }

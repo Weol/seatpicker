@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Adapters.DiscordClient;
+using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
@@ -119,7 +119,7 @@ public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
     {
         return new ObjectResult("Discord API responded with non-successful status")
         {
-            StatusCode = 500
+            StatusCode = 500,
         };
     }
 }

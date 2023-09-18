@@ -4,7 +4,7 @@ using Seatpicker.Domain;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Seatpicker.IntegrationTests.Tests.Seats.Reservation;
+namespace Seatpicker.IntegrationTests.Tests.Seats.ReservationManagement;
 
 // ReSharper disable once InconsistentNaming
 public class Remove_reservation : IntegrationTestBase, IClassFixture<TestWebApplicationFactory>
@@ -27,7 +27,7 @@ public class Remove_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         SetupAggregates(seat);
 
         //Act
-        var response = await client.DeleteAsync($"reservation/{seat.Id}");
+        var response = await client.DeleteAsync($"reservationmanagement/{seat.Id}");
 
         //Assert
         Assert.Multiple(
@@ -51,7 +51,7 @@ public class Remove_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         SetupAggregates(seat);
 
         //Act
-        var response = await client.DeleteAsync($"reservation/{seat.Id}");
+        var response = await client.DeleteAsync($"reservationmanagement/{seat.Id}");
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -71,7 +71,7 @@ public class Remove_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         SetupAggregates(seat);
 
         //Act
-        var response = await client.DeleteAsync($"reservation/{seat.Id}");
+        var response = await client.DeleteAsync($"reservationmanagement/{seat.Id}");
 
         //Assert
         Assert.Multiple(
@@ -92,7 +92,7 @@ public class Remove_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         var client = GetClient(identity);
 
         //Act
-        var response = await client.DeleteAsync($"reservation/{Guid.NewGuid()}");
+        var response = await client.DeleteAsync($"reservationmanagement/{Guid.NewGuid()}");
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);

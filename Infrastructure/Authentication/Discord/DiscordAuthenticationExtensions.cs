@@ -1,5 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using Microsoft.AspNetCore.Authentication;
+﻿using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 
 namespace Seatpicker.Infrastructure.Authentication.Discord;
 
@@ -7,22 +6,17 @@ public static class DiscordAuthenticationExtensions
 {
     public static IServiceCollection AddDiscordLogin(
         this IServiceCollection services,
-        Action<DiscordAuthenticationOptions, IConfiguration> configureAction)
+        Action<DiscordAuthenticationOptions, IConfiguration> configureAuthAction,
+        Action<DiscordClientOptions, IConfiguration> configureClientAction)
     {
+        services.AddOptions<DiscordAuthenticationOptions>()
+            .Configure(configureAuthAction)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         return services
-            .AddValidatedOptions(configureAction)
+            .AddDiscordClient(configureClientAction)
+            .AddSingleton<DiscordRoleMapper>()
             .AddScoped<DiscordJwtTokenCreator>();
-    }
-
-    public static IApplicationBuilder MapDiscordAuthenticationEndpoints(this IApplicationBuilder app)
-    {
-        app.UseEndpoints(
-            asd =>
-            {
-                asd.MapPost("discord/login", DiscordLoginEndpoints.Login);
-                asd.MapPost("discord/renew", DiscordLoginEndpoints.Renew);
-            });
-
-        return app;
     }
 }

@@ -13,7 +13,6 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Seatpicker.Application.Features;
 using Seatpicker.Infrastructure;
-using Seatpicker.Infrastructure.Adapters.DiscordClient;
 using Seatpicker.IntegrationTests.TestAdapters;
 using Xunit.Abstractions;
 
