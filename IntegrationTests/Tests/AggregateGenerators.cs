@@ -47,6 +47,6 @@ public static class UserGenerator
 {
     public static User Create(params Role[] roles)
     {
-        return new User(new UserId(Guid.NewGuid().ToString()), new Faker().Name.FirstName(), roles);
+        return new User(new UserId(Guid.NewGuid().ToString()), new Faker().Name.FirstName());
     }
 }

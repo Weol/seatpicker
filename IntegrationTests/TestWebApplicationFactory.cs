@@ -29,6 +29,7 @@ public class TestWebApplicationFactory : WebApplicationFactory<Infrastructure.Pr
                 // Values from key vault
                 ["DiscordClientId"] = "9124761923842139",
                 ["DiscordClientSecret"] = "<client-secret>",
+                ["DiscordBotToken"] = "<bot-token>",
                 ["SigningCertificate"] = GenerateSelfSignedBase64Certificate(),
 
                 ["Discord:Uri"] = "https://discord.com/api/v10",
@@ -44,6 +45,9 @@ public class TestWebApplicationFactory : WebApplicationFactory<Infrastructure.Pr
                 // Replace aggregate repository
                 services.RemoveAll<IAggregateRepository>();
                 services.AddPortMapping<IAggregateRepository, TestAggregateRepository>();
+
+                services.RemoveAll<IDocumentRepository>();
+                services.AddPortMapping<IDocumentRepository, TestDocumentRepository>();
 
                 // Add identity generator
                 services.AddSingleton<IdentityGenerator>();

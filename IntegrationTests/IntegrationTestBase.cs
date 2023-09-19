@@ -55,6 +55,17 @@ public abstract class IntegrationTestBase : IDisposable
         transaction.Commit();
     }
 
+    protected void SetupDocuments(params IDocument[] documents)
+    {
+        var repository = factory.Services.GetRequiredService<TestDocumentRepository>();
+        var transaction = repository.CreateTransaction();
+        foreach (var document in documents)
+        {
+            transaction.Store(document);
+        }
+        transaction.Commit();
+    }
+
     protected IEnumerable<TAggregate> GetCommittedAggregates<TAggregate>()
         where TAggregate : AggregateBase
     {
@@ -62,7 +73,14 @@ public abstract class IntegrationTestBase : IDisposable
         return repository.CreateReader().Query<TAggregate>();
     }
 
-    protected void MockOutgoingHttpRequest(
+    protected IEnumerable<TDocument> GetCommittedDocuments<TDocument>()
+        where TDocument : IDocument
+    {
+        var repository = factory.Services.GetRequiredService<TestDocumentRepository>();
+        return repository.CreateReader().Query<TDocument>();
+    }
+
+    protected internal void MockOutgoingHttpRequest(
         Predicate<HttpRequestMessage> matcher,
         Func<HttpRequestMessage, HttpResponseMessage> responder)
     {

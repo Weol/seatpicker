@@ -26,13 +26,14 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         var client = GetClient(identity);
 
         var seat = SeatGenerator.Create();
+        var reserveFor = UserGenerator.Create();
 
         SetupAggregates(seat);
 
         //Act
         var response = await client.PostAsync(
             "reservationmanagement",
-            JsonContent.Create(new ReservationManagementController.CreateReservationForRequestModel(seat.Id)));
+            JsonContent.Create(new ReservationManagementController.CreateReservationForRequestModel(seat.Id, reserveFor.Id)));
 
         //Assert
         Assert.Multiple(
@@ -41,7 +42,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
             {
                 var committedSeat = GetCommittedAggregates<Seat>().Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().NotBeNull();
-                committedSeat.ReservedBy!.Should().Be(identity.User.UserId);
+                committedSeat.ReservedBy!.Should().Be(reserveFor.Id);
             });
     }
 
@@ -53,13 +54,14 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         var client = GetClient(identity);
 
         var seat = SeatGenerator.Create(reservedBy: identity.User);
+        var reserveFor = UserGenerator.Create();
 
         SetupAggregates(seat);
 
         //Act
         var response = await client.PostAsJsonAsync(
             "reservationmanagement",
-            new ReservationManagementController.CreateReservationForRequestModel(seat.Id));
+            new ReservationManagementController.CreateReservationForRequestModel(seat.Id, reserveFor.Id));
 
         //Assert
         Assert.Multiple(
@@ -68,7 +70,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
             {
                 var committedSeat = GetCommittedAggregates<Seat>().Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().NotBeNull();
-                committedSeat.ReservedBy!.Should().Be(identity.User.UserId);
+                committedSeat.ReservedBy!.Should().Be(reserveFor.Id);
             });
     }
 
@@ -80,15 +82,15 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         var client = GetClient(identity);
 
         var alreadyReservedBy = UserGenerator.Create();
-
         var seat = SeatGenerator.Create(reservedBy: alreadyReservedBy);
+        var reserveFor = UserGenerator.Create();
 
         SetupAggregates(seat);
 
         //Act
         var response = await client.PostAsJsonAsync(
             "reservationmanagement",
-            new ReservationManagementController.CreateReservationForRequestModel(seat.Id));
+            new ReservationManagementController.CreateReservationForRequestModel(seat.Id, reserveFor.Id));
 
         //Assert
         Assert.Multiple(
@@ -97,7 +99,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
             {
                 var committedSeat = GetCommittedAggregates<Seat>().Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().NotBeNull();
-                committedSeat.ReservedBy!.Should().Be(alreadyReservedBy.UserId);
+                committedSeat.ReservedBy!.Should().Be(alreadyReservedBy.Id);
             });
     }
 
@@ -109,11 +111,12 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         var client = GetClient(identity);
 
         var seat = SeatGenerator.Create();
+        var reserveFor = UserGenerator.Create();
 
         //Act
         var response = await client.PostAsJsonAsync(
             "reservationmanagement",
-            new ReservationManagementController.CreateReservationForRequestModel(seat.Id));
+            new ReservationManagementController.CreateReservationForRequestModel(seat.Id, reserveFor.Id));
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);

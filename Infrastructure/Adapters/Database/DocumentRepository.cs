@@ -37,10 +37,10 @@ public class DocumentTransaction : IDocumentTransaction
         reader = new DocumentReader(session);
     }
 
-    public void Store<TDocument>(params TDocument[] documents)
+    public void Store<TDocument>(params TDocument[] documentsToAdd)
         where TDocument : IDocument
     {
-        session.Store(documents);
+        session.Store(documentsToAdd);
     }
 
     public void Delete<TDocument>(string id)

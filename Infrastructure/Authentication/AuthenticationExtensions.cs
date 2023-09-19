@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Seatpicker.Infrastructure.Authentication.Discord;
 using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
@@ -41,6 +43,8 @@ public static class AuthenticationExtensions
         options.TokenValidationParameters.ValidIssuer = discordOptions.Value.GuildId;
         options.TokenValidationParameters.IssuerSigningKey = securityKey;
         options.TokenValidationParameters.ValidateAudience = false;
+        options.TokenValidationParameters.NameClaimType = JwtRegisteredClaimNames.Name;
+        options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
     }
 
     private static void ConfigureDiscordAuthentication(

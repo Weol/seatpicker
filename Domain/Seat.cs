@@ -20,7 +20,7 @@ public class Seat : AggregateBase
     {
         if (title.Length == 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
 
-        var evt = new SeatCreated(id, title, bounds, initiator.UserId);
+        var evt = new SeatCreated(id, title, bounds, initiator.Id);
         Raise(evt);
         Apply(evt);
     }
@@ -34,7 +34,7 @@ public class Seat : AggregateBase
     {
         if (title.Length == 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
 
-        var evt = new SeatTitleChanged(title, initiator.UserId);
+        var evt = new SeatTitleChanged(title, initiator.Id);
 
         Raise(evt);
         Apply(evt);
@@ -42,7 +42,7 @@ public class Seat : AggregateBase
 
     public void SetBounds(Bounds bounds, User initiator)
     {
-        var evt = new SeatBoundsChanged(bounds, initiator.UserId);
+        var evt = new SeatBoundsChanged(bounds, initiator.Id);
 
         Raise(evt);
         Apply(evt);
@@ -50,7 +50,7 @@ public class Seat : AggregateBase
 
     public void Archive(User initiator)
     {
-        var evt = new SeatArchived(initiator.UserId);
+        var evt = new SeatArchived(initiator.Id);
 
         Raise(evt);
         Apply(evt);
@@ -58,28 +58,28 @@ public class Seat : AggregateBase
 
     public void MakeReservation(User user, ICollection<Seat> seatsReservedByUser)
     {
-        if (user.UserId == ReservedBy) return;
+        if (user.Id == ReservedBy) return;
 
         if (seatsReservedByUser.Any()) throw new DuplicateSeatReservationException(this, seatsReservedByUser, user);
 
         if (ReservedBy is not null)
-            throw new SeatReservationConflictException(this, ReservedBy, user.UserId);
+            throw new SeatReservationConflictException(this, ReservedBy, user.Id);
 
-        var evt = new SeatReservationMade(user.UserId);
+        var evt = new SeatReservationMade(user.Id);
         Raise(evt);
         Apply(evt);
     }
 
     public void MakeReservationFor(User user, ICollection<Seat> seatsReservedByUser, User madeBy)
     {
-        if (user.UserId == ReservedBy) return;
+        if (user.Id == ReservedBy) return;
 
         if (seatsReservedByUser.Any()) throw new DuplicateSeatReservationException(this, seatsReservedByUser, user);
 
         if (ReservedBy is not null)
-            throw new SeatReservationConflictException(this, ReservedBy, user.UserId);
+            throw new SeatReservationConflictException(this, ReservedBy, user.Id);
 
-        var evt = new SeatReservationMadeFor(user.UserId, madeBy.UserId);
+        var evt = new SeatReservationMadeFor(user.Id, madeBy.Id);
         Raise(evt);
         Apply(evt);
     }
@@ -88,8 +88,8 @@ public class Seat : AggregateBase
     {
         if (ReservedBy is null) return;
 
-        if (ReservedBy != initiator.UserId)
-            throw new SeatReservationConflictException(this, ReservedBy, initiator.UserId);
+        if (ReservedBy != initiator.Id)
+            throw new SeatReservationConflictException(this, ReservedBy, initiator.Id);
 
         var evt = new SeatReservationRemoved(ReservedBy);
         Raise(evt);
@@ -100,7 +100,7 @@ public class Seat : AggregateBase
     {
         if (ReservedBy is null) return;
 
-        var evt = new SeatReservationRemovedFor(ReservedBy, removedBy.UserId);
+        var evt = new SeatReservationRemovedFor(ReservedBy, removedBy.Id);
         Raise(evt);
         Apply(evt);
     }
@@ -108,15 +108,15 @@ public class Seat : AggregateBase
     public void MoveReservation(User user, Seat fromSeat)
     {
         if (ReservedBy is not null)
-            throw new SeatReservationConflictException(this, ReservedBy, user.UserId);
+            throw new SeatReservationConflictException(this, ReservedBy, user.Id);
 
         if (fromSeat.ReservedBy is null)
             throw new SeatReservationNotFoundException { Seat = fromSeat };
 
-        if (fromSeat.ReservedBy != user.UserId)
-            throw new SeatReservationConflictException(this, fromSeat.ReservedBy, user.UserId);
+        if (fromSeat.ReservedBy != user.Id)
+            throw new SeatReservationConflictException(this, fromSeat.ReservedBy, user.Id);
 
-        var evt = new SeatReservationMoved(user.UserId, fromSeat.Id, Id);
+        var evt = new SeatReservationMoved(user.Id, fromSeat.Id, Id);
 
         fromSeat.Raise(evt);
         fromSeat.Apply(evt);
@@ -128,12 +128,12 @@ public class Seat : AggregateBase
     public void MoveReservationFor(User user, Seat fromSeat, User movedBy)
     {
         if (ReservedBy is not null)
-            throw new SeatReservationConflictException(this, ReservedBy, user.UserId);
+            throw new SeatReservationConflictException(this, ReservedBy, user.Id);
 
         if (fromSeat.ReservedBy is null)
             throw new SeatReservationNotFoundException { Seat = fromSeat };
 
-        var evt = new SeatReservationMovedFor(user.UserId, fromSeat.Id, Id, movedBy.UserId);
+        var evt = new SeatReservationMovedFor(user.Id, fromSeat.Id, Id, movedBy.Id);
 
         fromSeat.Raise(evt);
         fromSeat.Apply(evt);

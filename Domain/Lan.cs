@@ -8,7 +8,7 @@ public class Lan : AggregateBase
     {
         if (title.Length <= 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
 
-        var evt = new LanCreated(lanId, title, background, initiator.UserId);
+        var evt = new LanCreated(lanId, title, background, initiator.Id);
 
         Raise(evt);
         Apply(evt);
@@ -27,14 +27,14 @@ public class Lan : AggregateBase
 
     public void ChangeBackground(byte[] newBackground, User initiator)
     {
-        var evt = new LanBackgroundChanged(newBackground, initiator.UserId);
+        var evt = new LanBackgroundChanged(newBackground, initiator.Id);
         Raise(evt);
         Apply(evt);
     }
 
     public void ChangeTitle(string newTitle, User initiator)
     {
-        var evt = new LanTitleChanged(newTitle, initiator.UserId);
+        var evt = new LanTitleChanged(newTitle, initiator.Id);
         Raise(evt);
         Apply(evt);
     }

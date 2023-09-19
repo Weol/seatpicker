@@ -52,7 +52,7 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
                 committedFromSeat.ReservedBy.Should().BeNull();
                 committedToSeat.ReservedBy.Should().NotBeNull();
 
-                committedToSeat.ReservedBy!.Should().Be(identity.User.UserId);
+                committedToSeat.ReservedBy!.Should().Be(identity.User.Id);
             });
     }
 

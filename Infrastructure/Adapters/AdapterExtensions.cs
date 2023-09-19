@@ -7,7 +7,9 @@ public static class AdapterExtensions
 {
     public static IServiceCollection AddAdapters(this IServiceCollection services)
     {
-        return services.AddDatabase(ConfigureDatabase).AddUserProvider();
+        return services
+            .AddDatabase(ConfigureDatabase)
+            .AddUserProvider();
     }
 
     private static void ConfigureDatabase(DatabaseOptions options, IConfiguration configuration)

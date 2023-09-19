@@ -23,7 +23,7 @@ public class LoggedInUserAccessor : ILoggedInUserAccessor
     public User Get()
     {
         var id  = HttpContext.User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
-        var nick = HttpContext.User.Claims.First(x => x.Type == ClaimTypes.Name).Value;
+        var nick = HttpContext.User.Claims.First(x => x.Type is ClaimTypes.Name or "name").Value;
 
         return new User(new UserId(id), nick);
     }

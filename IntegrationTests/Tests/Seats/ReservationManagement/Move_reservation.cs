@@ -19,13 +19,14 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
     }
 
     [Fact]
-    public async Task succeeds_when_seat_is_reserved_by_user_and_other_seat_is_not_reserved()
+    public async Task succeeds_when_seat_is_reserved_and_other_seat_is_not_reserved()
     {
         // Arrange
         var identity = await CreateIdentity();
         var client = GetClient(identity);
 
-        var fromSeat = SeatGenerator.Create(reservedBy: identity.User);
+        var reservedBy = UserGenerator.Create();
+        var fromSeat = SeatGenerator.Create(reservedBy: reservedBy);
         var toSeat = SeatGenerator.Create();
 
         SetupAggregates(fromSeat, toSeat);
@@ -33,7 +34,7 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
         //Act
         var response = await client.PutAsJsonAsync(
             $"reservationmanagement/{fromSeat.Id}",
-            new ReservationManagementController.MoveReservationForRequestModel(fromSeat.Id, toSeat.Id));
+            new ReservationManagementController.MoveReservationForRequestModel(reservedBy.Id, fromSeat.Id, toSeat.Id));
 
         //Assert
         Assert.Multiple(
@@ -51,14 +52,51 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
                     .Subject;
 
                 committedFromSeat.ReservedBy.Should().BeNull();
-                committedToSeat.ReservedBy.Should().NotBeNull();
 
-                committedToSeat.ReservedBy!.Should().Be(identity.User.UserId);
+                committedToSeat.ReservedBy.Should().NotBeNull();
+                committedToSeat.ReservedBy!.Should().Be(reservedBy.Id);
             });
     }
 
     [Fact]
-    public async Task fails_when_seat_is_reserved_by_another_user()
+    public async Task fails_when_seat_is_not_reserved()
+    {
+        // Arrange
+        var identity = await CreateIdentity();
+        var client = GetClient(identity);
+
+        var fromSeat = SeatGenerator.Create();
+        var toSeat = SeatGenerator.Create();
+
+        SetupAggregates(fromSeat, toSeat);
+
+        //Act
+        var response = await client.PutAsJsonAsync(
+            $"reservationmanagement/{fromSeat.Id}",
+            new ReservationManagementController.MoveReservationForRequestModel(UserGenerator.Create().Id, fromSeat.Id, toSeat.Id));
+
+        //Assert
+        Assert.Multiple(
+            () => response.StatusCode.Should().Be(HttpStatusCode.Conflict),
+            () =>
+            {
+                var committedFromSeat = GetCommittedAggregates<Seat>()
+                    .Should()
+                    .ContainSingle(seat => seat.Id == fromSeat.Id)
+                    .Subject;
+
+                var committedToSeat = GetCommittedAggregates<Seat>()
+                    .Should()
+                    .ContainSingle(seat => seat.Id == toSeat.Id)
+                    .Subject;
+
+                committedFromSeat.ReservedBy.Should().Be(fromSeat.ReservedBy);
+                committedToSeat.ReservedBy.Should().BeNull();
+            });
+    }
+
+    [Fact]
+    public async Task fails_when_seat_is_not_reserved_by_user()
     {
         // Arrange
         var identity = await CreateIdentity();
@@ -72,7 +110,7 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
         //Act
         var response = await client.PutAsJsonAsync(
             $"reservationmanagement/{fromSeat.Id}",
-            new ReservationManagementController.MoveReservationForRequestModel(fromSeat.Id, toSeat.Id));
+            new ReservationManagementController.MoveReservationForRequestModel(UserGenerator.Create().Id, fromSeat.Id, toSeat.Id));
 
         //Assert
         Assert.Multiple(

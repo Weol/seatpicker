@@ -80,7 +80,7 @@ public class Remove_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
             {
                 var committedSeat = GetCommittedAggregates<Seat>().Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().NotBeNull();
-                committedSeat.ReservedBy!.Should().Be(alreadyReservedBy.UserId);
+                committedSeat.ReservedBy!.Should().Be(alreadyReservedBy.Id);
             });
     }
 

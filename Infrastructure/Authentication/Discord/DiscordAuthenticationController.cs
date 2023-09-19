@@ -1,33 +1,40 @@
 ﻿using System.Net;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Seatpicker.Application.Features;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
+using Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
 namespace Seatpicker.Infrastructure.Authentication.Discord;
 
 [ApiController]
-[Route("[controller]")]
-public class DiscordAuthenticationController
+[Route("discord")]
+public class DiscordAuthenticationController : ControllerBase
 {
     private readonly DiscordClient.DiscordClient discordClient;
     private readonly DiscordJwtTokenCreator tokenCreator;
     private readonly IDocumentRepository documentRepository;
     private readonly DiscordRoleMapper discordRoleMapper;
     private readonly DiscordAuthenticationOptions options;
+    private readonly ILoggedInUserAccessor loggedInUserAccessor;
 
     public DiscordAuthenticationController(
         DiscordClient.DiscordClient discordClient,
         DiscordJwtTokenCreator tokenCreator,
         IDocumentRepository documentRepository,
         IOptions<DiscordAuthenticationOptions> options,
-        DiscordRoleMapper discordRoleMapper)
+        DiscordRoleMapper discordRoleMapper,
+        ILoggedInUserAccessor loggedInUserAccessor)
     {
         this.discordClient = discordClient;
         this.tokenCreator = tokenCreator;
         this.documentRepository = documentRepository;
         this.discordRoleMapper = discordRoleMapper;
+        this.loggedInUserAccessor = loggedInUserAccessor;
         this.options = options.Value;
     }
 
@@ -63,13 +70,28 @@ public class DiscordAuthenticationController
         }
     }
 
+    [HttpGet("test")]
+    [Authorize]
+    public async Task<IActionResult> Test()
+    {
+        var roles = HttpContext.User.Identities
+            .SelectMany(identity => identity.Claims
+                    .Where(claim => claim.Type == identity.RoleClaimType)
+                    .Select(claim => claim.Value))
+            .ToArray();
+
+        var loggedInuser = loggedInUserAccessor.Get();
+
+        return new OkObjectResult(new TestResponseModel(loggedInuser.Id, loggedInuser.Name, roles));
+    }
+
     [HttpGet("roles")]
     public async Task<IActionResult> GetRoles()
     {
         var roleMappings = await discordRoleMapper.Get(options.GuildId);
         var guildRoles = await discordClient.GetGuildRoles(options.GuildId);
 
-        IEnumerable<DiscordRoleMappingResponse> Join()
+        IEnumerable<DiscordRoleMappingResponseModel> Join()
         {
             foreach (var guildRole in guildRoles)
             {
@@ -79,7 +101,7 @@ public class DiscordAuthenticationController
                     if (guildRole.Id == mapping.DiscordRoleId) role = mapping.Role;
                 }
 
-                yield return new DiscordRoleMappingResponse(
+                yield return new DiscordRoleMappingResponseModel(
                     guildRole.Id,
                     guildRole.Name,
                     guildRole.Color,
@@ -92,9 +114,9 @@ public class DiscordAuthenticationController
     }
 
     [HttpPut("roles")]
-    public async Task<IActionResult> PutRoles([FromBody] DiscordRoleMapping[] model)
+    public async Task<IActionResult> PutRoles([FromBody] DiscordRoleMappingModel model)
     {
-        await discordRoleMapper.Set(model);
+        await discordRoleMapper.Set(model.Mappings);
         return new OkResult();
     }
 
@@ -105,7 +127,7 @@ public class DiscordAuthenticationController
         // Minus 10 just to make sure that the discord token expires a bit after the jwt token actually expires
         var expiresAt = DateTimeOffset.UtcNow.AddSeconds(accessToken.ExpiresIn - 10);
 
-        var guildMember = await discordClient.GetGuildMember(options.GuildId, accessToken.AccessToken);
+        var guildMember = await discordClient.GetGuildMember(options.GuildId, discordUser.Id);
         var roleMapping = await discordRoleMapper.Get(options.GuildId);
 
         var roles = GetRoles(roleMapping, guildMember).ToArray();
@@ -124,13 +146,15 @@ public class DiscordAuthenticationController
 
     private IEnumerable<Role> GetRoles(DiscordRoleMapping[] roleMapping, GuildMember guildMember)
     {
+        yield return Role.User;
+
         if (options.Admins.Any(admin => admin == guildMember.DiscordUser.Id)) yield return Role.Admin;
 
         foreach (var guildRoleId in guildMember.Roles)
         {
             foreach (var mapping in roleMapping)
             {
-                if (guildRoleId == mapping.DiscordRoleId) continue;
+                if (guildRoleId != mapping.DiscordRoleId) continue;
 
                 yield return mapping.Role;
             }
@@ -143,7 +167,11 @@ public class DiscordAuthenticationController
 
     public record TokenResponseModel(string Token);
 
-    public record DiscordRoleMappingResponse(
+    public record TestResponseModel(string? Id, string? Name, string[] Roles);
+
+    public record DiscordRoleMappingModel(DiscordRoleMapping[] Mappings);
+
+    public record DiscordRoleMappingResponseModel(
         string DiscordRoleId,
         string DiscordRoleName,
         int DiscordRoleColor,

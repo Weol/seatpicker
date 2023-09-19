@@ -112,7 +112,7 @@ public class TestAggregateReader : IAggregateReader
     {
         if (!aggregates.TryGetValue(id, out var tuple)) return null;
 
-        if (tuple.Aggregate is not TAggregate typedAggregate) throw new TypeMismatchException
+        if (tuple.Aggregate is not TAggregate typedAggregate) throw new AggregateTypeMismatchException
         {
             Id = id,
             ExpectedType = typeof(TAggregate),
@@ -140,7 +140,7 @@ public class TestAggregateReader : IAggregateReader
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }
 
-public class TypeMismatchException : Exception
+public class AggregateTypeMismatchException : Exception
 {
     public required Guid Id { get; init; }
     public required Type ExpectedType { get; init; }

@@ -2,7 +2,7 @@
 
 namespace Seatpicker.Domain;
 
-public record User(UserId UserId, string Name);
+public record User(UserId Id, string Name);
 
 public record UserId(string Id)
 {

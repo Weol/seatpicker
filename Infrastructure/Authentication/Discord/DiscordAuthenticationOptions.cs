@@ -18,5 +18,5 @@ public class DiscordAuthenticationOptions
     public string GuildId { get; set; } = null!;
 
     [Required]
-    public IEnumerable<string> Admins = null!;
+    public string[] Admins { get; set; } = null!;
 }

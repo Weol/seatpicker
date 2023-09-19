@@ -25,9 +25,9 @@ public class IdentityGenerator
             Avatar: null
         );
 
-        var token = await jwtTokenCreator.CreateToken(discordToken, roles.Select(x => x.ToString()).ToArray());
+        var token = await jwtTokenCreator.CreateToken(discordToken, roles);
 
-        var user = new User(new UserId(discordToken.Id), discordToken.Nick, roles);
+        var user = new User(new UserId(discordToken.Id), discordToken.Nick);
         return new TestIdentity(user, roles, token);
     }
 }
