@@ -39,11 +39,11 @@ public class DiscordAuthenticationController : ControllerBase
     }
 
     [HttpPost("renew")]
-    public async Task<IActionResult> Renew([FromBody] TokenRenewModel model)
+    public async Task<IActionResult> Renew([FromBody] RenewRequestModel requestModel)
     {
         try
         {
-            var accessToken = await discordClient.RefreshAccessToken(model.RefreshToken);
+            var accessToken = await discordClient.RefreshAccessToken(requestModel.RefreshToken);
             var discordUser = await discordClient.Lookup(accessToken.AccessToken);
 
             return new OkObjectResult(await CreateTokenRequestModel(accessToken, discordUser));
@@ -55,7 +55,7 @@ public class DiscordAuthenticationController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] TokenRequestModel model)
+    public async Task<IActionResult> Login([FromBody] LoginRequestModel model)
     {
         try
         {
@@ -114,9 +114,9 @@ public class DiscordAuthenticationController : ControllerBase
     }
 
     [HttpPut("roles")]
-    public async Task<IActionResult> PutRoles([FromBody] DiscordRoleMappingModel model)
+    public async Task<IActionResult> PutRoles([FromBody] DiscordRoleMappingRequestModel requestModel)
     {
-        await discordRoleMapper.Set(model.Mappings);
+        await discordRoleMapper.Set(requestModel.Mappings);
         return new OkResult();
     }
 
@@ -161,15 +161,15 @@ public class DiscordAuthenticationController : ControllerBase
         }
     }
 
-    public record TokenRequestModel(string Token);
+    public record LoginRequestModel(string Token);
 
-    public record TokenRenewModel(string RefreshToken);
+    public record RenewRequestModel(string RefreshToken);
 
     public record TokenResponseModel(string Token);
 
     public record TestResponseModel(string? Id, string? Name, string[] Roles);
 
-    public record DiscordRoleMappingModel(DiscordRoleMapping[] Mappings);
+    public record DiscordRoleMappingRequestModel(DiscordRoleMapping[] Mappings);
 
     public record DiscordRoleMappingResponseModel(
         string DiscordRoleId,

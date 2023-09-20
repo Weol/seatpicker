@@ -40,7 +40,7 @@ public class Renew : IntegrationTestBase, IClassFixture<TestWebApplicationFactor
         //Act
         var response = await client.PostAsync(
             "discord/renew",
-            JsonContent.Create(new DiscordAuthenticationController.TokenRenewModel(refreshToken)));
+            JsonContent.Create(new DiscordAuthenticationController.RenewRequestModel(refreshToken)));
         var responseModel = await response.Content.ReadFromJsonAsync<DiscordAuthenticationController.TokenResponseModel>();
 
         // Assert
@@ -84,7 +84,7 @@ public class Renew : IntegrationTestBase, IClassFixture<TestWebApplicationFactor
         //Act
         var response = await client.PostAsync(
             "discord/renew",
-            JsonContent.Create(new DiscordAuthenticationController.TokenRenewModel(refreshToken)));
+            JsonContent.Create(new DiscordAuthenticationController.RenewRequestModel(refreshToken)));
         var responseModel = await response.Content.ReadFromJsonAsync<DiscordAuthenticationController.TokenResponseModel>();
 
         // Assert

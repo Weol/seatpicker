@@ -73,7 +73,7 @@ public class Roles : IntegrationTestBase, IClassFixture<TestWebApplicationFactor
         //Act
         var response = await client.PutAsync(
             "discord/roles",
-            JsonContent.Create(new DiscordAuthenticationController.DiscordRoleMappingModel(roleMappings)));
+            JsonContent.Create(new DiscordAuthenticationController.DiscordRoleMappingRequestModel(roleMappings)));
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

@@ -40,7 +40,7 @@ public class Login : IntegrationTestBase, IClassFixture<TestWebApplicationFactor
         //Act
         var response = await client.PostAsync(
             "discord/login",
-            JsonContent.Create(new DiscordAuthenticationController.TokenRequestModel(token)));
+            JsonContent.Create(new DiscordAuthenticationController.LoginRequestModel(token)));
         var responseModel
             = await response.Content.ReadFromJsonAsync<DiscordAuthenticationController.TokenResponseModel>();
 
@@ -85,7 +85,7 @@ public class Login : IntegrationTestBase, IClassFixture<TestWebApplicationFactor
         //Act
         var response = await client.PostAsync(
             "discord/login",
-            JsonContent.Create(new DiscordAuthenticationController.TokenRequestModel(token)));
+            JsonContent.Create(new DiscordAuthenticationController.LoginRequestModel(token)));
         var responseModel
             = await response.Content.ReadFromJsonAsync<DiscordAuthenticationController.TokenResponseModel>();
 

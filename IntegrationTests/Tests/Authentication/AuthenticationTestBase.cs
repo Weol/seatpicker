@@ -16,16 +16,23 @@ using Xunit.Abstractions;
 namespace Seatpicker.IntegrationTests.Tests;
 
 // ReSharper disable once InconsistentNaming
-public static class AuthenticationTestExtensions
+public class AuthenticationTestBase : IntegrationTestBase, IClassFixture<TestWebApplicationFactory>
 {
-    public static void SetupRefreshResponse(this IntegrationTestBase integrationTestBase)
+    public AuthenticationTestBase(TestWebApplicationFactory factory, ITestOutputHelper testOutputHelper) : base(
+        factory,
+        testOutputHelper)
     {
-        integrationTestBase.MockOutgoingHttpRequest(
-            request => request.RequestUri!.ToString().EndsWith("oauth2/token"),
-            _ => new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(
-                    """
+    }
+
+    {
+        public void SetupRefreshResponse(IntegrationTestBase integrationTestBase)
+        {
+            integrationTestBase.MockOutgoingHttpRequest(
+                request => request.RequestUri!.ToString().EndsWith("oauth2/token"),
+                _ => new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(
+                        """
                         {
                             "access_token": "9283hfaojflsjjdskjfa3ijdsfasfd",
                             "token_type": "Bearer",
@@ -34,17 +41,17 @@ public static class AuthenticationTestExtensions
                             "scope": "identify"
                         }
                     """),
-            });
-    }
+                });
+        }
 
-    public static void SetupAccessTokenResponse(this IntegrationTestBase integrationTestBase)
-    {
-        integrationTestBase.MockOutgoingHttpRequest(
-            request => request.RequestUri!.ToString().EndsWith("oauth2/token"),
-            _ => new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(
-                    """
+        public static void SetupAccessTokenResponse(this IntegrationTestBase integrationTestBase)
+        {
+            integrationTestBase.MockOutgoingHttpRequest(
+                request => request.RequestUri!.ToString().EndsWith("oauth2/token"),
+                _ => new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(
+                        """
                         {
                             "access_token": "auiywbfuiksdflkaelkiuadsf",
                             "token_type": "Bearer",
@@ -53,17 +60,17 @@ public static class AuthenticationTestExtensions
                             "scope": "identify"
                         }
                     """),
-            });
-    }
+                });
+        }
 
-    public static void SetupLookupResponse(this IntegrationTestBase integrationTestBase, DiscordUser discordUser)
-    {
-        integrationTestBase.MockOutgoingHttpRequest(
-            request => request.RequestUri!.ToString().EndsWith("users/@me"),
-            _ => new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(
-                    $$"""
+        public static void SetupLookupResponse(this IntegrationTestBase integrationTestBase, DiscordUser discordUser)
+        {
+            integrationTestBase.MockOutgoingHttpRequest(
+                request => request.RequestUri!.ToString().EndsWith("users/@me"),
+                _ => new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(
+                        $$"""
                         {
                           "id": "{{discordUser.Id}}",
                           "username": "{{discordUser.Username}}",
@@ -71,19 +78,22 @@ public static class AuthenticationTestExtensions
                           "avatar": {{discordUser.Avatar ?? "null"}}
                         }
                     """),
-            });
-    }
+                });
+        }
 
-    public static void SetupGuildMemberResponse(this IntegrationTestBase integrationTestBase, DiscordUser discordUser, params string[] guildRoles)
-    {
-        var roles = string.Join(",", guildRoles.Select(role => "\"" + role + "\""));
+        public static void SetupGuildMemberResponse(
+            this IntegrationTestBase integrationTestBase,
+            DiscordUser discordUser,
+            params string[] guildRoles)
+        {
+            var roles = string.Join(",", guildRoles.Select(role => "\"" + role + "\""));
 
-        integrationTestBase.MockOutgoingHttpRequest(
-            request => request.RequestUri!.ToString().EndsWith($"members/{discordUser.Id}"),
-            _ => new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(
-                    $$"""
+            integrationTestBase.MockOutgoingHttpRequest(
+                request => request.RequestUri!.ToString().EndsWith($"members/{discordUser.Id}"),
+                _ => new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(
+                        $$"""
                         {
                           "id": "{{discordUser.Id}}",
                           "avatar": {{discordUser.Avatar ?? "null"}},
@@ -96,17 +106,17 @@ public static class AuthenticationTestExtensions
                           }
                         }
                     """),
-            });
-    }
+                });
+        }
 
-    public static void SetupRolesResponse(this IntegrationTestBase integrationTestBase, string operatorId)
-    {
-        integrationTestBase.MockOutgoingHttpRequest(
-            request => request.RequestUri!.ToString().EndsWith("roles"),
-            _ => new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(
-                    $$"""
+        public static void SetupRolesResponse(this IntegrationTestBase integrationTestBase, string operatorId)
+        {
+            integrationTestBase.MockOutgoingHttpRequest(
+                request => request.RequestUri!.ToString().EndsWith("roles"),
+                _ => new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(
+                        $$"""
                         [
                           {
                             "id": "1234567",
@@ -120,6 +130,6 @@ public static class AuthenticationTestExtensions
                           }
                         ]
                     """),
-            });
+                });
+        }
     }
-}
