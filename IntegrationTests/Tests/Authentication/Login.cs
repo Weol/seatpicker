@@ -1,22 +1,17 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using System.Net.Http.Headers;
+﻿using System.Net;
 using System.Net.Http.Json;
-using System.Security.Claims;
 using FluentAssertions;
-using Microsoft.IdentityModel.Tokens;
-using NSubstitute;
+using Microsoft.Extensions.Options;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Authentication.Discord;
 using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
-using Seatpicker.Infrastructure.Entrypoints.Http;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Seatpicker.IntegrationTests.Tests;
+namespace Seatpicker.IntegrationTests.Tests.Authentication;
 
 // ReSharper disable once InconsistentNaming
-public class Login : IntegrationTestBase, IClassFixture<TestWebApplicationFactory>
+public class Login : AuthenticationTestBase
 {
     public Login(TestWebApplicationFactory factory, ITestOutputHelper testOutputHelper) : base(
         factory,
@@ -33,33 +28,31 @@ public class Login : IntegrationTestBase, IClassFixture<TestWebApplicationFactor
 
         var discordUser = new DiscordUser("123", "Tore Tang", null);
 
-        this.SetupAccessTokenResponse();
-        this.SetupLookupResponse(discordUser);
-        this.SetupGuildMemberResponse(discordUser);
+        SetupAccessTokenResponse();
+        SetupLookupResponse(discordUser);
+        SetupGuildMemberResponse(discordUser);
 
         //Act
         var response = await client.PostAsync(
             "discord/login",
             JsonContent.Create(new DiscordAuthenticationController.LoginRequestModel(token)));
+
         var responseModel
-            = await response.Content.ReadFromJsonAsync<DiscordAuthenticationController.TokenResponseModel>();
+            = await response.Content.ReadAsJsonAsync<DiscordAuthenticationController.TokenResponseModel>();
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         responseModel.Should().NotBeNull();
 
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", responseModel!.Token);
-        var testResponse = await client.GetAsync("discord/test");
-        var testResponseModel
-            = await testResponse.Content.ReadFromJsonAsync<DiscordAuthenticationController.TestResponseModel>();
-
+        var testResponseModel = await TestAuthentication(client, responseModel!.Token);
         testResponseModel.Should().NotBeNull();
 
         Assert.Multiple(
-            () => testResponseModel!.Id.Should().Be(discordUser.Id),
-            () => testResponseModel!.Name.Should().Be(discordUser.Username),
-            () => testResponseModel!.Roles.Should().Contain(Role.User.ToString()));
+            () => testResponseModel.Id.Should().Be(discordUser.Id),
+            () => testResponseModel.Name.Should().Be(discordUser.Username),
+            () => testResponseModel.Roles.Should().Contain(Role.User.ToString()));
     }
+
 
     [Fact]
     public async Task login_succeeds_when_discord_token_is_valid_and_has_roles_according_to_mapping()
@@ -73,37 +66,34 @@ public class Login : IntegrationTestBase, IClassFixture<TestWebApplicationFactor
         var guildOperatorRoleId = "999999";
 
         var mapper = GetService<DiscordRoleMapper>();
-        await mapper.Set(new[]
+        var options = GetService<IOptions<DiscordAuthenticationOptions>>().Value;
+        await mapper.Set(options.GuildId , new[]
         {
             new DiscordRoleMapping(guildOperatorRoleId, Role.Operator),
         });
 
-        this.SetupAccessTokenResponse();
-        this.SetupLookupResponse(discordUser);
-        this.SetupGuildMemberResponse(discordUser, guildOperatorRoleId);
+        SetupAccessTokenResponse();
+        SetupLookupResponse(discordUser);
+        SetupGuildMemberResponse(discordUser, guildOperatorRoleId);
 
         //Act
         var response = await client.PostAsync(
             "discord/login",
             JsonContent.Create(new DiscordAuthenticationController.LoginRequestModel(token)));
         var responseModel
-            = await response.Content.ReadFromJsonAsync<DiscordAuthenticationController.TokenResponseModel>();
+            = await response.Content.ReadAsJsonAsync<DiscordAuthenticationController.TokenResponseModel>();
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         responseModel.Should().NotBeNull();
 
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", responseModel!.Token);
-        var testResponse = await client.GetAsync("discord/test");
-        var testResponseModel
-            = await testResponse.Content.ReadFromJsonAsync<DiscordAuthenticationController.TestResponseModel>();
-
+        var testResponseModel = await TestAuthentication(client, responseModel!.Token);
         testResponseModel.Should().NotBeNull();
 
         Assert.Multiple(
-            () => testResponseModel!.Id.Should().Be(discordUser.Id),
-            () => testResponseModel!.Name.Should().Be(discordUser.Username),
-            () => testResponseModel!.Roles.Should().Contain(Role.User.ToString()),
-            () => testResponseModel!.Roles.Should().Contain(Role.Operator.ToString()));
+            () => testResponseModel.Id.Should().Be(discordUser.Id),
+            () => testResponseModel.Name.Should().Be(discordUser.Username),
+            () => testResponseModel.Roles.Should().Contain(Role.User.ToString()),
+            () => testResponseModel.Roles.Should().Contain(Role.Operator.ToString()));
     }
 }

@@ -1,38 +1,30 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Security.Claims;
-using FluentAssertions;
-using Microsoft.IdentityModel.Tokens;
-using NSubstitute;
-using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Authentication.Discord;
 using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
-using Seatpicker.Infrastructure.Entrypoints.Http;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Seatpicker.IntegrationTests.Tests;
+namespace Seatpicker.IntegrationTests.Tests.Authentication;
 
 // ReSharper disable once InconsistentNaming
 public class AuthenticationTestBase : IntegrationTestBase, IClassFixture<TestWebApplicationFactory>
 {
-    public AuthenticationTestBase(TestWebApplicationFactory factory, ITestOutputHelper testOutputHelper) : base(
+    protected AuthenticationTestBase(TestWebApplicationFactory factory, ITestOutputHelper testOutputHelper) : base(
         factory,
         testOutputHelper)
     {
     }
 
+    protected void SetupRefreshResponse()
     {
-        public void SetupRefreshResponse(IntegrationTestBase integrationTestBase)
-        {
-            integrationTestBase.MockOutgoingHttpRequest(
-                request => request.RequestUri!.ToString().EndsWith("oauth2/token"),
-                _ => new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(
-                        """
+        MockOutgoingHttpRequest(
+            request => request.RequestUri!.ToString().EndsWith("oauth2/token"),
+            _ => new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(
+                    """
                         {
                             "access_token": "9283hfaojflsjjdskjfa3ijdsfasfd",
                             "token_type": "Bearer",
@@ -41,17 +33,17 @@ public class AuthenticationTestBase : IntegrationTestBase, IClassFixture<TestWeb
                             "scope": "identify"
                         }
                     """),
-                });
-        }
+            });
+    }
 
-        public static void SetupAccessTokenResponse(this IntegrationTestBase integrationTestBase)
-        {
-            integrationTestBase.MockOutgoingHttpRequest(
-                request => request.RequestUri!.ToString().EndsWith("oauth2/token"),
-                _ => new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(
-                        """
+    protected void SetupAccessTokenResponse()
+    {
+        MockOutgoingHttpRequest(
+            request => request.RequestUri!.ToString().EndsWith("oauth2/token"),
+            _ => new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(
+                    """
                         {
                             "access_token": "auiywbfuiksdflkaelkiuadsf",
                             "token_type": "Bearer",
@@ -60,63 +52,60 @@ public class AuthenticationTestBase : IntegrationTestBase, IClassFixture<TestWeb
                             "scope": "identify"
                         }
                     """),
-                });
-        }
+            });
+    }
 
-        public static void SetupLookupResponse(this IntegrationTestBase integrationTestBase, DiscordUser discordUser)
-        {
-            integrationTestBase.MockOutgoingHttpRequest(
-                request => request.RequestUri!.ToString().EndsWith("users/@me"),
-                _ => new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(
-                        $$"""
+    protected void SetupLookupResponse(DiscordUser discordUser)
+    {
+        MockOutgoingHttpRequest(
+            request => request.RequestUri!.ToString().EndsWith("users/@me"),
+            _ => new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(
+                    $$"""
                         {
-                          "id": "{{discordUser.Id}}",
-                          "username": "{{discordUser.Username}}",
+                          "id": "{{ discordUser.Id}}",
+                          "username": "{{ discordUser.Username}}",
                           "discriminator": "1337",
-                          "avatar": {{discordUser.Avatar ?? "null"}}
+                          "avatar": {{ discordUser.Avatar ?? "null"}}
                         }
-                    """),
-                });
-        }
+                    """ ),
+            });
+    }
 
-        public static void SetupGuildMemberResponse(
-            this IntegrationTestBase integrationTestBase,
-            DiscordUser discordUser,
-            params string[] guildRoles)
-        {
-            var roles = string.Join(",", guildRoles.Select(role => "\"" + role + "\""));
+    protected void SetupGuildMemberResponse(DiscordUser discordUser, params string[] guildRoles)
+    {
+        var roles = string.Join(",", guildRoles.Select(role => "\"" + role + "\""));
 
-            integrationTestBase.MockOutgoingHttpRequest(
-                request => request.RequestUri!.ToString().EndsWith($"members/{discordUser.Id}"),
-                _ => new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(
-                        $$"""
+        MockOutgoingHttpRequest(
+            request => request.RequestUri!.ToString().EndsWith($"members/{discordUser.Id}"),
+            _ => new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(
+                    $$"""
                         {
-                          "id": "{{discordUser.Id}}",
-                          "avatar": {{discordUser.Avatar ?? "null"}},
-                          "roles": [{{roles}}],
+                          "id": "{{ discordUser.Id}}",
+                          "avatar": {{ discordUser.Avatar ?? "null"}}  ,
+                          "roles": [{{ roles}}  ],
                           "user": {
-                            "id": "{{discordUser.Id}}",
-                            "username": "{{discordUser.Username}}",
+                            "id": "{{ discordUser.Id}}",
+                            "username": "{{ discordUser.Username}}",
                             "discriminator": "1337",
-                            "avatar": {{discordUser.Avatar ?? "null"}}
+                            "avatar": {{ discordUser.Avatar ?? "null"}}
                           }
                         }
-                    """),
-                });
-        }
+                    """ ),
+            });
+    }
 
-        public static void SetupRolesResponse(this IntegrationTestBase integrationTestBase, string operatorId)
-        {
-            integrationTestBase.MockOutgoingHttpRequest(
-                request => request.RequestUri!.ToString().EndsWith("roles"),
-                _ => new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(
-                        $$"""
+    protected void SetupRolesResponse(string operatorId)
+    {
+        MockOutgoingHttpRequest(
+            request => request.RequestUri!.ToString().EndsWith("roles"),
+            _ => new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(
+                    $$"""
                         [
                           {
                             "id": "1234567",
@@ -130,6 +119,17 @@ public class AuthenticationTestBase : IntegrationTestBase, IClassFixture<TestWeb
                           }
                         ]
                     """),
-                });
-        }
+            });
     }
+
+    protected static async Task<DiscordAuthenticationController.TestResponseModel> TestAuthentication(HttpClient client, string token)
+    {
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var response = await client.GetAsync("discord/test");
+        var responseModel = await response.Content.ReadAsJsonAsync<DiscordAuthenticationController.TestResponseModel>();
+
+        if (responseModel is null) throw new NullReferenceException();
+
+        return responseModel;
+    }
+}

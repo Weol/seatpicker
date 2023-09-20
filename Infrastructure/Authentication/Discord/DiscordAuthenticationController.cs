@@ -116,7 +116,7 @@ public class DiscordAuthenticationController : ControllerBase
     [HttpPut("roles")]
     public async Task<IActionResult> PutRoles([FromBody] DiscordRoleMappingRequestModel requestModel)
     {
-        await discordRoleMapper.Set(requestModel.Mappings);
+        await discordRoleMapper.Set(options.GuildId, requestModel.Mappings);
         return new OkResult();
     }
 

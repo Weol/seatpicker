@@ -9,20 +9,16 @@ namespace Seatpicker.Infrastructure.Authentication.Discord;
 public class DiscordRoleMapper
 {
     private readonly IDocumentRepository documentRepository;
-    private readonly DiscordAuthenticationOptions options;
 
-    public DiscordRoleMapper(
-        IOptions<DiscordAuthenticationOptions> options,
-        IDocumentRepository documentRepository)
+    public DiscordRoleMapper(IDocumentRepository documentRepository)
     {
         this.documentRepository = documentRepository;
-        this.options = options.Value;
     }
 
-    public async Task Set(DiscordRoleMapping[] mappings)
+    public async Task Set(string guildId, DiscordRoleMapping[] mappings)
     {
         await using var transaction = documentRepository.CreateTransaction();
-        transaction.Store(new GuildRoleMapping(options.GuildId, mappings));
+        transaction.Store(new GuildRoleMapping(guildId, mappings));
         transaction.Commit();
     }
 
@@ -30,8 +26,8 @@ public class DiscordRoleMapper
     {
         var reader = documentRepository.CreateReader();
 
-        var mapping = await reader.Get<GuildRoleMapping>(options.GuildId) ??
-                      new GuildRoleMapping(options.GuildId, Array.Empty<DiscordRoleMapping>());
+        var mapping = await reader.Get<GuildRoleMapping>(guildId) ??
+                      new GuildRoleMapping(guildId, Array.Empty<DiscordRoleMapping>());
 
         return mapping.Mappings;
     }
@@ -42,6 +38,4 @@ public class DiscordRoleMapper
     }
 }
 
-public record DiscordRoleMapping(
-    string DiscordRoleId,
-    Role Role);
+public record DiscordRoleMapping(string DiscordRoleId, Role Role);

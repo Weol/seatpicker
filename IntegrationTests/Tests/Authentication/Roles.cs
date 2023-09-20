@@ -1,24 +1,16 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using System.Net.Http.Headers;
+﻿using System.Net;
 using System.Net.Http.Json;
-using System.Security.Claims;
 using FluentAssertions;
-using Microsoft.CodeAnalysis.Options;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using NSubstitute;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Authentication.Discord;
-using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
-using Seatpicker.Infrastructure.Entrypoints.Http;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Seatpicker.IntegrationTests.Tests;
+namespace Seatpicker.IntegrationTests.Tests.Authentication;
 
 // ReSharper disable once InconsistentNaming
-public class Roles : IntegrationTestBase, IClassFixture<TestWebApplicationFactory>
+public class Roles : AuthenticationTestBase
 {
     public Roles(TestWebApplicationFactory factory, ITestOutputHelper testOutputHelper) : base(
         factory,
@@ -40,13 +32,12 @@ public class Roles : IntegrationTestBase, IClassFixture<TestWebApplicationFactor
             new[] { new DiscordRoleMapping(guildOperatorRoleId, Role.Operator) });
 
         SetupDocuments(roleMappings);
-
-        this.SetupRolesResponse(guildOperatorRoleId);
+        SetupRolesResponse(guildOperatorRoleId);
 
         //Act
         var response = await client.GetAsync("discord/roles");
         var responseModel = await response.Content
-            .ReadFromJsonAsync<DiscordAuthenticationController.DiscordRoleMappingResponseModel[]>();
+            .ReadAsJsonAsync<IEnumerable<DiscordAuthenticationController.DiscordRoleMappingResponseModel>>();
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -54,7 +45,7 @@ public class Roles : IntegrationTestBase, IClassFixture<TestWebApplicationFactor
         Assert.Multiple(
             () =>
             {
-                var role = responseModel.Should().Contain(role => role.DiscordRoleId == guildOperatorRoleId).Subject;
+                var role = responseModel.Should().ContainSingle(role => role.DiscordRoleId == guildOperatorRoleId).Subject;
                 Assert.Multiple(
                     () => role.DiscordRoleId.Should().Be(guildOperatorRoleId),
                     () => role.Role.Should().Be(Role.Operator));
