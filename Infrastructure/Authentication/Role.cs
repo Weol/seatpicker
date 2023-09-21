@@ -1,4 +1,4 @@
-﻿namespace Seatpicker.Domain;
+﻿namespace Seatpicker.Infrastructure.Authentication;
 
 public enum Role
 {

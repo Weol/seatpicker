@@ -1,20 +1,14 @@
 ﻿using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using Marten;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Seatpicker.Application.Features;
 using Seatpicker.Infrastructure;
 using Seatpicker.IntegrationTests.TestAdapters;
-using Xunit.Abstractions;
 
 namespace Seatpicker.IntegrationTests;
 

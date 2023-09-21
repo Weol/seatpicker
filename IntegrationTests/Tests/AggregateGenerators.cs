@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using Bogus;
 using Seatpicker.Domain;
 
 namespace Seatpicker.IntegrationTests.Tests;

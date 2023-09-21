@@ -1,6 +1,4 @@
-﻿using Shared;
-
-namespace Seatpicker.Domain;
+﻿namespace Seatpicker.Domain;
 
 public record User(UserId Id, string Name);
 

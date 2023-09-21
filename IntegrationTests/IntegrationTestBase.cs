@@ -1,17 +1,11 @@
 ﻿using System.Net.Http.Headers;
-using System.Text;
 using Bogus;
-using JasperFx.Core;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Seatpicker.Application.Features;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.IntegrationTests.TestAdapters;
 using Shared;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Seatpicker.IntegrationTests;

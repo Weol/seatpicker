@@ -1,6 +1,5 @@
 ﻿using Seatpicker.Infrastructure.Adapters.Database;
 using Seatpicker.Infrastructure.Authentication;
-using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 
 namespace Seatpicker.Infrastructure.Adapters;
 

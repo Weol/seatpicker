@@ -1,10 +1,10 @@
-﻿using JasperFx.CodeGeneration.Frames;
-using Seatpicker.Domain;
+﻿using Seatpicker.Domain;
+using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Authentication.Discord;
 
 namespace Seatpicker.IntegrationTests;
 
-public record TestIdentity(User User, Role[] Roles, string Token);
+public record TestIdentity(Domain.User User, Role[] Roles, string Token);
 
 public class IdentityGenerator
 {
@@ -27,7 +27,7 @@ public class IdentityGenerator
 
         var token = await jwtTokenCreator.CreateToken(discordToken, roles);
 
-        var user = new User(new UserId(discordToken.Id), discordToken.Nick);
+        var user = new Domain.User(new UserId(discordToken.Id), discordToken.Nick);
         return new TestIdentity(user, roles, token);
     }
 }

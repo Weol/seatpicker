@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Seatpicker.Infrastructure.Adapters.Database;
 using Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints;

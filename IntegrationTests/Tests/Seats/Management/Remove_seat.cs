@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using FluentAssertions;
 using Seatpicker.Domain;
+using Seatpicker.Infrastructure.Authentication;
 using Xunit;
 using Xunit.Abstractions;
 

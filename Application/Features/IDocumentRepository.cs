@@ -1,5 +1,4 @@
-﻿using Seatpicker.Domain;
-using Shared;
+﻿using Shared;
 
 namespace Seatpicker.Application.Features;
 

@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using Seatpicker.Domain;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 

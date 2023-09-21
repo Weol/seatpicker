@@ -2,6 +2,7 @@
 using System.Net.Http.Json;
 using FluentAssertions;
 using Seatpicker.Domain;
+using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 using Xunit;
 using Xunit.Abstractions;

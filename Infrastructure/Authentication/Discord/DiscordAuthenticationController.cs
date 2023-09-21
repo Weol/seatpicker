@@ -1,9 +1,7 @@
 ﻿using System.Net;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Seatpicker.Application.Features;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
@@ -21,6 +19,7 @@ public class DiscordAuthenticationController : ControllerBase
     private readonly DiscordRoleMapper discordRoleMapper;
     private readonly DiscordAuthenticationOptions options;
     private readonly ILoggedInUserAccessor loggedInUserAccessor;
+    private readonly UserManager userManager;
 
     public DiscordAuthenticationController(
         DiscordClient.DiscordClient discordClient,
@@ -28,13 +27,15 @@ public class DiscordAuthenticationController : ControllerBase
         IDocumentRepository documentRepository,
         IOptions<DiscordAuthenticationOptions> options,
         DiscordRoleMapper discordRoleMapper,
-        ILoggedInUserAccessor loggedInUserAccessor)
+        ILoggedInUserAccessor loggedInUserAccessor,
+        UserManager userManager)
     {
         this.discordClient = discordClient;
         this.tokenCreator = tokenCreator;
         this.documentRepository = documentRepository;
         this.discordRoleMapper = discordRoleMapper;
         this.loggedInUserAccessor = loggedInUserAccessor;
+        this.userManager = userManager;
         this.options = options.Value;
     }
 
@@ -140,6 +141,7 @@ public class DiscordAuthenticationController : ControllerBase
             expiresAt);
 
         var jwtToken = await tokenCreator.CreateToken(token, roles);
+        await userManager.Store(new User(new UserId(discordUser.Id), discordUser.Username));
 
         return new TokenResponseModel(jwtToken);
     }

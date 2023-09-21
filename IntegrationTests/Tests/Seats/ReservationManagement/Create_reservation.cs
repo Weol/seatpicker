@@ -1,9 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
-using Microsoft.AspNetCore.Identity;
 using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Entrypoints.Http.Reservation;
 using Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement;
 using Xunit;
 using Xunit.Abstractions;

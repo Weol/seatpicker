@@ -1,6 +1,4 @@
-﻿using Marten;
-using NSubstitute;
-using Seatpicker.Application.Features;
+﻿using Seatpicker.Application.Features;
 using Shared;
 
 namespace Seatpicker.IntegrationTests.TestAdapters;

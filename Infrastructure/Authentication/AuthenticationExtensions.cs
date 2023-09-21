@@ -5,7 +5,6 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Seatpicker.Infrastructure.Authentication.Discord;
 using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
-using Seatpicker.Infrastructure.Authentication.UserStore;
 
 namespace Seatpicker.Infrastructure.Authentication;
 

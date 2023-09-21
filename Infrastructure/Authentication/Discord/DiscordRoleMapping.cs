@@ -1,7 +1,5 @@
-﻿using Microsoft.Extensions.Options;
-using Seatpicker.Application.Features;
+﻿using Seatpicker.Application.Features;
 using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 using Shared;
 
 namespace Seatpicker.Infrastructure.Authentication.Discord;
