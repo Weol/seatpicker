@@ -78,7 +78,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         var identity = await CreateIdentity();
         var client = GetClient(identity);
 
-        var alreadyReservedBy = UserGenerator.Create();
+        var alreadyReservedBy = CreateUser();
 
         var seat = SeatGenerator.Create(reservedBy: alreadyReservedBy);
 
@@ -116,5 +116,32 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task fails_when_user_already_has_a_reserved_seat()
+    {
+        // Arrange
+        var identity = await CreateIdentity();
+        var client = GetClient(identity);
+
+        var alreadyReservedSeat = SeatGenerator.Create(reservedBy: identity.User);
+        var seat = SeatGenerator.Create();
+
+        SetupAggregates(alreadyReservedSeat, seat);
+
+        //Act
+        var response = await client.PostAsJsonAsync(
+            "reservation",
+            new ReservationController.CreateReservationRequestModel(seat.Id));
+
+        //Assert
+        Assert.Multiple(
+            () => response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity),
+            () =>
+            {
+                var committedSeat = GetCommittedAggregates<Seat>().Should().ContainSingle(x => x.Id == seat.Id).Subject;
+                committedSeat.ReservedBy.Should().BeNull();
+            });
     }
 }

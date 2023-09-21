@@ -63,7 +63,7 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
         var identity = await CreateIdentity();
         var client = GetClient(identity);
 
-        var fromSeat = SeatGenerator.Create(reservedBy: UserGenerator.Create());
+        var fromSeat = SeatGenerator.Create(reservedBy: CreateUser());
         var toSeat = SeatGenerator.Create();
 
         SetupAggregates(fromSeat, toSeat);

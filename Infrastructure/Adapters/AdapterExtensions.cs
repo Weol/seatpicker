@@ -1,4 +1,5 @@
 ﻿using Seatpicker.Infrastructure.Adapters.Database;
+using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 
 namespace Seatpicker.Infrastructure.Adapters;
@@ -9,7 +10,7 @@ public static class AdapterExtensions
     {
         return services
             .AddDatabase(ConfigureDatabase)
-            .AddUserProvider();
+            .AddUserManager();
     }
 
     private static void ConfigureDatabase(DatabaseOptions options, IConfiguration configuration)

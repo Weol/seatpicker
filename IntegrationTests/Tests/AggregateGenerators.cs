@@ -17,7 +17,7 @@ public static class SeatGenerator
             id ?? Guid.NewGuid(),
             title ?? "Test title",
             bounds ?? new Bounds(0, 0, 1, 1),
-            initiator ?? UserGenerator.Create(Role.Admin));
+            initiator ?? new User(new UserId("124"), "asd"));
 
         if (reservedBy is not null) seat.MakeReservation(reservedBy, new List<Seat>());
 
@@ -39,14 +39,6 @@ public static class LanGenerator
             id ?? Guid.NewGuid(),
             title ?? "Test title",
             background ?? CreateValidBackround(),
-            initiator ?? UserGenerator.Create(Role.Admin));
-    }
-}
-
-public static class UserGenerator
-{
-    public static User Create(params Role[] roles)
-    {
-        return new User(new UserId(Guid.NewGuid().ToString()), new Faker().Name.FirstName());
+            initiator ?? new User(new UserId("124"), "asd"));
     }
 }

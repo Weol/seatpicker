@@ -25,7 +25,7 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
         var identity = await CreateIdentity();
         var client = GetClient(identity);
 
-        var reservedBy = UserGenerator.Create();
+        var reservedBy = CreateUser();
         var fromSeat = SeatGenerator.Create(reservedBy: reservedBy);
         var toSeat = SeatGenerator.Create();
 
@@ -73,11 +73,11 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
         //Act
         var response = await client.PutAsJsonAsync(
             $"reservationmanagement/{fromSeat.Id}",
-            new ReservationManagementController.MoveReservationForRequestModel(UserGenerator.Create().Id, fromSeat.Id, toSeat.Id));
+            new ReservationManagementController.MoveReservationForRequestModel(CreateUser().Id, fromSeat.Id, toSeat.Id));
 
         //Assert
         Assert.Multiple(
-            () => response.StatusCode.Should().Be(HttpStatusCode.Conflict),
+            () => response.StatusCode.Should().Be(HttpStatusCode.NotFound),
             () =>
             {
                 var committedFromSeat = GetCommittedAggregates<Seat>()
@@ -102,7 +102,7 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
         var identity = await CreateIdentity();
         var client = GetClient(identity);
 
-        var fromSeat = SeatGenerator.Create(reservedBy: UserGenerator.Create());
+        var fromSeat = SeatGenerator.Create(reservedBy: CreateUser());
         var toSeat = SeatGenerator.Create();
 
         SetupAggregates(fromSeat, toSeat);
@@ -110,7 +110,7 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
         //Act
         var response = await client.PutAsJsonAsync(
             $"reservationmanagement/{fromSeat.Id}",
-            new ReservationManagementController.MoveReservationForRequestModel(UserGenerator.Create().Id, fromSeat.Id, toSeat.Id));
+            new ReservationManagementController.MoveReservationForRequestModel(CreateUser().Id, fromSeat.Id, toSeat.Id));
 
         //Assert
         Assert.Multiple(

@@ -62,8 +62,7 @@ public class Seat : AggregateBase
 
         if (seatsReservedByUser.Any()) throw new DuplicateSeatReservationException(this, seatsReservedByUser, user);
 
-        if (ReservedBy is not null)
-            throw new SeatReservationConflictException(this, ReservedBy, user.Id);
+        if (ReservedBy is not null) throw new SeatReservationConflictException(this, ReservedBy, user.Id);
 
         var evt = new SeatReservationMade(user.Id);
         Raise(evt);
@@ -76,8 +75,7 @@ public class Seat : AggregateBase
 
         if (seatsReservedByUser.Any()) throw new DuplicateSeatReservationException(this, seatsReservedByUser, user);
 
-        if (ReservedBy is not null)
-            throw new SeatReservationConflictException(this, ReservedBy, user.Id);
+        if (ReservedBy is not null) throw new SeatReservationConflictException(this, ReservedBy, user.Id);
 
         var evt = new SeatReservationMadeFor(user.Id, madeBy.Id);
         Raise(evt);
@@ -88,8 +86,7 @@ public class Seat : AggregateBase
     {
         if (ReservedBy is null) return;
 
-        if (ReservedBy != initiator.Id)
-            throw new SeatReservationConflictException(this, ReservedBy, initiator.Id);
+        if (ReservedBy != initiator.Id) throw new SeatReservationConflictException(this, ReservedBy, initiator.Id);
 
         var evt = new SeatReservationRemoved(ReservedBy);
         Raise(evt);
@@ -107,11 +104,9 @@ public class Seat : AggregateBase
 
     public void MoveReservation(User user, Seat fromSeat)
     {
-        if (ReservedBy is not null)
-            throw new SeatReservationConflictException(this, ReservedBy, user.Id);
+        if (ReservedBy is not null) throw new SeatReservationConflictException(this, ReservedBy, user.Id);
 
-        if (fromSeat.ReservedBy is null)
-            throw new SeatReservationNotFoundException { Seat = fromSeat };
+        if (fromSeat.ReservedBy is null) throw new SeatReservationNotFoundException { Seat = fromSeat };
 
         if (fromSeat.ReservedBy != user.Id)
             throw new SeatReservationConflictException(this, fromSeat.ReservedBy, user.Id);
@@ -127,11 +122,12 @@ public class Seat : AggregateBase
 
     public void MoveReservationFor(User user, Seat fromSeat, User movedBy)
     {
-        if (ReservedBy is not null)
-            throw new SeatReservationConflictException(this, ReservedBy, user.Id);
+        if (ReservedBy is not null) throw new SeatReservationConflictException(this, ReservedBy, user.Id);
 
-        if (fromSeat.ReservedBy is null)
-            throw new SeatReservationNotFoundException { Seat = fromSeat };
+        if (fromSeat.ReservedBy is null) throw new SeatReservationNotFoundException { Seat = fromSeat };
+
+        if (fromSeat.ReservedBy.Id != user.Id)
+            throw new SeatReservationConflictException(this, fromSeat.ReservedBy, user.Id);
 
         var evt = new SeatReservationMovedFor(user.Id, fromSeat.Id, Id, movedBy.Id);
 
@@ -212,7 +208,8 @@ public class Bounds
     public Bounds(double x, double y, double width, double height)
     {
         if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width), width, "Width must be greater than zero");
-        if (height <= 0) throw new ArgumentOutOfRangeException(nameof(height), height, "Height must be greater than zero");
+        if (height <= 0)
+            throw new ArgumentOutOfRangeException(nameof(height), height, "Height must be greater than zero");
 
         X = x;
         Y = y;
@@ -220,7 +217,8 @@ public class Bounds
         Height = height;
     }
 
-    public override string ToString() => $"Bounds {nameof(X)}: {X}, {nameof(Y)}: {Y}, {nameof(Width)}: {Width}, {nameof(Height)}: {Height}";
+    public override string ToString() =>
+        $"Bounds {nameof(X)}: {X}, {nameof(Y)}: {Y}, {nameof(Width)}: {Width}, {nameof(Height)}: {Height}";
 }
 
 /**
@@ -263,7 +261,8 @@ public class SeatReservationConflictException : DomainException
         Seat = seat;
     }
 
-    protected override string ErrorMessage => $"{Seat} is reserved by {ReservedUser}, cannot be changed by {AttemptedUser} ";
+    protected override string ErrorMessage =>
+        $"{Seat} is reserved by {ReservedUser}, cannot be changed by {AttemptedUser} ";
 }
 
 public class SeatReservationNotFoundException : DomainException
@@ -291,5 +290,5 @@ public class DuplicateSeatReservationException : DomainException
     }
 
     protected override string ErrorMessage =>
-        $"{User} tried to reserve {AttemptedSeatReservation} but already has a reservation on {ExistingSeatReservations}";
+        $"Cannot create reservation for {User} on {AttemptedSeatReservation} because they already have reservations on {ExistingSeatReservations}";
 }

@@ -1,11 +1,14 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
+using Bogus;
 using JasperFx.Core;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Seatpicker.Application.Features;
 using Seatpicker.Domain;
+using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.IntegrationTests.TestAdapters;
 using Shared;
 using Xunit;
@@ -78,6 +81,14 @@ public abstract class IntegrationTestBase : IDisposable
     {
         var repository = factory.Services.GetRequiredService<TestDocumentRepository>();
         return repository.CreateReader().Query<TDocument>();
+    }
+
+    protected User CreateUser()
+    {
+        var userManager = GetService<UserManager>();
+        var user = new User(new UserId(Guid.NewGuid().ToString()), new Faker().Name.FirstName());
+        userManager.Store(user).GetAwaiter().GetResult();
+        return user;
     }
 
     protected internal void MockOutgoingHttpRequest(

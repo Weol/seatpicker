@@ -16,6 +16,7 @@ public static class AuthenticationExtensions
     {
         services
             .AddDiscordLogin(ConfigureDiscordAuthentication, ConfigureDiscordClient)
+            .AddUserManager()
             .AddAuthorization()
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer();
