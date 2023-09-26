@@ -2,6 +2,7 @@
 using System.Net.Http.Json;
 using FluentAssertions;
 using Seatpicker.Domain;
+using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement;
 using Xunit;
 using Xunit.Abstractions;
@@ -21,7 +22,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
     public async Task succeeds_when_reserving_existing_available_seat()
     {
         // Arrange
-        var identity = await CreateIdentity();
+        var identity = await CreateIdentity(Role.Operator);
         var client = GetClient(identity);
 
         var seat = SeatGenerator.Create();
@@ -49,7 +50,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
     public async Task succeeds_when_reserving_seat_that_user_has_already_reserved()
     {
         // Arrange
-        var identity = await CreateIdentity();
+        var identity = await CreateIdentity(Role.Operator);
         var client = GetClient(identity);
 
         var reserveFor = CreateUser();
@@ -77,7 +78,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
     public async Task fails_when_seat_is_already_reserved()
     {
         // Arrange
-        var identity = await CreateIdentity();
+        var identity = await CreateIdentity(Role.Operator);
         var client = GetClient(identity);
 
         var alreadyReservedBy = CreateUser();
@@ -106,7 +107,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
     public async Task fails_when_seat_does_not_exist()
     {
         // Arrange
-        var identity = await CreateIdentity();
+        var identity = await CreateIdentity(Role.Operator);
         var client = GetClient(identity);
 
         var seat = SeatGenerator.Create();
@@ -125,7 +126,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
     public async Task fails_when_user_already_has_a_reserved_seat()
     {
         // Arrange
-        var identity = await CreateIdentity();
+        var identity = await CreateIdentity(Role.Operator);
         var client = GetClient(identity);
 
         var reserveFor = CreateUser();

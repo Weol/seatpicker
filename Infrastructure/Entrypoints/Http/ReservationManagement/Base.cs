@@ -7,7 +7,7 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement;
 
 [ApiController]
 [Route("[controller]")]
-[Authorize]
+[Authorize(Roles = "Operator")]
 public partial class ReservationManagementController
 {
     private readonly IReservationManagementService reservationManagementService;

@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using FluentAssertions;
 using Seatpicker.Domain;
+using Seatpicker.Infrastructure.Authentication;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -19,7 +20,7 @@ public class Remove_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
     public async Task succeeds_when_seat_is_reserved_by_user()
     {
         // Arrange
-        var identity = await CreateIdentity();
+        var identity = await CreateIdentity(Role.Operator);
         var client = GetClient(identity);
 
         var seat = SeatGenerator.Create(reservedBy: identity.User);
@@ -43,7 +44,7 @@ public class Remove_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
     public async Task succeeds_when_seat_is_reserved_by_another_user()
     {
         // Arrange
-        var identity = await CreateIdentity();
+        var identity = await CreateIdentity(Role.Operator);
         var client = GetClient(identity);
 
         var user = CreateUser();
@@ -68,7 +69,7 @@ public class Remove_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
     public async Task succeeds_when_seat_is_not_reserved()
     {
         // Arrange
-        var identity = await CreateIdentity();
+        var identity = await CreateIdentity(Role.Operator);
         var client = GetClient(identity);
 
         var seat = SeatGenerator.Create();
@@ -86,7 +87,7 @@ public class Remove_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
     public async Task fails_when_seat_does_not_exist()
     {
         // Arrange
-        var identity = await CreateIdentity();
+        var identity = await CreateIdentity(Role.Operator);
         var client = GetClient(identity);
 
         //Act

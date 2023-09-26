@@ -11,15 +11,11 @@ import {
 } from '@mui/material';
 import background from "../Media/background.svg"
 import Seat from '../Models/Seat';
-import CreateReservation from "../Adapters/CreateReservation";
-import GetAllSeats from "../Adapters/GetAllSeats";
 import {useUserContext} from "../UserContext";
-import DeleteReservation from '../Adapters/DeleteReservation';
 import {useAlertContext} from "../AlertContext";
 import Button from "@mui/material/Button";
-import ReplaceReservation from '../Adapters/ReplaceReservation';
 import SeatComponent from '../Components/Seat';
-import StaticSeats from '../StaticSeats';
+import { SeatAdapter } from '../Adapters/Generated'
 
 interface DialogModel<T> {
   title: string;
@@ -48,7 +44,7 @@ export default function Seats() {
   }, [])
 
   const fetchAllSeats = () => {
-    GetAllSeats().then(seats => {
+    SeatAdapter.putSeat.then(seats => {
       setSeats(seats)
 
       setSelectedSeat(null)

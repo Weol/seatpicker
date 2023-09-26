@@ -34,4 +34,8 @@
         <InternalsVisibleTo Include="IntegrationTests" />
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
     </ItemGroup>
+
+    <Target Name="NSwag" AfterTargets="Publish">
+        <Exec Command="$(NSwagExe_Net60) aspnetcore2openapi /configuration:Release /assembly:$(TargetDir)/$(AssemblyName).dll /output:$(PublishDir)/swagger.json" />
+    </Target>
 </Project>

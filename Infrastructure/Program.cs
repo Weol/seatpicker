@@ -20,33 +20,11 @@ builder.Services.AddApplicationInsightsTelemetry()
     .ConfigureJsonSerialization()
     .AddEntrypoints(builder.Configuration)
     .AddApplication()
-    .AddSwaggerGen(
-        options =>
-        {
-            var jwtSecurityScheme = new OpenApiSecurityScheme
-            {
-                BearerFormat = "JWT",
-                Name = "Bearer token authentication",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.Http,
-                Scheme = JwtBearerDefaults.AuthenticationScheme,
-                Description = "Bearer token",
-                Reference = new OpenApiReference
-                {
-                    Id = JwtBearerDefaults.AuthenticationScheme, Type = ReferenceType.SecurityScheme,
-                },
-            };
-
-            options.AddSecurityDefinition("Bearer", jwtSecurityScheme);
-            options.AddSecurityRequirement(
-                new OpenApiSecurityRequirement { { jwtSecurityScheme, Array.Empty<string>() } });
-        });
+    .AddSwaggerGen();
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
-
+app.UseSwaggerGen();
 app.UseEntrypoints();
 app.UseSeatpickerAuthentication();
 
