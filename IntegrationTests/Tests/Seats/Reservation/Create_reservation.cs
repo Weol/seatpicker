@@ -31,7 +31,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         //Act
         var response = await client.PostAsync(
             "reservation",
-            JsonContent.Create(new ReservationController.CreateReservationRequestModel(seat.Id)));
+            JsonContent.Create(new ReservationController.CreateReservationRequest(seat.Id)));
 
         //Assert
         Assert.Multiple(
@@ -58,7 +58,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         //Act
         var response = await client.PostAsJsonAsync(
             "reservation",
-            new ReservationController.CreateReservationRequestModel(seat.Id));
+            new ReservationController.CreateReservationRequest(seat.Id));
 
         //Assert
         Assert.Multiple(
@@ -87,7 +87,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         //Act
         var response = await client.PostAsJsonAsync(
             "reservation",
-            new ReservationController.CreateReservationRequestModel(seat.Id));
+            new ReservationController.CreateReservationRequest(seat.Id));
 
         //Assert
         Assert.Multiple(
@@ -112,7 +112,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         //Act
         var response = await client.PostAsJsonAsync(
             "reservation",
-            new ReservationController.CreateReservationRequestModel(seat.Id));
+            new ReservationController.CreateReservationRequest(seat.Id));
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -133,7 +133,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         //Act
         var response = await client.PostAsJsonAsync(
             "reservation",
-            new ReservationController.CreateReservationRequestModel(seat.Id));
+            new ReservationController.CreateReservationRequest(seat.Id));
 
         //Assert
         Assert.Multiple(

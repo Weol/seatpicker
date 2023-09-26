@@ -6,13 +6,14 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 public partial class SeatController
 {
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateSeatRequestModel model)
+    [ProducesResponseType(200)]
+    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateSeatRequest model)
     {
-        await validateModel.Validate<UpdateSeatRequestModel, UpdateSeatRequestModelModelValidator>(model);
+        await validateModel.Validate<UpdateSeatRequest, UpdateSeatRequestModelValidator>(model);
 
         if (id != model.SeatId)
             throw new BadRequestException(
-                $"Route parameter {nameof(id)} does not match the request model {nameof(UpdateSeatRequestModel.SeatId)}");
+                $"Route parameter {nameof(id)} does not match the request model {nameof(UpdateSeatRequest.SeatId)}");
 
         var user = loggedInUserAccessor.Get();
 
@@ -21,11 +22,11 @@ public partial class SeatController
         return new OkResult();
     }
 
-    public record UpdateSeatRequestModel(Guid SeatId, string? Title, BoundsModel? Bounds);
+    public record UpdateSeatRequest(Guid SeatId, string? Title, BoundsModel? Bounds);
 
-    private class UpdateSeatRequestModelModelValidator : AbstractValidator<UpdateSeatRequestModel>
+    private class UpdateSeatRequestModelValidator : AbstractValidator<UpdateSeatRequest>
     {
-        public UpdateSeatRequestModelModelValidator()
+        public UpdateSeatRequestModelValidator()
         {
             RuleFor(x => x.SeatId).NotEmpty();
 

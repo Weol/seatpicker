@@ -14,24 +14,61 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RenewRequestModel"
+                "$ref": "#/components/schemas/RenewRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/RenewRequestModel"
+                "$ref": "#/components/schemas/RenewRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/RenewRequestModel"
+                "$ref": "#/components/schemas/RenewRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
           }
         }
       }
@@ -45,24 +82,61 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LoginRequestModel"
+                "$ref": "#/components/schemas/LoginRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/LoginRequestModel"
+                "$ref": "#/components/schemas/LoginRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/LoginRequestModel"
+                "$ref": "#/components/schemas/LoginRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
           }
         }
       }
@@ -74,7 +148,24 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -86,7 +177,33 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DiscordRoleMappingResponse"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DiscordRoleMappingResponse"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DiscordRoleMappingResponse"
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -98,17 +215,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DiscordRoleMappingRequestModel"
+                "$ref": "#/components/schemas/DiscordRoleMappingRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/DiscordRoleMappingRequestModel"
+                "$ref": "#/components/schemas/DiscordRoleMappingRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/DiscordRoleMappingRequestModel"
+                "$ref": "#/components/schemas/DiscordRoleMappingRequest"
               }
             }
           }
@@ -129,17 +246,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateLanRequestModel"
+                "$ref": "#/components/schemas/CreateLanRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateLanRequestModel"
+                "$ref": "#/components/schemas/CreateLanRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateLanRequestModel"
+                "$ref": "#/components/schemas/CreateLanRequest"
               }
             }
           }
@@ -156,7 +273,33 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LanResponse"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LanResponse"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LanResponse"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -179,7 +322,24 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LanResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LanResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LanResponse"
+                }
+              }
+            }
           }
         }
       },
@@ -202,17 +362,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateLanRequestModel"
+                "$ref": "#/components/schemas/UpdateLanRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateLanRequestModel"
+                "$ref": "#/components/schemas/UpdateLanRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateLanRequestModel"
+                "$ref": "#/components/schemas/UpdateLanRequest"
               }
             }
           }
@@ -233,17 +393,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateReservationRequestModel"
+                "$ref": "#/components/schemas/CreateReservationRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateReservationRequestModel"
+                "$ref": "#/components/schemas/CreateReservationRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateReservationRequestModel"
+                "$ref": "#/components/schemas/CreateReservationRequest"
               }
             }
           }
@@ -275,17 +435,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MoveReservationRequestModel"
+                "$ref": "#/components/schemas/MoveReservationRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/MoveReservationRequestModel"
+                "$ref": "#/components/schemas/MoveReservationRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/MoveReservationRequestModel"
+                "$ref": "#/components/schemas/MoveReservationRequest"
               }
             }
           }
@@ -327,17 +487,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateReservationForRequestModel"
+                "$ref": "#/components/schemas/CreateReservationForRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateReservationForRequestModel"
+                "$ref": "#/components/schemas/CreateReservationForRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateReservationForRequestModel"
+                "$ref": "#/components/schemas/CreateReservationForRequest"
               }
             }
           }
@@ -369,17 +529,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MoveReservationForRequestModel"
+                "$ref": "#/components/schemas/MoveReservationForRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/MoveReservationForRequestModel"
+                "$ref": "#/components/schemas/MoveReservationForRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/MoveReservationForRequestModel"
+                "$ref": "#/components/schemas/MoveReservationForRequest"
               }
             }
           }
@@ -421,17 +581,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateSeatRequestModel"
+                "$ref": "#/components/schemas/CreateSeatRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateSeatRequestModel"
+                "$ref": "#/components/schemas/CreateSeatRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateSeatRequestModel"
+                "$ref": "#/components/schemas/CreateSeatRequest"
               }
             }
           }
@@ -484,17 +644,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateSeatRequestModel"
+                "$ref": "#/components/schemas/UpdateSeatRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateSeatRequestModel"
+                "$ref": "#/components/schemas/UpdateSeatRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateSeatRequestModel"
+                "$ref": "#/components/schemas/UpdateSeatRequest"
               }
             }
           }
@@ -531,7 +691,7 @@
         },
         "additionalProperties": false
       },
-      "CreateLanRequestModel": {
+      "CreateLanRequest": {
         "type": "object",
         "properties": {
           "title": {
@@ -546,7 +706,7 @@
         },
         "additionalProperties": false
       },
-      "CreateReservationForRequestModel": {
+      "CreateReservationForRequest": {
         "type": "object",
         "properties": {
           "seatId": {
@@ -560,7 +720,7 @@
         },
         "additionalProperties": false
       },
-      "CreateReservationRequestModel": {
+      "CreateReservationRequest": {
         "type": "object",
         "properties": {
           "seatId": {
@@ -570,7 +730,7 @@
         },
         "additionalProperties": false
       },
-      "CreateSeatRequestModel": {
+      "CreateSeatRequest": {
         "type": "object",
         "properties": {
           "title": {
@@ -596,7 +756,7 @@
         },
         "additionalProperties": false
       },
-      "DiscordRoleMappingRequestModel": {
+      "DiscordRoleMappingRequest": {
         "type": "object",
         "properties": {
           "mappings": {
@@ -609,7 +769,50 @@
         },
         "additionalProperties": false
       },
-      "LoginRequestModel": {
+      "DiscordRoleMappingResponse": {
+        "type": "object",
+        "properties": {
+          "discordRoleId": {
+            "type": "string",
+            "nullable": true
+          },
+          "discordRoleName": {
+            "type": "string",
+            "nullable": true
+          },
+          "discordRoleColor": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "discordRoleIcon": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LanResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "background": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LoginRequest": {
         "type": "object",
         "properties": {
           "token": {
@@ -619,7 +822,7 @@
         },
         "additionalProperties": false
       },
-      "MoveReservationForRequestModel": {
+      "MoveReservationForRequest": {
         "type": "object",
         "properties": {
           "userId": {
@@ -637,7 +840,7 @@
         },
         "additionalProperties": false
       },
-      "MoveReservationRequestModel": {
+      "MoveReservationRequest": {
         "type": "object",
         "properties": {
           "fromSeatId": {
@@ -651,7 +854,34 @@
         },
         "additionalProperties": false
       },
-      "RenewRequestModel": {
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": { }
+      },
+      "RenewRequest": {
         "type": "object",
         "properties": {
           "refreshToken": {
@@ -669,7 +899,38 @@
         ],
         "type": "string"
       },
-      "UpdateLanRequestModel": {
+      "TestResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TokenResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateLanRequest": {
         "type": "object",
         "properties": {
           "id": {
@@ -688,7 +949,7 @@
         },
         "additionalProperties": false
       },
-      "UpdateSeatRequestModel": {
+      "UpdateSeatRequest": {
         "type": "object",
         "properties": {
           "seatId": {
@@ -709,7 +970,7 @@
     "securitySchemes": {
       "Bearer": {
         "type": "http",
-        "description": "Bearer token",
+        "description": "Bearer token acquired through the Discord authentication endpoints",
         "scheme": "Bearer",
         "bearerFormat": "JWT"
       }

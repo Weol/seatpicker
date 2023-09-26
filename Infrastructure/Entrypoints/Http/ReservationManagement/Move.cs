@@ -7,13 +7,14 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement;
 public partial class ReservationManagementController
 {
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Move([FromRoute] Guid id, [FromBody] MoveReservationForRequestModel model)
+    [ProducesResponseType(200)]
+    public async Task<IActionResult> Move([FromRoute] Guid id, [FromBody] MoveReservationForRequest model)
     {
-        await validateModel.Validate<MoveReservationForRequestModel, MoveReservationForRequestModelValidator>(model);
+        await validateModel.Validate<MoveReservationForRequest, MoveReservationForRequestValidator>(model);
 
         if (id != model.FromSeatId)
             throw new BadRequestException(
-                $"Route parameter {nameof(id)} does not match the request model {nameof(MoveReservationForRequestModel.FromSeatId)}");
+                $"Route parameter {nameof(id)} does not match the request model {nameof(MoveReservationForRequest.FromSeatId)}");
 
         var user = loggedInUserAccessor.Get();
 
@@ -22,11 +23,11 @@ public partial class ReservationManagementController
         return new OkResult();
     }
 
-    public record MoveReservationForRequestModel(string UserId, Guid FromSeatId, Guid ToSeatId);
+    public record MoveReservationForRequest(string UserId, Guid FromSeatId, Guid ToSeatId);
 
-    private class MoveReservationForRequestModelValidator : AbstractValidator<MoveReservationForRequestModel>
+    private class MoveReservationForRequestValidator : AbstractValidator<MoveReservationForRequest>
     {
-        public MoveReservationForRequestModelValidator()
+        public MoveReservationForRequestValidator()
         {
             RuleFor(x => x.UserId).NotEmpty();
 

@@ -34,7 +34,7 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
         //Act
         var response = await client.PutAsJsonAsync(
             $"reservationmanagement/{fromSeat.Id}",
-            new ReservationManagementController.MoveReservationForRequestModel(reservedBy.Id, fromSeat.Id, toSeat.Id));
+            new ReservationManagementController.MoveReservationForRequest(reservedBy.Id, fromSeat.Id, toSeat.Id));
 
         //Assert
         Assert.Multiple(
@@ -73,7 +73,7 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
         //Act
         var response = await client.PutAsJsonAsync(
             $"reservationmanagement/{fromSeat.Id}",
-            new ReservationManagementController.MoveReservationForRequestModel(CreateUser().Id, fromSeat.Id, toSeat.Id));
+            new ReservationManagementController.MoveReservationForRequest(CreateUser().Id, fromSeat.Id, toSeat.Id));
 
         //Assert
         Assert.Multiple(
@@ -110,7 +110,7 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
         //Act
         var response = await client.PutAsJsonAsync(
             $"reservationmanagement/{fromSeat.Id}",
-            new ReservationManagementController.MoveReservationForRequestModel(CreateUser().Id, fromSeat.Id, toSeat.Id));
+            new ReservationManagementController.MoveReservationForRequest(CreateUser().Id, fromSeat.Id, toSeat.Id));
 
         //Assert
         Assert.Multiple(

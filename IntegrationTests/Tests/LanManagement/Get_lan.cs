@@ -29,19 +29,19 @@ public class Get_lan : IntegrationTestBase, IClassFixture<TestWebApplicationFact
 
         //Act
         var response = await client.GetAsync($"lan/{existingLan.Id}");
-        var responseModel = await response.Content.ReadAsJsonAsync<LanController.LanResponseModel>();
+        var Response = await response.Content.ReadAsJsonAsync<LanController.LanResponse>();
 
         //Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                responseModel.Should().NotBeNull();
+                Response.Should().NotBeNull();
                 Assert.Multiple(
-                    () => responseModel!.Id.Should().Be(existingLan.Id),
+                    () => Response!.Id.Should().Be(existingLan.Id),
 
-                    () => responseModel!.Title.Should().Be(existingLan.Title),
-                    () => responseModel!.Background.Should().Be(Convert.ToBase64String(existingLan.Background)));
+                    () => Response!.Title.Should().Be(existingLan.Title),
+                    () => Response!.Background.Should().Be(Convert.ToBase64String(existingLan.Background)));
             });
     }
 

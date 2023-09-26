@@ -40,14 +40,16 @@ public class DiscordAuthenticationController : ControllerBase
     }
 
     [HttpPost("renew")]
-    public async Task<IActionResult> Renew([FromBody] RenewRequestModel requestModel)
+    [ProducesResponseType(typeof(TokenResponse), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> Renew([FromBody] RenewRequest Request)
     {
         try
         {
-            var accessToken = await discordClient.RefreshAccessToken(requestModel.RefreshToken);
+            var accessToken = await discordClient.RefreshAccessToken(Request.RefreshToken);
             var discordUser = await discordClient.Lookup(accessToken.AccessToken);
 
-            return new OkObjectResult(await CreateTokenRequestModel(accessToken, discordUser));
+            return new OkObjectResult(await CreateTokenRequest(accessToken, discordUser));
         }
         catch (DiscordException e) when (e.StatusCode == HttpStatusCode.BadRequest)
         {
@@ -56,14 +58,16 @@ public class DiscordAuthenticationController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequestModel model)
+    [ProducesResponseType(typeof(TokenResponse), 200)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> Login([FromBody] LoginRequest model)
     {
         try
         {
             var accessToken = await discordClient.GetAccessToken(model.Token);
             var discordUser = await discordClient.Lookup(accessToken.AccessToken);
 
-            return new OkObjectResult(await CreateTokenRequestModel(accessToken, discordUser));
+            return new OkObjectResult(await CreateTokenRequest(accessToken, discordUser));
         }
         catch (DiscordException e) when (e.StatusCode == HttpStatusCode.BadRequest)
         {
@@ -71,8 +75,9 @@ public class DiscordAuthenticationController : ControllerBase
         }
     }
 
-    [HttpGet("test")]
     [Authorize]
+    [HttpGet("test")]
+    [ProducesResponseType(typeof(TestResponse), 200)]
     public async Task<IActionResult> Test()
     {
         var roles = HttpContext.User.Identities
@@ -83,16 +88,18 @@ public class DiscordAuthenticationController : ControllerBase
 
         var loggedInuser = loggedInUserAccessor.Get();
 
-        return new OkObjectResult(new TestResponseModel(loggedInuser.Id, loggedInuser.Name, roles));
+        return new OkObjectResult(new TestResponse(loggedInuser.Id, loggedInuser.Name, roles));
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("roles")]
+    [ProducesResponseType(typeof(DiscordRoleMappingResponse[]), 200)]
     public async Task<IActionResult> GetRoles()
     {
         var roleMappings = await discordRoleMapper.Get(options.GuildId);
         var guildRoles = await discordClient.GetGuildRoles(options.GuildId);
 
-        IEnumerable<DiscordRoleMappingResponseModel> Join()
+        IEnumerable<DiscordRoleMappingResponse> Join()
         {
             foreach (var guildRole in guildRoles)
             {
@@ -102,7 +109,7 @@ public class DiscordAuthenticationController : ControllerBase
                     if (guildRole.Id == mapping.DiscordRoleId) role = mapping.Role;
                 }
 
-                yield return new DiscordRoleMappingResponseModel(
+                yield return new DiscordRoleMappingResponse(
                     guildRole.Id,
                     guildRole.Name,
                     guildRole.Color,
@@ -114,14 +121,16 @@ public class DiscordAuthenticationController : ControllerBase
         return new OkObjectResult(Join());
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("roles")]
-    public async Task<IActionResult> PutRoles([FromBody] DiscordRoleMappingRequestModel requestModel)
+    [ProducesResponseType(200)]
+    public async Task<IActionResult> PutRoles([FromBody] DiscordRoleMappingRequest Request)
     {
-        await discordRoleMapper.Set(options.GuildId, requestModel.Mappings);
+        await discordRoleMapper.Set(options.GuildId, Request.Mappings);
         return new OkResult();
     }
 
-    private async Task<TokenResponseModel> CreateTokenRequestModel(
+    private async Task<TokenResponse> CreateTokenRequest(
         DiscordAccessToken accessToken,
         DiscordUser discordUser)
     {
@@ -143,7 +152,7 @@ public class DiscordAuthenticationController : ControllerBase
         var jwtToken = await tokenCreator.CreateToken(token, roles);
         await userManager.Store(new User(new UserId(discordUser.Id), discordUser.Username));
 
-        return new TokenResponseModel(jwtToken);
+        return new TokenResponse(jwtToken);
     }
 
     private IEnumerable<Role> GetRoles(DiscordRoleMapping[] roleMapping, GuildMember guildMember)
@@ -163,17 +172,17 @@ public class DiscordAuthenticationController : ControllerBase
         }
     }
 
-    public record LoginRequestModel(string Token);
+    public record LoginRequest(string Token);
 
-    public record RenewRequestModel(string RefreshToken);
+    public record RenewRequest(string RefreshToken);
 
-    public record TokenResponseModel(string Token);
+    public record TokenResponse(string Token);
 
-    public record TestResponseModel(string? Id, string? Name, string[] Roles);
+    public record TestResponse(string? Id, string? Name, string[] Roles);
 
-    public record DiscordRoleMappingRequestModel(DiscordRoleMapping[] Mappings);
+    public record DiscordRoleMappingRequest(DiscordRoleMapping[] Mappings);
 
-    public record DiscordRoleMappingResponseModel(
+    public record DiscordRoleMappingResponse(
         string DiscordRoleId,
         string DiscordRoleName,
         int DiscordRoleColor,

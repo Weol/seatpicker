@@ -2,8 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CreateReservationForRequestModel } from '../models/CreateReservationForRequestModel';
-import type { MoveReservationForRequestModel } from '../models/MoveReservationForRequestModel';
+import type { CreateReservationForRequest } from '../models/CreateReservationForRequest';
+import type { MoveReservationForRequest } from '../models/MoveReservationForRequest';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -17,7 +17,7 @@ export class ReservationManagementAdapter {
      * @throws ApiError
      */
     public static postReservationManagement(
-requestBody?: CreateReservationForRequestModel,
+requestBody?: CreateReservationForRequest,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -35,7 +35,7 @@ requestBody?: CreateReservationForRequestModel,
      */
     public static putReservationManagement(
 id: string,
-requestBody?: MoveReservationForRequestModel,
+requestBody?: MoveReservationForRequest,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',

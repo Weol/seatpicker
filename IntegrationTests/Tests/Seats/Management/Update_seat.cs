@@ -18,22 +18,22 @@ public class Update_seat : IntegrationTestBase, IClassFixture<TestWebApplication
     {
     }
 
-    public static IEnumerable<object[]> ValidUpdateRequestModels = new[]
+    public static IEnumerable<object[]> ValidUpdateRequests = new[]
     {
-        new object[] { Generator.UpdateSeatRequestModel() },
+        new object[] { Generator.UpdateSeatRequest() },
         new object[]
         {
-            Generator.UpdateSeatRequestModel() with { Title = null },
+            Generator.UpdateSeatRequest() with { Title = null },
         },
         new object[]
         {
-            Generator.UpdateSeatRequestModel() with { Bounds = null },
+            Generator.UpdateSeatRequest() with { Bounds = null },
         },
     };
 
     [Theory]
-    [MemberData(nameof(ValidUpdateRequestModels))]
-    public async Task succeeds_when_valid(SeatController.UpdateSeatRequestModel model)
+    [MemberData(nameof(ValidUpdateRequests))]
+    public async Task succeeds_when_valid(SeatController.UpdateSeatRequest model)
     {
         // Arrange
         var identity = await CreateIdentity(Role.Operator);
@@ -70,7 +70,7 @@ public class Update_seat : IntegrationTestBase, IClassFixture<TestWebApplication
         var identity = await CreateIdentity(Role.Operator);
         var client = GetClient(identity);
 
-        var model = Generator.UpdateSeatRequestModel();
+        var model = Generator.UpdateSeatRequest();
 
         //Act
         var response = await client.PutAsJsonAsync(
@@ -81,18 +81,18 @@ public class Update_seat : IntegrationTestBase, IClassFixture<TestWebApplication
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
-    public static IEnumerable<object[]> InvalidUpdateRequestModels = new[]
+    public static IEnumerable<object[]> InvalidUpdateRequests = new[]
     {
-        new object[] { Generator.CreateSeatRequestModel() with { Title = "" } },
+        new object[] { Generator.CreateSeatRequest() with { Title = "" } },
         new object[]
-            { Generator.CreateSeatRequestModel() with { Bounds = new SeatController.BoundsModel(0, 0, -1, 1) } },
+            { Generator.CreateSeatRequest() with { Bounds = new SeatController.BoundsModel(0, 0, -1, 1) } },
         new object[]
-            { Generator.CreateSeatRequestModel() with { Bounds = new SeatController.BoundsModel(0, 0, 1, -1) } },
+            { Generator.CreateSeatRequest() with { Bounds = new SeatController.BoundsModel(0, 0, 1, -1) } },
     };
 
     [Theory]
-    [MemberData(nameof(InvalidUpdateRequestModels))]
-    public async Task fails_when_seat_request_model_is_invalid(SeatController.CreateSeatRequestModel model)
+    [MemberData(nameof(InvalidUpdateRequests))]
+    public async Task fails_when_seat_request_model_is_invalid(SeatController.CreateSeatRequest model)
     {
         // Arrange
         var identity = await CreateIdentity(Role.Operator);

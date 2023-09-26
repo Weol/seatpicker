@@ -3,6 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type LoginRequestModel = {
-    token?: string | null;
+export type RenewRequest = {
+    refreshToken?: string | null;
 };

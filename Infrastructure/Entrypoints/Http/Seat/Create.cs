@@ -6,9 +6,10 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 public partial class SeatController
 {
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateSeatRequestModel model)
+    [ProducesResponseType(200)]
+    public async Task<IActionResult> Create([FromBody] CreateSeatRequest model)
     {
-        await validateModel.Validate<CreateSeatRequestModel, CreateSeatRequestModelModelValidator>(model);
+        await validateModel.Validate<CreateSeatRequest, CreateSeatRequestModelValidator>(model);
 
         var user = loggedInUserAccessor.Get();
 
@@ -20,11 +21,11 @@ public partial class SeatController
         return new CreatedResult(seatId.ToString(), null);
     }
 
-    public record CreateSeatRequestModel(string Title, BoundsModel Bounds);
+    public record CreateSeatRequest(string Title, BoundsModel Bounds);
 
-    private class CreateSeatRequestModelModelValidator : AbstractValidator<CreateSeatRequestModel>
+    private class CreateSeatRequestModelValidator : AbstractValidator<CreateSeatRequest>
     {
-        public CreateSeatRequestModelModelValidator()
+        public CreateSeatRequestModelValidator()
         {
             RuleFor(x => x.Title).NotEmpty();
 

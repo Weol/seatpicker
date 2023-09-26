@@ -2,8 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CreateSeatRequestModel } from '../models/CreateSeatRequestModel';
-import type { UpdateSeatRequestModel } from '../models/UpdateSeatRequestModel';
+import type { CreateSeatRequest } from '../models/CreateSeatRequest';
+import type { UpdateSeatRequest } from '../models/UpdateSeatRequest';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -17,7 +17,7 @@ export class SeatAdapter {
      * @throws ApiError
      */
     public static postSeat(
-requestBody?: CreateSeatRequestModel,
+requestBody?: CreateSeatRequest,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -52,7 +52,7 @@ id: string,
      */
     public static putSeat(
 id: string,
-requestBody?: UpdateSeatRequestModel,
+requestBody?: UpdateSeatRequest,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',

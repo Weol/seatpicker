@@ -5,7 +5,8 @@
 
 import type { BoundsModel } from './BoundsModel';
 
-export type CreateSeatRequestModel = {
+export type UpdateSeatRequest = {
+    seatId?: string;
     title?: string | null;
     bounds?: BoundsModel;
 };

@@ -7,9 +7,10 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement;
 public partial class ReservationManagementController
 {
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateReservationForRequestModel model)
+    [ProducesResponseType(200)]
+    public async Task<IActionResult> Create([FromBody] CreateReservationForRequest model)
     {
-        await validateModel.Validate<CreateReservationForRequestModel, CreateReservationForRequestModelValidator>(model);
+        await validateModel.Validate<CreateReservationForRequest, CreateReservationForRequestValidator>(model);
 
         var user = loggedInUserAccessor.Get();
 
@@ -18,11 +19,11 @@ public partial class ReservationManagementController
         return new OkResult();
     }
 
-    public record CreateReservationForRequestModel(Guid SeatId, string UserId);
+    public record CreateReservationForRequest(Guid SeatId, string UserId);
 
-    private class CreateReservationForRequestModelValidator : AbstractValidator<CreateReservationForRequestModel>
+    private class CreateReservationForRequestValidator : AbstractValidator<CreateReservationForRequest>
     {
-        public CreateReservationForRequestModelValidator()
+        public CreateReservationForRequestValidator()
         {
             RuleFor(x => x.SeatId)
                 .NotEmpty();

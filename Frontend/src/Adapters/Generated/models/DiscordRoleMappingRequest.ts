@@ -5,6 +5,6 @@
 
 import type { DiscordRoleMapping } from './DiscordRoleMapping';
 
-export type DiscordRoleMappingRequestModel = {
+export type DiscordRoleMappingRequest = {
     mappings?: Array<DiscordRoleMapping> | null;
 };

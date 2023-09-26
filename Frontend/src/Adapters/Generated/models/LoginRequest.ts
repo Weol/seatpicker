@@ -3,7 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type CreateLanRequestModel = {
-    title?: string | null;
-    background?: string | null;
+export type LoginRequest = {
+    token?: string | null;
 };

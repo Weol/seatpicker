@@ -2,9 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { DiscordRoleMappingRequestModel } from '../models/DiscordRoleMappingRequestModel';
-import type { LoginRequestModel } from '../models/LoginRequestModel';
-import type { RenewRequestModel } from '../models/RenewRequestModel';
+import type { DiscordRoleMappingRequest } from '../models/DiscordRoleMappingRequest';
+import type { DiscordRoleMappingResponse } from '../models/DiscordRoleMappingResponse';
+import type { LoginRequest } from '../models/LoginRequest';
+import type { RenewRequest } from '../models/RenewRequest';
+import type { TestResponse } from '../models/TestResponse';
+import type { TokenResponse } from '../models/TokenResponse';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -14,41 +17,47 @@ export class DiscordAuthenticationAdapter {
 
     /**
      * @param requestBody 
-     * @returns any Success
+     * @returns TokenResponse Success
      * @throws ApiError
      */
     public static postDiscordRenew(
-requestBody?: RenewRequestModel,
-): CancelablePromise<any> {
+requestBody?: RenewRequest,
+): CancelablePromise<TokenResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/discord/renew',
             body: requestBody,
             mediaType: 'application/json',
+            errors: {
+                400: `Bad Request`,
+            },
         });
     }
 
     /**
      * @param requestBody 
-     * @returns any Success
+     * @returns TokenResponse Success
      * @throws ApiError
      */
     public static postDiscordLogin(
-requestBody?: LoginRequestModel,
-): CancelablePromise<any> {
+requestBody?: LoginRequest,
+): CancelablePromise<TokenResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/discord/login',
             body: requestBody,
             mediaType: 'application/json',
+            errors: {
+                400: `Bad Request`,
+            },
         });
     }
 
     /**
-     * @returns any Success
+     * @returns TestResponse Success
      * @throws ApiError
      */
-    public static getDiscordTest(): CancelablePromise<any> {
+    public static getDiscordTest(): CancelablePromise<TestResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/discord/test',
@@ -56,10 +65,10 @@ requestBody?: LoginRequestModel,
     }
 
     /**
-     * @returns any Success
+     * @returns DiscordRoleMappingResponse Success
      * @throws ApiError
      */
-    public static getDiscordRoles(): CancelablePromise<any> {
+    public static getDiscordRoles(): CancelablePromise<Array<DiscordRoleMappingResponse>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/discord/roles',
@@ -72,7 +81,7 @@ requestBody?: LoginRequestModel,
      * @throws ApiError
      */
     public static putDiscordRoles(
-requestBody?: DiscordRoleMappingRequestModel,
+requestBody?: DiscordRoleMappingRequest,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',

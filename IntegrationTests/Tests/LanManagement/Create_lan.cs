@@ -24,10 +24,10 @@ public class Create_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
         var identity = await CreateIdentity(Role.Admin);
         var client = GetClient(identity);
 
-        var requestModel = Generator.CreateLanRequestModel();
+        var Request = Generator.CreateLanRequest();
 
         //Act
-        var response = await client.PostAsJsonAsync("lan", requestModel);
+        var response = await client.PostAsJsonAsync("lan", Request);
 
         //Assert
         var committedAggregates = GetCommittedAggregates<Lan>();
@@ -38,8 +38,8 @@ public class Create_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
             {
                 var lan = committedAggregates.Should().ContainSingle().Subject;
                 Assert.Multiple(
-                    () => lan.Title.Should().Be(requestModel.Title),
-                    () => lan.Background.Should().Equal(requestModel.Background));
+                    () => lan.Title.Should().Be(Request.Title),
+                    () => lan.Background.Should().Equal(Request.Background));
             });
     }
 
@@ -53,7 +53,7 @@ public class Create_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
         //Act
         var response = await client.PostAsJsonAsync(
             "lan",
-            Generator.CreateLanRequestModel() with { Background = new byte[] { 1, 2, 3, 4, 5, 6 } });
+            Generator.CreateLanRequest() with { Background = new byte[] { 1, 2, 3, 4, 5, 6 } });
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

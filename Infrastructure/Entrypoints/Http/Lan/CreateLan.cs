@@ -6,9 +6,10 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 public partial class LanController
 {
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateLanRequestModel model)
+    [ProducesResponseType(200)]
+    public async Task<IActionResult> Create([FromBody] CreateLanRequest model)
     {
-        await validateModel.Validate<CreateLanRequestModel, CreateLanRequestModelValidator>(model);
+        await validateModel.Validate<CreateLanRequest, CreateLanRequestValidator>(model);
 
         var user = loggedInUserAccessor.Get();
 
@@ -17,11 +18,11 @@ public partial class LanController
         return new CreatedResult(lanId.ToString(), null);
     }
 
-    public record CreateLanRequestModel(string Title, byte[] Background);
+    public record CreateLanRequest(string Title, byte[] Background);
 
-    private class CreateLanRequestModelValidator : AbstractValidator<CreateLanRequestModel>
+    private class CreateLanRequestValidator : AbstractValidator<CreateLanRequest>
     {
-        public CreateLanRequestModelValidator()
+        public CreateLanRequestValidator()
         {
             RuleFor(x => x.Title)
                 .NotEmpty();

@@ -3,10 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { BoundsModel } from './BoundsModel';
-
-export type UpdateSeatRequestModel = {
-    seatId?: string;
+export type LanResponse = {
+    id?: string;
     title?: string | null;
-    bounds?: BoundsModel;
+    background?: string | null;
 };

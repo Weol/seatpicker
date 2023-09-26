@@ -3,6 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type RenewRequestModel = {
-    refreshToken?: string | null;
+export type TokenResponse = {
+    token?: string | null;
 };

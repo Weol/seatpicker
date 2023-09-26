@@ -2,8 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CreateLanRequestModel } from '../models/CreateLanRequestModel';
-import type { UpdateLanRequestModel } from '../models/UpdateLanRequestModel';
+import type { CreateLanRequest } from '../models/CreateLanRequest';
+import type { LanResponse } from '../models/LanResponse';
+import type { UpdateLanRequest } from '../models/UpdateLanRequest';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -17,7 +18,7 @@ export class LanAdapter {
      * @throws ApiError
      */
     public static postLan(
-requestBody?: CreateLanRequestModel,
+requestBody?: CreateLanRequest,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -28,10 +29,10 @@ requestBody?: CreateLanRequestModel,
     }
 
     /**
-     * @returns any Success
+     * @returns LanResponse Success
      * @throws ApiError
      */
-    public static getLan(): CancelablePromise<any> {
+    public static getLan(): CancelablePromise<Array<LanResponse>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/Lan',
@@ -40,12 +41,12 @@ requestBody?: CreateLanRequestModel,
 
     /**
      * @param id 
-     * @returns any Success
+     * @returns LanResponse Success
      * @throws ApiError
      */
     public static getLan1(
 id: string,
-): CancelablePromise<any> {
+): CancelablePromise<LanResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/Lan/{id}',
@@ -63,7 +64,7 @@ id: string,
      */
     public static putLan(
 id: string,
-requestBody?: UpdateLanRequestModel,
+requestBody?: UpdateLanRequest,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',

@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type CreateReservationForRequestModel = {
-    seatId?: string;
-    userId?: string | null;
+export type CreateLanRequest = {
+    title?: string | null;
+    background?: string | null;
 };

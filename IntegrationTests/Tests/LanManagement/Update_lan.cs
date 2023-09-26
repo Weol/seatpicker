@@ -18,22 +18,22 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
     {
     }
 
-    public static IEnumerable<object[]> ValidUpdateRequestModels = new[]
+    public static IEnumerable<object[]> ValidUpdateRequests = new[]
     {
-        new object[] { Generator.UpdateLanRequestModel() with { Title = null } },
+        new object[] { Generator.UpdateLanRequest() with { Title = null } },
         new object[]
         {
-            Generator.UpdateLanRequestModel() with { Background = null },
+            Generator.UpdateLanRequest() with { Background = null },
         },
         new object[]
         {
-            Generator.UpdateLanRequestModel(),
+            Generator.UpdateLanRequest(),
         },
     };
 
     [Theory]
-    [MemberData(nameof(ValidUpdateRequestModels))]
-    public async Task succeeds_when_valid(LanController.UpdateLanRequestModel updateModel)
+    [MemberData(nameof(ValidUpdateRequests))]
+    public async Task succeeds_when_valid(LanController.UpdateLanRequest updateModel)
     {
         // Arrange
         var identity = await CreateIdentity(Role.Admin);
@@ -66,17 +66,17 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
             });
     }
 
-    public static IEnumerable<object[]> InvalidUpdateRequestModels = new[]
+    public static IEnumerable<object[]> InvalidUpdateRequests = new[]
     {
-        new object[] { Generator.UpdateLanRequestModel() with { Background = null, Title = null } },
-        new object[] { Generator.UpdateLanRequestModel() with { Title = "" } },
-        new object[] { Generator.UpdateLanRequestModel() with { Background = Array.Empty<byte>() } },
-        new object[] { Generator.UpdateLanRequestModel() with { Background = new byte[] { 1, 2, 3, 4 } } },
+        new object[] { Generator.UpdateLanRequest() with { Background = null, Title = null } },
+        new object[] { Generator.UpdateLanRequest() with { Title = "" } },
+        new object[] { Generator.UpdateLanRequest() with { Background = Array.Empty<byte>() } },
+        new object[] { Generator.UpdateLanRequest() with { Background = new byte[] { 1, 2, 3, 4 } } },
     };
 
     [Theory]
-    [MemberData(nameof(InvalidUpdateRequestModels))]
-    public async Task fails_when_invalid(LanController.UpdateLanRequestModel updateModel)
+    [MemberData(nameof(InvalidUpdateRequests))]
+    public async Task fails_when_invalid(LanController.UpdateLanRequest updateModel)
     {
         // Arrange
         var identity = await CreateIdentity(Role.Admin);
@@ -103,7 +103,7 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
         SetupAggregates(existingLan);
 
         //Act
-        var updateModel = Generator.UpdateLanRequestModel();
+        var updateModel = Generator.UpdateLanRequest();
         var response = await client.PutAsJsonAsync($"lan/{existingLan.Id}", updateModel);
 
         //Assert

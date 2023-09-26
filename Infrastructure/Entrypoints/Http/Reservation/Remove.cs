@@ -5,6 +5,7 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Reservation;
 public partial class ReservationController
 {
     [HttpDelete("{id:guid}")]
+    [ProducesResponseType(200)]
     public async Task<IActionResult> Remove([FromRoute] Guid id)
     {
         var user = loggedInUserAccessor.Get();

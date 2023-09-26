@@ -25,7 +25,7 @@ public class Create_seat : IntegrationTestBase, IClassFixture<TestWebApplication
         var identity = await CreateIdentity(Role.Operator);
         var client = GetClient(identity);
 
-        var model = Generator.CreateSeatRequestModel();
+        var model = Generator.CreateSeatRequest();
 
         //Act
         var response = await client.PostAsJsonAsync("seat", model);
@@ -41,18 +41,18 @@ public class Create_seat : IntegrationTestBase, IClassFixture<TestWebApplication
             });
     }
 
-    public static IEnumerable<object[]> InvalidUpdateRequestModels = new[]
+    public static IEnumerable<object[]> InvalidUpdateRequests = new[]
     {
-        new object[] { Generator.CreateSeatRequestModel() with { Title = "" } },
+        new object[] { Generator.CreateSeatRequest() with { Title = "" } },
         new object[]
-            { Generator.CreateSeatRequestModel() with { Bounds = new SeatController.BoundsModel(0, 0, -1, 1) } },
+            { Generator.CreateSeatRequest() with { Bounds = new SeatController.BoundsModel(0, 0, -1, 1) } },
         new object[]
-            { Generator.CreateSeatRequestModel() with { Bounds = new SeatController.BoundsModel(0, 0, 1, -1) } },
+            { Generator.CreateSeatRequest() with { Bounds = new SeatController.BoundsModel(0, 0, 1, -1) } },
     };
 
     [Theory]
-    [MemberData(nameof(InvalidUpdateRequestModels))]
-    public async Task fails_when_seat_request_model_is_invalid(SeatController.CreateSeatRequestModel model)
+    [MemberData(nameof(InvalidUpdateRequests))]
+    public async Task fails_when_seat_request_model_is_invalid(SeatController.CreateSeatRequest model)
     {
         // Arrange
         var identity = await CreateIdentity(Role.Operator);

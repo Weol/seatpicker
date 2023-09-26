@@ -23,7 +23,8 @@ public class Roles : AuthenticationTestBase
     public async Task getting_role_mapping_succeeds()
     {
         // Arrange
-        var client = GetAnonymousClient();
+        var identity = await CreateIdentity(Role.Admin);
+        var client = GetClient(identity);
         var guildOperatorRoleId = "1238712";
 
         var discordAuthenticationOptions = GetService<IOptions<DiscordAuthenticationOptions>>().Value;
@@ -37,8 +38,8 @@ public class Roles : AuthenticationTestBase
 
         //Act
         var response = await client.GetAsync("discord/roles");
-        var responseModel = await response.Content
-            .ReadAsJsonAsync<IEnumerable<DiscordAuthenticationController.DiscordRoleMappingResponseModel>>();
+        var Response = await response.Content
+            .ReadAsJsonAsync<IEnumerable<DiscordAuthenticationController.DiscordRoleMappingResponse>>();
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -46,7 +47,7 @@ public class Roles : AuthenticationTestBase
         Assert.Multiple(
             () =>
             {
-                var role = responseModel.Should().ContainSingle(role => role.DiscordRoleId == guildOperatorRoleId).Subject;
+                var role = Response.Should().ContainSingle(role => role.DiscordRoleId == guildOperatorRoleId).Subject;
                 Assert.Multiple(
                     () => role.DiscordRoleId.Should().Be(guildOperatorRoleId),
                     () => role.Role.Should().Be(Role.Operator));
@@ -57,7 +58,8 @@ public class Roles : AuthenticationTestBase
     public async Task setting_role_mapping_succeeds()
     {
         // Arrange
-        var client = GetAnonymousClient();
+        var identity = await CreateIdentity(Role.Admin);
+        var client = GetClient(identity);
         var guildOperatorRoleId = "1238712";
 
         var roleMappings = new[] { new DiscordRoleMapping(guildOperatorRoleId, Role.Operator) };
@@ -65,7 +67,7 @@ public class Roles : AuthenticationTestBase
         //Act
         var response = await client.PutAsync(
             "discord/roles",
-            JsonContent.Create(new DiscordAuthenticationController.DiscordRoleMappingRequestModel(roleMappings)));
+            JsonContent.Create(new DiscordAuthenticationController.DiscordRoleMappingRequest(roleMappings)));
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

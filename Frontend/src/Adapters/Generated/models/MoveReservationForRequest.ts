@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type MoveReservationForRequestModel = {
+export type MoveReservationForRequest = {
     userId?: string | null;
     fromSeatId?: string;
     toSeatId?: string;

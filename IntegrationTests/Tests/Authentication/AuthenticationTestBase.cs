@@ -121,14 +121,14 @@ public class AuthenticationTestBase : IntegrationTestBase, IClassFixture<TestWeb
             });
     }
 
-    protected static async Task<DiscordAuthenticationController.TestResponseModel> TestAuthentication(HttpClient client, string token)
+    protected static async Task<DiscordAuthenticationController.TestResponse> TestAuthentication(HttpClient client, string token)
     {
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         var response = await client.GetAsync("discord/test");
-        var responseModel = await response.Content.ReadAsJsonAsync<DiscordAuthenticationController.TestResponseModel>();
+        var Response = await response.Content.ReadAsJsonAsync<DiscordAuthenticationController.TestResponse>();
 
-        if (responseModel is null) throw new NullReferenceException();
+        if (Response is null) throw new NullReferenceException();
 
-        return responseModel;
+        return Response;
     }
 }

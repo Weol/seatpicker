@@ -5,16 +5,16 @@ namespace Seatpicker.IntegrationTests.Tests.LanManagement;
 
 public static class Generator
 {
-    public static LanController.CreateLanRequestModel CreateLanRequestModel()
+    public static LanController.CreateLanRequest CreateLanRequest()
     {
-        return new LanController.CreateLanRequestModel(
+        return new LanController.CreateLanRequest(
             new Faker().Hacker.Noun(),
             LanGenerator.CreateValidBackround());
     }
 
-    public static LanController.UpdateLanRequestModel UpdateLanRequestModel()
+    public static LanController.UpdateLanRequest UpdateLanRequest()
     {
-        return new LanController.UpdateLanRequestModel(
+        return new LanController.UpdateLanRequest(
             Guid.NewGuid(),
             new Faker().Hacker.Noun(),
             LanGenerator.CreateValidBackround());

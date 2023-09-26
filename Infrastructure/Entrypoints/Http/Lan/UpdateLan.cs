@@ -6,9 +6,9 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 public partial class LanController
 {
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateLanRequestModel model)
+    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateLanRequest model)
     {
-        await validateModel.Validate<UpdateLanRequestModel, UpdateLanRequestModelValidator>(model);
+        await validateModel.Validate<UpdateLanRequest, UpdateLanRequestValidator>(model);
 
         if (id != model.Id) throw new BadRequestException("Route parameter id does not match the request model id");
 
@@ -22,11 +22,11 @@ public partial class LanController
         return new OkResult();
     }
 
-    public record UpdateLanRequestModel(Guid Id, string? Title, byte[]? Background);
+    public record UpdateLanRequest(Guid Id, string? Title, byte[]? Background);
 
-    private class UpdateLanRequestModelValidator : AbstractValidator<UpdateLanRequestModel>
+    private class UpdateLanRequestValidator : AbstractValidator<UpdateLanRequest>
     {
-        public UpdateLanRequestModelValidator()
+        public UpdateLanRequestValidator()
         {
             RuleFor(x => x.Id).NotEmpty();
 

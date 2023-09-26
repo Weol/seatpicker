@@ -36,20 +36,20 @@ public class Renew : AuthenticationTestBase
         //Act
         var response = await client.PostAsync(
             "discord/renew",
-            JsonContent.Create(new DiscordAuthenticationController.RenewRequestModel(refreshToken)));
-        var responseModel = await response.Content.ReadAsJsonAsync<DiscordAuthenticationController.TokenResponseModel>();
+            JsonContent.Create(new DiscordAuthenticationController.RenewRequest(refreshToken)));
+        var Response = await response.Content.ReadAsJsonAsync<DiscordAuthenticationController.TokenResponse>();
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        responseModel.Should().NotBeNull();
+        Response.Should().NotBeNull();
 
-        var testResponseModel = await TestAuthentication(client, responseModel!.Token);
-        testResponseModel.Should().NotBeNull();
+        var testResponse = await TestAuthentication(client, Response!.Token);
+        testResponse.Should().NotBeNull();
 
         Assert.Multiple(
-            () => testResponseModel.Id.Should().Be(discordUser.Id),
-            () => testResponseModel.Name.Should().Be(discordUser.Username),
-            () => testResponseModel.Roles.Should().Contain(Role.User.ToString()));
+            () => testResponse.Id.Should().Be(discordUser.Id),
+            () => testResponse.Name.Should().Be(discordUser.Username),
+            () => testResponse.Roles.Should().Contain(Role.User.ToString()));
     }
 
     [Fact]
@@ -77,20 +77,20 @@ public class Renew : AuthenticationTestBase
         //Act
         var response = await client.PostAsync(
             "discord/renew",
-            JsonContent.Create(new DiscordAuthenticationController.RenewRequestModel(refreshToken)));
-        var responseModel = await response.Content.ReadAsJsonAsync<DiscordAuthenticationController.TokenResponseModel>();
+            JsonContent.Create(new DiscordAuthenticationController.RenewRequest(refreshToken)));
+        var Response = await response.Content.ReadAsJsonAsync<DiscordAuthenticationController.TokenResponse>();
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        responseModel.Should().NotBeNull();
+        Response.Should().NotBeNull();
 
-        var testResponseModel = await TestAuthentication(client, responseModel!.Token);
-        testResponseModel.Should().NotBeNull();
+        var testResponse = await TestAuthentication(client, Response!.Token);
+        testResponse.Should().NotBeNull();
 
         Assert.Multiple(
-            () => testResponseModel.Id.Should().Be(discordUser.Id),
-            () => testResponseModel.Name.Should().Be(discordUser.Username),
-            () => testResponseModel.Roles.Should().Contain(Role.User.ToString()),
-            () => testResponseModel.Roles.Should().Contain(Role.Operator.ToString()));
+            () => testResponse.Id.Should().Be(discordUser.Id),
+            () => testResponse.Name.Should().Be(discordUser.Username),
+            () => testResponse.Roles.Should().Contain(Role.User.ToString()),
+            () => testResponse.Roles.Should().Contain(Role.Operator.ToString()));
     }
 }
