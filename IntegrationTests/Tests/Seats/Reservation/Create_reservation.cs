@@ -31,7 +31,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         //Act
         var response = await client.PostAsync(
             "reservation",
-            JsonContent.Create(new ReservationController.CreateReservationRequest(seat.Id)));
+            JsonContent.Create(new Create.Request(seat.Id)));
 
         //Assert
         Assert.Multiple(
@@ -58,7 +58,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         //Act
         var response = await client.PostAsJsonAsync(
             "reservation",
-            new ReservationController.CreateReservationRequest(seat.Id));
+            new Create.Request(seat.Id));
 
         //Assert
         Assert.Multiple(
@@ -78,7 +78,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         var identity = await CreateIdentity();
         var client = GetClient(identity);
 
-        var alreadyReservedBy = CreateUser();
+        var alreadyReservedBy = await CreateUser();
 
         var seat = SeatGenerator.Create(reservedBy: alreadyReservedBy);
 
@@ -87,7 +87,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         //Act
         var response = await client.PostAsJsonAsync(
             "reservation",
-            new ReservationController.CreateReservationRequest(seat.Id));
+            new Create.Request(seat.Id));
 
         //Assert
         Assert.Multiple(
@@ -112,7 +112,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         //Act
         var response = await client.PostAsJsonAsync(
             "reservation",
-            new ReservationController.CreateReservationRequest(seat.Id));
+            new Create.Request(seat.Id));
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -133,7 +133,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         //Act
         var response = await client.PostAsJsonAsync(
             "reservation",
-            new ReservationController.CreateReservationRequest(seat.Id));
+            new Create.Request(seat.Id));
 
         //Assert
         Assert.Multiple(

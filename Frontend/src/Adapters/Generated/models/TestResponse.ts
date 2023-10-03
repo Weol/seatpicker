@@ -6,5 +6,5 @@
 export type TestResponse = {
     id?: string | null;
     name?: string | null;
-    roles?: Array<string> | null;
+    roles?: Array<string>;
 };

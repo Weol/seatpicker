@@ -19,17 +19,17 @@ public class UserManager : IUserProvider
         var reader = documentRepository.CreateReader();
         var userDocument = await reader.Get<UserDocument>(userId);
 
-        return userDocument is null ? null : new User(new UserId(userDocument.Id), userDocument.Name);
+        return userDocument is null ? null : new User(new UserId(userDocument.Id), userDocument.Name, userDocument.Avatar);
     }
 
     public async Task Store(User user)
     {
         await using var transaction = documentRepository.CreateTransaction();
-        transaction.Store(new UserDocument(user.Id, user.Name));
+        transaction.Store(new UserDocument(user.Id, user.Name, user.Avatar));
         transaction.Commit();
     }
 
-    public record UserDocument(string Id, string Name) : IDocument;
+    public record UserDocument(string Id, string Name, string? Avatar) : IDocument;
 }
 
 public static class UserManagerExtensions

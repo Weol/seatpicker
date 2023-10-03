@@ -3,6 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type LoginRequest = {
-    token?: string;
+export type FrontendGetAllSeatsReservedBy = {
+    id?: string;
+    name?: string;
+    avatar?: string | null;
 };

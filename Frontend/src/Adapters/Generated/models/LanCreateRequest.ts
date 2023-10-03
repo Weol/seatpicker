@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type CreateLanRequest = {
-    title?: string | null;
-    background?: string | null;
+export type LanCreateRequest = {
+    title?: string;
+    background?: string;
 };

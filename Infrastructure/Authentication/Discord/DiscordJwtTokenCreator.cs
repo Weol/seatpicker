@@ -3,7 +3,6 @@ using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Seatpicker.Domain;
 
 namespace Seatpicker.Infrastructure.Authentication.Discord;
 

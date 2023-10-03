@@ -2,7 +2,6 @@
 using Marten;
 using Microsoft.Extensions.Options;
 using Seatpicker.Application.Features;
-using Seatpicker.Infrastructure.Adapters.Database.Queries;
 using Weasel.Core;
 
 namespace Seatpicker.Infrastructure.Adapters.Database;
@@ -21,8 +20,6 @@ internal static class DatabaseExtensions
             .AddSingleton<IDocumentRepository, DocumentRepository>()
             .AddScoped(CreateDocumentTransaction)
             .AddScoped(CreateDocumentReader);
-
-        services.AddScoped<LanQueries>();
 
         services.AddMarten(
             provider =>

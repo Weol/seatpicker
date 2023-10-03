@@ -2,8 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CreateReservationRequest } from '../models/CreateReservationRequest';
-import type { MoveReservationRequest } from '../models/MoveReservationRequest';
+import type { ReservationCreateRequest } from '../models/ReservationCreateRequest';
+import type { ReservationMoveRequest } from '../models/ReservationMoveRequest';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -16,12 +16,12 @@ export class ReservationAdapter {
      * @returns any Success
      * @throws ApiError
      */
-    public static postReservation(
-requestBody?: CreateReservationRequest,
+    public static seatpickerInfrastructureEntrypointsHttpReservationCreateEndpointInfrastructure(
+requestBody?: ReservationCreateRequest,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/Reservation',
+            url: '/reservation',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -33,13 +33,13 @@ requestBody?: CreateReservationRequest,
      * @returns any Success
      * @throws ApiError
      */
-    public static putReservation(
+    public static seatpickerInfrastructureEntrypointsHttpReservationMoveEndpointInfrastructure(
 id: string,
-requestBody?: MoveReservationRequest,
+requestBody?: ReservationMoveRequest,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',
-            url: '/Reservation/{id}',
+            url: '/reservation/{id}',
             path: {
                 'id': id,
             },
@@ -53,12 +53,12 @@ requestBody?: MoveReservationRequest,
      * @returns any Success
      * @throws ApiError
      */
-    public static deleteReservation(
+    public static seatpickerInfrastructureEntrypointsHttpReservationRemoveEndpointInfrastructure(
 id: string,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/Reservation/{id}',
+            url: '/reservation/{id}',
             path: {
                 'id': id,
             },

@@ -1,6 +1,5 @@
 using System.Net;
 using FluentAssertions;
-using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 using Xunit;
@@ -28,20 +27,20 @@ public class Get_lan : IntegrationTestBase, IClassFixture<TestWebApplicationFact
         SetupAggregates(existingLan);
 
         //Act
-        var response = await client.GetAsync($"lan/{existingLan.Id}");
-        var Response = await response.Content.ReadAsJsonAsync<LanController.LanResponse>();
+        var request = await client.GetAsync($"lan/{existingLan.Id}");
+        var response = await request.Content.ReadAsJsonAsync<Get.Response>();
 
         //Assert
         Assert.Multiple(
-            () => response.StatusCode.Should().Be(HttpStatusCode.OK),
+            () => request.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                Response.Should().NotBeNull();
+                response.Should().NotBeNull();
                 Assert.Multiple(
-                    () => Response!.Id.Should().Be(existingLan.Id),
+                    () => response!.Id.Should().Be(existingLan.Id),
 
-                    () => Response!.Title.Should().Be(existingLan.Title),
-                    () => Response!.Background.Should().Be(Convert.ToBase64String(existingLan.Background)));
+                    () => response!.Title.Should().Be(existingLan.Title),
+                    () => response!.Background.Should().Equal(existingLan.Background));
             });
     }
 

@@ -5,11 +5,140 @@
     "version": "1.0"
   },
   "paths": {
+    "/seat": {
+      "post": {
+        "tags": [
+          "seat"
+        ],
+        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Seat.Create.Endpoint (Infrastructure)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeatCreateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeatCreateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeatCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/reservation": {
+      "post": {
+        "tags": [
+          "reservation"
+        ],
+        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Reservation.Create.Endpoint (Infrastructure)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationCreateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationCreateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/reservationmanagement": {
+      "post": {
+        "tags": [
+          "reservationmanagement"
+        ],
+        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement.Create.Endpoint (Infrastructure)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationManagementCreateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationManagementCreateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationManagementCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/lan": {
+      "post": {
+        "tags": [
+          "lan"
+        ],
+        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Lan.Create.Endpoint (Infrastructure)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LanCreateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LanCreateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LanCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/discord/renew": {
       "post": {
         "tags": [
-          "DiscordAuthentication"
+          "discord"
         ],
+        "operationId": "Seatpicker.Infrastructure.Authentication.Discord.DiscordAuthenticationController.Renew (Infrastructure)",
         "requestBody": {
           "content": {
             "application/json": {
@@ -76,8 +205,9 @@
     "/discord/login": {
       "post": {
         "tags": [
-          "DiscordAuthentication"
+          "discord"
         ],
+        "operationId": "Seatpicker.Infrastructure.Authentication.Discord.DiscordAuthenticationController.Login (Infrastructure)",
         "requestBody": {
           "content": {
             "application/json": {
@@ -144,8 +274,9 @@
     "/discord/test": {
       "get": {
         "tags": [
-          "DiscordAuthentication"
+          "discord"
         ],
+        "operationId": "Seatpicker.Infrastructure.Authentication.Discord.DiscordAuthenticationController.Test (Infrastructure)",
         "responses": {
           "200": {
             "description": "Success",
@@ -173,8 +304,9 @@
     "/discord/roles": {
       "get": {
         "tags": [
-          "DiscordAuthentication"
+          "discord"
         ],
+        "operationId": "Seatpicker.Infrastructure.Authentication.Discord.DiscordAuthenticationController.GetRoles (Infrastructure)",
         "responses": {
           "200": {
             "description": "Success",
@@ -209,8 +341,9 @@
       },
       "put": {
         "tags": [
-          "DiscordAuthentication"
+          "discord"
         ],
+        "operationId": "Seatpicker.Infrastructure.Authentication.Discord.DiscordAuthenticationController.PutRoles (Infrastructure)",
         "requestBody": {
           "content": {
             "application/json": {
@@ -237,39 +370,22 @@
         }
       }
     },
-    "/Lan": {
-      "post": {
-        "tags": [
-          "Lan"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateLanRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateLanRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateLanRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      },
+    "/lan/{id}": {
       "get": {
         "tags": [
-          "Lan"
+          "lan"
+        ],
+        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Lan.Get.Endpoint (Infrastructure)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -277,76 +393,101 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/LanResponse"
-                  }
+                  "$ref": "#/components/schemas/LanGetResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/LanResponse"
-                  }
+                  "$ref": "#/components/schemas/LanGetResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/LanResponse"
-                  }
+                  "$ref": "#/components/schemas/LanGetResponse"
                 }
               }
             }
           }
         }
+      },
+      "put": {
+        "tags": [
+          "lan"
+        ],
+        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Lan.Update.Endpoint (Infrastructure)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LanUpdateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LanUpdateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LanUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
       }
     },
-    "/Lan/{id}": {
+    "/frontend/seats": {
       "get": {
         "tags": [
-          "Lan"
+          "frontend"
         ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
+        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Frontend.GetAllSeats.Get (Infrastructure)",
         "responses": {
           "200": {
             "description": "Success",
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/LanResponse"
+                  "$ref": "#/components/schemas/FrontendGetAllSeatsResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LanResponse"
+                  "$ref": "#/components/schemas/FrontendGetAllSeatsResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LanResponse"
+                  "$ref": "#/components/schemas/FrontendGetAllSeatsResponse"
                 }
               }
             }
           }
         }
-      },
+      }
+    },
+    "/reservation/{id}": {
       "put": {
         "tags": [
-          "Lan"
+          "reservation"
         ],
+        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Reservation.Move.Endpoint (Infrastructure)",
         "parameters": [
           {
             "name": "id",
@@ -362,90 +503,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateLanRequest"
+                "$ref": "#/components/schemas/ReservationMoveRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateLanRequest"
+                "$ref": "#/components/schemas/ReservationMoveRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateLanRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/Reservation": {
-      "post": {
-        "tags": [
-          "Reservation"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateReservationRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateReservationRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateReservationRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/Reservation/{id}": {
-      "put": {
-        "tags": [
-          "Reservation"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MoveReservationRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MoveReservationRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/MoveReservationRequest"
+                "$ref": "#/components/schemas/ReservationMoveRequest"
               }
             }
           }
@@ -458,8 +526,9 @@
       },
       "delete": {
         "tags": [
-          "Reservation"
+          "reservation"
         ],
+        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Reservation.Remove.Endpoint (Infrastructure)",
         "parameters": [
           {
             "name": "id",
@@ -478,42 +547,12 @@
         }
       }
     },
-    "/ReservationManagement": {
-      "post": {
-        "tags": [
-          "ReservationManagement"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateReservationForRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateReservationForRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateReservationForRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/ReservationManagement/{id}": {
+    "/reservationmanagement/{id}": {
       "put": {
         "tags": [
-          "ReservationManagement"
+          "reservationmanagement"
         ],
+        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement.Move.Endpoint (Infrastructure)",
         "parameters": [
           {
             "name": "id",
@@ -529,17 +568,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MoveReservationForRequest"
+                "$ref": "#/components/schemas/ReservationManagementMoveRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/MoveReservationForRequest"
+                "$ref": "#/components/schemas/ReservationManagementMoveRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/MoveReservationForRequest"
+                "$ref": "#/components/schemas/ReservationManagementMoveRequest"
               }
             }
           }
@@ -552,8 +591,9 @@
       },
       "delete": {
         "tags": [
-          "ReservationManagement"
+          "reservationmanagement"
         ],
+        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement.Remove.Endpoint (Infrastructure)",
         "parameters": [
           {
             "name": "id",
@@ -572,42 +612,12 @@
         }
       }
     },
-    "/Seat": {
-      "post": {
-        "tags": [
-          "Seat"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateSeatRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateSeatRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateSeatRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/Seat/{id}": {
+    "/seat/{id}": {
       "delete": {
         "tags": [
-          "Seat"
+          "seat"
         ],
+        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Seat.Remove.Endpoint (Infrastructure)",
         "parameters": [
           {
             "name": "id",
@@ -627,8 +637,9 @@
       },
       "put": {
         "tags": [
-          "Seat"
+          "seat"
         ],
+        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Seat.Update.Endpoint (Infrastructure)",
         "parameters": [
           {
             "name": "id",
@@ -644,17 +655,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateSeatRequest"
+                "$ref": "#/components/schemas/SeatUpdateRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateSeatRequest"
+                "$ref": "#/components/schemas/SeatUpdateRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateSeatRequest"
+                "$ref": "#/components/schemas/SeatUpdateRequest"
               }
             }
           }
@@ -669,7 +680,7 @@
   },
   "components": {
     "schemas": {
-      "BoundsModel": {
+      "Bounds": {
         "type": "object",
         "properties": {
           "x": {
@@ -691,64 +702,11 @@
         },
         "additionalProperties": false
       },
-      "CreateLanRequest": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "nullable": true
-          },
-          "background": {
-            "type": "string",
-            "format": "byte",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "CreateReservationForRequest": {
-        "type": "object",
-        "properties": {
-          "seatId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "userId": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "CreateReservationRequest": {
-        "type": "object",
-        "properties": {
-          "seatId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "additionalProperties": false
-      },
-      "CreateSeatRequest": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "nullable": true
-          },
-          "bounds": {
-            "$ref": "#/components/schemas/BoundsModel"
-          }
-        },
-        "additionalProperties": false
-      },
       "DiscordRoleMapping": {
         "type": "object",
         "properties": {
           "discordRoleId": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "role": {
             "$ref": "#/components/schemas/Role"
@@ -763,8 +721,7 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/DiscordRoleMapping"
-            },
-            "nullable": true
+            }
           }
         },
         "additionalProperties": false
@@ -773,12 +730,10 @@
         "type": "object",
         "properties": {
           "discordRoleId": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "discordRoleName": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "discordRoleColor": {
             "type": "integer",
@@ -794,7 +749,84 @@
         },
         "additionalProperties": false
       },
-      "LanResponse": {
+      "FrontendGetAllSeatsReservedBy": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FrontendGetAllSeatsResponse": {
+        "type": "object",
+        "properties": {
+          "seats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FrontendGetAllSeatsSeat"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "FrontendGetAllSeatsSeat": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "bounds": {
+            "$ref": "#/components/schemas/Bounds"
+          },
+          "reservedBy": {
+            "$ref": "#/components/schemas/FrontendGetAllSeatsReservedBy"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LanCreateRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "background": {
+            "type": "string",
+            "format": "byte"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LanGetResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "background": {
+            "type": "string",
+            "format": "byte"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LanUpdateRequest": {
         "type": "object",
         "properties": {
           "id": {
@@ -807,6 +839,7 @@
           },
           "background": {
             "type": "string",
+            "format": "byte",
             "nullable": true
           }
         },
@@ -816,40 +849,7 @@
         "type": "object",
         "properties": {
           "token": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "MoveReservationForRequest": {
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "string",
-            "nullable": true
-          },
-          "fromSeatId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "toSeatId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "additionalProperties": false
-      },
-      "MoveReservationRequest": {
-        "type": "object",
-        "properties": {
-          "fromSeatId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "toSeatId": {
-            "type": "string",
-            "format": "uuid"
+            "type": "string"
           }
         },
         "additionalProperties": false
@@ -885,8 +885,61 @@
         "type": "object",
         "properties": {
           "refreshToken": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReservationCreateRequest": {
+        "type": "object",
+        "properties": {
+          "seatId": {
             "type": "string",
-            "nullable": true
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReservationManagementCreateRequest": {
+        "type": "object",
+        "properties": {
+          "seatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReservationManagementMoveRequest": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "fromSeatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "toSeatId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReservationMoveRequest": {
+        "type": "object",
+        "properties": {
+          "fromSeatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "toSeatId": {
+            "type": "string",
+            "format": "uuid"
           }
         },
         "additionalProperties": false
@@ -898,6 +951,35 @@
           "User"
         ],
         "type": "string"
+      },
+      "SeatCreateRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "bounds": {
+            "$ref": "#/components/schemas/Bounds"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SeatUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "seatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "bounds": {
+            "$ref": "#/components/schemas/Bounds"
+          }
+        },
+        "additionalProperties": false
       },
       "TestResponse": {
         "type": "object",
@@ -914,8 +996,7 @@
             "type": "array",
             "items": {
               "type": "string"
-            },
-            "nullable": true
+            }
           }
         },
         "additionalProperties": false
@@ -924,44 +1005,23 @@
         "type": "object",
         "properties": {
           "token": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "UpdateLanRequest": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
+            "type": "string"
           },
-          "title": {
+          "userId": {
+            "type": "string"
+          },
+          "nick": {
+            "type": "string"
+          },
+          "avatar": {
             "type": "string",
             "nullable": true
           },
-          "background": {
-            "type": "string",
-            "format": "byte",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "UpdateSeatRequest": {
-        "type": "object",
-        "properties": {
-          "seatId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "title": {
-            "type": "string",
-            "nullable": true
-          },
-          "bounds": {
-            "$ref": "#/components/schemas/BoundsModel"
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Role"
+            }
           }
         },
         "additionalProperties": false

@@ -6,6 +6,6 @@
 import type { Role } from './Role';
 
 export type DiscordRoleMapping = {
-    discordRoleId?: string | null;
+    discordRoleId?: string;
     role?: Role;
 };

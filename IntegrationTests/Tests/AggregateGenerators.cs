@@ -16,7 +16,7 @@ public static class SeatGenerator
             id ?? Guid.NewGuid(),
             title ?? "Test title",
             bounds ?? new Bounds(0, 0, 1, 1),
-            initiator ?? new User(new UserId("124"), "asd"));
+            initiator ?? new User(new UserId("124"), "asd", null));
 
         if (reservedBy is not null) seat.MakeReservation(reservedBy, new List<Seat>());
 
@@ -38,6 +38,6 @@ public static class LanGenerator
             id ?? Guid.NewGuid(),
             title ?? "Test title",
             background ?? CreateValidBackround(),
-            initiator ?? new User(new UserId("124"), "asd"));
+            initiator ?? new User(new UserId("124"), "asd", null));
     }
 }

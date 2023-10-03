@@ -2,9 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CreateLanRequest } from '../models/CreateLanRequest';
-import type { LanResponse } from '../models/LanResponse';
-import type { UpdateLanRequest } from '../models/UpdateLanRequest';
+import type { LanCreateRequest } from '../models/LanCreateRequest';
+import type { LanGetResponse } from '../models/LanGetResponse';
+import type { LanUpdateRequest } from '../models/LanUpdateRequest';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -17,39 +17,28 @@ export class LanAdapter {
      * @returns any Success
      * @throws ApiError
      */
-    public static postLan(
-requestBody?: CreateLanRequest,
+    public static seatpickerInfrastructureEntrypointsHttpLanCreateEndpointInfrastructure(
+requestBody?: LanCreateRequest,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/Lan',
+            url: '/lan',
             body: requestBody,
             mediaType: 'application/json',
         });
     }
 
     /**
-     * @returns LanResponse Success
-     * @throws ApiError
-     */
-    public static getLan(): CancelablePromise<Array<LanResponse>> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/Lan',
-        });
-    }
-
-    /**
      * @param id 
-     * @returns LanResponse Success
+     * @returns LanGetResponse Success
      * @throws ApiError
      */
-    public static getLan1(
+    public static seatpickerInfrastructureEntrypointsHttpLanGetEndpointInfrastructure(
 id: string,
-): CancelablePromise<LanResponse> {
+): CancelablePromise<LanGetResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/Lan/{id}',
+            url: '/lan/{id}',
             path: {
                 'id': id,
             },
@@ -62,13 +51,13 @@ id: string,
      * @returns any Success
      * @throws ApiError
      */
-    public static putLan(
+    public static seatpickerInfrastructureEntrypointsHttpLanUpdateEndpointInfrastructure(
 id: string,
-requestBody?: UpdateLanRequest,
+requestBody?: LanUpdateRequest,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',
-            url: '/Lan/{id}',
+            url: '/lan/{id}',
             path: {
                 'id': id,
             },

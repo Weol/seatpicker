@@ -32,7 +32,7 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
         //Act
         var response = await client.PutAsJsonAsync(
             $"reservation/{fromSeat.Id}",
-            new ReservationController.MoveReservationRequest(fromSeat.Id, toSeat.Id));
+            new Move.Request(fromSeat.Id, toSeat.Id));
 
         //Assert
         Assert.Multiple(
@@ -63,7 +63,8 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
         var identity = await CreateIdentity();
         var client = GetClient(identity);
 
-        var fromSeat = SeatGenerator.Create(reservedBy: CreateUser());
+        var alreadyReservedBy = await CreateUser();
+        var fromSeat = SeatGenerator.Create(reservedBy: alreadyReservedBy);
         var toSeat = SeatGenerator.Create();
 
         SetupAggregates(fromSeat, toSeat);
@@ -71,7 +72,7 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
         //Act
         var response = await client.PutAsJsonAsync(
             $"reservation/{fromSeat.Id}",
-            new ReservationController.MoveReservationRequest(fromSeat.Id, toSeat.Id));
+            new Move.Request(fromSeat.Id, toSeat.Id));
 
         //Assert
         Assert.Multiple(

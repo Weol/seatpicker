@@ -64,7 +64,7 @@ public class Remove_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         var identity = await CreateIdentity();
         var client = GetClient(identity);
 
-        var alreadyReservedBy = CreateUser();
+        var alreadyReservedBy = await CreateUser();
 
         var seat = SeatGenerator.Create(reservedBy: alreadyReservedBy);
 

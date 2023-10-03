@@ -1,5 +1,4 @@
 ﻿using Seatpicker.Application.Features;
-using Seatpicker.Domain;
 using Shared;
 
 namespace Seatpicker.Infrastructure.Authentication.Discord;

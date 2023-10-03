@@ -6,8 +6,8 @@
 import type { Role } from './Role';
 
 export type DiscordRoleMappingResponse = {
-    discordRoleId?: string | null;
-    discordRoleName?: string | null;
+    discordRoleId?: string;
+    discordRoleName?: string;
     discordRoleColor?: number;
     discordRoleIcon?: string | null;
     role?: Role;

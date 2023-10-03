@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Authentication;
+using Seatpicker.Infrastructure.Authentication.Discord;
 using Seatpicker.IntegrationTests.TestAdapters;
 using Shared;
 using Xunit.Abstractions;
@@ -31,12 +32,6 @@ public abstract class IntegrationTestBase : IDisposable
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", identity.Token);
 
         return client;
-    }
-
-    protected Task<TestIdentity> CreateIdentity(params Role[] roles)
-    {
-        var identityGenerator = factory.Services.GetRequiredService<IdentityGenerator>();
-        return identityGenerator.GenerateWithRoles(roles);
     }
 
     protected HttpClient GetAnonymousClient() => factory.CreateClient();
@@ -77,12 +72,37 @@ public abstract class IntegrationTestBase : IDisposable
         return repository.CreateReader().Query<TDocument>();
     }
 
-    protected User CreateUser()
+    protected async Task<User> CreateUser()
     {
         var userManager = GetService<UserManager>();
-        var user = new User(new UserId(Guid.NewGuid().ToString()), new Faker().Name.FirstName());
-        userManager.Store(user).GetAwaiter().GetResult();
+
+        var user = new User(
+            new UserId(Guid.NewGuid().ToString()),
+            new Faker().Name.FirstName(),
+            null);
+
+        await userManager.Store(user);
         return user;
+    }
+
+    protected async Task<TestIdentity> CreateIdentity(params Role[] roles)
+    {
+        var jwtTokenCreator = GetService<DiscordJwtTokenCreator>();
+
+        var user = await CreateUser();
+
+        var discordToken = new DiscordToken(
+            Id: user.Id,
+            Nick: user.Name,
+            RefreshToken: "8ioq3",
+            ExpiresAtUtc: DateTimeOffset.UtcNow.AddDays(1),
+            Avatar: user.Avatar
+        );
+
+        var token = await jwtTokenCreator.CreateToken(discordToken, roles);
+
+        var identity = new TestIdentity(user, roles, token);
+        return identity;
     }
 
     protected internal void MockOutgoingHttpRequest(
@@ -100,4 +120,5 @@ public abstract class IntegrationTestBase : IDisposable
         factory.Dispose();
     }
 
+    public record TestIdentity(Domain.User User, Role[] Roles, string Token);
 }

@@ -45,21 +45,21 @@ public class Create_seat : IntegrationTestBase, IClassFixture<TestWebApplication
     {
         new object[] { Generator.CreateSeatRequest() with { Title = "" } },
         new object[]
-            { Generator.CreateSeatRequest() with { Bounds = new SeatController.BoundsModel(0, 0, -1, 1) } },
+            { Generator.CreateSeatRequest() with { Bounds = new Infrastructure.Entrypoints.Http.Bounds(0, 0, -1, 1) } },
         new object[]
-            { Generator.CreateSeatRequest() with { Bounds = new SeatController.BoundsModel(0, 0, 1, -1) } },
+            { Generator.CreateSeatRequest() with { Bounds = new Infrastructure.Entrypoints.Http.Bounds(0, 0, 1, -1) } },
     };
 
     [Theory]
     [MemberData(nameof(InvalidUpdateRequests))]
-    public async Task fails_when_seat_request_model_is_invalid(SeatController.CreateSeatRequest model)
+    public async Task fails_when_seat_request_model_is_invalid(Create.Request request)
     {
         // Arrange
         var identity = await CreateIdentity(Role.Operator);
         var client = GetClient(identity);
 
         //Act
-        var response = await client.PostAsJsonAsync("seat", model);
+        var response = await client.PostAsJsonAsync("seat", request);
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

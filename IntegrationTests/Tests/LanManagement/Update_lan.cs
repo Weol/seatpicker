@@ -33,17 +33,17 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
 
     [Theory]
     [MemberData(nameof(ValidUpdateRequests))]
-    public async Task succeeds_when_valid(LanController.UpdateLanRequest updateModel)
+    public async Task succeeds_when_valid(Update.Request request)
     {
         // Arrange
         var identity = await CreateIdentity(Role.Admin);
         var client = GetClient(identity);
 
-        var existingLan = LanGenerator.Create(updateModel.Id);
+        var existingLan = LanGenerator.Create(request.Id);
         SetupAggregates(existingLan);
 
         //Act
-        var response = await client.PutAsJsonAsync($"lan/{updateModel.Id}", updateModel);
+        var response = await client.PutAsJsonAsync($"lan/{request.Id}", request);
 
         //Assert
         var committedAggregates = GetCommittedAggregates<Lan>();
@@ -54,14 +54,14 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
             {
                 var lan = committedAggregates.Should().ContainSingle().Subject;
                 Assert.Multiple(
-                    () => lan.Id.Should().Be(updateModel.Id),
+                    () => lan.Id.Should().Be(request.Id),
                     () =>
                     {
-                        if (updateModel.Title is not null) lan.Title.Should().Be(updateModel.Title);
+                        if (request.Title is not null) lan.Title.Should().Be(request.Title);
                     },
                     () =>
                     {
-                        if (updateModel.Background is not null) lan.Background.Should().Equal(updateModel.Background);
+                        if (request.Background is not null) lan.Background.Should().Equal(request.Background);
                     });
             });
     }
@@ -76,7 +76,7 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
 
     [Theory]
     [MemberData(nameof(InvalidUpdateRequests))]
-    public async Task fails_when_invalid(LanController.UpdateLanRequest updateModel)
+    public async Task fails_when_invalid(Update.Request updateModel)
     {
         // Arrange
         var identity = await CreateIdentity(Role.Admin);

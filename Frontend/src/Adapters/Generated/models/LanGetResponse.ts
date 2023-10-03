@@ -3,6 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type CreateReservationRequest = {
-    seatId?: string;
+export type LanGetResponse = {
+    id?: string;
+    title?: string;
+    background?: string;
 };

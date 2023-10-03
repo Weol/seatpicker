@@ -3,6 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { Role } from './Role';
+
 export type TokenResponse = {
-    token?: string | null;
+    token?: string;
+    userId?: string;
+    nick?: string;
+    avatar?: string | null;
+    roles?: Array<Role>;
 };

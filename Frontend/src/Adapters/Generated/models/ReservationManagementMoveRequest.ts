@@ -3,8 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type LanResponse = {
-    id?: string;
-    title?: string | null;
-    background?: string | null;
+export type ReservationManagementMoveRequest = {
+    userId?: string;
+    fromSeatId?: string;
+    toSeatId?: string;
 };

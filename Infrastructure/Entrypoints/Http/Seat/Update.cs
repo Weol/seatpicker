@@ -1,32 +1,38 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Seatpicker.Application.Features.Seats;
+using Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 
-public partial class SeatController
+[ApiController]
+[Route("seat")]
+public class Update
 {
     [HttpPut("{id:guid}")]
     [ProducesResponseType(200)]
-    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateSeatRequest model)
+    public async Task<IActionResult> Endpoint(
+        [FromRoute] Guid id,
+        [FromBody] Request request,
+        [FromServices] ILoggedInUserAccessor loggedInUserAccessor,
+        [FromServices] ISeatManagementService seatManagementService)
     {
-        await validateModel.Validate<UpdateSeatRequest, UpdateSeatRequestModelValidator>(model);
-
-        if (id != model.SeatId)
+        if (id != request.SeatId)
             throw new BadRequestException(
-                $"Route parameter {nameof(id)} does not match the request model {nameof(UpdateSeatRequest.SeatId)}");
+                $"Route parameter {nameof(id)} does not match the request model {nameof(Request.SeatId)}");
 
-        var user = loggedInUserAccessor.Get();
+        var user = await loggedInUserAccessor.Get();
 
-        await seatManagementService.Update(model.SeatId, model.Title, model.Bounds?.ToDomainBounds(), user);
+        await seatManagementService.Update(request.SeatId, request.Title, request.Bounds?.ToDomainBounds(), user);
 
         return new OkResult();
     }
 
-    public record UpdateSeatRequest(Guid SeatId, string? Title, BoundsModel? Bounds);
+    public record Request(Guid SeatId, string? Title, Bounds? Bounds);
 
-    private class UpdateSeatRequestModelValidator : AbstractValidator<UpdateSeatRequest>
+    public class Validator : AbstractValidator<Request>
     {
-        public UpdateSeatRequestModelValidator()
+        public Validator()
         {
             RuleFor(x => x.SeatId).NotEmpty();
 
@@ -35,7 +41,7 @@ public partial class SeatController
                 .When(x => x.Title is not null);
 
             RuleFor(x => x.Bounds)
-                .SetValidator(new BoundsModelValidator()!)
+                .SetValidator(new BoundsValidator()!)
                 .When(x => x.Bounds is not null);
         }
     }

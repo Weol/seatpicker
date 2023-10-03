@@ -1,29 +1,34 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Seatpicker.Application.Features.Seats;
 using Seatpicker.Domain;
+using Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement;
 
-public partial class ReservationManagementController
+[ApiController]
+[Route("reservationmanagement")]
+public class Create
 {
     [HttpPost]
     [ProducesResponseType(200)]
-    public async Task<IActionResult> Create([FromBody] CreateReservationForRequest model)
+    public async Task<IActionResult> Endpoint(
+        [FromBody] Request request,
+        [FromServices] ILoggedInUserAccessor loggedInUserAccessor,
+        [FromServices] IReservationManagementService reservationManagementService)
     {
-        await validateModel.Validate<CreateReservationForRequest, CreateReservationForRequestValidator>(model);
+        var user = await loggedInUserAccessor.Get();
 
-        var user = loggedInUserAccessor.Get();
-
-        await reservationManagementService.Create(model.SeatId, new UserId(model.UserId), user);
+        await reservationManagementService.Create(request.SeatId, new UserId(request.UserId), user);
 
         return new OkResult();
     }
 
-    public record CreateReservationForRequest(Guid SeatId, string UserId);
+    public record Request(Guid SeatId, string UserId);
 
-    private class CreateReservationForRequestValidator : AbstractValidator<CreateReservationForRequest>
+    public class Validator : AbstractValidator<Request>
     {
-        public CreateReservationForRequestValidator()
+        public Validator()
         {
             RuleFor(x => x.SeatId)
                 .NotEmpty();

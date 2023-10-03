@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type UpdateLanRequest = {
+export type LanUpdateRequest = {
     id?: string;
     title?: string | null;
     background?: string | null;

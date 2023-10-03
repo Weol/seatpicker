@@ -1,35 +1,37 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Seatpicker.Application.Features.Seats;
+using Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 
-public partial class SeatController
+[ApiController]
+[Route("seat")]
+public class Create
 {
     [HttpPost]
     [ProducesResponseType(200)]
-    public async Task<IActionResult> Create([FromBody] CreateSeatRequest model)
+    public async Task<IActionResult> Endpoint(
+        [FromBody] Request request,
+        [FromServices] ILoggedInUserAccessor loggedInUserAccessor,
+        [FromServices] ISeatManagementService seatManagementService)
     {
-        await validateModel.Validate<CreateSeatRequest, CreateSeatRequestModelValidator>(model);
+        var user = await loggedInUserAccessor.Get();
 
-        var user = loggedInUserAccessor.Get();
-
-        var seatId = await seatManagementService.Create(
-            model.Title,
-            model.Bounds.ToDomainBounds(),
-            user);
+        var seatId = await seatManagementService.Create(request.Title, request.Bounds.ToDomainBounds(), user);
 
         return new CreatedResult(seatId.ToString(), null);
     }
 
-    public record CreateSeatRequest(string Title, BoundsModel Bounds);
+    public record Request(string Title, Bounds Bounds);
 
-    private class CreateSeatRequestModelValidator : AbstractValidator<CreateSeatRequest>
+    public class Validator : AbstractValidator<Request>
     {
-        public CreateSeatRequestModelValidator()
+        public Validator()
         {
             RuleFor(x => x.Title).NotEmpty();
 
-            RuleFor(x => x.Bounds).SetValidator(new BoundsModelValidator());
+            RuleFor(x => x.Bounds).SetValidator(new BoundsValidator());
         }
     }
 }

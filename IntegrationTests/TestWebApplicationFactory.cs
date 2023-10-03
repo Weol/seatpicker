@@ -43,9 +43,6 @@ public class TestWebApplicationFactory : WebApplicationFactory<Infrastructure.Pr
                 services.RemoveAll<IDocumentRepository>();
                 services.AddPortMapping<IDocumentRepository, TestDocumentRepository>();
 
-                // Add identity generator
-                services.AddSingleton<IdentityGenerator>();
-
                 // Add intercepting http message handler
                 var interceptingHandler = new InterceptingHttpMessageHandler();
                 services.AddSingleton(interceptingHandler);

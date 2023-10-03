@@ -2,8 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CreateSeatRequest } from '../models/CreateSeatRequest';
-import type { UpdateSeatRequest } from '../models/UpdateSeatRequest';
+import type { SeatCreateRequest } from '../models/SeatCreateRequest';
+import type { SeatUpdateRequest } from '../models/SeatUpdateRequest';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -16,12 +16,12 @@ export class SeatAdapter {
      * @returns any Success
      * @throws ApiError
      */
-    public static postSeat(
-requestBody?: CreateSeatRequest,
+    public static seatpickerInfrastructureEntrypointsHttpSeatCreateEndpointInfrastructure(
+requestBody?: SeatCreateRequest,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/Seat',
+            url: '/seat',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -32,12 +32,12 @@ requestBody?: CreateSeatRequest,
      * @returns any Success
      * @throws ApiError
      */
-    public static deleteSeat(
+    public static seatpickerInfrastructureEntrypointsHttpSeatRemoveEndpointInfrastructure(
 id: string,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/Seat/{id}',
+            url: '/seat/{id}',
             path: {
                 'id': id,
             },
@@ -50,13 +50,13 @@ id: string,
      * @returns any Success
      * @throws ApiError
      */
-    public static putSeat(
+    public static seatpickerInfrastructureEntrypointsHttpSeatUpdateEndpointInfrastructure(
 id: string,
-requestBody?: UpdateSeatRequest,
+requestBody?: SeatUpdateRequest,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',
-            url: '/Seat/{id}',
+            url: '/seat/{id}',
             path: {
                 'id': id,
             },

@@ -1,22 +1,23 @@
 ﻿using Bogus;
+using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 
 namespace Seatpicker.IntegrationTests.Tests.Seats.Management;
 
 public static class Generator
 {
-    public static SeatController.CreateSeatRequest CreateSeatRequest()
+    public static Create.Request CreateSeatRequest()
     {
-        return new SeatController.CreateSeatRequest(
+        return new Create.Request(
             Title: new Faker().Hacker.Verb(),
-            new SeatController.BoundsModel(0, 0, 1, 1));
+            new Infrastructure.Entrypoints.Http.Bounds(0, 0, 1, 1));
     }
 
-    public static SeatController.UpdateSeatRequest UpdateSeatRequest()
+    public static Update.Request UpdateSeatRequest()
     {
-        return new SeatController.UpdateSeatRequest(
+        return new Update.Request(
             Guid.NewGuid(),
             Title: new Faker().Hacker.Verb(),
-            new SeatController.BoundsModel(0, 0, 1, 1));
+            new Infrastructure.Entrypoints.Http.Bounds(0, 0, 1, 1));
     }
 }

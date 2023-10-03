@@ -2,7 +2,6 @@
 using System.Net.Http.Json;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
-using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Authentication.Discord;
 using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;

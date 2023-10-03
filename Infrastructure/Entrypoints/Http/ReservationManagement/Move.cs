@@ -1,33 +1,39 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Seatpicker.Application.Features.Seats;
 using Seatpicker.Domain;
+using Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement;
 
-public partial class ReservationManagementController
+[ApiController]
+[Route("reservationmanagement")]
+public class Move
 {
     [HttpPut("{id:guid}")]
     [ProducesResponseType(200)]
-    public async Task<IActionResult> Move([FromRoute] Guid id, [FromBody] MoveReservationForRequest model)
+    public async Task<IActionResult> Endpoint(
+        [FromRoute] Guid id,
+        [FromBody] Request request,
+        [FromServices] ILoggedInUserAccessor loggedInUserAccessor,
+        [FromServices] IReservationManagementService reservationManagementService)
     {
-        await validateModel.Validate<MoveReservationForRequest, MoveReservationForRequestValidator>(model);
-
-        if (id != model.FromSeatId)
+        if (id != request.FromSeatId)
             throw new BadRequestException(
-                $"Route parameter {nameof(id)} does not match the request model {nameof(MoveReservationForRequest.FromSeatId)}");
+                $"Route parameter {nameof(id)} does not match the request model {nameof(Request.FromSeatId)}");
 
-        var user = loggedInUserAccessor.Get();
+        var user = await loggedInUserAccessor.Get();
 
-        await reservationManagementService.Move(new UserId(model.UserId), model.FromSeatId, model.ToSeatId, user);
+        await reservationManagementService.Move(new UserId(request.UserId), request.FromSeatId, request.ToSeatId, user);
 
         return new OkResult();
     }
 
-    public record MoveReservationForRequest(string UserId, Guid FromSeatId, Guid ToSeatId);
+    public record Request(string UserId, Guid FromSeatId, Guid ToSeatId);
 
-    private class MoveReservationForRequestValidator : AbstractValidator<MoveReservationForRequest>
+    public class Validator : AbstractValidator<Request>
     {
-        public MoveReservationForRequestValidator()
+        public Validator()
         {
             RuleFor(x => x.UserId).NotEmpty();
 

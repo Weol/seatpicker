@@ -24,10 +24,10 @@ public class Create_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
         var identity = await CreateIdentity(Role.Admin);
         var client = GetClient(identity);
 
-        var Request = Generator.CreateLanRequest();
+        var request = Generator.CreateLanRequest();
 
         //Act
-        var response = await client.PostAsJsonAsync("lan", Request);
+        var response = await client.PostAsJsonAsync("lan", request);
 
         //Assert
         var committedAggregates = GetCommittedAggregates<Lan>();
@@ -38,8 +38,8 @@ public class Create_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
             {
                 var lan = committedAggregates.Should().ContainSingle().Subject;
                 Assert.Multiple(
-                    () => lan.Title.Should().Be(Request.Title),
-                    () => lan.Background.Should().Equal(Request.Background));
+                    () => lan.Title.Should().Be(request.Title),
+                    () => lan.Background.Should().Equal(request.Background));
             });
     }
 

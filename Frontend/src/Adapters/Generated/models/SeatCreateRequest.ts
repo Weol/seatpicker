@@ -3,9 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { BoundsModel } from './BoundsModel';
+import type { Bounds } from './Bounds';
 
-export type CreateSeatRequest = {
-    title?: string | null;
-    bounds?: BoundsModel;
+export type SeatCreateRequest = {
+    title?: string;
+    bounds?: Bounds;
 };

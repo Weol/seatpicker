@@ -13,14 +13,14 @@ import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 
-export class DiscordAuthenticationAdapter {
+export class DiscordAdapter {
 
     /**
      * @param requestBody 
      * @returns TokenResponse Success
      * @throws ApiError
      */
-    public static postDiscordRenew(
+    public static seatpickerInfrastructureAuthenticationDiscordDiscordAuthenticationControllerRenewInfrastructure(
 requestBody?: RenewRequest,
 ): CancelablePromise<TokenResponse> {
         return __request(OpenAPI, {
@@ -39,7 +39,7 @@ requestBody?: RenewRequest,
      * @returns TokenResponse Success
      * @throws ApiError
      */
-    public static postDiscordLogin(
+    public static seatpickerInfrastructureAuthenticationDiscordDiscordAuthenticationControllerLoginInfrastructure(
 requestBody?: LoginRequest,
 ): CancelablePromise<TokenResponse> {
         return __request(OpenAPI, {
@@ -57,7 +57,7 @@ requestBody?: LoginRequest,
      * @returns TestResponse Success
      * @throws ApiError
      */
-    public static getDiscordTest(): CancelablePromise<TestResponse> {
+    public static seatpickerInfrastructureAuthenticationDiscordDiscordAuthenticationControllerTestInfrastructure(): CancelablePromise<TestResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/discord/test',
@@ -68,7 +68,7 @@ requestBody?: LoginRequest,
      * @returns DiscordRoleMappingResponse Success
      * @throws ApiError
      */
-    public static getDiscordRoles(): CancelablePromise<Array<DiscordRoleMappingResponse>> {
+    public static seatpickerInfrastructureAuthenticationDiscordDiscordAuthenticationControllerGetRolesInfrastructure(): CancelablePromise<Array<DiscordRoleMappingResponse>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/discord/roles',
@@ -80,7 +80,7 @@ requestBody?: LoginRequest,
      * @returns any Success
      * @throws ApiError
      */
-    public static putDiscordRoles(
+    public static seatpickerInfrastructureAuthenticationDiscordDiscordAuthenticationControllerPutRolesInfrastructure(
 requestBody?: DiscordRoleMappingRequest,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {

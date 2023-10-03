@@ -1,32 +1,38 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Seatpicker.Application.Features.Seats;
+using Seatpicker.Infrastructure.Entrypoints.Http.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Reservation;
 
-public partial class ReservationController
+[ApiController]
+[Route("reservation")]
+public class Move
 {
     [HttpPut("{id:guid}")]
     [ProducesResponseType(200)]
-    public async Task<IActionResult> Move([FromRoute] Guid id, [FromBody] MoveReservationRequest model)
+    public async Task<IActionResult> Endpoint(
+        [FromRoute] Guid id,
+        [FromBody] Request request,
+        [FromServices] ILoggedInUserAccessor loggedInUserAccessor,
+        [FromServices] IReservationService reservationService)
     {
-        await validateModel.Validate<MoveReservationRequest, MoveReservationRequestValidator>(model);
-
-        if (id != model.FromSeatId)
+        if (id != request.FromSeatId)
             throw new BadRequestException(
-                $"Route parameter {nameof(id)} does not match the request model {nameof(MoveReservationRequest.FromSeatId)}");
+                $"Route parameter {nameof(id)} does not match the request model {nameof(Request.FromSeatId)}");
 
-        var user = loggedInUserAccessor.Get();
+        var user = await loggedInUserAccessor.Get();
 
-        await reservationService.Move(model.FromSeatId, model.ToSeatId, user);
+        await reservationService.Move(request.FromSeatId, request.ToSeatId, user);
 
         return new OkResult();
     }
 
-    public record MoveReservationRequest(Guid FromSeatId, Guid ToSeatId);
+    public record Request(Guid FromSeatId, Guid ToSeatId);
 
-    private class MoveReservationRequestValidator : AbstractValidator<MoveReservationRequest>
+    public class Validator : AbstractValidator<Request>
     {
-        public MoveReservationRequestValidator()
+        public Validator()
         {
             RuleFor(x => x.FromSeatId).NotEmpty();
 

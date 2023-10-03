@@ -3,9 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type BoundsModel = {
-    'x'?: number;
-    'y'?: number;
-    width?: number;
-    height?: number;
+export type ReservationManagementCreateRequest = {
+    seatId?: string;
+    userId?: string;
 };

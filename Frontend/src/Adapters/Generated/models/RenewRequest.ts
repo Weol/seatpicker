@@ -4,5 +4,5 @@
 /* eslint-disable */
 
 export type RenewRequest = {
-    refreshToken?: string | null;
+    refreshToken?: string;
 };

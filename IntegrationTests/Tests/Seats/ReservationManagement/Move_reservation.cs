@@ -25,7 +25,7 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
         var identity = await CreateIdentity(Role.Operator);
         var client = GetClient(identity);
 
-        var reservedBy = CreateUser();
+        var reservedBy = await CreateUser();
         var fromSeat = SeatGenerator.Create(reservedBy: reservedBy);
         var toSeat = SeatGenerator.Create();
 
@@ -34,7 +34,7 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
         //Act
         var response = await client.PutAsJsonAsync(
             $"reservationmanagement/{fromSeat.Id}",
-            new ReservationManagementController.MoveReservationForRequest(reservedBy.Id, fromSeat.Id, toSeat.Id));
+            new Move.Request(reservedBy.Id, fromSeat.Id, toSeat.Id));
 
         //Assert
         Assert.Multiple(
@@ -71,9 +71,10 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
         SetupAggregates(fromSeat, toSeat);
 
         //Act
+        var userToMove = await CreateUser();
         var response = await client.PutAsJsonAsync(
             $"reservationmanagement/{fromSeat.Id}",
-            new ReservationManagementController.MoveReservationForRequest(CreateUser().Id, fromSeat.Id, toSeat.Id));
+            new Move.Request(userToMove.Id, fromSeat.Id, toSeat.Id));
 
         //Assert
         Assert.Multiple(
@@ -102,15 +103,17 @@ public class Move_reservation : IntegrationTestBase, IClassFixture<TestWebApplic
         var identity = await CreateIdentity(Role.Operator);
         var client = GetClient(identity);
 
-        var fromSeat = SeatGenerator.Create(reservedBy: CreateUser());
+        var alreadyReservedBy = await CreateUser();
+        var fromSeat = SeatGenerator.Create(reservedBy: alreadyReservedBy);
         var toSeat = SeatGenerator.Create();
 
         SetupAggregates(fromSeat, toSeat);
 
         //Act
+        var userToMove = await CreateUser();
         var response = await client.PutAsJsonAsync(
             $"reservationmanagement/{fromSeat.Id}",
-            new ReservationManagementController.MoveReservationForRequest(CreateUser().Id, fromSeat.Id, toSeat.Id));
+            new Move.Request(userToMove.Id, fromSeat.Id, toSeat.Id));
 
         //Assert
         Assert.Multiple(

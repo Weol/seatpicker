@@ -86,7 +86,7 @@ public class DiscordAuthenticationController : ControllerBase
                     .Select(claim => claim.Value))
             .ToArray();
 
-        var loggedInuser = loggedInUserAccessor.Get();
+        var loggedInuser = await loggedInUserAccessor.Get();
 
         return new OkObjectResult(new TestResponse(loggedInuser.Id, loggedInuser.Name, roles));
     }
@@ -150,9 +150,9 @@ public class DiscordAuthenticationController : ControllerBase
             expiresAt);
 
         var jwtToken = await tokenCreator.CreateToken(token, roles);
-        await userManager.Store(new User(new UserId(discordUser.Id), discordUser.Username));
+        await userManager.Store(new User(new UserId(discordUser.Id), discordUser.Username, discordUser.Avatar));
 
-        return new TokenResponse(jwtToken);
+        return new TokenResponse(jwtToken, discordUser.Id, discordUser.Username, discordUser.Avatar, roles);
     }
 
     private IEnumerable<Role> GetRoles(DiscordRoleMapping[] roleMapping, GuildMember guildMember)
@@ -176,7 +176,7 @@ public class DiscordAuthenticationController : ControllerBase
 
     public record RenewRequest(string RefreshToken);
 
-    public record TokenResponse(string Token);
+    public record TokenResponse(string Token, string UserId, string Nick, string? Avatar, ICollection<Role> Roles);
 
     public record TestResponse(string? Id, string? Name, string[] Roles);
 

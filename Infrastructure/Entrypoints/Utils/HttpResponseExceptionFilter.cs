@@ -2,8 +2,9 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
+using Seatpicker.Infrastructure.Entrypoints.Http;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Http.Utils;
+namespace Seatpicker.Infrastructure.Entrypoints.Utils;
 
 public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
 {
@@ -52,7 +53,7 @@ public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
             return HandleDiscordException();
         }
 
-        if (exception is ModelValidationException modelValidationException)
+        if (exception is FluentValidationFilter.ModelValidationException modelValidationException)
         {
             return HandleModelValidationException(modelValidationException);
         }
@@ -102,7 +103,7 @@ public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
         });
     }
 
-    private static ObjectResult HandleModelValidationException(ModelValidationException e)
+    private static ObjectResult HandleModelValidationException(FluentValidationFilter.ModelValidationException e)
     {
         var errors = e.ValidationResultErrors.Select(x =>
             new

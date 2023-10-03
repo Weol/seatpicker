@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Infrastructure.Entrypoints.Http.Utils;
+using Seatpicker.Infrastructure.Entrypoints.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints;
 
@@ -10,12 +12,18 @@ public static class EntrypointsExtensions
         services
             .AddEndpointsApiExplorer()
             .AddLoggedInUserAccessor()
-            .AddModelValidator()
             .AddHealthChecks()
             .Services
+            .AddFluentValidation()
             .AddControllers(ConfigureMvcOptions);
 
         return services;
+    }
+
+    private static IServiceCollection AddFluentValidation(this IServiceCollection services)
+    {
+        return services
+            .AddValidatorsFromAssemblyContaining<Program>();
     }
 
     public static WebApplication UseEntrypoints(this WebApplication app)
@@ -32,5 +40,6 @@ public static class EntrypointsExtensions
     private static void ConfigureMvcOptions(MvcOptions options)
     {
          options.Filters.Add<HttpResponseExceptionFilter>();
+         options.Filters.Add<FluentValidationFilter>();
     }
 }

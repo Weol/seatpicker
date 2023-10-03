@@ -33,7 +33,7 @@ public class Update_seat : IntegrationTestBase, IClassFixture<TestWebApplication
 
     [Theory]
     [MemberData(nameof(ValidUpdateRequests))]
-    public async Task succeeds_when_valid(SeatController.UpdateSeatRequest model)
+    public async Task succeeds_when_valid(Update.Request request)
     {
         // Arrange
         var identity = await CreateIdentity(Role.Operator);
@@ -43,7 +43,7 @@ public class Update_seat : IntegrationTestBase, IClassFixture<TestWebApplication
         SetupAggregates(existingSeat);
 
         //Act
-        var response = await client.PutAsJsonAsync($"seat/{existingSeat.Id}", model with { SeatId = existingSeat.Id });
+        var response = await client.PutAsJsonAsync($"seat/{existingSeat.Id}", request with { SeatId = existingSeat.Id });
 
         //Assert
         Assert.Multiple(
@@ -54,11 +54,11 @@ public class Update_seat : IntegrationTestBase, IClassFixture<TestWebApplication
                 Assert.Multiple(
                     () =>
                     {
-                        if (model.Title is not null) seat.Title.Should().Be(seat.Title);
+                        if (request.Title is not null) seat.Title.Should().Be(seat.Title);
                     },
                     () =>
                     {
-                        if (model.Bounds is not null) seat.Bounds.Should().BeEquivalentTo(seat.Bounds);
+                        if (request.Bounds is not null) seat.Bounds.Should().BeEquivalentTo(seat.Bounds);
                     });
             });
     }
@@ -85,21 +85,21 @@ public class Update_seat : IntegrationTestBase, IClassFixture<TestWebApplication
     {
         new object[] { Generator.CreateSeatRequest() with { Title = "" } },
         new object[]
-            { Generator.CreateSeatRequest() with { Bounds = new SeatController.BoundsModel(0, 0, -1, 1) } },
+            { Generator.CreateSeatRequest() with { Bounds = new Infrastructure.Entrypoints.Http.Bounds(0, 0, -1, 1) } },
         new object[]
-            { Generator.CreateSeatRequest() with { Bounds = new SeatController.BoundsModel(0, 0, 1, -1) } },
+            { Generator.CreateSeatRequest() with { Bounds = new Infrastructure.Entrypoints.Http.Bounds(0, 0, 1, -1) } },
     };
 
     [Theory]
     [MemberData(nameof(InvalidUpdateRequests))]
-    public async Task fails_when_seat_request_model_is_invalid(SeatController.CreateSeatRequest model)
+    public async Task fails_when_seat_request_model_is_invalid(Create.Request request)
     {
         // Arrange
         var identity = await CreateIdentity(Role.Operator);
         var client = GetClient(identity);
 
         //Act
-        var response = await client.PostAsJsonAsync("seat", model);
+        var response = await client.PostAsJsonAsync("seat", request);
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

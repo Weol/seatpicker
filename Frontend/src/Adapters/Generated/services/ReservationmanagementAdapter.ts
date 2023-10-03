@@ -2,26 +2,26 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CreateReservationForRequest } from '../models/CreateReservationForRequest';
-import type { MoveReservationForRequest } from '../models/MoveReservationForRequest';
+import type { ReservationManagementCreateRequest } from '../models/ReservationManagementCreateRequest';
+import type { ReservationManagementMoveRequest } from '../models/ReservationManagementMoveRequest';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 
-export class ReservationManagementAdapter {
+export class ReservationmanagementAdapter {
 
     /**
      * @param requestBody 
      * @returns any Success
      * @throws ApiError
      */
-    public static postReservationManagement(
-requestBody?: CreateReservationForRequest,
+    public static seatpickerInfrastructureEntrypointsHttpReservationManagementCreateEndpointInfrastructure(
+requestBody?: ReservationManagementCreateRequest,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/ReservationManagement',
+            url: '/reservationmanagement',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -33,13 +33,13 @@ requestBody?: CreateReservationForRequest,
      * @returns any Success
      * @throws ApiError
      */
-    public static putReservationManagement(
+    public static seatpickerInfrastructureEntrypointsHttpReservationManagementMoveEndpointInfrastructure(
 id: string,
-requestBody?: MoveReservationForRequest,
+requestBody?: ReservationManagementMoveRequest,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',
-            url: '/ReservationManagement/{id}',
+            url: '/reservationmanagement/{id}',
             path: {
                 'id': id,
             },
@@ -53,12 +53,12 @@ requestBody?: MoveReservationForRequest,
      * @returns any Success
      * @throws ApiError
      */
-    public static deleteReservationManagement(
+    public static seatpickerInfrastructureEntrypointsHttpReservationManagementRemoveEndpointInfrastructure(
 id: string,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/ReservationManagement/{id}',
+            url: '/reservationmanagement/{id}',
             path: {
                 'id': id,
             },

@@ -3,10 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { BoundsModel } from './BoundsModel';
+import type { Bounds } from './Bounds';
 
-export type UpdateSeatRequest = {
+export type SeatUpdateRequest = {
     seatId?: string;
     title?: string | null;
-    bounds?: BoundsModel;
+    bounds?: Bounds;
 };
