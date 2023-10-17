@@ -1,4 +1,5 @@
-﻿using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
+﻿using Microsoft.OpenApi.Writers;
+using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 
 namespace Seatpicker.Infrastructure.Authentication.Discord;
 
@@ -16,7 +17,7 @@ public static class DiscordAuthenticationExtensions
 
         return services
             .AddDiscordClient(configureClientAction)
-            .AddSingleton<DiscordRoleMapper>()
+            .AddScoped<DiscordAuthenticationService>()
             .AddScoped<DiscordJwtTokenCreator>();
     }
 }

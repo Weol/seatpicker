@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using JasperFx.Core;
+using Marten;
+using Marten.Events.Projections;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Seatpicker.Application.Features.Seats;
 
@@ -6,8 +9,13 @@ internal static class FeatureExtension
 {
     public static IServiceCollection AddSeatsFeature(this IServiceCollection services)
     {
-        return services
-            .AddScoped<ISeatManagementService, SeatManagementService>()
+        services.ConfigureMarten(
+            options =>
+            {
+                options.Projections.Add<SeatProjection>(ProjectionLifecycle.Inline);
+            });
+
+        return services.AddScoped<ISeatManagementService, SeatManagementService>()
             .AddScoped<IReservationManagementService, ReservationManagementService>()
             .AddScoped<IReservationService, ReservationService>();
     }

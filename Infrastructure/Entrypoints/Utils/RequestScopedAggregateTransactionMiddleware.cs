@@ -1,6 +1,6 @@
 ﻿using Seatpicker.Application.Features;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Http.Utils;
+namespace Seatpicker.Infrastructure.Entrypoints.Utils;
 
 public class RequestScopedAggregateTransactionMiddleware
 {

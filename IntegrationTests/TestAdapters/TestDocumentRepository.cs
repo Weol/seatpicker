@@ -39,9 +39,10 @@ public class TestDocumentTransaction : IDocumentTransaction
     {
         foreach (var document in documentsToAdd)
         {
-            if (documents.ContainsKey(document.Id)) throw new DocumentAlreadyExistsException
+            var id = GetDocumentId(document);
+            if (documents.ContainsKey(id)) throw new DocumentAlreadyExistsException
                 {
-                    Id = document.Id,
+                    Id = id,
                     Type = document.GetType(),
                 };
 
@@ -65,7 +66,7 @@ public class TestDocumentTransaction : IDocumentTransaction
     {
         foreach (var document in stagedDocuments)
         {
-            documents[document.Id] = document;
+            documents[GetDocumentId(document)] = document;
         }
 
         foreach (var documentId in stagedDeletions)
@@ -81,6 +82,13 @@ public class TestDocumentTransaction : IDocumentTransaction
     public IQueryable<TDocument> Query<TDocument>()
         where TDocument : IDocument =>
         reader.Query<TDocument>();
+
+    private string GetDocumentId<TDocument>(TDocument document)
+        where TDocument : IDocument
+    {
+        var id = document.GetType().GetProperty("Id")!.GetValue(document, null);
+        return id.ToString() ?? throw new NullReferenceException();
+    }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 

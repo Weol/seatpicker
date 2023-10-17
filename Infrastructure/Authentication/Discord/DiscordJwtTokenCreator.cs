@@ -39,6 +39,7 @@ public class DiscordJwtTokenCreator
             new ("refresh_token", discordToken.RefreshToken),
         };
 
+        if (discordToken.GuildId is not null) defaultClaims.Add(new Claim("tenant_id", discordToken.GuildId));
         if (discordToken.Avatar is not null) defaultClaims.Add(new Claim("avatar", discordToken.Avatar));
 
         var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role.ToString()));
@@ -47,7 +48,7 @@ public class DiscordJwtTokenCreator
 
         var now = DateTime.UtcNow;
         var token = handler.CreateJwtSecurityToken(
-            options.GuildId,
+            discordToken.GuildId,
             discordToken.Id,
             new ClaimsIdentity(roleClaims.Concat(defaultClaims)),
             now.AddMilliseconds(-30),

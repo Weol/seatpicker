@@ -2,5 +2,4 @@
 
 public interface IDocument
 {
-    public string Id { get; }
 }

@@ -7,6 +7,7 @@ public static class SeatGenerator
 {
     public static Seat Create(
         Guid? id = null,
+        Lan? lan = null,
         string? title = null,
         Bounds? bounds = null,
         User? reservedBy = null,
@@ -14,6 +15,7 @@ public static class SeatGenerator
     {
         var seat = new Seat(
             id ?? Guid.NewGuid(),
+            lan ?? LanGenerator.Create(),
             title ?? "Test title",
             bounds ?? new Bounds(0, 0, 1, 1),
             initiator ?? new User(new UserId("124"), "asd", null));

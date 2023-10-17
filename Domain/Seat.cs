@@ -4,10 +4,15 @@ using Shared;
 namespace Seatpicker.Domain;
 
 // ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable NotAccessedPositionalProperty.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+// ReSharper disable UnusedParameter.Local
 #pragma warning disable CS1998 // Disable warning about async methods missing awaits
 #pragma warning disable CS8618 // Disable warning about uninitialized properties
 public class Seat : AggregateBase
 {
+    public Guid LanId { get; private set; }
+
     public string Title { get; private set; }
 
     public Bounds Bounds { get; private set; }
@@ -16,15 +21,16 @@ public class Seat : AggregateBase
 
     public bool IsArchived { get; private set; }
 
-    public Seat(Guid id, string title, Bounds bounds, User initiator)
+    public Seat(Guid id, Lan lan, string title, Bounds bounds, User initiator)
     {
         if (title.Length == 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
 
-        var evt = new SeatCreated(id, title, bounds, initiator.Id);
+        var evt = new SeatCreated(id, lan.Id, title, bounds, initiator.Id);
         Raise(evt);
         Apply(evt);
     }
 
+    // ReSharper disable once UnusedMember.Local
     private Seat()
     {
         // Marten needs this
@@ -34,7 +40,7 @@ public class Seat : AggregateBase
     {
         if (title.Length == 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
 
-        var evt = new SeatTitleChanged(title, initiator.Id);
+        var evt = new SeatTitleChanged(Id, title, initiator.Id);
 
         Raise(evt);
         Apply(evt);
@@ -42,7 +48,7 @@ public class Seat : AggregateBase
 
     public void SetBounds(Bounds bounds, User initiator)
     {
-        var evt = new SeatBoundsChanged(bounds, initiator.Id);
+        var evt = new SeatBoundsChanged(Id, bounds, initiator.Id);
 
         Raise(evt);
         Apply(evt);
@@ -50,7 +56,7 @@ public class Seat : AggregateBase
 
     public void Archive(User initiator)
     {
-        var evt = new SeatArchived(initiator.Id);
+        var evt = new SeatArchived(Id, initiator.Id);
 
         Raise(evt);
         Apply(evt);
@@ -64,7 +70,7 @@ public class Seat : AggregateBase
 
         if (ReservedBy is not null) throw new SeatReservationConflictException(this, ReservedBy, user.Id);
 
-        var evt = new SeatReservationMade(user.Id);
+        var evt = new SeatReservationMade(Id, user.Id);
         Raise(evt);
         Apply(evt);
     }
@@ -77,7 +83,7 @@ public class Seat : AggregateBase
 
         if (ReservedBy is not null) throw new SeatReservationConflictException(this, ReservedBy, user.Id);
 
-        var evt = new SeatReservationMadeFor(user.Id, madeBy.Id);
+        var evt = new SeatReservationMadeFor(Id, user.Id, madeBy.Id);
         Raise(evt);
         Apply(evt);
     }
@@ -88,7 +94,7 @@ public class Seat : AggregateBase
 
         if (ReservedBy != initiator.Id) throw new SeatReservationConflictException(this, ReservedBy, initiator.Id);
 
-        var evt = new SeatReservationRemoved(ReservedBy);
+        var evt = new SeatReservationRemoved(Id, ReservedBy);
         Raise(evt);
         Apply(evt);
     }
@@ -97,7 +103,7 @@ public class Seat : AggregateBase
     {
         if (ReservedBy is null) return;
 
-        var evt = new SeatReservationRemovedFor(ReservedBy, removedBy.Id);
+        var evt = new SeatReservationRemovedFor(Id, ReservedBy, removedBy.Id);
         Raise(evt);
         Apply(evt);
     }
@@ -111,7 +117,7 @@ public class Seat : AggregateBase
         if (fromSeat.ReservedBy != user.Id)
             throw new SeatReservationConflictException(this, fromSeat.ReservedBy, user.Id);
 
-        var evt = new SeatReservationMoved(user.Id, fromSeat.Id, Id);
+        var evt = new SeatReservationMoved(Id, user.Id, fromSeat.Id, Id);
 
         fromSeat.Raise(evt);
         fromSeat.Apply(evt);
@@ -126,10 +132,10 @@ public class Seat : AggregateBase
 
         if (fromSeat.ReservedBy is null) throw new SeatReservationNotFoundException { Seat = fromSeat };
 
-        if (fromSeat.ReservedBy.Id != user.Id)
+        if (fromSeat.ReservedBy.Value != user.Id)
             throw new SeatReservationConflictException(this, fromSeat.ReservedBy, user.Id);
 
-        var evt = new SeatReservationMovedFor(user.Id, fromSeat.Id, Id, movedBy.Id);
+        var evt = new SeatReservationMovedFor(Id, user.Id, fromSeat.Id, Id, movedBy.Id);
 
         fromSeat.Raise(evt);
         fromSeat.Apply(evt);
@@ -146,6 +152,7 @@ public class Seat : AggregateBase
     private async void Apply(SeatCreated evt)
     {
         Id = evt.Id;
+        LanId = evt.LanId;
         Title = evt.Title;
         Bounds = evt.Bounds;
     }
@@ -224,25 +231,25 @@ public class Bounds
 /**
  * Events
  */
-public record SeatCreated(Guid Id, string Title, Bounds Bounds, UserId CreatedBy);
+public record SeatCreated(Guid Id, Guid LanId, string Title, Bounds Bounds, UserId CreatedBy);
 
-public record SeatTitleChanged(string Title, UserId ChangedBy);
+public record SeatTitleChanged(Guid LanId, string Title, UserId ChangedBy);
 
-public record SeatBoundsChanged(Bounds Bounds, UserId ChangedBy);
+public record SeatBoundsChanged(Guid LanId, Bounds Bounds, UserId ChangedBy);
 
-public record SeatReservationMade(UserId UserId);
+public record SeatReservationMade(Guid LanId, UserId UserId);
 
-public record SeatReservationRemoved(UserId UserId);
+public record SeatReservationRemoved(Guid LanId, UserId UserId);
 
-public record SeatReservationMoved(UserId UserId, Guid FromSeatId, Guid ToSeatId);
+public record SeatReservationMoved(Guid LanId, UserId UserId, Guid FromSeatId, Guid ToSeatId);
 
-public record SeatReservationMadeFor(UserId UserId, UserId MadeBy);
+public record SeatReservationMadeFor(Guid LanId, UserId UserId, UserId MadeBy);
 
-public record SeatReservationRemovedFor(UserId UserId, UserId RemovedBy);
+public record SeatReservationRemovedFor(Guid LanId, UserId UserId, UserId RemovedBy);
 
-public record SeatReservationMovedFor(UserId UserId, Guid FromSeatId, Guid ToSeatId, UserId MovedBy);
+public record SeatReservationMovedFor(Guid LanId, UserId UserId, Guid FromSeatId, Guid ToSeatId, UserId MovedBy);
 
-public record SeatArchived(UserId ArchivedBy);
+public record SeatArchived(Guid LanId, UserId ArchivedBy);
 
 /**
  * Exceptions

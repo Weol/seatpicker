@@ -2,8 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ReservationManagementCreateRequest } from '../models/ReservationManagementCreateRequest';
-import type { ReservationManagementMoveRequest } from '../models/ReservationManagementMoveRequest';
+import type { CreateReservationManagementRequest } from '../models/CreateReservationManagementRequest';
+import type { MoveReservationManagementRequest } from '../models/MoveReservationManagementRequest';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -12,56 +12,73 @@ import { request as __request } from '../core/request';
 export class ReservationmanagementAdapter {
 
     /**
+     * @param lanId 
+     * @param seatId 
      * @param requestBody 
      * @returns any Success
      * @throws ApiError
      */
-    public static seatpickerInfrastructureEntrypointsHttpReservationManagementCreateEndpointInfrastructure(
-requestBody?: ReservationManagementCreateRequest,
+    public static createReservationmanagement(
+lanId: string,
+seatId: string,
+requestBody?: CreateReservationManagementRequest,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/reservationmanagement',
+            url: '/lan/{lanId}/seat/{seatId}/reservationmanagement',
+            path: {
+                'lanId': lanId,
+                'seatId': seatId,
+            },
             body: requestBody,
             mediaType: 'application/json',
         });
     }
 
     /**
+     * @param lanId 
+     * @param seatId 
+     * @returns any Success
+     * @throws ApiError
+     */
+    public static deleteReservationmanagement(
+lanId: string,
+seatId: string,
+): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/lan/{lanId}/seat/{seatId}/reservationmanagement',
+            path: {
+                'lanId': lanId,
+                'seatId': seatId,
+            },
+        });
+    }
+
+    /**
+     * @param lanId 
+     * @param seatId 
      * @param id 
      * @param requestBody 
      * @returns any Success
      * @throws ApiError
      */
-    public static seatpickerInfrastructureEntrypointsHttpReservationManagementMoveEndpointInfrastructure(
+    public static moveReservationmanagement(
+lanId: string,
+seatId: string,
 id: string,
-requestBody?: ReservationManagementMoveRequest,
+requestBody?: MoveReservationManagementRequest,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',
-            url: '/reservationmanagement/{id}',
+            url: '/lan/{lanId}/seat/{seatId}/reservationmanagement/{id}',
             path: {
+                'lanId': lanId,
+                'seatId': seatId,
                 'id': id,
             },
             body: requestBody,
             mediaType: 'application/json',
-        });
-    }
-
-    /**
-     * @param id 
-     * @returns any Success
-     * @throws ApiError
-     */
-    public static seatpickerInfrastructureEntrypointsHttpReservationManagementRemoveEndpointInfrastructure(
-id: string,
-): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'DELETE',
-            url: '/reservationmanagement/{id}',
-            path: {
-                'id': id,
-            },
         });
     }
 

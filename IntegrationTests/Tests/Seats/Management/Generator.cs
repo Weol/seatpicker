@@ -6,16 +6,17 @@ namespace Seatpicker.IntegrationTests.Tests.Seats.Management;
 
 public static class Generator
 {
-    public static Create.Request CreateSeatRequest()
+    public static CreateEndpoint.Request CreateSeatRequest(Guid? lanId = null)
     {
-        return new Create.Request(
+        return new CreateEndpoint.Request(
             Title: new Faker().Hacker.Verb(),
-            new Infrastructure.Entrypoints.Http.Bounds(0, 0, 1, 1));
+            LanId: lanId ?? new Guid(),
+            Bounds:new Infrastructure.Entrypoints.Http.Bounds(0, 0, 1, 1));
     }
 
-    public static Update.Request UpdateSeatRequest()
+    public static UpdateEndpoint.Request UpdateSeatRequest()
     {
-        return new Update.Request(
+        return new UpdateEndpoint.Request(
             Guid.NewGuid(),
             Title: new Faker().Hacker.Verb(),
             new Infrastructure.Entrypoints.Http.Bounds(0, 0, 1, 1));

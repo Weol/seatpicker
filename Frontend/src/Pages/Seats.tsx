@@ -10,12 +10,12 @@ import {
   Stack
 } from '@mui/material';
 import background from "../Media/background.svg"
-import Seat from '../Models/Seat';
 import {useUserContext} from "../UserContext";
 import {useAlertContext} from "../AlertContext";
 import Button from "@mui/material/Button";
 import SeatComponent from '../Components/Seat';
 import { SeatAdapter } from '../Adapters/Generated'
+import Seat from '../Adapters/Models/Seat';
 
 interface DialogModel<T> {
   title: string;
@@ -26,6 +26,8 @@ interface DialogModel<T> {
   negativeCallback?: (data: T) => void;
   metadata: T;
 }
+
+let lanId = "6789dd19-ef5a-4f33-b830-399cb8af80f3"
 
 export default function Seats() {
   const [seats, setSeats] = useState<Seat[]>([])
@@ -44,7 +46,7 @@ export default function Seats() {
   }, [])
 
   const fetchAllSeats = () => {
-    SeatAdapter.putSeat.then(seats => {
+    SeatAdapter.getAllSeat(lanId).then(seats => {
       setSeats(seats)
 
       setSelectedSeat(null)

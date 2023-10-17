@@ -2,12 +2,14 @@ import * as React from 'react';
 import {useContext, useEffect, useState} from 'react';
 import Typography from '@mui/material/Typography';
 import {Link, useSearchParams} from 'react-router-dom';
-import LoginWithDiscordToken from '../Adapters/LoginWithDiscordToken'
 import Config from "../config"
 import {CircularProgress, Stack} from '@mui/material';
-import User from '../Models/User';
 import {UserContext} from '../UserContext';
 import Button from "@mui/material/Button";
+import User from "../Adapters/Models/User";
+import {CookiesAdapter} from "../Adapters/CookiesAdapter";
+
+CookiesAdapter.setCurrentLan("6789dd19-ef5a-4f33-b830-399cb8af80f3")
 
 export default function RedirectLogin() {
   const [user, setUser] = useState<User | null>(null)

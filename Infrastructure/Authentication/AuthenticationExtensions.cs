@@ -40,7 +40,6 @@ public static class AuthenticationExtensions
     {
         var securityKey = new X509SecurityKey(discordOptions.Value.SigningCertificate);
 
-        options.TokenValidationParameters.ValidIssuer = discordOptions.Value.GuildId;
         options.TokenValidationParameters.IssuerSigningKey = securityKey;
         options.TokenValidationParameters.ValidateAudience = false;
         options.TokenValidationParameters.NameClaimType = JwtRegisteredClaimNames.Name;

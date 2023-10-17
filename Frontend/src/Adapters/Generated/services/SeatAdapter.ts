@@ -2,8 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { SeatCreateRequest } from '../models/SeatCreateRequest';
-import type { SeatUpdateRequest } from '../models/SeatUpdateRequest';
+import type { CreateSeatRequest } from '../models/CreateSeatRequest';
+import type { CreateSeatResponse } from '../models/CreateSeatResponse';
+import type { GetSeatResponse } from '../models/GetSeatResponse';
+import type { UpdateSeatRequest } from '../models/UpdateSeatRequest';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -12,53 +14,101 @@ import { request as __request } from '../core/request';
 export class SeatAdapter {
 
     /**
+     * @param lanId 
      * @param requestBody 
-     * @returns any Success
+     * @returns CreateSeatResponse Success
      * @throws ApiError
      */
-    public static seatpickerInfrastructureEntrypointsHttpSeatCreateEndpointInfrastructure(
-requestBody?: SeatCreateRequest,
-): CancelablePromise<any> {
+    public static createSeat(
+lanId: string,
+requestBody?: CreateSeatRequest,
+): CancelablePromise<CreateSeatResponse> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/seat',
+            url: '/lan/{lanId}/seat',
+            path: {
+                'lanId': lanId,
+            },
             body: requestBody,
             mediaType: 'application/json',
         });
     }
 
     /**
-     * @param id 
-     * @returns any Success
+     * @param lanId 
+     * @returns GetSeatResponse Success
      * @throws ApiError
      */
-    public static seatpickerInfrastructureEntrypointsHttpSeatRemoveEndpointInfrastructure(
-id: string,
-): CancelablePromise<any> {
+    public static getAllSeat(
+lanId: string,
+): CancelablePromise<Array<GetSeatResponse>> {
         return __request(OpenAPI, {
-            method: 'DELETE',
-            url: '/seat/{id}',
+            method: 'GET',
+            url: '/lan/{lanId}/seat',
             path: {
-                'id': id,
+                'lanId': lanId,
             },
         });
     }
 
     /**
-     * @param id 
+     * @param lanId 
+     * @param seatId 
+     * @returns any Success
+     * @throws ApiError
+     */
+    public static deleteSeat(
+lanId: string,
+seatId: string,
+): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/lan/{lanId}/seat/{seatId}',
+            path: {
+                'lanId': lanId,
+                'seatId': seatId,
+            },
+        });
+    }
+
+    /**
+     * @param lanId 
+     * @param seatId 
+     * @returns GetSeatResponse Success
+     * @throws ApiError
+     */
+    public static getSeat(
+lanId: string,
+seatId: string,
+): CancelablePromise<GetSeatResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/lan/{lanId}/seat/{seatId}',
+            path: {
+                'lanId': lanId,
+                'seatId': seatId,
+            },
+        });
+    }
+
+    /**
+     * @param lanId 
+     * @param seatId 
      * @param requestBody 
      * @returns any Success
      * @throws ApiError
      */
-    public static seatpickerInfrastructureEntrypointsHttpSeatUpdateEndpointInfrastructure(
-id: string,
-requestBody?: SeatUpdateRequest,
+    public static updateSeat(
+lanId: string,
+seatId: string,
+requestBody?: UpdateSeatRequest,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'PUT',
-            url: '/seat/{id}',
+            url: '/lan/{lanId}/seat/{seatId}',
             path: {
-                'id': id,
+                'lanId': lanId,
+                'seatId': seatId,
             },
             body: requestBody,
             mediaType: 'application/json',

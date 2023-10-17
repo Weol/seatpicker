@@ -33,7 +33,7 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
 
     [Theory]
     [MemberData(nameof(ValidUpdateRequests))]
-    public async Task succeeds_when_valid(Update.Request request)
+    public async Task succeeds_when_valid(UpdateEndpoint.Request request)
     {
         // Arrange
         var identity = await CreateIdentity(Role.Admin);
@@ -76,7 +76,7 @@ public class Update_lan : IntegrationTestBase, IClassFixture<TestWebApplicationF
 
     [Theory]
     [MemberData(nameof(InvalidUpdateRequests))]
-    public async Task fails_when_invalid(Update.Request updateModel)
+    public async Task fails_when_invalid(UpdateEndpoint.Request updateModel)
     {
         // Arrange
         var identity = await CreateIdentity(Role.Admin);

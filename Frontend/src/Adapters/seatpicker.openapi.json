@@ -5,59 +5,217 @@
     "version": "1.0"
   },
   "paths": {
-    "/seat": {
+    "/lan/{lanId}/seat": {
       "post": {
         "tags": [
           "seat"
         ],
-        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Seat.Create.Endpoint (Infrastructure)",
+        "operationId": "CreateSeat",
+        "parameters": [
+          {
+            "name": "lanId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SeatCreateRequest"
+                "$ref": "#/components/schemas/CreateSeatRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/SeatCreateRequest"
+                "$ref": "#/components/schemas/CreateSeatRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/SeatCreateRequest"
+                "$ref": "#/components/schemas/CreateSeatRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSeatResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSeatResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSeatResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "seat"
+        ],
+        "operationId": "GetAllSeat",
+        "parameters": [
+          {
+            "name": "lanId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetSeatResponse"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetSeatResponse"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetSeatResponse"
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
-    "/reservation": {
+    "/lan/{lanId}/seat/{seatId}/reservation": {
       "post": {
         "tags": [
           "reservation"
         ],
-        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Reservation.Create.Endpoint (Infrastructure)",
+        "operationId": "CreateReservation",
+        "parameters": [
+          {
+            "name": "lanId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "seatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "reservation"
+        ],
+        "operationId": "DeleteReservation",
+        "parameters": [
+          {
+            "name": "lanId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "seatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "reservation"
+        ],
+        "operationId": "MoveReservation",
+        "parameters": [
+          {
+            "name": "lanId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "seatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReservationCreateRequest"
+                "$ref": "#/components/schemas/MoveReservationRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReservationCreateRequest"
+                "$ref": "#/components/schemas/MoveReservationRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/ReservationCreateRequest"
+                "$ref": "#/components/schemas/MoveReservationRequest"
               }
             }
           }
@@ -69,31 +227,82 @@
         }
       }
     },
-    "/reservationmanagement": {
+    "/lan/{lanId}/seat/{seatId}/reservationmanagement": {
       "post": {
         "tags": [
           "reservationmanagement"
         ],
-        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement.Create.Endpoint (Infrastructure)",
+        "operationId": "CreateReservationmanagement",
+        "parameters": [
+          {
+            "name": "lanId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "seatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReservationManagementCreateRequest"
+                "$ref": "#/components/schemas/CreateReservationManagementRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReservationManagementCreateRequest"
+                "$ref": "#/components/schemas/CreateReservationManagementRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/ReservationManagementCreateRequest"
+                "$ref": "#/components/schemas/CreateReservationManagementRequest"
               }
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "reservationmanagement"
+        ],
+        "operationId": "DeleteReservationmanagement",
+        "parameters": [
+          {
+            "name": "lanId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "seatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -106,233 +315,161 @@
         "tags": [
           "lan"
         ],
-        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Lan.Create.Endpoint (Infrastructure)",
+        "operationId": "CreateLan",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LanCreateRequest"
+                "$ref": "#/components/schemas/CreateLanRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/LanCreateRequest"
+                "$ref": "#/components/schemas/CreateLanRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/LanCreateRequest"
+                "$ref": "#/components/schemas/CreateLanRequest"
               }
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateLanResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateLanResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateLanResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "lan"
+        ],
+        "operationId": "GetAllLan",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetLanResponse"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetLanResponse"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetLanResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lan/{lanId}/seat/{seatId}": {
+      "delete": {
+        "tags": [
+          "seat"
+        ],
+        "operationId": "DeleteSeat",
+        "parameters": [
+          {
+            "name": "lanId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "seatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
           }
         }
-      }
-    },
-    "/discord/renew": {
-      "post": {
-        "tags": [
-          "discord"
-        ],
-        "operationId": "Seatpicker.Infrastructure.Authentication.Discord.DiscordAuthenticationController.Renew (Infrastructure)",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RenewRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RenewRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/RenewRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenResponse"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenResponse"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/discord/login": {
-      "post": {
-        "tags": [
-          "discord"
-        ],
-        "operationId": "Seatpicker.Infrastructure.Authentication.Discord.DiscordAuthenticationController.Login (Infrastructure)",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenResponse"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenResponse"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/discord/test": {
+      },
       "get": {
         "tags": [
-          "discord"
+          "seat"
         ],
-        "operationId": "Seatpicker.Infrastructure.Authentication.Discord.DiscordAuthenticationController.Test (Infrastructure)",
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/TestResponse"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TestResponse"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TestResponse"
-                }
-              }
+        "operationId": "GetSeat",
+        "parameters": [
+          {
+            "name": "lanId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "seatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
-        }
-      }
-    },
-    "/discord/roles": {
-      "get": {
-        "tags": [
-          "discord"
         ],
-        "operationId": "Seatpicker.Infrastructure.Authentication.Discord.DiscordAuthenticationController.GetRoles (Infrastructure)",
         "responses": {
           "200": {
             "description": "Success",
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DiscordRoleMappingResponse"
-                  }
+                  "$ref": "#/components/schemas/GetSeatResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DiscordRoleMappingResponse"
-                  }
+                  "$ref": "#/components/schemas/GetSeatResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DiscordRoleMappingResponse"
-                  }
+                  "$ref": "#/components/schemas/GetSeatResponse"
                 }
               }
             }
@@ -341,24 +478,44 @@
       },
       "put": {
         "tags": [
-          "discord"
+          "seat"
         ],
-        "operationId": "Seatpicker.Infrastructure.Authentication.Discord.DiscordAuthenticationController.PutRoles (Infrastructure)",
+        "operationId": "UpdateSeat",
+        "parameters": [
+          {
+            "name": "lanId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "seatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DiscordRoleMappingRequest"
+                "$ref": "#/components/schemas/UpdateSeatRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/DiscordRoleMappingRequest"
+                "$ref": "#/components/schemas/UpdateSeatRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/DiscordRoleMappingRequest"
+                "$ref": "#/components/schemas/UpdateSeatRequest"
               }
             }
           }
@@ -375,7 +532,7 @@
         "tags": [
           "lan"
         ],
-        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Lan.Get.Endpoint (Infrastructure)",
+        "operationId": "GetLan",
         "parameters": [
           {
             "name": "id",
@@ -393,17 +550,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/LanGetResponse"
+                  "$ref": "#/components/schemas/GetLanResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LanGetResponse"
+                  "$ref": "#/components/schemas/GetLanResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LanGetResponse"
+                  "$ref": "#/components/schemas/GetLanResponse"
                 }
               }
             }
@@ -414,7 +571,7 @@
         "tags": [
           "lan"
         ],
-        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Lan.Update.Endpoint (Infrastructure)",
+        "operationId": "UpdateLan",
         "parameters": [
           {
             "name": "id",
@@ -430,17 +587,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LanUpdateRequest"
+                "$ref": "#/components/schemas/UpdateLanRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/LanUpdateRequest"
+                "$ref": "#/components/schemas/UpdateLanRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/LanUpdateRequest"
+                "$ref": "#/components/schemas/UpdateLanRequest"
               }
             }
           }
@@ -452,29 +609,137 @@
         }
       }
     },
-    "/frontend/seats": {
+    "/authentication/discord/roles/{guildId}": {
       "get": {
         "tags": [
-          "frontend"
+          "discordAuthentication"
         ],
-        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Frontend.GetAllSeats.Get (Infrastructure)",
+        "operationId": "SetDiscordAuthentication",
+        "parameters": [
+          {
+            "name": "guildId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/FrontendGetAllSeatsResponse"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetDiscordAuthenticationRoleMappingResponse"
+                  }
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FrontendGetAllSeatsResponse"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetDiscordAuthenticationRoleMappingResponse"
+                  }
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FrontendGetAllSeatsResponse"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetDiscordAuthenticationRoleMappingResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "discordAuthentication"
+        ],
+        "operationId": "SetDiscordAuthentication",
+        "parameters": [
+          {
+            "name": "guildId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetDiscordAuthenticationRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetDiscordAuthenticationRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetDiscordAuthenticationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/authentication/discord/login": {
+      "post": {
+        "tags": [
+          "discordAuthentication"
+        ],
+        "operationId": "LoginDiscordAuthentication",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDiscordAuthenticationRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDiscordAuthenticationRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDiscordAuthenticationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginDiscordAuthenticationResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginDiscordAuthenticationResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginDiscordAuthenticationResponse"
                 }
               }
             }
@@ -482,20 +747,37 @@
         }
       }
     },
-    "/reservation/{id}": {
+    "/lan/{lanId}/seat/{seatId}/reservationmanagement/{id}": {
       "put": {
         "tags": [
-          "reservation"
+          "reservationmanagement"
         ],
-        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Reservation.Move.Endpoint (Infrastructure)",
+        "operationId": "MoveReservationmanagement",
         "parameters": [
           {
-            "name": "id",
+            "name": "lanId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "seatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -503,43 +785,21 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReservationMoveRequest"
+                "$ref": "#/components/schemas/MoveReservationManagementRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReservationMoveRequest"
+                "$ref": "#/components/schemas/MoveReservationManagementRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/ReservationMoveRequest"
+                "$ref": "#/components/schemas/MoveReservationManagementRequest"
               }
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "reservation"
-        ],
-        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Reservation.Remove.Endpoint (Infrastructure)",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -547,132 +807,81 @@
         }
       }
     },
-    "/reservationmanagement/{id}": {
-      "put": {
+    "/authentication/discord/renew": {
+      "post": {
         "tags": [
-          "reservationmanagement"
+          "discordAuthentication"
         ],
-        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement.Move.Endpoint (Infrastructure)",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
+        "operationId": "LoginDiscordAuthentication",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReservationManagementMoveRequest"
+                "$ref": "#/components/schemas/RenewDiscordAuthenticationRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReservationManagementMoveRequest"
+                "$ref": "#/components/schemas/RenewDiscordAuthenticationRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/ReservationManagementMoveRequest"
+                "$ref": "#/components/schemas/RenewDiscordAuthenticationRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Success"
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "reservationmanagement"
-        ],
-        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement.Remove.Endpoint (Infrastructure)",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenewDiscordAuthenticationResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenewDiscordAuthenticationResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenewDiscordAuthenticationResponse"
+                }
+              }
             }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
           }
         }
       }
     },
-    "/seat/{id}": {
-      "delete": {
+    "/authentication/discord/test": {
+      "get": {
         "tags": [
-          "seat"
+          "discordAuthentication"
         ],
-        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Seat.Remove.Endpoint (Infrastructure)",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
+        "operationId": "TestDiscordAuthentication",
         "responses": {
           "200": {
-            "description": "Success"
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "seat"
-        ],
-        "operationId": "Seatpicker.Infrastructure.Entrypoints.Http.Seat.Update.Endpoint (Infrastructure)",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SeatUpdateRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SeatUpdateRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/SeatUpdateRequest"
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestDiscordAuthenticationResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestDiscordAuthenticationResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestDiscordAuthenticationResponse"
+                }
               }
             }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success"
           }
         }
       }
@@ -702,31 +911,61 @@
         },
         "additionalProperties": false
       },
-      "DiscordRoleMapping": {
+      "CreateLanRequest": {
         "type": "object",
         "properties": {
-          "discordRoleId": {
+          "title": {
             "type": "string"
           },
-          "role": {
-            "$ref": "#/components/schemas/Role"
+          "background": {
+            "type": "string",
+            "format": "byte"
           }
         },
         "additionalProperties": false
       },
-      "DiscordRoleMappingRequest": {
+      "CreateLanResponse": {
         "type": "object",
         "properties": {
-          "mappings": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DiscordRoleMapping"
-            }
+          "id": {
+            "type": "string",
+            "format": "uuid"
           }
         },
         "additionalProperties": false
       },
-      "DiscordRoleMappingResponse": {
+      "CreateReservationManagementRequest": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateSeatRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "bounds": {
+            "$ref": "#/components/schemas/Bounds"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateSeatResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "GetDiscordAuthenticationRoleMappingResponse": {
         "type": "object",
         "properties": {
           "discordRoleId": {
@@ -749,35 +988,24 @@
         },
         "additionalProperties": false
       },
-      "FrontendGetAllSeatsReservedBy": {
+      "GetLanResponse": {
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "avatar": {
             "type": "string",
-            "nullable": true
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "background": {
+            "type": "string",
+            "format": "byte"
           }
         },
         "additionalProperties": false
       },
-      "FrontendGetAllSeatsResponse": {
-        "type": "object",
-        "properties": {
-          "seats": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FrontendGetAllSeatsSeat"
-            }
-          }
-        },
-        "additionalProperties": false
-      },
-      "FrontendGetAllSeatsSeat": {
+      "GetSeatResponse": {
         "type": "object",
         "properties": {
           "id": {
@@ -791,217 +1019,25 @@
             "$ref": "#/components/schemas/Bounds"
           },
           "reservedBy": {
-            "$ref": "#/components/schemas/FrontendGetAllSeatsReservedBy"
+            "$ref": "#/components/schemas/User"
           }
         },
         "additionalProperties": false
       },
-      "LanCreateRequest": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string"
-          },
-          "background": {
-            "type": "string",
-            "format": "byte"
-          }
-        },
-        "additionalProperties": false
-      },
-      "LanGetResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "title": {
-            "type": "string"
-          },
-          "background": {
-            "type": "string",
-            "format": "byte"
-          }
-        },
-        "additionalProperties": false
-      },
-      "LanUpdateRequest": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "title": {
-            "type": "string",
-            "nullable": true
-          },
-          "background": {
-            "type": "string",
-            "format": "byte",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "LoginRequest": {
+      "LoginDiscordAuthenticationRequest": {
         "type": "object",
         "properties": {
           "token": {
             "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "ProblemDetails": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "nullable": true
           },
-          "title": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "detail": {
-            "type": "string",
-            "nullable": true
-          },
-          "instance": {
+          "guildId": {
             "type": "string",
             "nullable": true
           }
         },
-        "additionalProperties": { }
-      },
-      "RenewRequest": {
-        "type": "object",
-        "properties": {
-          "refreshToken": {
-            "type": "string"
-          }
-        },
         "additionalProperties": false
       },
-      "ReservationCreateRequest": {
-        "type": "object",
-        "properties": {
-          "seatId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "additionalProperties": false
-      },
-      "ReservationManagementCreateRequest": {
-        "type": "object",
-        "properties": {
-          "seatId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "userId": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "ReservationManagementMoveRequest": {
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "string"
-          },
-          "fromSeatId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "toSeatId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "additionalProperties": false
-      },
-      "ReservationMoveRequest": {
-        "type": "object",
-        "properties": {
-          "fromSeatId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "toSeatId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "additionalProperties": false
-      },
-      "Role": {
-        "enum": [
-          "Admin",
-          "Operator",
-          "User"
-        ],
-        "type": "string"
-      },
-      "SeatCreateRequest": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string"
-          },
-          "bounds": {
-            "$ref": "#/components/schemas/Bounds"
-          }
-        },
-        "additionalProperties": false
-      },
-      "SeatUpdateRequest": {
-        "type": "object",
-        "properties": {
-          "seatId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "title": {
-            "type": "string",
-            "nullable": true
-          },
-          "bounds": {
-            "$ref": "#/components/schemas/Bounds"
-          }
-        },
-        "additionalProperties": false
-      },
-      "TestResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "nullable": true
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "roles": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      },
-      "TokenResponse": {
+      "LoginDiscordAuthenticationResponse": {
         "type": "object",
         "properties": {
           "token": {
@@ -1024,6 +1060,168 @@
             }
           }
         },
+        "additionalProperties": false
+      },
+      "MoveReservationManagementRequest": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "toSeatId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MoveReservationRequest": {
+        "type": "object",
+        "properties": {
+          "moveToSeatId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RenewDiscordAuthenticationRequest": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string"
+          },
+          "guildId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RenewDiscordAuthenticationResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "nick": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string",
+            "nullable": true
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Role"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "Role": {
+        "enum": [
+          "Admin",
+          "Operator",
+          "User"
+        ],
+        "type": "string"
+      },
+      "SetDiscordAuthenticationRequest": {
+        "type": "object",
+        "properties": {
+          "roleMappings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValueTuple`2"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "TestDiscordAuthenticationResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateLanRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "background": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateSeatRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "bounds": {
+            "$ref": "#/components/schemas/Bounds"
+          }
+        },
+        "additionalProperties": false
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UserId"
+          },
+          "name": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserId": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ValueTuple`2": {
+        "type": "object",
         "additionalProperties": false
       }
     },

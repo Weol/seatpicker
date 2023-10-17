@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -51,16 +52,12 @@ public static class SwaggerExtensions
         if (type.IsNested)
         {
             var declaringType = type.DeclaringType!;
-            if (declaringType.Name.EndsWith("Controller")) return type.Name;
 
-            var name = declaringType.Name + type.Name;
             var httpNamespace = typeof(EntrypointsExtensions).Namespace! + "." + nameof(Http);
             if (declaringType.Namespace!.StartsWith(httpNamespace))
             {
-                name = declaringType.Namespace.Substring(httpNamespace.Length + 1) + name;
+                return declaringType.Name.Replace("Endpoint", "") + declaringType.Namespace.Substring(httpNamespace.Length + 1).Replace(".", "") + type.Name;
             }
-
-            return name;
         }
 
         return type.Name;
@@ -70,24 +67,27 @@ public static class SwaggerExtensions
     {
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
-            var path = context.ApiDescription.RelativePath!.Split('/');
+            var type = context.MethodInfo.DeclaringType;
 
-            var stack = new Stack<string>();
-            foreach (var section in path)
+            string? name = null;
+            foreach (Attribute attr in type!.GetCustomAttributes(false))
             {
-                if (!Regex.IsMatch(section, @"^[a-zA-Z]+$")) break;
-                stack.Push(section);
+                if (attr is AreaAttribute areaAttribute)
+                {
+                    name = areaAttribute.RouteValue;
+                }
             }
-            if (stack.Count > 1) stack.Pop();
 
-            var name = string.Join('/', stack);
-
-            operation.OperationId = context.ApiDescription.ActionDescriptor.DisplayName;
-            operation.Tags.Clear();
-            operation.Tags.Add(new OpenApiTag
+            if (name is not null)
             {
-                Name = name,
-            });
+                operation.OperationId = context.MethodInfo.Name + char.ToUpper(name[0]) + name.Substring(1);
+
+                operation.Tags.Clear();
+                operation.Tags.Add(new OpenApiTag
+                {
+                    Name = name,
+                });
+            }
         }
     }
 }

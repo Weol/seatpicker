@@ -2,6 +2,12 @@
 
 namespace Seatpicker.Domain;
 
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable NotAccessedPositionalProperty.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+// ReSharper disable UnusedParameter.Local
+#pragma warning disable CS1998 // Disable warning about async methods missing awaits
+#pragma warning disable CS8618 // Disable warning about uninitialized properties
 public class Lan : AggregateBase
 {
     public Lan(Guid lanId, string title, byte[] background, User initiator)
@@ -14,6 +20,7 @@ public class Lan : AggregateBase
         Apply(evt);
     }
 
+    // ReSharper disable once UnusedMember.Local
     private Lan()
     {
         // Marten needs this
@@ -41,7 +48,7 @@ public class Lan : AggregateBase
 
     public void Apply(LanCreated evt)
     {
-        Id = evt.LanId;
+        Id = evt.Id;
         Title = evt.Title;
         Background = evt.Background;
     }
@@ -60,7 +67,7 @@ public class Lan : AggregateBase
 /**
  * Events
  */
-public record LanCreated(Guid LanId, string Title, byte[] Background, UserId Initiator);
+public record LanCreated(Guid Id, string Title, byte[] Background, UserId Initiator);
 
 public record LanTitleChanged(string Title, UserId Initiator);
 

@@ -2,68 +2,80 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { LanCreateRequest } from '../models/LanCreateRequest';
-import type { LanGetResponse } from '../models/LanGetResponse';
-import type { LanUpdateRequest } from '../models/LanUpdateRequest';
+import type {CreateLanRequest} from '../models/CreateLanRequest';
+import type {CreateLanResponse} from '../models/CreateLanResponse';
+import type {GetLanResponse} from '../models/GetLanResponse';
+import type {UpdateLanRequest} from '../models/UpdateLanRequest';
 
-import type { CancelablePromise } from '../core/CancelablePromise';
-import { OpenAPI } from '../core/OpenAPI';
-import { request as __request } from '../core/request';
+import type {CancelablePromise} from '../core/CancelablePromise';
+import {OpenAPI} from '../core/OpenAPI';
+import {request as __request} from '../core/request';
 
 export class LanAdapter {
 
-    /**
-     * @param requestBody 
-     * @returns any Success
-     * @throws ApiError
-     */
-    public static seatpickerInfrastructureEntrypointsHttpLanCreateEndpointInfrastructure(
-requestBody?: LanCreateRequest,
-): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/lan',
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
+  /**
+   * @param requestBody
+   * @returns CreateLanResponse Success
+   * @throws ApiError
+   */
+  public static createLan(
+    requestBody?: CreateLanRequest,
+  ): CancelablePromise<CreateLanResponse> {
+    return __request(OpenAPI, {
+      method: 'POST',
+      url: '/lan',
+      body: requestBody,
+      mediaType: 'application/json',
+    });
+  }
 
-    /**
-     * @param id 
-     * @returns LanGetResponse Success
-     * @throws ApiError
-     */
-    public static seatpickerInfrastructureEntrypointsHttpLanGetEndpointInfrastructure(
-id: string,
-): CancelablePromise<LanGetResponse> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/lan/{id}',
-            path: {
-                'id': id,
-            },
-        });
-    }
+  /**
+   * @returns GetLanResponse Success
+   * @throws ApiError
+   */
+  public static getAllLan(): CancelablePromise<Array<GetLanResponse>> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/lan',
+    });
+  }
 
-    /**
-     * @param id 
-     * @param requestBody 
-     * @returns any Success
-     * @throws ApiError
-     */
-    public static seatpickerInfrastructureEntrypointsHttpLanUpdateEndpointInfrastructure(
-id: string,
-requestBody?: LanUpdateRequest,
-): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'PUT',
-            url: '/lan/{id}',
-            path: {
-                'id': id,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
+  /**
+   * @param id
+   * @returns GetLanResponse Success
+   * @throws ApiError
+   */
+  public static getLan(
+    id: string,
+  ): CancelablePromise<GetLanResponse> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/lan/{id}',
+      path: {
+        'id': id,
+      },
+    });
+  }
+
+  /**
+   * @param id
+   * @param requestBody
+   * @returns any Success
+   * @throws ApiError
+   */
+  public static updateLan(
+    id: string,
+    requestBody?: UpdateLanRequest,
+  ): CancelablePromise<any> {
+    return __request(OpenAPI, {
+      method: 'PUT',
+      url: '/lan/{id}',
+      path: {
+        'id': id,
+      },
+      body: requestBody,
+      mediaType: 'application/json',
+    });
+  }
 
 }

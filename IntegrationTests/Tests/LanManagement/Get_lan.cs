@@ -28,7 +28,7 @@ public class Get_lan : IntegrationTestBase, IClassFixture<TestWebApplicationFact
 
         //Act
         var request = await client.GetAsync($"lan/{existingLan.Id}");
-        var response = await request.Content.ReadAsJsonAsync<Get.Response>();
+        var response = await request.Content.ReadAsJsonAsync<GetEndpoint.Response>();
 
         //Assert
         Assert.Multiple(

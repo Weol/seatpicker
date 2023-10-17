@@ -2,7 +2,7 @@
 
 public record User(UserId Id, string Name, string? Avatar);
 
-public record UserId(string Id)
+public record UserId(string Value)
 {
-    public static implicit operator string(UserId id) => id.Id;
+    public static implicit operator string(UserId id) => id.Value;
 }

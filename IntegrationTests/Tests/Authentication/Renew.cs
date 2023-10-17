@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Authentication.Discord;
 using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
+using Seatpicker.Infrastructure.Entrypoints.Http.DiscordAuthentication;
 using Xunit;
 using Xunit.Abstractions;
 

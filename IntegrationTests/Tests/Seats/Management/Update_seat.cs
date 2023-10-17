@@ -33,7 +33,7 @@ public class Update_seat : IntegrationTestBase, IClassFixture<TestWebApplication
 
     [Theory]
     [MemberData(nameof(ValidUpdateRequests))]
-    public async Task succeeds_when_valid(Update.Request request)
+    public async Task succeeds_when_valid(UpdateEndpoint.Request request)
     {
         // Arrange
         var identity = await CreateIdentity(Role.Operator);
@@ -92,7 +92,7 @@ public class Update_seat : IntegrationTestBase, IClassFixture<TestWebApplication
 
     [Theory]
     [MemberData(nameof(InvalidUpdateRequests))]
-    public async Task fails_when_seat_request_model_is_invalid(Create.Request request)
+    public async Task fails_when_seat_request_model_is_invalid(CreateEndpoint.Request request)
     {
         // Arrange
         var identity = await CreateIdentity(Role.Operator);

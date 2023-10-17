@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using Seatpicker.Application.Features.LanManagement;
+using Seatpicker.Application.Features.Lans;
 using Seatpicker.Application.Features.Seats;
 
 namespace Seatpicker.Application;

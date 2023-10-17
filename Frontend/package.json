@@ -22,7 +22,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "generate": "openapi  --postfixServices Adapter --input ./src/Adapters/seatpicker.openapi.json --output ./src/Adapters/Generated"
+    "generate": "openapi --postfixServices Adapter --input ./src/Adapters/seatpicker.openapi.json --output ./src/Adapters/Generated"
   },
   "browserslist": {
     "production": [

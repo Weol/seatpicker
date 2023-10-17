@@ -5,11 +5,11 @@ namespace Seatpicker.Application.Features.Seats;
 
 public interface IReservationManagementService
 {
-    public Task Move(UserId userToMove, Guid fromSeatId, Guid toSeatId, User initiator);
+    public Task Move(Guid lanId, UserId userToMove, Guid fromSeatId, Guid toSeatId, User initiator);
 
-    public Task Create(Guid seatId, UserId userId, User reservedBy);
+    public Task Create(Guid lanId, Guid seatId, UserId userId, User reservedBy);
 
-    public Task Remove(Guid seatId, User removedBy);
+    public Task Delete(Guid lanId, Guid seatId, User removedBy);
 }
 
 public class ReservationManagementService : IReservationManagementService
@@ -23,7 +23,7 @@ public class ReservationManagementService : IReservationManagementService
         this.userProvider = userProvider;
     }
 
-    public async Task Create(Guid seatId, UserId userId, User reservedBy)
+    public async Task Create(Guid lanId, Guid seatId, UserId userId, User reservedBy)
     {
         var userToReserveFor = await userProvider.GetById(userId) ?? throw new UserNotFoundException { UserId = userId };
 
@@ -39,7 +39,7 @@ public class ReservationManagementService : IReservationManagementService
         transaction.Update(seatToReserve);
     }
 
-    public async Task Remove(Guid seatId, User removedBy)
+    public async Task Delete(Guid lanId, Guid seatId, User removedBy)
     {
         var seat = await transaction.Aggregate<Seat>(seatId) ?? throw new SeatNotFoundException { SeatId = seatId };
 
@@ -48,7 +48,7 @@ public class ReservationManagementService : IReservationManagementService
         transaction.Update(seat);
     }
 
-    public async Task Move(UserId userToMove, Guid fromSeatId, Guid toSeatId, User movedBy)
+    public async Task Move(Guid lanId, UserId userToMove, Guid fromSeatId, Guid toSeatId, User movedBy)
     {
         var userToMoveFor = await userProvider.GetById(userToMove) ?? throw new UserNotFoundException { UserId = userToMove };
 

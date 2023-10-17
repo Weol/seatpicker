@@ -2,7 +2,7 @@
 using Seatpicker.Application.Features.Seats;
 using Seatpicker.Domain;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Http.Utils;
+namespace Seatpicker.Infrastructure.Entrypoints.Utils;
 
 public interface ILoggedInUserAccessor
 {

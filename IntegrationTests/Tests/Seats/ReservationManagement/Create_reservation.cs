@@ -33,7 +33,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         //Act
         var response = await client.PostAsync(
             "reservationmanagement",
-            JsonContent.Create(new Create.Request(seat.Id, reserveFor.Id)));
+            JsonContent.Create(new CreateEndpoint.Request(seat.Id, reserveFor.Id)));
 
         //Assert
         Assert.Multiple(
@@ -61,7 +61,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         //Act
         var response = await client.PostAsJsonAsync(
             "reservationmanagement",
-            new Create.Request(seat.Id, reserveFor.Id));
+            new CreateEndpoint.Request(seat.Id, reserveFor.Id));
 
         //Assert
         Assert.Multiple(
@@ -90,7 +90,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         //Act
         var response = await client.PostAsJsonAsync(
             "reservationmanagement",
-            new Create.Request(seat.Id, reserveFor.Id));
+            new CreateEndpoint.Request(seat.Id, reserveFor.Id));
 
         //Assert
         Assert.Multiple(
@@ -116,7 +116,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         //Act
         var response = await client.PostAsJsonAsync(
             "reservationmanagement",
-            new Create.Request(seat.Id, reserveFor.Id));
+            new CreateEndpoint.Request(seat.Id, reserveFor.Id));
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -138,7 +138,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         //Act
         var response = await client.PostAsJsonAsync(
             "reservationmanagement",
-            new Create.Request(seat.Id, reserveFor.Id));
+            new CreateEndpoint.Request(seat.Id, reserveFor.Id));
 
         //Assert
         Assert.Multiple(

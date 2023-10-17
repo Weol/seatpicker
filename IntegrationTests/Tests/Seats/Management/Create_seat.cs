@@ -25,14 +25,17 @@ public class Create_seat : IntegrationTestBase, IClassFixture<TestWebApplication
         var identity = await CreateIdentity(Role.Operator);
         var client = GetClient(identity);
 
-        var model = Generator.CreateSeatRequest();
+        var lan = LanGenerator.Create();
+        SetupAggregates(lan);
+
+        var model = Generator.CreateSeatRequest(lan.Id);
 
         //Act
         var response = await client.PostAsJsonAsync("seat", model);
 
         //Assert
         Assert.Multiple(
-            () => response.StatusCode.Should().Be(HttpStatusCode.Created),
+            () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
                 var committedSeat = GetCommittedAggregates<Seat>().Should().ContainSingle().Subject;
@@ -52,7 +55,7 @@ public class Create_seat : IntegrationTestBase, IClassFixture<TestWebApplication
 
     [Theory]
     [MemberData(nameof(InvalidUpdateRequests))]
-    public async Task fails_when_seat_request_model_is_invalid(Create.Request request)
+    public async Task fails_when_seat_request_model_is_invalid(CreateEndpoint.Request request)
     {
         // Arrange
         var identity = await CreateIdentity(Role.Operator);
