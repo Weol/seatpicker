@@ -1,8 +1,8 @@
-import type { Role } from './Role';
+import {Role} from "../../Models/Role";
 
 export default interface AuthenticationToken {
     token: string;
-    expiresAt: Date,
+    expiresAt: string,
     refreshToken: string;
     userId: string;
     nick: string;

@@ -10,7 +10,7 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.DiscordAuthentication;
 public class RenewEndpoint
 {
     [HttpPost("renew")]
-    public async Task<ActionResult<Response>> Login(
+    public async Task<ActionResult<Response>> Renew(
         [FromServices] DiscordAuthenticationService discordAuthenticationService,
         [FromBody] Request request)
     {

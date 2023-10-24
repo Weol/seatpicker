@@ -1,4 +1,4 @@
-import Seat from "./Models/Seat";
+import Seat from "./Adapters/Models/Seat";
 
 interface SeatReference {
   Id: string | null;
@@ -99,12 +99,14 @@ export default function createSeats(): { [Id: string]: Seat } {
       title++
       seats[seat.Id ?? "NO ID"] = {
         id: seat.Id ?? "NO ID",
-        user: null,
         title: title + "",
-        width: seat.Width,
-        height: seat.Height,
-        y: seat.Y,
-        x: seat.X,
+        reservedBy: null,
+        bounds: {
+          width: seat.Width,
+          height: seat.Height,
+          y: seat.Y,
+          x: seat.X,
+        }
       }
     })
   })

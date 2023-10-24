@@ -14,8 +14,11 @@ import {useUserContext} from "../UserContext";
 import {useAlertContext} from "../AlertContext";
 import Button from "@mui/material/Button";
 import SeatComponent from '../Components/Seat';
-import { SeatAdapter } from '../Adapters/Generated'
 import Seat from '../Adapters/Models/Seat';
+import {CookiesAdapter} from "../Adapters/CookiesAdapter";
+import SeatAdapter from "../Adapters/SeatAdapter";
+import StaticSeats from '../StaticSeats';
+import createSeats from "../StaticSeats";
 
 interface DialogModel<T> {
   title: string;
@@ -27,7 +30,13 @@ interface DialogModel<T> {
   metadata: T;
 }
 
+var seats = createSeats();
+for (let seatsKey in seats) {
+  // SeatAdapter.postSeat(seats[seatsKey])
+}
+
 let lanId = "6789dd19-ef5a-4f33-b830-399cb8af80f3"
+CookiesAdapter.setCurrentLan(lanId)
 
 export default function Seats() {
   const [seats, setSeats] = useState<Seat[]>([])
@@ -38,24 +47,13 @@ export default function Seats() {
 
   useEffect(() => {
     fetchAllSeats()
-    const interval = setInterval(() => {
-      fetchAllSeats()
-    }, 5000);
-
-    return () => clearInterval(interval);
   }, [])
 
   const fetchAllSeats = () => {
-    SeatAdapter.getAllSeat(lanId).then(seats => {
+    SeatAdapter.getAllSeats().then(seats => {
       setSeats(seats)
 
       setSelectedSeat(null)
-      for (let seat of seats) {
-        if (seat.user && seat.user.id == user?.id) {
-          setSelectedSeat(seat);
-          break;
-        }
-      }
     })
   }
 
@@ -66,13 +64,13 @@ export default function Seats() {
         title: "Du må være logget inn for å reservere et sete",
         description: ""
       })
-    } else if (seat.user && seat.user.id !== user.id) {
+    } else if (seat.reservedBy && seat.reservedBy.id !== user.id) {
       setAlert({
         type: "warning",
         title: "Plass " + seat.title + " er opptatt",
         description: ""
       })
-    } else if (seat.user && seat.user.id === user.id) {
+    } else if (seat.reservedBy && seat.reservedBy.id === user.id) {
       setDialog({
         title: "Fjern reservasjon",
         description: "Sikker på at du vil gi fra deg denne plassen?",
@@ -80,7 +78,7 @@ export default function Seats() {
         positiveText: "Ja",
         negativeText: "Nei",
         positiveCallback: async (seatId) => {
-          await DeleteReservation(seatId)
+          // await DeleteReservation(seatId)
           fetchAllSeats()
         }
       })
@@ -92,12 +90,12 @@ export default function Seats() {
         positiveText: "Ja",
         negativeText: "Nei",
         positiveCallback: async (seatId) => {
-          await ReplaceReservation(selectedSeat.id, seatId)
+          // await ReplaceReservation(selectedSeat.id, seatId)
           fetchAllSeats()
         }
       })
     } else {
-      await CreateReservation(seat.id)
+      // await CreateReservation(seat.id)
       fetchAllSeats()
       setAlert({
         type: "success",
@@ -137,9 +135,9 @@ export default function Seats() {
     )
 
   const getSeatColor = (seat: Seat): string => {
-    if (seat.user && user && seat.user.id === user.id) {
+    if (seat.reservedBy && user && seat.reservedBy.id === user.id) {
       return "#0f3f6a"
-    } else if (seat.user) {
+    } else if (seat.reservedBy) {
       return "#aa3030"
     } else {
       return "#0f6a0f"

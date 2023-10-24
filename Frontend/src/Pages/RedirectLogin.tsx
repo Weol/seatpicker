@@ -6,8 +6,9 @@ import Config from "../config"
 import {CircularProgress, Stack} from '@mui/material';
 import {UserContext} from '../UserContext';
 import Button from "@mui/material/Button";
-import User from "../Adapters/Models/User";
 import {CookiesAdapter} from "../Adapters/CookiesAdapter";
+import User from "../Models/User";
+import {AuthenticationAdapter} from "../Adapters/AuthenticationAdapter";
 
 CookiesAdapter.setCurrentLan("6789dd19-ef5a-4f33-b830-399cb8af80f3")
 
@@ -19,7 +20,7 @@ export default function RedirectLogin() {
   useEffect(() => {
     let code = searchParams.get("code")
     if (code) {
-      LoginWithDiscordToken(code, user => {
+      AuthenticationAdapter.login(code).then(user => {
         console.log(user)
         setUser(user)
         userContext.setUser(user)

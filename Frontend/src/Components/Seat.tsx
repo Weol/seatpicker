@@ -1,16 +1,16 @@
 ﻿import * as React from 'react';
 import {Box, Stack, styled, Tooltip, tooltipClasses, TooltipProps, Typography} from '@mui/material';
-import SeatModel from '../Models/Seat';
 import DiscordAvatar from './DiscordAvatar';
 import User from "../Models/User";
+import Seat from "../Adapters/Models/Seat";
 
 interface SeatProperties {
-  seat: SeatModel;
+  seat: Seat;
   color: string;
-  onClick: (seat: SeatModel) => void;
+  onClick: (seat: Seat) => void;
 }
 
-export default function Seat(props: SeatProperties) {
+export default function SeatComponent(props: SeatProperties) {
   const HtmlTooltip = styled(({className, ...props}: TooltipProps) => (
     <Tooltip {...props} classes={{popper: className}}/>
   ))(({theme}) => ({
@@ -34,15 +34,15 @@ export default function Seat(props: SeatProperties) {
     return (20 * Math.random())
   }
 
-  const renderSeat = (seat: SeatModel) => {
+  const renderSeat = (seat: Seat) => {
     return (
       <Box key={seat.id} onClick={() => props.onClick(seat)} sx={{
         position: "absolute",
         minWidth: "0",
-        top: seat.y + "%",
-        left: seat.x + "%",
-        width: seat.width + "%",
-        height: seat.height + "%",
+        top: seat.bounds.y + "%",
+        left: seat.bounds.x + "%",
+        width: seat.bounds.width + "%",
+        height: seat.bounds.height + "%",
         border: "1px #ffffff61 solid",
         backgroundColor: props.color,
         borderTopLeftRadius: r() + "px " + q() + "px",
@@ -60,13 +60,13 @@ export default function Seat(props: SeatProperties) {
       </Box>
     )
   }
-  const renderTooltipSeat = (seat: SeatModel, user: User) => (
+  const renderTooltipSeat = (seat: Seat, user: User) => (
     <HtmlTooltip
       title={
         <React.Fragment>
           <Stack direction="row" spacing={1}>
             <DiscordAvatar user={user} style={{width: '25px', height: '25px', borderRadius: '50%'}}/>
-            <Typography color="inherit">{seat.user?.nick}</Typography>
+            <Typography color="inherit">{seat.reservedBy?.nick}</Typography>
           </Stack>
         </React.Fragment>
       }
@@ -75,5 +75,5 @@ export default function Seat(props: SeatProperties) {
     </HtmlTooltip>
   )
 
-  return (props.seat.user && renderTooltipSeat(props.seat, props.seat.user) || renderSeat(props.seat))
+  return (props.seat.reservedBy && renderTooltipSeat(props.seat, props.seat.reservedBy) || renderSeat(props.seat))
 }

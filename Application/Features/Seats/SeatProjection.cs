@@ -9,7 +9,7 @@ public class SeatProjection : SingleStreamProjection<ProjectedSeat>
 {
     public SeatProjection()
     {
-        DeleteEvent<SeatArchived>();
+        DeleteEvent<SeatArchived>(x => true);
     }
 
     public ProjectedSeat Create(SeatCreated evt)

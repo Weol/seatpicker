@@ -4,7 +4,7 @@ type Config = {
 }
 
 let config: Config = {
-  ApiBaseUrl: "api",
+  ApiBaseUrl: "http://localhost:3000/",
   DiscordAvatarBaseUrl: "https://cdn.discordapp.com/avatars/"
 }
 

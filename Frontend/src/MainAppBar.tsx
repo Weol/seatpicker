@@ -11,13 +11,13 @@ import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
-import LogOutLoggedInUser from './Adapters/LogOutLoggedInUser';
 import Config from './config'
 import User from './Models/User';
 import {useNavigate} from "react-router-dom";
 import discord from "./Media/discord.svg";
 import RedirectToDiscordLogin from "./Adapters/RedirectToDiscordLogin";
 import {useUserContext} from "./UserContext";
+import {AuthenticationAdapter} from "./Adapters/AuthenticationAdapter";
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
@@ -63,7 +63,6 @@ function ResponsiveAppBar() {
 
   const handleLogout = () => {
     handleCloseUserMenu()
-    LogOutLoggedInUser()
 
     setUser(null)
   }

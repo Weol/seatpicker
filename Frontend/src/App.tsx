@@ -5,15 +5,15 @@ import NotFound from './Pages/NotFound';
 import Seats from './Pages/Seats';
 import RedirectLogin from './Pages/RedirectLogin';
 import MainAppBar from './MainAppBar';
-import {UserContext} from './UserContext';
-import User from './Models/User';
-import GetLoggedInUser from './Adapters/GetLoggedInUser';
 import {AlertContext} from './AlertContext';
 import AlertModel from "./Models/Alert";
 import {Alert, AlertTitle, Snackbar} from "@mui/material";
+import User from "./Models/User";
+import {AuthenticationAdapter} from "./Adapters/AuthenticationAdapter";
+import {UserContext} from "./UserContext";
 
 export default function App() {
-  let [user, setUser] = useState<User | null>(GetLoggedInUser())
+  let [user, setUser] = useState<User | null>(AuthenticationAdapter.getUser())
   let [alert, setAlert] = useState<AlertModel | null>(null)
 
   const renderAlert = (alert: AlertModel) => (

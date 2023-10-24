@@ -1,5 +1,5 @@
 import Bounds from "./Bounds";
-import User from "./User";
+import User from "../../Models/User";
 
 export default interface Seat {
   id: string;

@@ -56,5 +56,22 @@ resource appService 'Microsoft.Web/sites@2018-02-01' = {
   }
 }
 
+resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
+  name: 'appsettings'
+  parent: appService
+  properties: {
+    APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.properties.ConnectionString
+    ASPNETCORE_ENVIRONMENT: 'Production'
+
+    App_Database__ConnectionString: format(keyvaultReferenceFormat, 'AuthenticationCertificate')
+
+    App_Discord__ClientId: format(keyvaultReferenceFormat, 'DiscordClientId')
+    App_Discord__ClientSecret: format(keyvaultReferenceFormat, 'DiscordClientSecret')
+    App_Discord__RedirectUri: 'https://${appService.properties.defaultHostName}/redirect-login'
+
+    App_Wolverine__ServiceBusFQDN: serviceBusEndpoint
+  }
+}
+
 
 output appPrincipalId string = appService.identity.principalId

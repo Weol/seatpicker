@@ -1,5 +1,4 @@
 import Cookies from 'universal-cookie';
-import User from "./Models/User";
 
 const cookies = new Cookies();
 

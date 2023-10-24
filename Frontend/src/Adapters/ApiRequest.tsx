@@ -1,6 +1,5 @@
-﻿import Cookies from "universal-cookie";
-import Config from "../config";
-import {CookiesAdapter} from "./CookiesAdapter";
+﻿import Config from "../config";
+import {AuthenticationAdapter} from "./AuthenticationAdapter";
 
 export default async function ApiRequestJson<T>(method: "POST" | "DELETE" | "GET" | "PUT",
                                                 path: string,
@@ -13,25 +12,29 @@ export async function ApiRequest(
   method: "POST" | "DELETE" | "GET" | "PUT",
   path: string,
   body?: any): Promise<Response> {
-  const token = CookiesAdapter.getLoggedInUserToken()
+  return AuthenticationAdapter.getToken()
+    .then(async token => {
+      const headers = new Headers();
 
-  const headers = new Headers();
-  headers.append("Authorization", "Bearer " + token);
+      if (token != null) {
+        headers.append("Authorization", "Bearer " + token);
+      }
 
-  const requestInit: RequestInit = {
-    method: method,
-    headers: headers,
-    redirect: 'follow'
-  };
+      const requestInit: RequestInit = {
+        method: method,
+        headers: headers,
+        redirect: 'follow'
+      };
 
-  if (method == "POST" || method == "PUT") {
-    headers.append("Content-Type", "text/json");
-    if (body != null) requestInit.body = JSON.stringify(body);
-  }
+      if (method == "POST" || method == "PUT") {
+        headers.append("Content-Type", "text/json");
+        if (body != null) requestInit.body = JSON.stringify(body);
+      }
 
-  const response = await fetch(Config.ApiBaseUrl + path, requestInit);
-
-  if (response.ok) return response
-
-  throw response;
+      return await fetch(Config.ApiBaseUrl + path, requestInit).then<Response>(response => {
+        console.log(response)
+        console.trace()
+        return response
+      })
+    })
 }
