@@ -1,8 +1,5 @@
-﻿using Discord;
-using Microsoft.AspNetCore.Mvc;
-using Remotion.Linq.Clauses;
+﻿using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features;
-using Seatpicker.Application.Features.Lans;
 using Seatpicker.Application.Features.Seats;
 using Seatpicker.Domain;
 

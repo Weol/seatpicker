@@ -1,4 +1,4 @@
-import Seat from "./Adapters/Models/Seat";
+import Seat from "./Models/Seat";
 
 interface SeatReference {
   Id: string | null;

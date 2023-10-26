@@ -1,5 +1,4 @@
 ﻿using Bogus;
-using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 
 namespace Seatpicker.IntegrationTests.Tests.Seats.Management;

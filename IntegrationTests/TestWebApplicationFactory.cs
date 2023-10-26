@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 using Seatpicker.Application.Features;
 using Seatpicker.Infrastructure;
-using Seatpicker.IntegrationTests.TestAdapters;
 
 namespace Seatpicker.IntegrationTests;
 

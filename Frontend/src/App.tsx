@@ -4,6 +4,7 @@ import {Route, Routes} from "react-router-dom";
 import NotFound from './Pages/NotFound';
 import Seats from './Pages/Seats';
 import RedirectLogin from './Pages/RedirectLogin';
+import LanManagement from './Pages/LanManagement';
 import MainAppBar from './MainAppBar';
 import {AlertContext} from './AlertContext';
 import AlertModel from "./Models/Alert";
@@ -34,6 +35,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Seats/>}/>
           <Route path="/redirect-login" element={<RedirectLogin/>}/>
+          <Route path="/lanmanagement" element={<LanManagement/>}/>
           <Route path="/*" element={<NotFound/>}/>
         </Routes>
       </UserContext.Provider>

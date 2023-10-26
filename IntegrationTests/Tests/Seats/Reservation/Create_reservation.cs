@@ -133,7 +133,7 @@ public class Create_reservation : IntegrationTestBase, IClassFixture<TestWebAppl
         //Act
         var response = await client.PostAsJsonAsync(
             "reservation",
-            new CreateEndpoint.Request(seat.Id));
+            new CreateEndpoint.(seat.Id));
 
         //Assert
         Assert.Multiple(

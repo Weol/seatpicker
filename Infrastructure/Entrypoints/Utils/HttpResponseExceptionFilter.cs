@@ -68,8 +68,7 @@ public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
 
     private ObjectResult HandleDomainOrApplicationException(Exception e)
     {
-        var exceptionName = e.GetType()
-            .Name;
+        var exceptionName = e.GetType().Name;
 
         var statusCode = 422;
         if (exceptionName.Contains("NotFound")) statusCode = 404;

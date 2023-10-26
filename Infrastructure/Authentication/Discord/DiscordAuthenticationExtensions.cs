@@ -1,5 +1,4 @@
-﻿using Microsoft.OpenApi.Writers;
-using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
+﻿using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 
 namespace Seatpicker.Infrastructure.Authentication.Discord;
 

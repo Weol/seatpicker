@@ -21,5 +21,5 @@ public class LoginEndpoint
 
     public record Request(string Token, string? GuildId);
 
-    public record Response(string Token, DateTimeOffset expiresAt, string RefreshToken, string UserId, string Nick, string? Avatar, ICollection<Role> Roles);
+    public record Response(string Token, DateTimeOffset ExpiresAt, string RefreshToken, string UserId, string Nick, string? Avatar, ICollection<Role> Roles);
 }

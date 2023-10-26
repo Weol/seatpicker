@@ -51,6 +51,7 @@ public class SeatManagementService : ISeatManagementService
 
         seat.Archive(initiator);
 
+        transaction.Update(seat);
         transaction.Archive(seat);
     }
 }

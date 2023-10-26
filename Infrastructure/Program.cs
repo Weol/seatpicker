@@ -1,3 +1,4 @@
+using Oakton;
 using Seatpicker.Application;
 using Seatpicker.Infrastructure;
 using Seatpicker.Infrastructure.Adapters;
@@ -20,17 +21,19 @@ builder.Services.AddApplicationInsightsTelemetry()
     .AddApplication()
     .AddSwaggerGen();
 
+builder.Host.ApplyOaktonExtensions();
+
 var app = builder.Build();
 
 app.UseSwaggerGen();
 app.UseEntrypoints();
 app.UseSeatpickerAuthentication();
 
-app.Run();
+app.RunOaktonCommands(args);
 
 namespace Seatpicker.Infrastructure
 {
-    public partial class Program
+    public class Program
     {
     }
 }

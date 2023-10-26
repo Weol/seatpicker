@@ -13,8 +13,8 @@ import background from "../Media/background.svg"
 import {useUserContext} from "../UserContext";
 import {useAlertContext} from "../AlertContext";
 import Button from "@mui/material/Button";
-import SeatComponent from '../Components/Seat';
-import Seat from '../Adapters/Models/Seat';
+import SeatComponent from '../Components/SeatComponent';
+import Seat from '../Models/Seat';
 import {CookiesAdapter} from "../Adapters/CookiesAdapter";
 import SeatAdapter from "../Adapters/SeatAdapter";
 import StaticSeats from '../StaticSeats';
@@ -35,15 +35,21 @@ for (let seatsKey in seats) {
   // SeatAdapter.postSeat(seats[seatsKey])
 }
 
-let lanId = "6789dd19-ef5a-4f33-b830-399cb8af80f3"
+let lanId = "3af0cfba-305e-46c6-b44e-0f70f2b6585c"
 CookiesAdapter.setCurrentLan(lanId)
 
 export default function Seats() {
   const [seats, setSeats] = useState<Seat[]>([])
   const [selectedSeat, setSelectedSeat] = useState<Seat | null>(null)
   const [dialog, setDialog] = useState<DialogModel<any> | null>(null)
-  const {user} = useUserContext()
   const {setAlert} = useAlertContext()
+  const {user} = useUserContext()
+  const {seats} = useSeatContext()
+
+  const { avaliableSeats, occupiedSeats, yourSeats } = useSeats()
+  const availableSeats = useAvailableSeats()
+  const occupiedSeats = useOccupiedSeats()
+  const yourSeats = useYourSeats()
 
   useEffect(() => {
     fetchAllSeats()

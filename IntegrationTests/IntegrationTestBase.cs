@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Authentication.Discord;
-using Seatpicker.IntegrationTests.TestAdapters;
 using Shared;
 using Xunit.Abstractions;
 
@@ -96,7 +95,8 @@ public abstract class IntegrationTestBase : IDisposable
             Nick: user.Name,
             RefreshToken: "8ioq3",
             ExpiresAtUtc: DateTimeOffset.UtcNow.AddDays(1),
-            Avatar: user.Avatar
+            Avatar: user.Avatar,
+            GuildId: "123"
         );
 
         var token = await jwtTokenCreator.CreateToken(discordToken, roles);
@@ -120,5 +120,5 @@ public abstract class IntegrationTestBase : IDisposable
         factory.Dispose();
     }
 
-    public record TestIdentity(Domain.User User, Role[] Roles, string Token);
+    public record TestIdentity(User User, Role[] Roles, string Token);
 }

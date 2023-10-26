@@ -13,12 +13,7 @@ public class LanProjection : SingleStreamProjection<ProjectedLan>
 
     public ProjectedLan Create(LanCreated evt)
     {
-        return new ProjectedLan
-        {
-            Id = evt.Id,
-            Background = evt.Background,
-            Title = evt.Title,
-        };
+        return new ProjectedLan(evt.Id, evt.Title, evt.Background);
     }
 
     public void Apply(LanBackgroundChanged evt, ProjectedLan lan)
@@ -34,6 +29,13 @@ public class LanProjection : SingleStreamProjection<ProjectedLan>
 
 public class ProjectedLan: IDocument
 {
+    public ProjectedLan(Guid id, string title, byte[] background)
+    {
+        Id = id;
+        Title = title;
+        Background = background;
+    }
+
     public Guid Id { get; set; }
     public string Title { get; set; }
     public byte[] Background { get; set; }

@@ -18,7 +18,7 @@ public interface IDocumentReader : IAsyncDisposable
         where TDocument : IDocument;
 }
 
-public interface IDocumentTransaction : IDocumentReader, IAsyncDisposable, IDisposable
+public interface IDocumentTransaction : IDocumentReader, IDisposable
 {
     public void Store<TDocument>(params TDocument[] documentsToAdd)
         where TDocument : IDocument;

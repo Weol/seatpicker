@@ -10,8 +10,6 @@ import {CookiesAdapter} from "../Adapters/CookiesAdapter";
 import User from "../Models/User";
 import {AuthenticationAdapter} from "../Adapters/AuthenticationAdapter";
 
-CookiesAdapter.setCurrentLan("6789dd19-ef5a-4f33-b830-399cb8af80f3")
-
 export default function RedirectLogin() {
   const [user, setUser] = useState<User | null>(null)
   const userContext = useContext(UserContext)

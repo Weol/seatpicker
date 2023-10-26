@@ -2,7 +2,7 @@
 import {Box, Stack, styled, Tooltip, tooltipClasses, TooltipProps, Typography} from '@mui/material';
 import DiscordAvatar from './DiscordAvatar';
 import User from "../Models/User";
-import Seat from "../Adapters/Models/Seat";
+import Seat from "../Models/Seat";
 
 interface SeatProperties {
   seat: Seat;

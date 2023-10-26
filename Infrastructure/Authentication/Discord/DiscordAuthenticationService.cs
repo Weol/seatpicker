@@ -1,11 +1,7 @@
-﻿using System.Net;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Seatpicker.Application.Features;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
-using Seatpicker.Infrastructure.Entrypoints.Utils;
 using Shared;
 
 namespace Seatpicker.Infrastructure.Authentication.Discord;
@@ -16,7 +12,6 @@ public class DiscordAuthenticationService
     private readonly DiscordJwtTokenCreator tokenCreator;
     private readonly IDocumentRepository documentRepository;
     private readonly DiscordAuthenticationOptions options;
-    private readonly ILoggedInUserAccessor loggedInUserAccessor;
     private readonly UserManager userManager;
 
     public DiscordAuthenticationService(
@@ -24,13 +19,11 @@ public class DiscordAuthenticationService
         DiscordJwtTokenCreator tokenCreator,
         IDocumentRepository documentRepository,
         IOptions<DiscordAuthenticationOptions> options,
-        ILoggedInUserAccessor loggedInUserAccessor,
         UserManager userManager)
     {
         this.discordClient = discordClient;
         this.tokenCreator = tokenCreator;
         this.documentRepository = documentRepository;
-        this.loggedInUserAccessor = loggedInUserAccessor;
         this.userManager = userManager;
         this.options = options.Value;
     }

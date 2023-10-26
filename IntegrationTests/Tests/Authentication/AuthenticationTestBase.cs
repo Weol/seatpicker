@@ -1,8 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
-using Seatpicker.Infrastructure.Authentication.Discord;
 using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
-using Seatpicker.Infrastructure.Entrypoints.Http.DiscordAuthentication;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -1,5 +1,4 @@
 import * as React from 'react';
-import {useState} from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -10,122 +9,166 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
+import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import Config from './config'
-import User from './Models/User';
+import {useUserContext} from './UserContext';
 import {useNavigate} from "react-router-dom";
-import discord from "./Media/discord.svg";
-import RedirectToDiscordLogin from "./Adapters/RedirectToDiscordLogin";
-import {useUserContext} from "./UserContext";
-import {AuthenticationAdapter} from "./Adapters/AuthenticationAdapter";
+import {Divider} from "@mui/material";
+import User from "./Models/User";
+
+const pages = ['Sete reservasjon', 'Lan administrasjon'];
+const settings = ['Profil', 'Logout'];
 
 function ResponsiveAppBar() {
-  const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
-  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
-  const {user, setUser} = useUserContext()
-  const navigate = useNavigate()
+    const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
+    const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+    const {user, setUser} = useUserContext()
+    const navigate = useNavigate()
 
-  const pages = [
-    {
-      Title: 'Setevalg',
-      Path: '/'
-    },
-    {
-      Title: 'Info',
-      Path: '/about'
+    const getPagesForUser = (user : User | null) => {
+        if (user == null) {
+            return ["Sete reservasjon", "Lan administrasjon"]
+        } else {
+            if (user.roles.)
+        }
     }
-  ]
 
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElNav(event.currentTarget);
+    const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorElNav(event.currentTarget);
+    };
+    const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorElUser(event.currentTarget);
+    };
 
-  };
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElUser(event.currentTarget);
-  };
+    const handleCloseNavMenu = () => {
+        setAnchorElNav(null);
+    };
 
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
-  };
+    const handleCloseUserMenu = () => {
+        setAnchorElUser(null);
+    };
 
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
+    return (
+        <AppBar position="static" sx={{ bgColor: 'background.paper', color: 'text.primary' }}>
+            <Container maxWidth="xl">
+                <Toolbar disableGutters>
+                    <Typography
+                        variant="h6"
+                        noWrap
+                        component="a"
+                        href="#app-bar-with-responsive-menu"
+                        sx={{
+                            mr: 2,
+                            display: {xs: 'none', md: 'flex'},
+                            fontFamily: 'monospace',
+                            fontWeight: 700,
+                            letterSpacing: '.3rem',
+                            color: 'inherit',
+                            textDecoration: 'none',
+                        }}
+                    >
+                        SALTENLAN
+                    </Typography>
 
-  const getAvatarUrl = (user: User | null) => {
-    return Config.DiscordAvatarBaseUrl + user?.id + "/" + user?.avatar
-  }
+                    <Box sx={{flexGrow: 1, display: {xs: 'flex', md: 'none'}}}>
+                        <IconButton
+                            size="large"
+                            aria-label="account of current user"
+                            aria-controls="menu-appbar"
+                            aria-haspopup="true"
+                            onClick={handleOpenNavMenu}
+                            color="inherit"
+                        >
+                            <MenuIcon/>
+                        </IconButton>
+                        <Menu
+                            id="menu-appbar"
+                            anchorEl={anchorElNav}
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'left',
+                            }}
+                            keepMounted
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'left',
+                            }}
+                            open={Boolean(anchorElNav)}
+                            onClose={handleCloseNavMenu}
+                            sx={{
+                                display: {xs: 'block', md: 'none'},
+                            }}
+                        >
+                            {pages.map((page) => (
+                                <MenuItem key={page} onClick={handleCloseNavMenu}>
+                                    <Typography textAlign="center">{page}</Typography>
+                                </MenuItem>
+                            ))}
+                        </Menu>
+                    </Box>
+                    <Typography
+                        variant="h5"
+                        noWrap
+                        component="a"
+                        href="#app-bar-with-responsive-menu"
+                        sx={{
+                            mr: 2,
+                            display: {xs: 'flex', md: 'none'},
+                            flexGrow: 1,
+                            fontFamily: 'monospace',
+                            fontWeight: 700,
+                            letterSpacing: '.3rem',
+                            color: 'inherit',
+                            textDecoration: 'none',
+                        }}
+                    >
+                        SALTENLAN
+                    </Typography>
+                    <Box sx={{flexGrow: 1, display: {xs: 'none', md: 'flex'}}}>
+                        {pages.map((page) => (
+                            <Button
+                                key={page}
+                                onClick={handleCloseNavMenu}
+                                sx={{my: 2, color: 'white', display: 'block'}}
+                            >
+                                {page}
+                            </Button>
+                        ))}
+                    </Box>
 
-  const navigateTo = (path: string) => {
-    navigate(path)
-    handleCloseNavMenu()
-  }
-
-  const handleLogout = () => {
-    handleCloseUserMenu()
-
-    setUser(null)
-  }
-
-  return (
-    <AppBar position="static" sx={{bgcolor: 'background.paper', color: 'text.primary'}}>
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="/"
-            sx={{
-              mr: 2,
-              flexGrow: 1,
-              display: 'block',
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            SALTENLAN
-          </Typography>
-          {user && (
-            <Box sx={{flexGrow: 0}}>
-              <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
-                <Avatar alt={user.nick} src={getAvatarUrl(user)}/>
-              </IconButton>
-              <Menu
-                sx={{mt: '45px'}}
-                id="menu-appbar"
-                anchorEl={anchorElUser}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                open={Boolean(anchorElUser)}
-                onClose={handleCloseUserMenu}
-              >
-                <MenuItem key='logout' onClick={handleLogout}>
-                  <Typography textAlign="center">Logg ut</Typography>
-                </MenuItem>
-              </Menu>
-            </Box>
-          ) || (
-            <Box sx={{flexGrow: 0}}>
-              <Button sx={{color: 'text.primary'}}
-                      startIcon={<img src={discord} style={{width: 20}} alt="avatar"/>} variant="text"
-                      onClick={RedirectToDiscordLogin}>Logg inn</Button>
-            </Box>
-          )}
-        </Toolbar>
-      </Container>
-    </AppBar>
-  );
+                    <Box sx={{flexGrow: 0}}>
+                        <Tooltip title="Open settings">
+                            <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
+                                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg"/>
+                            </IconButton>
+                        </Tooltip>
+                        <Menu
+                            sx={{mt: '45px'}}
+                            id="menu-appbar"
+                            anchorEl={anchorElUser}
+                            anchorOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            keepMounted
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            open={Boolean(anchorElUser)}
+                            onClose={handleCloseUserMenu}
+                        >
+                            {settings.map((setting) => (
+                                <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                                    <Typography textAlign="center">{setting}</Typography>
+                                </MenuItem>
+                            ))}
+                        </Menu>
+                    </Box>
+                </Toolbar>
+            </Container>
+        </AppBar>
+    );
 }
 
 export default ResponsiveAppBar;

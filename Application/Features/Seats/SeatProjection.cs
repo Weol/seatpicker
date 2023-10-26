@@ -1,5 +1,4 @@
 ﻿using Marten.Events.Aggregation;
-using Microsoft.CodeAnalysis;
 using Seatpicker.Domain;
 using Shared;
 
@@ -9,19 +8,12 @@ public class SeatProjection : SingleStreamProjection<ProjectedSeat>
 {
     public SeatProjection()
     {
-        DeleteEvent<SeatArchived>(x => true);
+        DeleteEvent<SeatArchived>();
     }
 
     public ProjectedSeat Create(SeatCreated evt)
     {
-        return new ProjectedSeat
-        {
-            Id = evt.Id,
-            LanId = evt.LanId,
-            Title = evt.Title,
-            Bounds = evt.Bounds,
-            ReservedBy = null,
-        };
+        return new ProjectedSeat(evt.Id, evt.LanId, evt.Title, evt.Bounds, null);
     }
 
     public void Apply(SeatReservationMade evt, ProjectedSeat seat)
@@ -70,6 +62,15 @@ public class SeatProjection : SingleStreamProjection<ProjectedSeat>
 
 public class ProjectedSeat : IDocument
 {
+    public ProjectedSeat(Guid id, Guid lanId, string title, Bounds bounds, UserId? reservedBy)
+    {
+        Id = id;
+        LanId = lanId;
+        Title = title;
+        Bounds = bounds;
+        ReservedBy = reservedBy;
+    }
+
     public Guid Id { get; set; }
     public Guid LanId { get; set; }
     public string Title { get; set; }

@@ -14,6 +14,7 @@
         <PackageReference Include="Discord.Net.Rest" Version="3.12.0" />
         <PackageReference Include="FluentValidation" Version="11.6.0" />
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.6.0" />
+        <PackageReference Include="Marten.CommandLine" Version="6.3.0" />
         <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.10" />
         <PackageReference Include="Microsoft.Extensions.Azure" Version="1.6.3" />

@@ -9,17 +9,15 @@ public class FluentValidationFilter : IAsyncActionFilter, IOrderedFilter
     public int Order => int.MaxValue - 10;
 
     private readonly IServiceProvider provider;
-    private readonly ILogger<FluentValidationFilter> logger;
 
-    public FluentValidationFilter(IServiceProvider provider, ILogger<FluentValidationFilter> logger)
+    public FluentValidationFilter(IServiceProvider provider)
     {
         this.provider = provider;
-        this.logger = logger;
     }
 
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
-        foreach (var (name, value) in context.ActionArguments)
+        foreach (var (_, value) in context.ActionArguments)
         {
             if (value is null) continue;
 

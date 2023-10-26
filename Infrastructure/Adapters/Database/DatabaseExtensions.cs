@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Marten;
+using Marten.Events.Daemon.Resiliency;
 using Microsoft.Extensions.Options;
 using Seatpicker.Application.Features;
 using Weasel.Core;
@@ -36,7 +37,8 @@ internal static class DatabaseExtensions
                 }
 
                 return options;
-            });
+            })
+            .AddAsyncDaemon(DaemonMode.HotCold);
 
         return services;
     }

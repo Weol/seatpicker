@@ -27,7 +27,7 @@ public class LoggedInUserAccessor : ILoggedInUserAccessor
     {
         var id  = HttpContext.User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
 
-        return (await userProvider.GetById(new UserId(id))) ??
+        return await userProvider.GetById(new UserId(id)) ??
                throw new NullReferenceException($"Cannot find user with id {id}");
     }
 }

@@ -21,7 +21,7 @@ public interface IAggregateReader : IAsyncDisposable
         where TAggregate : AggregateBase;
 }
 
-public interface IAggregateTransaction : IAggregateReader, IAsyncDisposable
+public interface IAggregateTransaction : IAggregateReader
 {
     public void Update<TAggregate>(TAggregate aggregate)
         where TAggregate : AggregateBase;

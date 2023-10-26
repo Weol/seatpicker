@@ -18,20 +18,20 @@ internal class LanManagementManagementService : ILanManagementService
         this.transaction = transaction;
     }
 
-    public async Task<Guid> Create(string title, byte[] background, User initiator)
+    public Task<Guid> Create(string title, byte[] background, User initiator)
     {
         var id = Guid.NewGuid();
 
-        var lan = new Domain.Lan(id, title, background, initiator);
+        var lan = new Lan(id, title, background, initiator);
 
         transaction.Create(lan);
 
-        return id;
+        return Task.FromResult(id);
     }
 
     public async Task Update(Guid id, string? title, byte[]? background, User initiator)
     {
-        var lan = await transaction.Aggregate<Domain.Lan>(id);
+        var lan = await transaction.Aggregate<Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
 
         if (title is not null) lan.ChangeTitle(title, initiator);
