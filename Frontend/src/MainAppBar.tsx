@@ -11,10 +11,9 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import {useUserContext} from './UserContext';
 import {useNavigate} from "react-router-dom";
-import {Divider} from "@mui/material";
 import User from "./Models/User";
+import useLoggedInUser from "./LoggedInUserHook";
 
 const pages = ['Sete reservasjon', 'Lan administrasjon'];
 const settings = ['Profil', 'Logout'];
@@ -22,14 +21,12 @@ const settings = ['Profil', 'Logout'];
 function ResponsiveAppBar() {
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
-    const {user, setUser} = useUserContext()
+    const loggedInUser = useLoggedInUser()
     const navigate = useNavigate()
 
     const getPagesForUser = (user : User | null) => {
         if (user == null) {
             return ["Sete reservasjon", "Lan administrasjon"]
-        } else {
-            if (user.roles.)
         }
     }
 

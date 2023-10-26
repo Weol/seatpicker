@@ -4,25 +4,19 @@ import Typography from '@mui/material/Typography';
 import {Link, useSearchParams} from 'react-router-dom';
 import Config from "../config"
 import {CircularProgress, Stack} from '@mui/material';
-import {UserContext} from '../UserContext';
 import Button from "@mui/material/Button";
-import {CookiesAdapter} from "../Adapters/CookiesAdapter";
-import User from "../Models/User";
-import {AuthenticationAdapter} from "../Adapters/AuthenticationAdapter";
+import useAuthentication from "../AuthenticationHook";
+import useLoggedInUser from "../LoggedInUserHook";
 
 export default function RedirectLogin() {
-  const [user, setUser] = useState<User | null>(null)
-  const userContext = useContext(UserContext)
+  const { login } = useAuthentication()
+  const user = useLoggedInUser()
   const [searchParams] = useSearchParams()
 
   useEffect(() => {
     let code = searchParams.get("code")
     if (code) {
-      AuthenticationAdapter.login(code).then(user => {
-        console.log(user)
-        setUser(user)
-        userContext.setUser(user)
-      })
+      login(code)
     }
   }, [])
 

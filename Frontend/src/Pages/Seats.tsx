@@ -10,15 +10,14 @@ import {
   Stack
 } from '@mui/material';
 import background from "../Media/background.svg"
-import {useUserContext} from "../UserContext";
 import {useAlertContext} from "../AlertContext";
 import Button from "@mui/material/Button";
 import SeatComponent from '../Components/SeatComponent';
 import Seat from '../Models/Seat';
-import {CookiesAdapter} from "../Adapters/CookiesAdapter";
-import SeatAdapter from "../Adapters/SeatAdapter";
-import StaticSeats from '../StaticSeats';
 import createSeats from "../StaticSeats";
+import useSeats from "../SeatsHook"
+import useReservation from "../ReservationHook"
+import useLoggedInUser from "../LoggedInUserHook";
 
 interface DialogModel<T> {
   title: string;
@@ -35,74 +34,54 @@ for (let seatsKey in seats) {
   // SeatAdapter.postSeat(seats[seatsKey])
 }
 
-let lanId = "3af0cfba-305e-46c6-b44e-0f70f2b6585c"
-CookiesAdapter.setCurrentLan(lanId)
-
 export default function Seats() {
-  const [seats, setSeats] = useState<Seat[]>([])
   const [selectedSeat, setSelectedSeat] = useState<Seat | null>(null)
   const [dialog, setDialog] = useState<DialogModel<any> | null>(null)
   const {setAlert} = useAlertContext()
-  const {user} = useUserContext()
-  const {seats} = useSeatContext()
-
-  const { avaliableSeats, occupiedSeats, yourSeats } = useSeats()
-  const availableSeats = useAvailableSeats()
-  const occupiedSeats = useOccupiedSeats()
-  const yourSeats = useYourSeats()
-
-  useEffect(() => {
-    fetchAllSeats()
-  }, [])
-
-  const fetchAllSeats = () => {
-    SeatAdapter.getAllSeats().then(seats => {
-      setSeats(seats)
-
-      setSelectedSeat(null)
-    })
-  }
+  const loggedInUser = useLoggedInUser()
+  const { seats, reloadSeats } = useSeats()
+  const { makeReservation, deleteReservation, moveReservation } = useReservation()
 
   async function onSeatClick(seat: Seat) {
-    if (!user) {
+    if (!loggedInUser) {
       setAlert({
         type: "warning",
         title: "Du må være logget inn for å reservere et sete",
         description: ""
       })
-    } else if (seat.reservedBy && seat.reservedBy.id !== user.id) {
+    } else if (seat.reservedBy && seat.reservedBy.id !== loggedInUser.id) {
       setAlert({
         type: "warning",
         title: "Plass " + seat.title + " er opptatt",
         description: ""
       })
-    } else if (seat.reservedBy && seat.reservedBy.id === user.id) {
+    } else if (seat.reservedBy && seat.reservedBy.id === loggedInUser.id) {
       setDialog({
         title: "Fjern reservasjon",
         description: "Sikker på at du vil gi fra deg denne plassen?",
-        metadata: seat.id,
+        metadata: seat,
         positiveText: "Ja",
         negativeText: "Nei",
-        positiveCallback: async (seatId) => {
-          // await DeleteReservation(seatId)
-          fetchAllSeats()
+        positiveCallback: async (seat) => {
+          deleteReservation(seat)
+          reloadSeats()
         }
       })
     } else if (selectedSeat) {
       setDialog({
         title: "Endre sete",
         description: "Sikker på at du vil endre sete fra " + selectedSeat.title + " til " + seat.title + "?",
-        metadata: seat.id,
+        metadata: seat,
         positiveText: "Ja",
         negativeText: "Nei",
-        positiveCallback: async (seatId) => {
-          // await ReplaceReservation(selectedSeat.id, seatId)
-          fetchAllSeats()
+        positiveCallback: async (seat) => {
+          moveReservation(selectedSeat, seat)
+          reloadSeats()
         }
       })
     } else {
-      // await CreateReservation(seat.id)
-      fetchAllSeats()
+      makeReservation(seat)
+      reloadSeats()
       setAlert({
         type: "success",
         title: "Du har reservert sete " + seat.title,
@@ -141,7 +120,7 @@ export default function Seats() {
     )
 
   const getSeatColor = (seat: Seat): string => {
-    if (seat.reservedBy && user && seat.reservedBy.id === user.id) {
+    if (seat.reservedBy && loggedInUser && seat.reservedBy.id === loggedInUser.id) {
       return "#0f3f6a"
     } else if (seat.reservedBy) {
       return "#aa3030"

@@ -1,12 +1,22 @@
 import {useAppState} from "./AppStateContext";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
+import Seat from "./Models/Seat";
+import ApiRequestJson, {ApiRequest} from "./Adapters/ApiRequest";
 
-function useSeats() {
-    const { seats } = useAppState();
+export default function useSeats() {
+  const { appState } = useAppState();
+  const [ seats, setSeats ] = useState<Seat[]>([]);
 
-    useEffect(() => {
+  useEffect(() => {
+    reloadSeats()
+  }, [ appState.activeLan ]);
 
-    }, []);
+  const reloadSeats = () => {
+    ApiRequestJson<Seat[]>("GET", `lan/${appState.activeLan}/seat`, null)
+    .then(seats => {
+      setSeats(seats)
+    });
+  }
 
-    return seats;
+  return { seats, reloadSeats }
 }

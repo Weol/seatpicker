@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useState} from 'react';
+import {createContext, useEffect, useState} from 'react';
 import {Route, Routes} from "react-router-dom";
 import NotFound from './Pages/NotFound';
 import Seats from './Pages/Seats';
@@ -9,13 +9,25 @@ import MainAppBar from './MainAppBar';
 import {AlertContext} from './AlertContext';
 import AlertModel from "./Models/Alert";
 import {Alert, AlertTitle, Snackbar} from "@mui/material";
-import User from "./Models/User";
-import {AuthenticationAdapter} from "./Adapters/AuthenticationAdapter";
-import {UserContext} from "./UserContext";
+import {AppState, AppStateContext} from './AppStateContext';
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
+
+cookies.set("activeLan", "6789dd19-ef5a-4f33-b830-399cb8af80f3")
 
 export default function App() {
-  let [user, setUser] = useState<User | null>(AuthenticationAdapter.getUser())
+  let [appState, setAppState] = useState<AppState>({ activeLan: cookies.get("activeLan"), loggedInUser: cookies.get("loggedInUser"), authenticationToken: null })
   let [alert, setAlert] = useState<AlertModel | null>(null)
+
+  useEffect(() => {
+    cookies.set("activeLan", appState.activeLan)
+    if (appState.loggedInUser == null) {
+      cookies.remove("loggedInUser")
+    } else {
+      cookies.set("loggedInUser", appState.loggedInUser)
+    }
+  }, [appState])
 
   const renderAlert = (alert: AlertModel) => (
     <Snackbar anchorOrigin={{vertical: "top", horizontal: "center"}} autoHideDuration={3000} open={true}
@@ -29,7 +41,7 @@ export default function App() {
 
   return (
     <AlertContext.Provider value={{alert: alert, setAlert: setAlert}}>
-      <UserContext.Provider value={{user: user, setUser: setUser}}>
+      <AppStateContext.Provider value={{appState, setAppState}}>
         {alert && renderAlert(alert)}
         <MainAppBar/>
         <Routes>
@@ -38,7 +50,7 @@ export default function App() {
           <Route path="/lanmanagement" element={<LanManagement/>}/>
           <Route path="/*" element={<NotFound/>}/>
         </Routes>
-      </UserContext.Provider>
+      </AppStateContext.Provider>
     </AlertContext.Provider>
   );
 }

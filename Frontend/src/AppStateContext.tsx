@@ -1,23 +1,24 @@
 import React, {useContext} from "react";
 import User from "./Models/User";
-import Seat from "./Models/Seat";
+import Cookies from 'universal-cookie';
+import AuthenticationToken from "./Models/AuthenticationToken";
+
+const cookies = new Cookies();
+
+export interface AppState {
+  loggedInUser: User | null;
+  authenticationToken: AuthenticationToken | null;
+  activeLan: string;
+}
 
 interface AppStateContextObject {
-  loggedInUser: User | null;
-  seats: Seat[];
-  activeLan: string;
-  setLoggedInUser: (user: User | null) => void
-  setSeats: (seats: Seat[]) => void
-  setActiveLan: (lan: string) => void
+  appState: AppState
+  setAppState: (appState: AppState) => void
 }
 
 var defaultValue: AppStateContextObject = {
-  loggedInUser: null,
-  seats: [],
-  activeLan: "",
-  setLoggedInUser: (user: User | null) => { },
-  setSeats: (seats: Seat[]) => { },
-  setActiveLan: (lan: string) => { }
+  appState: { loggedInUser: null, activeLan: "", authenticationToken: null },
+  setAppState: (appState: AppState) => { }
 };
 
 export const AppStateContext = React.createContext<AppStateContextObject>(defaultValue);
