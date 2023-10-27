@@ -30,7 +30,7 @@ export async function ApiRequest(
 
   if (method == "POST" || method == "PUT") {
     headers.append("Content-Type", "text/json");
-    if (body != null) requestInit.body = JSON.stringify(body);
+    if (typeof(body) !== 'undefined') requestInit.body = JSON.stringify(body);
   }
 
   return await fetch(Config.ApiBaseUrl + path, requestInit).then<Response>(response => {

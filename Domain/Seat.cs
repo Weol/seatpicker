@@ -62,11 +62,11 @@ public class Seat : AggregateBase
         Apply(evt);
     }
 
-    public void MakeReservation(User user, ICollection<Seat> seatsReservedByUser)
+    public void MakeReservation(User user, int numSeatsReservedByUser)
     {
         if (user.Id == ReservedBy) return;
 
-        if (seatsReservedByUser.Any()) throw new DuplicateSeatReservationException(this, seatsReservedByUser, user);
+        if (numSeatsReservedByUser > 0) throw new DuplicateSeatReservationException(this, numSeatsReservedByUser, user);
 
         if (ReservedBy is not null) throw new SeatReservationConflictException(this, ReservedBy, user.Id);
 
@@ -75,11 +75,11 @@ public class Seat : AggregateBase
         Apply(evt);
     }
 
-    public void MakeReservationFor(User user, ICollection<Seat> seatsReservedByUser, User madeBy)
+    public void MakeReservationFor(User user, int seatsReservedByUser, User madeBy)
     {
         if (user.Id == ReservedBy) return;
 
-        if (seatsReservedByUser.Any()) throw new DuplicateSeatReservationException(this, seatsReservedByUser, user);
+        if (seatsReservedByUser > 0) throw new DuplicateSeatReservationException(this, seatsReservedByUser, user);
 
         if (ReservedBy is not null) throw new SeatReservationConflictException(this, ReservedBy, user.Id);
 
@@ -282,20 +282,20 @@ public class SeatReservationNotFoundException : DomainException
 public class DuplicateSeatReservationException : DomainException
 {
     public required Seat AttemptedSeatReservation { get; init; }
-    public required ICollection<Seat> ExistingSeatReservations { get; init; }
+    public required int NumExistingSeatReservations { get; init; }
     public required User User { get; init; }
 
     [SetsRequiredMembers]
     internal DuplicateSeatReservationException(
         Seat attemptedSeatReservation,
-        ICollection<Seat> existingSeatReservations,
+        int numExistingSeatReservations,
         User user)
     {
         AttemptedSeatReservation = attemptedSeatReservation;
-        ExistingSeatReservations = existingSeatReservations;
+        NumExistingSeatReservations = numExistingSeatReservations;
         User = user;
     }
 
     protected override string ErrorMessage =>
-        $"Cannot create reservation for {User} on {AttemptedSeatReservation} because they already have reservations on {ExistingSeatReservations}";
+        $"Cannot create reservation for {User} on {AttemptedSeatReservation} because they already have reservations on {NumExistingSeatReservations} seats";
 }

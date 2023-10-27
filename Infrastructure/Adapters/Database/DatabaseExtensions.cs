@@ -17,7 +17,6 @@ internal static class DatabaseExtensions
 
         services.AddSingleton<IAggregateRepository, AggregateRepository>()
             .AddScoped(CreateAggregateTransaction)
-            .AddScoped(CreateAggregateReader)
             .AddSingleton<IDocumentRepository, DocumentRepository>()
             .AddScoped(CreateDocumentTransaction)
             .AddScoped(CreateDocumentReader);
@@ -37,8 +36,7 @@ internal static class DatabaseExtensions
                 }
 
                 return options;
-            })
-            .AddAsyncDaemon(DaemonMode.HotCold);
+            });
 
         return services;
     }
@@ -47,12 +45,6 @@ internal static class DatabaseExtensions
     {
         var repository = provider.GetRequiredService<IAggregateRepository>();
         return repository.CreateTransaction();
-    }
-
-    private static IAggregateReader CreateAggregateReader(IServiceProvider provider)
-    {
-        var repository = provider.GetRequiredService<IAggregateRepository>();
-        return repository.CreateReader();
     }
 
     private static IDocumentTransaction CreateDocumentTransaction(IServiceProvider provider)

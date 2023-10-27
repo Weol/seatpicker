@@ -29,18 +29,12 @@ interface DialogModel<T> {
   metadata: T;
 }
 
-var seats = createSeats();
-for (let seatsKey in seats) {
-  // SeatAdapter.postSeat(seats[seatsKey])
-}
-
 export default function Seats() {
-  const [selectedSeat, setSelectedSeat] = useState<Seat | null>(null)
   const [dialog, setDialog] = useState<DialogModel<any> | null>(null)
   const {setAlert} = useAlertContext()
   const loggedInUser = useLoggedInUser()
-  const { seats, reloadSeats } = useSeats()
-  const { makeReservation, deleteReservation, moveReservation } = useReservation()
+  const {seats, reloadSeats, reservedSeat } = useSeats()
+  const {makeReservation, deleteReservation, moveReservation} = useReservation()
 
   async function onSeatClick(seat: Seat) {
     if (!loggedInUser) {
@@ -63,25 +57,22 @@ export default function Seats() {
         positiveText: "Ja",
         negativeText: "Nei",
         positiveCallback: async (seat) => {
-          deleteReservation(seat)
-          reloadSeats()
+          deleteReservation(seat).then(() => reloadSeats())
         }
       })
-    } else if (selectedSeat) {
+    } else if (reservedSeat) {
       setDialog({
         title: "Endre sete",
-        description: "Sikker på at du vil endre sete fra " + selectedSeat.title + " til " + seat.title + "?",
+        description: "Sikker på at du vil endre sete fra " + reservedSeat.title + " til " + seat.title + "?",
         metadata: seat,
         positiveText: "Ja",
         negativeText: "Nei",
         positiveCallback: async (seat) => {
-          moveReservation(selectedSeat, seat)
-          reloadSeats()
+          moveReservation(reservedSeat, seat).then(() => reloadSeats())
         }
       })
     } else {
-      makeReservation(seat)
-      reloadSeats()
+      makeReservation(seat).then(() => reloadSeats())
       setAlert({
         type: "success",
         title: "Du har reservert sete " + seat.title,
@@ -120,7 +111,7 @@ export default function Seats() {
     )
 
   const getSeatColor = (seat: Seat): string => {
-    if (seat.reservedBy && loggedInUser && seat.reservedBy.id === loggedInUser.id) {
+    if (seat.reservedBy && loggedInUser && seat.reservedBy.id == loggedInUser.id) {
       return "#0f3f6a"
     } else if (seat.reservedBy) {
       return "#aa3030"
@@ -149,7 +140,7 @@ export default function Seats() {
               width: "100%"
             }}/>
 
-            {seats && seats.map(seat => <SeatComponent color={getSeatColor(seat)} seat={seat} onClick={onSeatClick} />)}
+            {seats && seats.map(seat => <SeatComponent color={getSeatColor(seat)} seat={seat} onClick={onSeatClick}/>)}
           </Box>
         </Box>
       </Box>

@@ -14,48 +14,48 @@ interface AuthenticationTokenModel {
 }
 
 export default function useAuthentication() {
-  const { appState, setAppState } = useAppState()
+  const {appState, setAppState} = useAppState()
 
   const login = (discordToken: string): Promise<User> => {
     return new Promise<User>((resolve, reject) => {
-      makeRequest<AuthenticationTokenModel>("POST", `authentication/discord/login`, { token: discordToken })
-      .then(authenticationToken => {
-        if (authenticationToken == null) {
-          reject()
-        } else {
-          const user = {
-            id: authenticationToken.userId,
-            nick: authenticationToken.nick,
-            avatar: authenticationToken.avatar,
-            roles: authenticationToken.roles
-          };
+      makeRequest<AuthenticationTokenModel>("POST", `authentication/discord/login`, {token: discordToken})
+        .then(authenticationToken => {
+          if (authenticationToken == null) {
+            reject()
+          } else {
+            const user = {
+              id: authenticationToken.userId,
+              nick: authenticationToken.nick,
+              avatar: authenticationToken.avatar,
+              roles: authenticationToken.roles
+            };
 
-          setAppState({ ...appState, loggedInUser: user, authenticationToken: authenticationToken })
-        }
+            setAppState({...appState, loggedInUser: user, authenticationToken: authenticationToken})
+          }
 
-      })
-      .catch(reason => reject(reason));
+        })
+        .catch(reason => reject(reason));
     })
   }
 
   const renew = (refreshToken: string): Promise<AuthenticationTokenModel> => {
     return new Promise<AuthenticationTokenModel>((resolve, reject) => {
-      makeRequest<AuthenticationTokenModel>("POST", `authentication/discord/renew`, { refreshToken: refreshToken })
-      .then(authenticationToken => {
-        if (authenticationToken == null) {
-          reject()
-        } else {
-          const user = {
-            id: authenticationToken.userId,
-            nick: authenticationToken.nick,
-            avatar: authenticationToken.avatar,
-            roles: authenticationToken.roles
-          };
+      makeRequest<AuthenticationTokenModel>("POST", `authentication/discord/renew`, {refreshToken: refreshToken})
+        .then(authenticationToken => {
+          if (authenticationToken == null) {
+            reject()
+          } else {
+            const user = {
+              id: authenticationToken.userId,
+              nick: authenticationToken.nick,
+              avatar: authenticationToken.avatar,
+              roles: authenticationToken.roles
+            };
 
-          setAppState({ ...appState, loggedInUser: user, authenticationToken: authenticationToken })
-        }
-      })
-      .catch(reason => reject(reason));
+            setAppState({...appState, loggedInUser: user, authenticationToken: authenticationToken})
+          }
+        })
+        .catch(reason => reject(reason));
     })
   }
 
@@ -66,10 +66,10 @@ export default function useAuthentication() {
       } else {
         if (new Date() > new Date(appState.authenticationToken.expiresAt)) {
           renew(appState.authenticationToken.refreshToken)
-          .then(renewedAuthenticationToken => {
-            resolve(renewedAuthenticationToken.token)
-          })
-          .catch(reason => reject(reason))
+            .then(renewedAuthenticationToken => {
+              resolve(renewedAuthenticationToken.token)
+            })
+            .catch(reason => reject(reason))
         }
 
         resolve(appState.authenticationToken.token)
@@ -88,9 +88,10 @@ export default function useAuthentication() {
 
     const headers = new Headers();
     if (method == "POST" || method == "PUT") {
+      if (typeof(body) !== 'undefined') requestInit.body = JSON.stringify(body);
       headers.append("Content-Type", "text/json");
-      if (body != null) requestInit.body = JSON.stringify(body);
     }
+    requestInit.headers = headers
 
     return await fetch(Config.ApiBaseUrl + path, requestInit).then<T>(response => {
       console.log(response)
@@ -98,5 +99,5 @@ export default function useAuthentication() {
     })
   }
 
-  return { login, token }
+  return {login, token}
 }

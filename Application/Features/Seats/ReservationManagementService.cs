@@ -15,12 +15,14 @@ public interface IReservationManagementService
 public class ReservationManagementService : IReservationManagementService
 {
     private readonly IAggregateTransaction transaction;
+    private readonly IDocumentReader reader;
     private readonly IUserProvider userProvider;
 
-    public ReservationManagementService(IAggregateTransaction transaction, IUserProvider userProvider)
+    public ReservationManagementService(IAggregateTransaction transaction, IUserProvider userProvider, IDocumentReader reader)
     {
         this.transaction = transaction;
         this.userProvider = userProvider;
+        this.reader = reader;
     }
 
     public async Task Create(Guid lanId, Guid seatId, UserId userId, User reservedBy)
@@ -30,11 +32,10 @@ public class ReservationManagementService : IReservationManagementService
         var seatToReserve = await transaction.Aggregate<Seat>(seatId) ??
                             throw new SeatNotFoundException { SeatId = seatId };
 
-        var seatsReservedByUser = transaction.Query<Seat>()
-            .Where(seat => seat.ReservedBy != null && seat.ReservedBy == userId)
-            .ToImmutableList();
+        var numReservedSeatsByUser = reader.Query<ProjectedSeat>()
+            .Count(seat => seat.ReservedBy != null && seat.ReservedBy.Value == userId);
 
-        seatToReserve.MakeReservationFor(userToReserveFor, seatsReservedByUser, reservedBy);
+        seatToReserve.MakeReservationFor(userToReserveFor, numReservedSeatsByUser, reservedBy);
 
         transaction.Update(seatToReserve);
     }

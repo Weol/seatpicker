@@ -6,7 +6,7 @@ using Seatpicker.Infrastructure.Authentication.Discord;
 namespace Seatpicker.Infrastructure.Entrypoints.Http.DiscordAuthentication.RoleMapping;
 
 [ApiController]
-[Route("authentication/discord")]
+[Route("api/authentication/discord")]
 [Area("discordAuthentication")]
 [Authorize(Roles = "Admin")]
 public class SetEndpoint

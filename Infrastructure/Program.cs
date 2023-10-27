@@ -21,15 +21,13 @@ builder.Services.AddApplicationInsightsTelemetry()
     .AddApplication()
     .AddSwaggerGen();
 
-builder.Host.ApplyOaktonExtensions();
-
 var app = builder.Build();
 
 app.UseSwaggerGen();
 app.UseEntrypoints();
 app.UseSeatpickerAuthentication();
 
-app.RunOaktonCommands(args);
+app.Run();
 
 namespace Seatpicker.Infrastructure
 {

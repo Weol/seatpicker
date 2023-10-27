@@ -5,23 +5,9 @@ namespace Seatpicker.Application.Features;
 public interface IAggregateRepository
 {
     public IAggregateTransaction CreateTransaction();
-
-    public IAggregateReader CreateReader();
 }
 
-public interface IAggregateReader : IAsyncDisposable
-{
-    public Task<TAggregate?> Aggregate<TAggregate>(Guid id)
-        where TAggregate : AggregateBase;
-
-    public Task<bool> Exists<TAggregate>(Guid id)
-        where TAggregate : AggregateBase;
-
-    public IQueryable<TAggregate> Query<TAggregate>()
-        where TAggregate : AggregateBase;
-}
-
-public interface IAggregateTransaction : IAggregateReader
+public interface IAggregateTransaction : IAsyncDisposable
 {
     public void Update<TAggregate>(TAggregate aggregate)
         where TAggregate : AggregateBase;
@@ -30,6 +16,12 @@ public interface IAggregateTransaction : IAggregateReader
         where TAggregate : AggregateBase;
 
     public void Archive<TAggregate>(TAggregate aggregate)
+        where TAggregate : AggregateBase;
+
+    public Task<TAggregate?> Aggregate<TAggregate>(Guid id)
+        where TAggregate : AggregateBase;
+
+    public Task<bool> Exists<TAggregate>(Guid id)
         where TAggregate : AggregateBase;
 
     public void Commit();

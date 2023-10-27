@@ -24,7 +24,7 @@ const createRow = (width: number, height: number, x: number, y: number, n: numbe
   return row
 }
 
-export default function createSeats(): { [Id: string]: Seat } {
+export default function createSeats(): Seat[] {
   const tableWidth = 11.5
   const tableHeight = 2.81
 
@@ -113,5 +113,5 @@ export default function createSeats(): { [Id: string]: Seat } {
 
   console.log(JSON.stringify(Object.values(seats)))
 
-  return seats
+  return Object.values(seats)
 }

@@ -14,18 +14,25 @@ import Cookies from 'universal-cookie';
 
 const cookies = new Cookies();
 
-cookies.set("activeLan", "6789dd19-ef5a-4f33-b830-399cb8af80f3")
+cookies.set("activeLan", "3af0cfba-305e-46c6-b44e-0f70f2b6585c")
 
 export default function App() {
-  let [appState, setAppState] = useState<AppState>({ activeLan: cookies.get("activeLan"), loggedInUser: cookies.get("loggedInUser"), authenticationToken: null })
+  let [appState, setAppState] = useState<AppState>({ activeLan: cookies.get("activeLan"), loggedInUser: cookies.get("loggedInUser"), authenticationToken: cookies.get("authenticationToken") })
   let [alert, setAlert] = useState<AlertModel | null>(null)
 
   useEffect(() => {
     cookies.set("activeLan", appState.activeLan)
+
     if (appState.loggedInUser == null) {
       cookies.remove("loggedInUser")
     } else {
       cookies.set("loggedInUser", appState.loggedInUser)
+    }
+
+    if (appState.authenticationToken == null) {
+      cookies.remove("authenticationToken")
+    } else {
+      cookies.set("authenticationToken", appState.authenticationToken)
     }
   }, [appState])
 

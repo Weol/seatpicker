@@ -6,7 +6,7 @@ using Seatpicker.Infrastructure.Entrypoints.Utils;
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 
 [ApiController]
-[Route("lan/{lanId:guid}/seat")]
+[Route("api/lan/{lanId:guid}/seat")]
 [Area("seat")]
 [Authorize(Roles = "Operator")]
 public class DeleteEndpoint

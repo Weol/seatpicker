@@ -5,7 +5,7 @@ using Seatpicker.Infrastructure.Authentication.Discord;
 namespace Seatpicker.Infrastructure.Entrypoints.Http.DiscordAuthentication;
 
 [ApiController]
-[Route("authentication/discord")]
+[Route("api/authentication/discord")]
 [Area("discordAuthentication")]
 public class RenewEndpoint
 {
