@@ -33,8 +33,16 @@ export async function ApiRequest(
     if (typeof(body) !== 'undefined') requestInit.body = JSON.stringify(body);
   }
 
-  return await fetch(Config.ApiBaseUrl + path, requestInit).then<Response>(response => {
-    console.log(response)
-    return response
+  return new Promise<Response>((resolve, reject) => {
+    fetch(Config.ApiBaseUrl + path, requestInit)
+      .then(response => {
+        console.log(response)
+        if (response.status > 299) {
+          reject(response)
+        } else {
+          resolve(response)
+        }
+      })
+      .catch((response) => reject(response))
   })
 }

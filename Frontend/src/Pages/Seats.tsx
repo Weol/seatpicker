@@ -30,11 +30,11 @@ interface DialogModel<T> {
 }
 
 export default function Seats() {
-  const [dialog, setDialog] = useState<DialogModel<any> | null>(null)
-  const {setAlert} = useAlertContext()
+  const [ dialog, setDialog ] = useState<DialogModel<any> | null>(null)
+  const { setAlert } = useAlertContext()
   const loggedInUser = useLoggedInUser()
-  const {seats, reloadSeats, reservedSeat } = useSeats()
-  const {makeReservation, deleteReservation, moveReservation} = useReservation()
+  const { seats, reloadSeats, reservedSeat, setSeatReservedBy } = useSeats()
+  const { makeReservation, deleteReservation, moveReservation } = useReservation()
 
   async function onSeatClick(seat: Seat) {
     if (!loggedInUser) {
@@ -57,7 +57,10 @@ export default function Seats() {
         positiveText: "Ja",
         negativeText: "Nei",
         positiveCallback: async (seat) => {
-          deleteReservation(seat).then(() => reloadSeats())
+          deleteReservation(seat).then(() => {
+            setSeatReservedBy(seat, null)
+            reloadSeats()
+          })
         }
       })
     } else if (reservedSeat) {
@@ -68,11 +71,19 @@ export default function Seats() {
         positiveText: "Ja",
         negativeText: "Nei",
         positiveCallback: async (seat) => {
-          moveReservation(reservedSeat, seat).then(() => reloadSeats())
+          moveReservation(reservedSeat, seat).then(() => {
+            setSeatReservedBy(reservedSeat, null)
+            setSeatReservedBy(seat, loggedInUser)
+            reloadSeats()
+          })
         }
       })
     } else {
-      makeReservation(seat).then(() => reloadSeats())
+      makeReservation(seat)
+      .then((response) => {
+        setSeatReservedBy(seat, loggedInUser)
+        reloadSeats()
+      })
       setAlert({
         type: "success",
         title: "Du har reservert sete " + seat.title,
@@ -121,8 +132,8 @@ export default function Seats() {
   }
 
   return (
-    <Stack sx={{my: 2, alignItems: 'center'}}>
-      <Box sx={{flexGrow: 1}}>
+    <Stack sx={{ my: 2, alignItems: 'center' }}>
+      <Box sx={{ flexGrow: 1 }}>
         <Box sx={{
           display: "flex",
           width: "100%",
@@ -140,7 +151,7 @@ export default function Seats() {
               width: "100%"
             }}/>
 
-            {seats && seats.map(seat => <SeatComponent color={getSeatColor(seat)} seat={seat} onClick={onSeatClick}/>)}
+            {seats && seats.map(seat => <SeatComponent key={seat.id} color={getSeatColor(seat)} seat={seat} onClick={onSeatClick}/>)}
           </Box>
         </Box>
       </Box>

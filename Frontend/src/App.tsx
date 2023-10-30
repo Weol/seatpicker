@@ -14,7 +14,7 @@ import Cookies from 'universal-cookie';
 
 const cookies = new Cookies();
 
-cookies.set("activeLan", "3af0cfba-305e-46c6-b44e-0f70f2b6585c")
+cookies.set("activeLan", "6789dd19-ef5a-4f33-b830-399cb8af80f3")
 
 export default function App() {
   let [appState, setAppState] = useState<AppState>({ activeLan: cookies.get("activeLan"), loggedInUser: cookies.get("loggedInUser"), authenticationToken: cookies.get("authenticationToken") })

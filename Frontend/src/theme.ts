@@ -3,22 +3,14 @@ import {createTheme} from '@mui/material/styles';
 // A custom theme for this app
 const theme = createTheme({
   palette: {
+    mode: 'dark',
     primary: {
-      main: '#ffff00',
+      main: '#3f51b5',
     },
     secondary: {
-      main: '#ffff00',
+      main: '#f50057',
     },
-    background: {
-      default: '#2b2a33',
-      paper: '#42413d',
-    },
-    text: {
-      primary: 'rgba(255,255,255,0.9)',
-      secondary: 'rgba(255,255,255,0.7)',
-      disabled: 'rgba(255,255,255,0.5)',
-    },
-  }
+  },
 });
 
 export default theme;
