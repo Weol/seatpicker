@@ -7,6 +7,8 @@ public interface ILanManagementService
     public Task<Guid> Create(string title, byte[] background, User initiator);
 
     public Task Update(Guid id, string? title, byte[]? background, User initiator);
+
+    public Task Delete(Guid id, User initiator);
 }
 
 internal class LanManagementManagementService : ILanManagementService
@@ -42,6 +44,19 @@ internal class LanManagementManagementService : ILanManagementService
         if (background is not null) lan.ChangeBackground(background, initiator);
 
         transaction.Update(lan);
+        transaction.Commit();
+    }
+
+    public async Task Delete(Guid id, User initiator)
+    {
+        await using var transaction = repository.CreateTransaction();
+
+        var lan = await transaction.Aggregate<Lan>(id);
+        if (lan is null) throw new LanNotFoundException { LanId = id };
+
+        transaction.Update(lan);
+        transaction.Archive(lan);
+
         transaction.Commit();
     }
 }

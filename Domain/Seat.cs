@@ -19,8 +19,6 @@ public class Seat : AggregateBase
 
     public UserId? ReservedBy { get; private set; }
 
-    public bool IsArchived { get; private set; }
-
     public Seat(Guid id, Lan lan, string title, Bounds bounds, User initiator)
     {
         if (title.Length == 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
@@ -201,7 +199,6 @@ public class Seat : AggregateBase
 
     private void Apply(SeatArchived evt)
     {
-        IsArchived = true;
     }
 }
 

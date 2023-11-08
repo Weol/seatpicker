@@ -10,7 +10,7 @@ import {
   Stack
 } from '@mui/material';
 import background from "../Media/background.svg"
-import {useAlertContext} from "../AlertContext";
+import {useAlerts} from "../AlertContext";
 import Button from "@mui/material/Button";
 import SeatComponent from '../Components/SeatComponent';
 import Seat from '../Models/Seat';
@@ -33,7 +33,7 @@ var lmao = createSeats()
 
 export default function Seats() {
   const [ dialog, setDialog ] = useState<DialogModel<any> | null>(null)
-  const { setAlert } = useAlertContext()
+  const { setAlert } = useAlerts()
   const loggedInUser = useLoggedInUser()
   const { seats, reloadSeats, reservedSeat, setSeatReservedBy, createNewSeat } = useSeats()
   const { makeReservation, deleteReservation, moveReservation } = useReservation()
@@ -43,7 +43,7 @@ export default function Seats() {
       // createNewSeat(seat)
     })
   }, []);
-  
+
   async function onSeatClick(seat: Seat) {
     if (!loggedInUser) {
       setAlert({

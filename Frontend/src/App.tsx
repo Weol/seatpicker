@@ -1,13 +1,12 @@
 import * as React from 'react';
-import {createContext, useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {Route, Routes} from "react-router-dom";
 import NotFound from './Pages/NotFound';
 import Seats from './Pages/Seats';
 import RedirectLogin from './Pages/RedirectLogin';
 import Admin from './Pages/Admin';
 import MainAppBar from './MainAppBar';
-import {AlertContext} from './AlertContext';
-import AlertModel from "./Models/Alert";
+import {AlertContext, AlertModel} from './AlertContext';
 import {Alert, AlertTitle, Snackbar} from "@mui/material";
 import {AppState, AppStateContext} from './AppStateContext';
 import Cookies from 'universal-cookie';

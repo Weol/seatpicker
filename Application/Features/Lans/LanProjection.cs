@@ -1,4 +1,5 @@
-﻿using Marten.Events.Aggregation;
+﻿using Marten.Events;
+using Marten.Events.Aggregation;
 using Seatpicker.Domain;
 using Shared;
 
@@ -8,35 +9,41 @@ public class LanProjection : SingleStreamProjection<ProjectedLan>
 {
     public LanProjection()
     {
-        DeleteEvent<SeatArchived>();
+        DeleteEvent<LanArchived>();
     }
 
     public ProjectedLan Create(IEvent<LanCreated> evt)
     {
-        return new ProjectedLan(evt.Id, evt.Title, evt.Background);
+        return new ProjectedLan(evt.Data.Id, evt.Data.Title, evt.Data.Background, evt.Timestamp, evt.Timestamp);
     }
 
-    public void Apply(LanBackgroundChanged evt, ProjectedLan lan)
+    public void Apply(IEvent<LanBackgroundChanged> evt, ProjectedLan lan)
     {
-        lan.Background = evt.Background;
+        lan.Background = evt.Data.Background;
+        lan.UpdatedAt = evt.Timestamp;
     }
 
-    public void Apply(LanTitleChanged evt, ProjectedLan lan)
+    public void Apply(IEvent<LanTitleChanged> evt, ProjectedLan lan)
     {
-        lan.Title = evt.Title;
+        lan.Title = evt.Data.Title;
+        lan.UpdatedAt = evt.Timestamp;
     }
 }
 
 public class ProjectedLan: IDocument
 {
-    public ProjectedLan(Guid id, string title, byte[] background)
+    public ProjectedLan(Guid id, string title, byte[] background, DateTimeOffset createdAt, DateTimeOffset updatedAt)
     {
         Id = id;
         Title = title;
         Background = background;
+        CreatedAt = createdAt;
+        UpdatedAt = updatedAt;
     }
 
     public Guid Id { get; set; }
     public string Title { get; set; }
     public byte[] Background { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
 }

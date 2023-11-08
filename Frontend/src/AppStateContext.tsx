@@ -1,9 +1,6 @@
 import React, {useContext} from "react";
 import User from "./Models/User";
-import Cookies from 'universal-cookie';
 import AuthenticationToken from "./Models/AuthenticationToken";
-
-const cookies = new Cookies();
 
 export interface AppState {
   loggedInUser: User | null;

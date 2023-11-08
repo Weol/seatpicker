@@ -46,6 +46,13 @@ public class Lan : AggregateBase
         Apply(evt);
     }
 
+    public void Archive(User initiator)
+    {
+        var evt = new LanArchived(initiator.Id);
+        Raise(evt);
+        Apply(evt);
+    }
+
     public void Apply(LanCreated evt)
     {
         Id = evt.Id;
@@ -62,6 +69,10 @@ public class Lan : AggregateBase
     {
         Background = evt.Background;
     }
+
+    public void Apply(LanArchived evt)
+    {
+    }
 }
 
 /**
@@ -72,3 +83,5 @@ public record LanCreated(Guid Id, string Title, byte[] Background, UserId Initia
 public record LanTitleChanged(string Title, UserId Initiator);
 
 public record LanBackgroundChanged(byte[] Background, UserId Initiator);
+
+public record LanArchived(UserId Initiator);

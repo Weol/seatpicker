@@ -15,7 +15,7 @@ public class GetEndpoint
     {
         var lans = documentReader.Query<ProjectedLan>()
             .AsEnumerable()
-            .Select(lan => new Response(lan.Id, lan.Title, lan.Background));
+            .Select(lan => new Response(lan.Id, lan.Title, lan.Background, lan.CreatedAt, lan.UpdatedAt));
 
         return Task.FromResult<ActionResult<Response[]>>(new OkObjectResult(lans));
     }
@@ -30,8 +30,8 @@ public class GetEndpoint
 
         if (lan is null) return Task.FromResult<ActionResult<Response>>(new NotFoundResult());
 
-        return Task.FromResult<ActionResult<Response>>(new OkObjectResult(new Response(lan.Id, lan.Title, lan.Background)));
+        return Task.FromResult<ActionResult<Response>>(new OkObjectResult(new Response(lan.Id, lan.Title, lan.Background, lan.CreatedAt, lan.UpdatedAt)));
     }
 
-    public record Response(Guid Id, string Title, byte[] Background);
+    public record Response(Guid Id, string Title, byte[] Background, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt);
 }

@@ -1,5 +1,3 @@
-// noinspection TypeScriptCheckImport
-
 import * as React from 'react';
 import {
   Accordion, AccordionDetails,
@@ -17,7 +15,9 @@ import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Lan from "../Models/Lan";
 import {useState} from "react";
-import {useAlertContext} from "../AlertContext";
+import {useAlerts} from "../AlertContext";
+import {Add} from '@mui/icons-material';
+import useLans from "../LanHook";
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -33,27 +33,60 @@ const VisuallyHiddenInput = styled('input')({
 
 interface LanEditorParams {
   lan: Lan | null;
-  onSave: (lan: Lan | null, title: string, background: Blob) => void
+  onSave: (lan: Lan | null, title: string, background: string) => void
   onCancel: () => void
-  onDelete: (lan : Lan) => void
+  onDelete: (lan: Lan) => void
 }
 
 const LanEditor = (params: LanEditorParams) => {
-  let {setAlert} = useAlertContext()
+  let { setAlert } = useAlerts()
 
-  let [title, setTitle] = useState<string | null>(params.lan && params.lan.title || null)
-  let [background, setBackground] = useState<Blob | null>(null)
-  let [backgroundName, setBackgroundName] = useState<string | null>(null)
-  let [viewBackground, setViewBackground] = useState<boolean>(false)
-  
+  const getDefaultBackground = () => {
+    if (params.lan != null) {
+      return new Blob([ atob(params.lan.background) ], {type: "image/svg+xml"})
+    }
+    return null
+  }
+
+  let [ title, setTitle ] = useState<string | null>(params.lan && params.lan.title || null)
+  let [ background, setBackground ] = useState<Blob | null>(getDefaultBackground())
+  let [ backgroundName, setBackgroundName ] = useState<string | null>(null)
+  let [ viewBackground, setViewBackground ] = useState<boolean>(false)
+
   const onCancelPressed = () => {
+    if (params.lan != null) {
+      params.onDelete(params.lan)
+    } else {
+      params.onCancel()
+    }
+
     setTitle(null)
     setBackground(null)
     setBackgroundName(null)
   }
-  
+
+  const blobToBase64 = (blob: Blob): Promise<string> => {
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+    return new Promise<string>(resolve => {
+      reader.onloadend = () => {
+        let result = reader.result as string
+        if (result != null) {
+          resolve(result.split(',')[1]);
+        }
+      };
+    });
+  };
+
   const onSavePressed = () => {
-  
+    if (background != null) {
+      blobToBase64(background)
+      .then((base64Background) => {
+        if (title != null) {
+          params.onSave(params.lan, title, base64Background)
+        }
+      })
+    }
   }
 
   const onTitleChanged = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,7 +107,7 @@ const LanEditor = (params: LanEditorParams) => {
       reader.onload = function (e) {
         if (e.target != null) {
           let bytes = e.target.result as ArrayBuffer
-          setBackground(new Blob([bytes]))
+          setBackground(new Blob([ bytes ], {type: "image/svg+xml"}))
           setBackgroundName(file.name)
         } else {
           setAlert({
@@ -94,23 +127,26 @@ const LanEditor = (params: LanEditorParams) => {
       reader.readAsArrayBuffer(file)
     }
   }
- // {<img alt="preview" style={{width: "100%"}} src={URL.createObjectURL(background)}/>}
+  // {<img alt="preview" style={{width: "100%"}} src={URL.createObjectURL(background)}/>}
   return (
-    <Stack spacing={2} justifyContent="center" alignItems="center">
-      <TextField sx={{width: "100%"}} required label="Lan name" variant="outlined" onInput={onTitleChanged}/>
-      <Button sx={{width: "100%"}} component="label" variant="outlined" startIcon={<UploadIcon/>}>
-        <Typography noWrap={true}>{backgroundName || "Upload background"}</Typography>
+    <Stack spacing={2} justifyContent="center" alignItems="center" sx={{ width: "100%" }}>
+      <TextField defaultValue={title} sx={{ width: "100%" }} required label="Lan name" variant="outlined" onInput={onTitleChanged}/>
+      <Button sx={{ width: "100%" }} component="label" variant="outlined" startIcon={<UploadIcon/>}>
+        <Typography noWrap={true}>{background && "Change background" || backgroundName || "Upload background"}</Typography>
         <VisuallyHiddenInput type="file" onInput={onBackgroundChanged} accept="image/svg"/>
       </Button>
-      {!viewBackground && background && <Button onClick={() => setViewBackground(true)} startIcon={<FullscreenIcon/>}>View backgroud</Button>}
-      {viewBackground && background && <Button onClick={() => setViewBackground(false)} startIcon={<FullscreenExitIcon/>}>Hide backgroud</Button>}
-      {viewBackground && background && <img alt="preview" style={{width: "100%"}} src={URL.createObjectURL(background)}/>}
-      <Stack sx={{width: "100%"}} spacing={1} direction="row" justifyContent="space-between" alignItems="center">
+      {!viewBackground && background &&
+          <Button onClick={() => setViewBackground(true)} startIcon={<FullscreenIcon/>}>View backgroud</Button>}
+      {viewBackground && background &&
+          <Button onClick={() => setViewBackground(false)} startIcon={<FullscreenExitIcon/>}>Hide backgroud</Button>}
+      {viewBackground && background &&
+          <img alt="preview" style={{ width: "100%"}} src={URL.createObjectURL(background)}/>}
+      <Stack sx={{ width: "100%" }} spacing={1} direction="row" justifyContent="space-between" alignItems="center">
         <Button onClick={onSavePressed} color="secondary" variant="contained">
           {params.lan && "Update" || "Create"}
         </Button>
         <IconButton aria-label="cancel" onClick={onCancelPressed}>
-          {params.lan &&  <DeleteIcon/> || <CancelIcon/>}
+          {params.lan && <DeleteIcon/> || <CancelIcon/>}
         </IconButton>
       </Stack>
     </Stack>
@@ -118,41 +154,69 @@ const LanEditor = (params: LanEditorParams) => {
 }
 
 export default function Admin() {
-  let {setAlert} = useAlertContext()
-  const [createExpanded, setCreateExpanded] = useState<boolean>(false);
+  let { setAlert } = useAlerts()
+  let { lans, reloadLans, createNewLan, deleteLan } = useLans()
+  let [ isCreateVisible, setCreateVisible ] = useState<boolean>(false);
+  let [ expanded, setExpanded ] = useState<string | false>(false);
 
-  const onSave = (lan: Lan | null, title: string, background: Blob) => {
+  const handleLanPressed = (lan: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
+    setExpanded(newExpanded ? lan : false);
+  };
+
+  const onSave = (lan: Lan | null, title: string, background: string) => {
     if (lan != null) {
       setAlert({
         title: "Lan opprettet",
         type: "success"
       })
     } else {
-      setAlert({
-        title: "Lan oppdatert",
-        type: "success"
-      })
+      createNewLan(title, background)
+        .then((response) => {
+          reloadLans()
+          setAlert({
+            title: title,
+            type: "success"
+          })
+        })
     }
   }
-  
+
   const onCancel = () => {
-    
+    setCreateVisible(false)
   }
-  
-  const onDelete = (lan : Lan) => {}
-  
+
+  const onDelete = (lan: Lan) => {
+    deleteLan(lan)
+      .then(response => {
+        setAlert({
+          title: "Lan slettet",
+          type: "success"
+        })
+        reloadLans()
+      })
+  }
+
   return (
-    <Stack spacing={1} justifyContent="center" alignItems="center" sx={{marginTop: "1em"}}>
-      <Accordion sx={{width: "100%"}}>
-        <AccordionSummary aria-controls="panel1d-content" id="panel1d-header" sx={{width: "100%"}}>
-          <Typography variant={"h5"} align={"center"} sx={{width: "100%"}}>Create new lan</Typography>
-        </AccordionSummary>
-        <Divider/>
-        <AccordionDetails sx={{paddingTop: "1em"}}>
-          <LanEditor onSave={onSave} onCancel={onCancel} onDelete={onDelete} lan={null}/>
-        </AccordionDetails>
-      </Accordion>
-      <Divider/>
+    <Stack divider={<Divider orientation="horizontal" flexItem />} spacing={2} justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }}>
+      <Stack direction="row" width="100%" justifyContent="space-between">
+        <Typography variant="h4">Alle lan</Typography>
+        <Button onClick={() => setCreateVisible(true)} startIcon={<Add/>} variant="outlined" color="secondary">Nytt
+          lan</Button>
+      </Stack>
+      {isCreateVisible && <LanEditor onSave={onSave} onCancel={onCancel} onDelete={onDelete} lan={null}/>}
+      <Stack justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }} width="100%">
+        {lans.map(lan => (
+          <Accordion expanded={expanded == lan.id} onChange={handleLanPressed(lan.id)} sx={{ width: "100%" }}>
+            <AccordionSummary sx={{ width: "100%" }}>
+              <Typography>{lan.title}</Typography>
+            </AccordionSummary>
+            <Divider orientation="horizontal" flexItem/>
+            <AccordionDetails sx={{ paddingTop: "1em" }}>
+              <LanEditor lan={lan} onSave={onSave} onCancel={onCancel} onDelete={onDelete}/>
+            </AccordionDetails>
+          </Accordion>
+        ))}
+      </Stack>
     </Stack>
   )
 }
