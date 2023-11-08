@@ -29,13 +29,21 @@ interface DialogModel<T> {
   metadata: T;
 }
 
+var lmao = createSeats()
+
 export default function Seats() {
   const [ dialog, setDialog ] = useState<DialogModel<any> | null>(null)
   const { setAlert } = useAlertContext()
   const loggedInUser = useLoggedInUser()
-  const { seats, reloadSeats, reservedSeat, setSeatReservedBy } = useSeats()
+  const { seats, reloadSeats, reservedSeat, setSeatReservedBy, createNewSeat } = useSeats()
   const { makeReservation, deleteReservation, moveReservation } = useReservation()
 
+  useEffect(() => {
+    lmao.forEach(seat => {
+      // createNewSeat(seat)
+    })
+  }, []);
+  
   async function onSeatClick(seat: Seat) {
     if (!loggedInUser) {
       setAlert({
@@ -138,7 +146,6 @@ export default function Seats() {
           overflowX: "hidden",
         }}>
           <Box sx={{
-            marginTop: "1em",
             marginBottom: "auto",
             marginLeft: "auto",
             marginRight: "auto",

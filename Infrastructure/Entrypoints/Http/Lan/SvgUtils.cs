@@ -10,6 +10,6 @@ public static class SvgUtils
         var utf8 = new UTF8Encoding();
         var svgString = utf8.GetString(svgImage);
 
-        return Regex.IsMatch(svgString, @"^\n*(<[!?].+>\n*){0,2}\n*<svg.+\/svg>\n*$");
+        return Regex.IsMatch(svgString, @"^\n*(<[!?].+>\n*){0,2}\n*<svg.*>");
     }
 }

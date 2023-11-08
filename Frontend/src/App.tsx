@@ -4,13 +4,14 @@ import {Route, Routes} from "react-router-dom";
 import NotFound from './Pages/NotFound';
 import Seats from './Pages/Seats';
 import RedirectLogin from './Pages/RedirectLogin';
-import LanManagement from './Pages/LanManagement';
+import Admin from './Pages/Admin';
 import MainAppBar from './MainAppBar';
 import {AlertContext} from './AlertContext';
 import AlertModel from "./Models/Alert";
 import {Alert, AlertTitle, Snackbar} from "@mui/material";
 import {AppState, AppStateContext} from './AppStateContext';
 import Cookies from 'universal-cookie';
+import Container from "@mui/material/Container";
 
 const cookies = new Cookies();
 
@@ -65,12 +66,14 @@ export default function App() {
       <AppStateContext.Provider value={{ appState, setAppState }}>
         {alert && renderAlert(alert)}
         <MainAppBar/>
-        <Routes>
-          <Route path="/" element={<Seats/>}/>
-          <Route path="/redirect-login" element={<RedirectLogin/>}/>
-          <Route path="/lanmanagement" element={<LanManagement/>}/>
-          <Route path="/*" element={<NotFound/>}/>
-        </Routes>
+        <Container maxWidth="sm">
+          <Routes>
+            <Route path="/" element={<Seats/>}/>
+            <Route path="/redirect-login" element={<RedirectLogin/>}/>
+            <Route path="/admin" element={<Admin/>}/>
+            <Route path="/*" element={<NotFound/>}/>
+          </Routes>
+        </Container>
       </AppStateContext.Provider>
     </AlertContext.Provider>
   );

@@ -16,7 +16,7 @@ public class UserManager : IUserProvider
 
     public async Task<User?> GetById(UserId userId)
     {
-        var reader = documentRepository.CreateReader();
+        await using var reader = documentRepository.CreateReader();
         var userDocument = await reader.Get<UserDocument>(userId);
 
         return userDocument is null ? null : new User(new UserId(userDocument.Id), userDocument.Name, userDocument.Avatar);

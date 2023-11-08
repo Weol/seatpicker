@@ -73,7 +73,7 @@ public class DocumentTransaction : IDocumentTransaction
 
     public void Dispose()
     {
-        throw new NotImplementedException();
+        session.Dispose();
     }
 }
 

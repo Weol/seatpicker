@@ -16,5 +16,4 @@ public static class AdapterExtensions
     {
         configuration.GetSection("Database").Bind(options);
     }
-
 }

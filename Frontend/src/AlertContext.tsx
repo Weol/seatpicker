@@ -4,7 +4,7 @@ import User from "./Models/User";
 
 interface AlertContextObject {
   alert: Alert | null;
-  setAlert: (user: Alert | null) => void
+  setAlert: (alert: Alert | null) => void
 }
 
 var defaultValue: AlertContextObject = { alert: null, setAlert: (alert: Alert | null) => { } };

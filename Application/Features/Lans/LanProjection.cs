@@ -11,7 +11,7 @@ public class LanProjection : SingleStreamProjection<ProjectedLan>
         DeleteEvent<SeatArchived>();
     }
 
-    public ProjectedLan Create(LanCreated evt)
+    public ProjectedLan Create(IEvent<LanCreated> evt)
     {
         return new ProjectedLan(evt.Id, evt.Title, evt.Background);
     }

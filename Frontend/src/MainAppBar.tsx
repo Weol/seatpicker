@@ -31,8 +31,7 @@ function ResponsiveAppBar() {
 
   const getPages = () => {
     if (loggedInUser != null) {
-      if (loggedInUser.roles.includes(Role.ADMIN))
-      return [ "Admin" ]
+      if (loggedInUser.roles.includes(Role.ADMIN)) return [ "Admin" ]
     }
     return []
   }
@@ -46,6 +45,10 @@ function ResponsiveAppBar() {
 
   const handleCloseNavMenu = (page: string) => {
     setAnchorElNav(null);
+    
+    if (page == "Admin") {
+      navigate("/admin")
+    }
   };
 
   const handleCloseUserMenu = (setting: string) => {
@@ -69,7 +72,7 @@ function ResponsiveAppBar() {
             variant="h6"
             noWrap
             component="a"
-            href="#app-bar-with-responsive-menu"
+            href=""
             sx={{
               mr: 2,
               display: { xs: 'none', md: 'flex' },
