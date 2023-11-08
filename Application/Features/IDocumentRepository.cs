@@ -9,7 +9,7 @@ public interface IDocumentRepository
     public IDocumentReader CreateReader();
 }
 
-public interface IDocumentReader : IAsyncDisposable
+public interface IDocumentReader : IAsyncDisposable, IDisposable
 {
     public Task<TDocument?> Get<TDocument>(string id)
         where TDocument : IDocument;

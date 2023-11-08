@@ -7,7 +7,7 @@ public interface IAggregateRepository
     public IAggregateTransaction CreateTransaction();
 }
 
-public interface IAggregateTransaction : IAsyncDisposable
+public interface IAggregateTransaction : IAsyncDisposable, IDisposable
 {
     public void Update<TAggregate>(TAggregate aggregate)
         where TAggregate : AggregateBase;

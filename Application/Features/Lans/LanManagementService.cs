@@ -11,26 +11,30 @@ public interface ILanManagementService
 
 internal class LanManagementManagementService : ILanManagementService
 {
-    private readonly IAggregateTransaction transaction;
+    private readonly IAggregateRepository repository;
 
-    public LanManagementManagementService(IAggregateTransaction transaction)
+    public LanManagementManagementService(IAggregateRepository repository)
     {
-        this.transaction = transaction;
+        this.repository = repository;
     }
 
-    public Task<Guid> Create(string title, byte[] background, User initiator)
+    public async Task<Guid> Create(string title, byte[] background, User initiator)
     {
+        await using var transaction = repository.CreateTransaction();
         var id = Guid.NewGuid();
 
         var lan = new Lan(id, title, background, initiator);
 
         transaction.Create(lan);
+        transaction.Commit();
 
-        return Task.FromResult(id);
+        return id;
     }
 
     public async Task Update(Guid id, string? title, byte[]? background, User initiator)
     {
+        await using var transaction = repository.CreateTransaction();
+
         var lan = await transaction.Aggregate<Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
 
@@ -38,6 +42,7 @@ internal class LanManagementManagementService : ILanManagementService
         if (background is not null) lan.ChangeBackground(background, initiator);
 
         transaction.Update(lan);
+        transaction.Commit();
     }
 }
 

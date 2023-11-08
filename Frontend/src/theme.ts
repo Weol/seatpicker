@@ -10,6 +10,10 @@ const theme = createTheme({
     secondary: {
       main: '#f50057',
     },
+    background: {
+      default: '#353535',
+      paper: '#353535',
+    },
   },
 });
 

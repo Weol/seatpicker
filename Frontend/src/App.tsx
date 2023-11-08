@@ -17,8 +17,12 @@ const cookies = new Cookies();
 cookies.set("activeLan", "6789dd19-ef5a-4f33-b830-399cb8af80f3")
 
 export default function App() {
-  let [appState, setAppState] = useState<AppState>({ activeLan: cookies.get("activeLan"), loggedInUser: cookies.get("loggedInUser"), authenticationToken: cookies.get("authenticationToken") })
-  let [alert, setAlert] = useState<AlertModel | null>(null)
+  let [ appState, setAppState ] = useState<AppState>({
+    activeLan: cookies.get("activeLan"),
+    loggedInUser: cookies.get("loggedInUser"),
+    authenticationToken: cookies.get("authenticationToken")
+  })
+  let [ alert, setAlert ] = useState<AlertModel | null>(null)
 
   useEffect(() => {
     cookies.set("activeLan", appState.activeLan)
@@ -34,21 +38,31 @@ export default function App() {
     } else {
       cookies.set("authenticationToken", appState.authenticationToken)
     }
-  }, [appState])
+  }, [ appState ])
+
+  const renderWithDescription = (alert: AlertModel) => (
+    <Alert variant="filled" severity={alert.type == "loading" ? "info" : alert.type}>
+      <AlertTitle>{alert.title}</AlertTitle>
+      {alert.description}
+    </Alert>
+  )
+
+  const renderWithoutDescription = (alert: AlertModel) => (
+    <Alert variant="filled" severity={alert.type == "loading" ? "info" : alert.type}>
+      {alert.title}
+    </Alert>
+  )
 
   const renderAlert = (alert: AlertModel) => (
     <Snackbar anchorOrigin={{vertical: "top", horizontal: "center"}} autoHideDuration={3000} open={true}
               onClose={() => setAlert(null)}>
-      <Alert severity={alert.type}>
-        <AlertTitle>{alert.title}</AlertTitle>
-        {alert.description}
-      </Alert>
+      {alert.description !== 'undefined' ? renderWithoutDescription(alert) : renderWithDescription(alert)}
     </Snackbar>
   )
 
   return (
-    <AlertContext.Provider value={{alert: alert, setAlert: setAlert}}>
-      <AppStateContext.Provider value={{appState, setAppState}}>
+    <AlertContext.Provider value={{ alert: alert, setAlert: setAlert }}>
+      <AppStateContext.Provider value={{ appState, setAppState }}>
         {alert && renderAlert(alert)}
         <MainAppBar/>
         <Routes>

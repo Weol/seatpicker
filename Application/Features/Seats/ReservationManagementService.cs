@@ -14,19 +14,21 @@ public interface IReservationManagementService
 
 public class ReservationManagementService : IReservationManagementService
 {
-    private readonly IAggregateTransaction transaction;
+    private readonly IAggregateRepository repository;
     private readonly IDocumentReader reader;
     private readonly IUserProvider userProvider;
 
-    public ReservationManagementService(IAggregateTransaction transaction, IUserProvider userProvider, IDocumentReader reader)
+    public ReservationManagementService(IUserProvider userProvider, IDocumentReader reader, IAggregateRepository repository)
     {
-        this.transaction = transaction;
         this.userProvider = userProvider;
         this.reader = reader;
+        this.repository = repository;
     }
 
     public async Task Create(Guid lanId, Guid seatId, UserId userId, User reservedBy)
     {
+        await using var transaction = repository.CreateTransaction();
+
         var userToReserveFor = await userProvider.GetById(userId) ?? throw new UserNotFoundException { UserId = userId };
 
         var seatToReserve = await transaction.Aggregate<Seat>(seatId) ??
@@ -38,19 +40,23 @@ public class ReservationManagementService : IReservationManagementService
         seatToReserve.MakeReservationFor(userToReserveFor, numReservedSeatsByUser, reservedBy);
 
         transaction.Update(seatToReserve);
+        transaction.Commit();
     }
 
     public async Task Delete(Guid lanId, Guid seatId, User removedBy)
     {
+        await using var transaction = repository.CreateTransaction();
         var seat = await transaction.Aggregate<Seat>(seatId) ?? throw new SeatNotFoundException { SeatId = seatId };
 
         seat.RemoveReservationFor(removedBy);
 
         transaction.Update(seat);
+        transaction.Commit();
     }
 
     public async Task Move(Guid lanId, UserId userToMove, Guid fromSeatId, Guid toSeatId, User movedBy)
     {
+        await using var transaction = repository.CreateTransaction();
         var userToMoveFor = await userProvider.GetById(userToMove) ?? throw new UserNotFoundException { UserId = userToMove };
 
         var fromSeat = await transaction.Aggregate<Seat>(fromSeatId) ??
@@ -63,5 +69,6 @@ public class ReservationManagementService : IReservationManagementService
 
         transaction.Update(fromSeat);
         transaction.Update(toSeat);
+        transaction.Commit();
     }
 }

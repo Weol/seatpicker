@@ -71,4 +71,9 @@ public class AggregateTransaction : IAggregateTransaction
     {
         return session.DisposeAsync();
     }
+
+    public void Dispose()
+    {
+        session.Dispose();
+    }
 }

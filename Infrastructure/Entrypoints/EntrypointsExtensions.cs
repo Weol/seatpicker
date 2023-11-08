@@ -27,8 +27,6 @@ public static class EntrypointsExtensions
 
     public static WebApplication UseEntrypoints(this WebApplication app)
     {
-        app.UseMiddleware<RequestScopedAggregateTransactionMiddleware>();
-
         app.UseHttpsRedirection();
         app.UseRouting();
         app.MapControllers();

@@ -108,4 +108,9 @@ public class DocumentReader : IDocumentReader
     {
         return session.DisposeAsync();
     }
+
+    public void Dispose()
+    {
+        session.Dispose();
+    }
 }

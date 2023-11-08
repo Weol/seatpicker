@@ -40,14 +40,12 @@ export default function Seats() {
     if (!loggedInUser) {
       setAlert({
         type: "warning",
-        title: "Du må være logget inn for å reservere et sete",
-        description: ""
+        title: "Du må være logget inn for å reservere et sete"
       })
     } else if (seat.reservedBy && seat.reservedBy.id !== loggedInUser.id) {
       setAlert({
         type: "warning",
         title: "Plass " + seat.title + " er opptatt",
-        description: ""
       })
     } else if (seat.reservedBy && seat.reservedBy.id === loggedInUser.id) {
       setDialog({
@@ -87,7 +85,6 @@ export default function Seats() {
       setAlert({
         type: "success",
         title: "Du har reservert sete " + seat.title,
-        description: ""
       })
     }
   }

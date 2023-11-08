@@ -16,9 +16,7 @@ internal static class DatabaseExtensions
         services.AddValidatedOptions(configureAction);
 
         services.AddSingleton<IAggregateRepository, AggregateRepository>()
-            .AddScoped(CreateAggregateTransaction)
             .AddSingleton<IDocumentRepository, DocumentRepository>()
-            .AddScoped(CreateDocumentTransaction)
             .AddScoped(CreateDocumentReader);
 
         services.AddMarten(
@@ -39,18 +37,6 @@ internal static class DatabaseExtensions
             });
 
         return services;
-    }
-
-    private static IAggregateTransaction CreateAggregateTransaction(IServiceProvider provider)
-    {
-        var repository = provider.GetRequiredService<IAggregateRepository>();
-        return repository.CreateTransaction();
-    }
-
-    private static IDocumentTransaction CreateDocumentTransaction(IServiceProvider provider)
-    {
-        var repository = provider.GetRequiredService<IDocumentRepository>();
-        return repository.CreateTransaction();
     }
 
     private static IDocumentReader CreateDocumentReader(IServiceProvider provider)

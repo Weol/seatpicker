@@ -14,17 +14,18 @@ public interface IReservationService
 
 public class ReservationService : IReservationService
 {
-    private readonly IAggregateTransaction transaction;
+    private readonly IAggregateRepository repository;
     private readonly IDocumentReader reader;
 
-    public ReservationService(IAggregateTransaction transaction, IDocumentReader reader)
+    public ReservationService(IDocumentReader reader, IAggregateRepository repository)
     {
-        this.transaction = transaction;
         this.reader = reader;
+        this.repository = repository;
     }
 
     public async Task Create(Guid lanId, Guid seatId, User user)
     {
+        await using var transaction = repository.CreateTransaction();
         var seatToReserve = await transaction.Aggregate<Seat>(seatId) ??
                             throw new SeatNotFoundException { SeatId = seatId };
 
@@ -34,19 +35,23 @@ public class ReservationService : IReservationService
         seatToReserve.MakeReservation(user, numReservedSeatsByUser);
 
         transaction.Update(seatToReserve);
+        transaction.Commit();
     }
 
     public async Task Remove(Guid lanId, Guid seatId, User user)
     {
+        await using var transaction = repository.CreateTransaction();
         var seat = await transaction.Aggregate<Seat>(seatId) ?? throw new SeatNotFoundException { SeatId = seatId };
 
         seat.RemoveReservation(user);
 
         transaction.Update(seat);
+        transaction.Commit();
     }
 
     public async Task Move(Guid lanId, Guid fromSeatId, Guid toSeatId, User user)
     {
+        await using var transaction = repository.CreateTransaction();
         var fromSeat = await transaction.Aggregate<Seat>(fromSeatId) ??
                        throw new SeatNotFoundException { SeatId = fromSeatId };
 
@@ -57,5 +62,6 @@ public class ReservationService : IReservationService
 
         transaction.Update(fromSeat);
         transaction.Update(toSeat);
+        transaction.Commit();
     }
 }
