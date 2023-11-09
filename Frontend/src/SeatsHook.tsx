@@ -38,13 +38,5 @@ export default function useSeats() {
     await apiRequest("POST", `lan/${appState.activeLan}/seat`, {title: seat.title, bounds: seat.bounds})
   }
 
-  const setSeatReservedBy = (seat: Seat, user: User | null) => {
-    let newSeats = [...seats]
-    newSeats.forEach(a => {
-      if (a.id == seat.id) seat.reservedBy = user
-    })
-    setSeats(newSeats)
-  }
-
-  return {seats, reservedSeat, reloadSeats, createNewSeat, setSeatReservedBy}
+  return {seats, reservedSeat, reloadSeats, createNewSeat }
 }

@@ -26,7 +26,7 @@ import Button from "@mui/material/Button";
 
 const cookies = new Cookies();
 
-cookies.set("activeLan", "6789dd19-ef5a-4f33-b830-399cb8af80f3")
+cookies.set("activeLan", "46d77e33-3209-4a0b-b210-5697fb6ca263")
 
 export default function App() {
   let [appState, setAppState] = useState<AppState>({

@@ -11,8 +11,13 @@ import ContentPaste from '@mui/icons-material/ContentPaste';
 import Cloud from '@mui/icons-material/Cloud';
 import Seat from "../Models/Seat";
 import {Add, Clear} from "@mui/icons-material";
+import Menu, {MenuProps} from "@mui/material/Menu";
 
-export function AdminSeatMenu(seat: Seat) {
+interface SeatMenuProps {
+  seat: Seat
+}
+
+export function SeatMenu(props: SeatMenuProps & MenuProps) {
   const addReservation = () => {
     return (
       <MenuItem>
@@ -69,16 +74,14 @@ export function AdminSeatMenu(seat: Seat) {
   }
 
   return (
-    <Paper sx={{ width: 320, maxWidth: '100%' }}>
-      <MenuList>
-        <Divider/>
-        <MenuItem>
-          <ListItemIcon>
-            <Cloud fontSize="small"/>
-          </ListItemIcon>
-          <ListItemText>Reserver</ListItemText>
-        </MenuItem>
-      </MenuList>
-    </Paper>
+    <Menu sx={{width: 320, maxWidth: '100%', padding: 0}} {...props}>
+      <Paper>
+        <MenuList dense>
+          <MenuItem>
+            <ListItemText>Re  sserver</ListItemText>
+          </MenuItem>
+        </MenuList>
+      </Paper>
+    </Menu>
   );
 }

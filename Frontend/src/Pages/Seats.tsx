@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {
   Box,
   Stack
@@ -14,24 +14,17 @@ import useReservation from "../ReservationHook"
 import useLoggedInUser from "../LoggedInUserHook";
 import { useDialogs } from '../DialogContext';
 
-
-
-var lmao = createSeats()
-
 export default function Seats() {
-  const { alertWarning, alertInfo } = useAlerts()
+  const { alertWarning, alertInfo, alertLoading } = useAlerts()
   const { showDialog } = useDialogs()
   const loggedInUser = useLoggedInUser()
-  const { seats, reloadSeats, reservedSeat, setSeatReservedBy, createNewSeat } = useSeats()
+  const { seats, reloadSeats, reservedSeat, createNewSeat } = useSeats()
   const { makeReservation, deleteReservation, moveReservation } = useReservation()
-
-  useEffect(() => {
-    lmao.forEach(seat => {
-      // createNewSeat(seat)
-    })
-  }, []);
+  const [ freeze, setFreeze ] = useState<boolean>(false)
 
   async function onSeatClick(seat: Seat) {
+    if (freeze) return
+    
     if (!loggedInUser) {
       alertWarning("Du må være logget inn for å reservere et sete")
     } else if (seat.reservedBy && seat.reservedBy.id !== loggedInUser.id) {
@@ -44,11 +37,15 @@ export default function Seats() {
         positiveText: "Ja",
         negativeText: "Nei",
         positiveCallback: async (seat) => {
-          deleteReservation(seat).then(() => {
-            setSeatReservedBy(seat, null)
-            reloadSeats()
+          setFreeze(true)
+          await alertLoading("Sletter reservasjon...", async () => {
+            await deleteReservation(seat)
+            await reloadSeats()
           })
-        }
+
+          setFreeze(false)
+          alertInfo("Du har slettet din reservasjon")
+         }
       })
     } else if (reservedSeat) {
       showDialog({
@@ -57,20 +54,26 @@ export default function Seats() {
         metadata: seat,
         positiveText: "Ja",
         negativeText: "Nei",
-        positiveCallback: async (seat) => {
-          moveReservation(reservedSeat, seat).then(() => {
-            setSeatReservedBy(reservedSeat, null)
-            setSeatReservedBy(seat, loggedInUser)
-            reloadSeats()
+        positiveCallback: async (toSeat) => {
+          setFreeze(true)
+          let fromSeat = reservedSeat
+          await alertLoading("Flytter reservasjon...", async () => {
+            await moveReservation(fromSeat, toSeat)
+            await reloadSeats()
           })
+
+          setFreeze(false)
+          alertInfo("Du har flyttet din reservasjon fra sete " + fromSeat.title + " til sete " + toSeat.title)
         }
       })
     } else {
-      makeReservation(seat)
-      .then((response) => {
-        setSeatReservedBy(seat, loggedInUser)
-        reloadSeats()
+      setFreeze(true)
+      await alertLoading("Reserverer...", async () => {
+        await makeReservation(seat)
+        await reloadSeats()
       })
+
+      setFreeze(false)
       alertInfo("Du har reservert sete " + seat.title)
     }
   }

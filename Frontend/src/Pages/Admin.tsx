@@ -217,10 +217,13 @@ export default function Admin() {
             </AccordionSummary>
             <Divider orientation="horizontal" flexItem/>
             <AccordionDetails sx={{ paddingTop: "1em" }}>
-              <LanEditor lan={lan} backgroundButtonText={"Change background"} saveButtonText={"Save changes"}
-                         cancelButtonIcon={<DeleteIcon/>}
-                         onSave={(title, background) => onUpdate(lan, title, background)}
-                         onCancel={() => onDelete(lan)}/>
+              <Stack width="100%" spacing={2} justifyContent="space-between" alignItems="center">
+                <Typography color="textSecondary" variant="subtitle2">{lan.id}</Typography>
+                <LanEditor lan={lan} backgroundButtonText={"Change background"} saveButtonText={"Save changes"}
+                           cancelButtonIcon={<DeleteIcon/>}
+                           onSave={(title, background) => onUpdate(lan, title, background)}
+                           onCancel={() => onDelete(lan)}/>
+              </Stack>
             </AccordionDetails>
           </Accordion>
         ))}
