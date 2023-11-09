@@ -14,6 +14,7 @@ public class GetEndpoint
         [FromServices] IDocumentReader documentReader)
     {
         var lans = documentReader.Query<ProjectedLan>()
+            .OrderByDescending(lan => lan.CreatedAt) 
             .AsEnumerable()
             .Select(lan => new Response(lan.Id, lan.Title, lan.Background, lan.CreatedAt, lan.UpdatedAt));
 

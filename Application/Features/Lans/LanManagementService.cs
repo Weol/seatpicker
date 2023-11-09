@@ -54,6 +54,8 @@ internal class LanManagementManagementService : ILanManagementService
         var lan = await transaction.Aggregate<Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
 
+        lan.Archive(initiator);
+        
         transaction.Update(lan);
         transaction.Archive(lan);
 

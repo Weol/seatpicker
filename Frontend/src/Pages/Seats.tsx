@@ -1,39 +1,26 @@
 import * as React from 'react';
-import {useEffect, useState} from 'react';
+import {useEffect} from 'react';
 import {
   Box,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   Stack
 } from '@mui/material';
 import background from "../Media/background.svg"
 import {useAlerts} from "../AlertContext";
-import Button from "@mui/material/Button";
 import SeatComponent from '../Components/SeatComponent';
 import Seat from '../Models/Seat';
 import createSeats from "../StaticSeats";
 import useSeats from "../SeatsHook"
 import useReservation from "../ReservationHook"
 import useLoggedInUser from "../LoggedInUserHook";
+import { useDialogs } from '../DialogContext';
 
-interface DialogModel<T> {
-  title: string;
-  description: string;
-  positiveText: string;
-  negativeText: string;
-  positiveCallback?: (data: T) => void;
-  negativeCallback?: (data: T) => void;
-  metadata: T;
-}
+
 
 var lmao = createSeats()
 
 export default function Seats() {
-  const [ dialog, setDialog ] = useState<DialogModel<any> | null>(null)
-  const { setAlert } = useAlerts()
+  const { alertWarning, alertInfo } = useAlerts()
+  const { showDialog } = useDialogs()
   const loggedInUser = useLoggedInUser()
   const { seats, reloadSeats, reservedSeat, setSeatReservedBy, createNewSeat } = useSeats()
   const { makeReservation, deleteReservation, moveReservation } = useReservation()
@@ -46,17 +33,11 @@ export default function Seats() {
 
   async function onSeatClick(seat: Seat) {
     if (!loggedInUser) {
-      setAlert({
-        type: "warning",
-        title: "Du må være logget inn for å reservere et sete"
-      })
+      alertWarning("Du må være logget inn for å reservere et sete")
     } else if (seat.reservedBy && seat.reservedBy.id !== loggedInUser.id) {
-      setAlert({
-        type: "warning",
-        title: "Plass " + seat.title + " er opptatt",
-      })
+      alertWarning("Plass " + seat.title + " er opptatt");
     } else if (seat.reservedBy && seat.reservedBy.id === loggedInUser.id) {
-      setDialog({
+      showDialog({
         title: "Fjern reservasjon",
         description: "Sikker på at du vil gi fra deg denne plassen?",
         metadata: seat,
@@ -70,7 +51,7 @@ export default function Seats() {
         }
       })
     } else if (reservedSeat) {
-      setDialog({
+      showDialog({
         title: "Endre sete",
         description: "Sikker på at du vil endre sete fra " + reservedSeat.title + " til " + seat.title + "?",
         metadata: seat,
@@ -90,41 +71,9 @@ export default function Seats() {
         setSeatReservedBy(seat, loggedInUser)
         reloadSeats()
       })
-      setAlert({
-        type: "success",
-        title: "Du har reservert sete " + seat.title,
-      })
+      alertInfo("Du har reservert sete " + seat.title)
     }
   }
-
-  const renderDialog = () =>
-    (dialog &&
-        <Dialog
-            open={true}
-            onClose={() => setDialog(null)}
-            aria-labelledby="alert-dialog-title"
-            aria-describedby="alert-dialog-description"
-        >
-            <DialogTitle id="alert-dialog-title">
-              {dialog.title}
-            </DialogTitle>
-            <DialogContent>
-                <DialogContentText id="alert-dialog-description">
-                  {dialog.description}
-                </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={() => {
-                  setDialog(null)
-                  if (dialog.negativeCallback) dialog.negativeCallback(dialog.metadata);
-                }}>{dialog.negativeText}</Button>
-                <Button onClick={() => {
-                  setDialog(null)
-                  if (dialog.positiveCallback) dialog.positiveCallback(dialog.metadata);
-                }}>{dialog.positiveText}</Button>
-            </DialogActions>
-        </Dialog>
-    )
 
   const getSeatColor = (seat: Seat): string => {
     if (seat.reservedBy && loggedInUser && seat.reservedBy.id == loggedInUser.id) {
@@ -159,7 +108,6 @@ export default function Seats() {
           </Box>
         </Box>
       </Box>
-      {renderDialog()}
     </Stack>
   )
 }
