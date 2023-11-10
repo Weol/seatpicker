@@ -21,12 +21,12 @@ public class CreateEndpoint
     {
         var user = await loggedInUserAccessor.Get();
 
-        var lanId = await lanManagementService.Create(request.Title, request.Background, user);
+        var lanId = await lanManagementService.Create(request.Title, request.GuildId, request.Background, user);
 
         return new OkObjectResult(new Response(lanId));
     }
 
-    public record Request(string Title, byte[] Background);
+    public record Request(string GuildId, string Title, byte[] Background);
 
     public record Response(Guid Id);
 
@@ -35,6 +35,9 @@ public class CreateEndpoint
         public Validator()
         {
             RuleFor(x => x.Title)
+                .NotEmpty();
+            
+            RuleFor(x => x.GuildId)
                 .NotEmpty();
 
             RuleFor(x => x.Background)

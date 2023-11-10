@@ -35,6 +35,7 @@ public class ReservationManagementService : IReservationManagementService
                             throw new SeatNotFoundException { SeatId = seatId };
 
         var numReservedSeatsByUser = reader.Query<ProjectedSeat>()
+            .Where(seat => seat.LanId == lanId)
             .Count(seat => seat.ReservedBy != null && seat.ReservedBy.Value == userId);
 
         seatToReserve.MakeReservationFor(userToReserveFor, numReservedSeatsByUser, reservedBy);

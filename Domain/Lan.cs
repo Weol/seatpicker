@@ -10,11 +10,11 @@ namespace Seatpicker.Domain;
 #pragma warning disable CS8618 // Disable warning about uninitialized properties
 public class Lan : AggregateBase
 {
-    public Lan(Guid lanId, string title, byte[] background, User initiator)
+    public Lan(Guid lanId, string title, byte[] background, string guildId, User initiator)
     {
         if (title.Length <= 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
 
-        var evt = new LanCreated(lanId, title, background, initiator.Id);
+        var evt = new LanCreated(lanId, title, background, guildId, initiator.Id);
 
         Raise(evt);
         Apply(evt);
@@ -28,7 +28,11 @@ public class Lan : AggregateBase
 
     public string Title { get; private set; }
 
+    public string GuildId { get; private set; }
+
     public byte[] Background { get; private set; }
+
+    public bool Active { get; private set; }
 
     public override string ToString() => $"Lan {Title} ({Id})";
 
@@ -46,6 +50,14 @@ public class Lan : AggregateBase
         Apply(evt);
     }
 
+    public void SetActive(bool active, User initiator)
+    {
+        var evt = new LanActiveChanged(active, initiator.Id);
+        Raise(evt);
+        Apply(evt);
+    }
+
+
     public void Archive(User initiator)
     {
         var evt = new LanArchived(initiator.Id);
@@ -58,6 +70,8 @@ public class Lan : AggregateBase
         Id = evt.Id;
         Title = evt.Title;
         Background = evt.Background;
+        GuildId = evt.GuildId;
+        Active = false;
     }
 
     public void Apply(LanTitleChanged evt)
@@ -69,6 +83,11 @@ public class Lan : AggregateBase
     {
         Background = evt.Background;
     }
+    
+    public void Apply(LanActiveChanged evt)
+    {
+        Active = evt.Active;
+    }
 
     public void Apply(LanArchived evt)
     {
@@ -78,10 +97,12 @@ public class Lan : AggregateBase
 /**
  * Events
  */
-public record LanCreated(Guid Id, string Title, byte[] Background, UserId Initiator);
+public record LanCreated(Guid Id, string Title, byte[] Background, string GuildId, UserId Initiator);
 
 public record LanTitleChanged(string Title, UserId Initiator);
 
 public record LanBackgroundChanged(byte[] Background, UserId Initiator);
+
+public record LanActiveChanged(bool Active, UserId Initiator);
 
 public record LanArchived(UserId Initiator);

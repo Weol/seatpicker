@@ -26,12 +26,12 @@ public class UpdateEndpoint
 
         var user = await loggedInUserAccessor.Get();
 
-        await lanManagementService.Update(request.Id, request.Title, request.Background, user);
+        await lanManagementService.Update(request.Id, request.Active, request.Title, request.Background, user);
 
         return new OkResult();
     }
 
-    public record Request(Guid Id, string? Title, byte[]? Background);
+    public record Request(Guid Id, bool? Active, string? Title, byte[]? Background);
 
     public class Validator : AbstractValidator<Request>
     {

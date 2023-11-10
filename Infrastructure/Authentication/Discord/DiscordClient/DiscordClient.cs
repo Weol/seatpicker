@@ -87,6 +87,16 @@ public class DiscordClient
         return await DeserializeContent<GuildMember>(response);
     }
 
+    public async Task<IEnumerable<Guild>> GetGuilds()
+    {
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "users/@me/guilds");
+
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
+
+        var response = await httpClient.SendAsync(requestMessage);
+        return await DeserializeContent<IEnumerable<Guild>>(response);
+    }
+
     private async Task<TModel> DeserializeContent<TModel>(HttpResponseMessage response)
     {
         var body = await response.Content.ReadAsStringAsync();
@@ -144,6 +154,15 @@ public class GuildRole
     [JsonPropertyName("name")] public string Name { get; set; } = null!;
 
     [JsonPropertyName("color")] public int Color { get; set; }
+
+    [JsonPropertyName("icon")] public string? Icon { get; set; } = null!;
+}
+
+public class Guild
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = null!;
+
+    [JsonPropertyName("name")] public string Name { get; set; } = null!;
 
     [JsonPropertyName("icon")] public string? Icon { get; set; } = null!;
 }

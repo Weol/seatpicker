@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {
   Accordion, AccordionDetails,
-  AccordionSummary, CircularProgress,
+  AccordionSummary, Box, CircularProgress, List, ListItem,
   Stack, styled, SvgIconTypeMap, TextField
 } from '@mui/material';
 import UploadIcon from '@mui/icons-material/Upload';
@@ -20,6 +20,11 @@ import {Add, SvgIconComponent} from '@mui/icons-material';
 import useLans from "../LanHook";
 import DelayedCircularProgress from '../Components/DelayedCircularProgress';
 import {useDialogs} from "../DialogContext";
+import useGuilds from "../GuildHook";
+import ListItemText from "@mui/material/ListItemText";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import Avatar from "@mui/material/Avatar";
+import Config from "../config";
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -148,6 +153,7 @@ export default function Admin() {
   let {alertSuccess, alertLoading} = useAlerts()
   let {showDialog} = useDialogs()
   let {lans, isLoading, reloadLans, createNewLan, deleteLan, updateLan} = useLans()
+  let {guilds} = useGuilds()
   let [isCreateVisible, setCreateVisible] = useState<boolean>(false);
   let [expanded, setExpanded] = useState<string | false>(false);
 
@@ -193,11 +199,24 @@ export default function Admin() {
       },
       metadata: lan,
     })
-  } 
+  }
 
   return (
     <Stack divider={<Divider orientation="horizontal" flexItem/>} spacing={2} justifyContent="center"
            alignItems="center" sx={{marginTop: "1em"}}>
+
+      <Typography variant="h4">Alle servere</Typography>
+      <List component={"nav"}>
+        {guilds.map(guild => (
+          <ListItem>
+            <ListItemIcon>
+              <Avatar alt={guild.name} src={Config.DiscordGuildIconBaseUrl + guild.id + "/" + guild.icon ?? "0"}/>
+            </ListItemIcon>
+            <ListItemText primary={guild.name}/>
+          </ListItem>
+        ))}
+      </List>
+
       <Stack direction="row" width="100%" justifyContent="space-between">
         <Typography variant="h4">Alle lan</Typography>
         <Button onClick={() => setCreateVisible(true)} startIcon={<Add/>} variant="outlined" color="secondary">Nytt
@@ -212,11 +231,15 @@ export default function Admin() {
             <AccordionSummary sx={{width: "100%"}}>
               <Stack width="100%" direction="row" spacing={2} justifyContent="space-between">
                 <Typography>{lan.title}</Typography>
-                <Typography color="textSecondary" variant="subtitle2">{lan.createdAt.toLocaleDateString("no", {day: "2-digit", month: "2-digit", year: "numeric"})}</Typography>
+                <Typography color="textSecondary" variant="subtitle2">{lan.createdAt.toLocaleDateString("no", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric"
+                })}</Typography>
               </Stack>
             </AccordionSummary>
             <Divider orientation="horizontal" flexItem/>
-            <AccordionDetails sx={{ paddingTop: "1em" }}>
+            <AccordionDetails sx={{paddingTop: "1em"}}>
               <Stack width="100%" spacing={2} justifyContent="space-between" alignItems="center">
                 <Typography color="textSecondary" variant="subtitle2">{lan.id}</Typography>
                 <LanEditor lan={lan} backgroundButtonText={"Change background"} saveButtonText={"Save changes"}

@@ -23,7 +23,7 @@ export default function RedirectLogin() {
   const welcome = () => {
     return (<Stack spacing={1} justifyContent="center" alignItems="center">
       <Typography variant="h5" component="h1" gutterBottom>
-        {"Velkommen, " + user?.nick}
+        {"Velkommen, " + user?.name}
       </Typography>
 
       <img src={Config.DiscordAvatarBaseUrl + user?.id + "/" + user?.avatar} style={{maxWidth: '150px', borderRadius: '50%'}}/>

@@ -1,28 +1,29 @@
 ﻿import * as React from 'react';
 import Divider from '@mui/material/Divider';
-import Paper from '@mui/material/Paper';
-import MenuList from '@mui/material/MenuList';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
-import ContentCut from '@mui/icons-material/ContentCut';
-import ContentCopy from '@mui/icons-material/ContentCopy';
-import ContentPaste from '@mui/icons-material/ContentPaste';
-import Cloud from '@mui/icons-material/Cloud';
 import Seat from "../Models/Seat";
-import {Add, Clear} from "@mui/icons-material";
 import Menu, {MenuProps} from "@mui/material/Menu";
+import DiscordAvatar from "./DiscordAvatar";
+import useLoggedInUser from "../LoggedInUserHook";
+import {Role} from "../Models/Role";
+import {Add, ContentCut, Delete, Shuffle} from "@mui/icons-material";
+import Typography from "@mui/material/Typography";
+import {Stack} from "@mui/material";
 
 interface SeatMenuProps {
   seat: Seat
 }
 
 export function SeatMenu(props: SeatMenuProps & MenuProps) {
+  const loggedInUser = useLoggedInUser()
+
   const addReservation = () => {
     return (
       <MenuItem>
         <ListItemIcon>
-          <ContentCut fontSize="small"/>
+          <Add fontSize="small"/>
         </ListItemIcon>
         <ListItemText>Legg til reservasjon</ListItemText>
       </MenuItem>
@@ -33,9 +34,9 @@ export function SeatMenu(props: SeatMenuProps & MenuProps) {
     return (
       <MenuItem>
         <ListItemIcon>
-          <ContentCut fontSize="small"/>
+          <Shuffle fontSize="small"/>
         </ListItemIcon>
-        <ListItemText>Legg til reservasjon</ListItemText>
+        <ListItemText>Flytt reservasjon</ListItemText>
       </MenuItem>
     )
   }
@@ -44,44 +45,59 @@ export function SeatMenu(props: SeatMenuProps & MenuProps) {
     return (
       <MenuItem>
         <ListItemIcon>
-          <ContentCut fontSize="small"/>
+          <Delete fontSize="small"/>
         </ListItemIcon>
-        <ListItemText>Legg til reservasjon</ListItemText>
+        <ListItemText>Fjern reservasjon</ListItemText>
       </MenuItem>
     )
   }
 
   const makeReservation = () => {
-    return (
-      <MenuItem>
-        <ListItemIcon>
-          <ContentCut fontSize="small"/>
-        </ListItemIcon>
-        <ListItemText>Legg til reservasjon</ListItemText>
-      </MenuItem>
-    )
+    if (props.seat.reservedBy != null) {
+      return (
+        <MenuItem>
+          <ListItemIcon>
+            <DiscordAvatar sx={{height: "1em", width: "1em"}} user={props.seat.reservedBy}/>
+          </ListItemIcon>
+          <ListItemText>Reservert av {props.seat.reservedBy.name}</ListItemText>
+        </MenuItem>
+      )
+    } else {
+      return (
+        <MenuItem>
+          Reserver
+        </MenuItem>
+      )
+    }
   }
 
-  const deleteSeat = () => {
-    return (
-      <MenuItem>
-        <ListItemIcon>
-          <ContentCut fontSize="small"/>
-        </ListItemIcon>
-        <ListItemText>Legg til reservasjon</ListItemText>
-      </MenuItem>
-    )
+  const header = (text: string) => (
+    <Divider flexItem sx={{width: "100%"}} orientation={"horizontal"}>
+      <Typography color="text.secondary" variant={"subtitle2"}>{text}</Typography>
+    </Divider>
+  )
+
+  const getMenuComponents = () => {
+    if (loggedInUser == null) {
+      if (props.seat.reservedBy != null) {
+        return [makeReservation()]
+      }
+    } else {
+      if (loggedInUser.roles.includes(Role.OPERATOR)) {
+        if (props.seat.reservedBy != null) {
+          return [header("ADMIN"), deleteReservation(), moveReservation(), header("USER"), makeReservation()]
+        } else {
+          return [header("ADMIN"), addReservation(), header("USER"), makeReservation()]
+        }
+      } else {
+        return [makeReservation()]
+      }
+    }
   }
 
   return (
-    <Menu sx={{width: 320, maxWidth: '100%', padding: 0}} {...props}>
-      <Paper>
-        <MenuList dense>
-          <MenuItem>
-            <ListItemText>Re  sserver</ListItemText>
-          </MenuItem>
-        </MenuList>
-      </Paper>
+    <Menu sx={{width: 320, maxWidth: '100%'}} {...props}>
+      {getMenuComponents()}
     </Menu>
   );
 }

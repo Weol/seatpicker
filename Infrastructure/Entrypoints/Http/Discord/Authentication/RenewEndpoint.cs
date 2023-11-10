@@ -2,24 +2,24 @@
 using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Authentication.Discord;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Http.DiscordAuthentication;
+namespace Seatpicker.Infrastructure.Entrypoints.Http.Discord.Authentication;
 
 [ApiController]
-[Route("api/authentication/discord")]
-[Area("discordAuthentication")]
-public class LoginEndpoint
+[Route("api/discord/guild")]
+[Area("discord")]
+public class RenewEndpoint
 {
-    [HttpPost("login")]
-    public async Task<ActionResult<Response>> Login(
+    [HttpPost("renew")]
+    public async Task<ActionResult<Response>> Renew(
         [FromServices] DiscordAuthenticationService discordAuthenticationService,
         [FromBody] Request request)
     {
-        var (token, expiresAt, refreshToken, discordUser, roles) = await discordAuthenticationService.Login(request.Token, request.GuildId);
+        var (token, expiresAt, refreshToken, discordUser, roles) = await discordAuthenticationService.Renew(request.RefreshToken, request.GuildId);
 
         return new OkObjectResult(new Response(token, expiresAt, refreshToken, discordUser.Id, discordUser.Username, discordUser.Avatar, roles));
     }
 
-    public record Request(string Token, string? GuildId);
+    public record Request(string RefreshToken, string? GuildId);
 
     public record Response(string Token, DateTimeOffset ExpiresAt, string RefreshToken, string UserId, string Nick, string? Avatar, ICollection<Role> Roles);
 }

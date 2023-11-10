@@ -25,7 +25,7 @@ export default function useAuthentication() {
         } else {
           const user = {
             id: authenticationToken.userId,
-            nick: authenticationToken.nick,
+            name: authenticationToken.nick,
             avatar: authenticationToken.avatar,
             roles: authenticationToken.roles
           };
@@ -47,7 +47,7 @@ export default function useAuthentication() {
         } else {
           const user = {
             id: authenticationToken.userId,
-            nick: authenticationToken.nick,
+            name: authenticationToken.nick,
             avatar: authenticationToken.avatar,
             roles: authenticationToken.roles
           };

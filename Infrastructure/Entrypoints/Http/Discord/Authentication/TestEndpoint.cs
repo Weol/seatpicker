@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Infrastructure.Entrypoints.Utils;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Http.DiscordAuthentication;
+namespace Seatpicker.Infrastructure.Entrypoints.Http.Discord.Authentication;
 
 [ApiController]
-[Route("api/authentication/discord")]
-[Area("discordAuthentication")]
+[Route("api/discord/authentication")]
+[Area("discord")]
 [Authorize]
 public class TestEndpoint
 {

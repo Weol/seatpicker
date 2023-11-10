@@ -1,12 +1,12 @@
-﻿import * as React from 'react';
+﻿import {Avatar, AvatarProps} from '@mui/material';
+import * as React from 'react';
 import Config from "../config";
 import User from '../Models/User';
 
 interface DiscordAvatarProperties {
   user: User;
-  style: React.CSSProperties;
 }
 
-export default function DiscordAvatar(props: DiscordAvatarProperties) {
-  return (<img src={Config.DiscordAvatarBaseUrl + props.user.id + "/" + props.user.avatar} style={props.style}/>)
+export default function DiscordAvatar(props: DiscordAvatarProperties & AvatarProps) {
+  return (<Avatar alt={props.user.name} src={Config.DiscordAvatarBaseUrl + props.user.id + "/" + props.user.avatar} {...props}/>)
 }

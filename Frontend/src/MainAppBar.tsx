@@ -19,6 +19,7 @@ import discord from "./Media/discord.svg"
 import RedirectToDiscordLogin from "./Adapters/RedirectToDiscordLogin";
 import useAuthentication from "./AuthenticationHook";
 import {Role} from "./Models/Role";
+import DiscordAvatar from "./Components/DiscordAvatar";
 
 const settings = [ 'Logg ut' ];
 
@@ -59,11 +60,7 @@ function ResponsiveAppBar() {
       navigate("/")
     }
   };
-
-  const getAvatarUrl = (user: User | null) => {
-    return Config.DiscordAvatarBaseUrl + user?.id + "/" + user?.avatar
-  }
-
+  
   return (
     <AppBar position="static">
       <Container maxWidth="xl">
@@ -156,7 +153,7 @@ function ResponsiveAppBar() {
             <Box sx={{ flexGrow: 0 }}>
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt={loggedInUser?.nick} src={getAvatarUrl(loggedInUser)}/>
+                  <DiscordAvatar user={loggedInUser}/>
                 </IconButton>
               </Tooltip>
               <Menu

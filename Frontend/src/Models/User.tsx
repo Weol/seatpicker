@@ -2,7 +2,7 @@ import {Role} from "./Role";
 
 export default interface User {
   id: string;
-  nick: string;
+  name: string;
   avatar: string | null;
   roles: Role[]
 }

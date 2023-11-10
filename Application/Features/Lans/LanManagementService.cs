@@ -4,9 +4,9 @@ namespace Seatpicker.Application.Features.Lans;
 
 public interface ILanManagementService
 {
-    public Task<Guid> Create(string title, byte[] background, User initiator);
+    public Task<Guid> Create(string title, string guildId, byte[] background, User initiator);
 
-    public Task Update(Guid id, string? title, byte[]? background, User initiator);
+    public Task Update(Guid id, bool? active, string? title, byte[]? background, User initiator);
 
     public Task Delete(Guid id, User initiator);
 }
@@ -14,18 +14,20 @@ public interface ILanManagementService
 internal class LanManagementManagementService : ILanManagementService
 {
     private readonly IAggregateRepository repository;
+    private readonly IDocumentReader reader;
 
-    public LanManagementManagementService(IAggregateRepository repository)
+    public LanManagementManagementService(IAggregateRepository repository, IDocumentReader reader)
     {
         this.repository = repository;
+        this.reader = reader;
     }
 
-    public async Task<Guid> Create(string title, byte[] background, User initiator)
+    public async Task<Guid> Create(string title, string guildId, byte[] background, User initiator)
     {
         await using var transaction = repository.CreateTransaction();
         var id = Guid.NewGuid();
 
-        var lan = new Lan(id, title, background, initiator);
+        var lan = new Lan(id, title, background, guildId, initiator);
 
         transaction.Create(lan);
         transaction.Commit();
@@ -33,7 +35,7 @@ internal class LanManagementManagementService : ILanManagementService
         return id;
     }
 
-    public async Task Update(Guid id, string? title, byte[]? background, User initiator)
+    public async Task Update(Guid id, bool? active, string? title, byte[]? background, User initiator)
     {
         await using var transaction = repository.CreateTransaction();
 
@@ -42,6 +44,7 @@ internal class LanManagementManagementService : ILanManagementService
 
         if (title is not null) lan.ChangeTitle(title, initiator);
         if (background is not null) lan.ChangeBackground(background, initiator);
+        if (active is not null) await SetActive(transaction, lan, active.Value, initiator);
 
         transaction.Update(lan);
         transaction.Commit();
@@ -55,11 +58,33 @@ internal class LanManagementManagementService : ILanManagementService
         if (lan is null) throw new LanNotFoundException { LanId = id };
 
         lan.Archive(initiator);
-        
+
         transaction.Update(lan);
         transaction.Archive(lan);
 
         transaction.Commit();
+    }
+
+    private async Task SetActive(IAggregateTransaction transaction, Lan lan, bool active, User initiator)
+    {
+        var activeLans = reader.Query<ProjectedLan>()
+            .Where(x => x.GuildId == lan.GuildId)
+            .Where(x => x.Active)
+            .Select(x => x.Id)
+            .ToArray();
+
+        foreach (var activeLanId in activeLans)
+        {
+            var activeLan = await transaction.Aggregate<Lan>(activeLanId)
+                ?? throw new LanNotFoundException { LanId = activeLanId };
+            
+            activeLan.SetActive(false, initiator);
+            transaction.Update(activeLan);
+        }
+
+        lan.SetActive(active, initiator);
+
+        transaction.Update(lan);
     }
 }
 
