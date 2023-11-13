@@ -1,13 +1,13 @@
 type Config = {
-  ApiBaseUrl: string,
-  DiscordAvatarBaseUrl: string,
+  ApiBaseUrl: string
+  DiscordAvatarBaseUrl: string
   DiscordGuildIconBaseUrl: string
 }
 
-let config: Config = {
+const config: Config = {
   ApiBaseUrl: "http://localhost:3000/api/",
   DiscordAvatarBaseUrl: "https://cdn.discordapp.com/avatars/",
-  DiscordGuildIconBaseUrl: "https://cdn.discordapp.com/icons/"
+  DiscordGuildIconBaseUrl: "https://cdn.discordapp.com/icons/",
 }
 
-export default config;
+export default config

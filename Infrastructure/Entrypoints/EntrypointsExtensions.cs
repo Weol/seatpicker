@@ -22,7 +22,11 @@ public static class EntrypointsExtensions
     private static IServiceCollection AddFluentValidation(this IServiceCollection services)
     {
         return services
-            .AddValidatorsFromAssemblyContaining<Program>();
+            .AddValidatorsFromAssemblyContaining<Program>()
+            .Configure<ApiBehaviorOptions>(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;
+            });
     }
 
     public static WebApplication UseEntrypoints(this WebApplication app)

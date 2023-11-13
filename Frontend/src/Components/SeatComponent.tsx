@@ -1,47 +1,53 @@
-﻿import * as React from 'react';
-import {Box, Container, Stack, styled, Tooltip, tooltipClasses, TooltipProps, Typography} from '@mui/material';
-import DiscordAvatar from './DiscordAvatar';
-import User from "../Models/User";
-import Seat from "../Models/Seat";
-import {SeatMenu} from "./SeatMenu";
+﻿import * as React from "react"
+import { Box, Container, Typography } from "@mui/material"
+import { SeatMenu } from "./SeatMenu"
+import { Seat } from "../Adapters/SeatsAdapter"
 
 interface SeatProperties {
-  seat: Seat;
-  color: string;
-  onClick: (seat: Seat) => void;
+  seat: Seat
+  color: string
+  onClick: (seat: Seat) => void
 }
 
 export default function SeatComponent(props: SeatProperties) {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-  
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
+
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+    setAnchorEl(event.currentTarget)
     // props.onClick(props.seat)
-  };
-  
+  }
+
   const handleClose = () => {
-    setAnchorEl(null);
-  };
-  
+    setAnchorEl(null)
+  }
+
   const renderSeat = (seat: Seat) => {
     return (
       <Container>
-        <Box key={seat.id} onClick={handleClick} sx={{
-          position: "absolute",
-          minWidth: "0",
-          top: seat.bounds.y + "%",
-          left: seat.bounds.x + "%",
-          width: seat.bounds.width + "%",
-          height: seat.bounds.height + "%",
-          border: "1px #ffffff61 solid",
-          backgroundColor: props.color,
-          cursor: "pointer",
-          textAlign: "center",
-          display: "flex"
-        }}>
-          <Typography variant="subtitle1" gutterBottom component="p"
-                      sx={{lineHeight: 1, fontSize: "0.9rem", margin: "auto"}}>
+        <Box
+          key={seat.id}
+          onClick={handleClick}
+          sx={{
+            position: "absolute",
+            minWidth: "0",
+            top: seat.bounds.y + "%",
+            left: seat.bounds.x + "%",
+            width: seat.bounds.width + "%",
+            height: seat.bounds.height + "%",
+            border: "1px #ffffff61 solid",
+            backgroundColor: props.color,
+            cursor: "pointer",
+            textAlign: "center",
+            display: "flex",
+          }}
+        >
+          <Typography
+            variant="subtitle1"
+            gutterBottom
+            component="p"
+            sx={{ lineHeight: 1, fontSize: "0.9rem", margin: "auto" }}
+          >
             {seat.title}
           </Typography>
         </Box>
@@ -53,12 +59,12 @@ export default function SeatComponent(props: SeatProperties) {
           anchorEl={anchorEl}
           onClose={handleClose}
           anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'center',
+            vertical: "top",
+            horizontal: "center",
           }}
           transformOrigin={{
-            vertical: 'bottom',
-            horizontal: 'center',
+            vertical: "bottom",
+            horizontal: "center",
           }}
         />
       </Container>

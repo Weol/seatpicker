@@ -1,10 +1,10 @@
-import * as React from 'react';
-import Typography from '@mui/material/Typography';
-import {Stack} from '@mui/material';
+import * as React from "react";
+import Typography from "@mui/material/Typography";
+import { Stack } from "@mui/material";
 
 export default function NotFound() {
   return (
-    <Stack sx={{my: 4, alignItems: 'center'}}>
+    <Stack sx={{ my: 4, alignItems: "center" }}>
       <Typography variant="h1" component="h1" gutterBottom>
         404
       </Typography>
@@ -14,4 +14,3 @@ export default function NotFound() {
     </Stack>
   );
 }
-
