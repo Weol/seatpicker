@@ -12,7 +12,9 @@ internal static class DiscordHttpClientExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        services.AddHttpClient<DiscordClient>((provider, client) =>
+        services
+            .AddMemoryCache()
+            .AddHttpClient<DiscordClient>((provider, client) =>
         {
             var options = provider.GetRequiredService<IOptions<DiscordClientOptions>>();
             var baseUrl = options.Value.Uri;
@@ -22,7 +24,6 @@ internal static class DiscordHttpClientExtensions
 
             client.BaseAddress = options.Value.Uri;
             client.DefaultRequestHeaders.Add("User-Agent", userAgent);
-
         });
 
         return services;

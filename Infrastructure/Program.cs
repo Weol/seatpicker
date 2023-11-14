@@ -1,3 +1,4 @@
+using Marten;
 using Oakton;
 using Seatpicker.Application;
 using Seatpicker.Infrastructure;

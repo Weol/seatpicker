@@ -2,7 +2,10 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
 namespace Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 
@@ -12,17 +15,20 @@ public class DiscordClient
     private readonly JsonSerializerOptions jsonSerializerOptions;
     private readonly DiscordClientOptions options;
     private readonly ILogger<DiscordClient> logger;
+    private readonly IMemoryCache memoryCache;
 
     public DiscordClient(
         HttpClient httpClient,
         IOptions<DiscordClientOptions> options,
         JsonSerializerOptions jsonSerializerOptions,
-        ILogger<DiscordClient> logger)
+        ILogger<DiscordClient> logger,
+        IMemoryCache memoryCache)
     {
         this.httpClient = httpClient;
         this.jsonSerializerOptions = jsonSerializerOptions;
         this.options = options.Value;
         this.logger = logger;
+        this.memoryCache = memoryCache;
     }
 
     public async Task<DiscordAccessToken> GetAccessToken(string discordToken)
@@ -67,16 +73,6 @@ public class DiscordClient
         return await DeserializeContent<DiscordUser>(response);
     }
 
-    public async Task<IEnumerable<GuildRole>> GetGuildRoles(string guildId)
-    {
-        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"guilds/{guildId}/roles");
-
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
-
-        var response = await httpClient.SendAsync(requestMessage);
-        return await DeserializeContent<GuildRole[]>(response);
-    }
-
     public async Task<GuildMember> GetGuildMember(string guildId, string memberId)
     {
         using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"guilds/{guildId}/members/{memberId}");
@@ -87,19 +83,56 @@ public class DiscordClient
         return await DeserializeContent<GuildMember>(response);
     }
 
+    public async Task<IEnumerable<GuildRole>> GetGuildRoles(string guildId)
+    {
+        return await MakeCachedRequest($"guild_roles_{guildId}", async () =>
+        {
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"guilds/{guildId}/roles");
+
+            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
+
+            var response = await httpClient.SendAsync(requestMessage);
+            return await DeserializeContent<GuildRole[]>(response);
+        });
+    }
+
     public async Task<IEnumerable<Guild>> GetGuilds()
     {
-        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "users/@me/guilds");
+        return await MakeCachedRequest("get_bot_guilds", async () =>
+        {
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "users/@me/guilds");
 
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
+            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
 
-        var response = await httpClient.SendAsync(requestMessage);
-        return await DeserializeContent<IEnumerable<Guild>>(response);
+            var response = await httpClient.SendAsync(requestMessage);
+            return await DeserializeContent<IEnumerable<Guild>>(response);
+        });
+    }
+
+    private async Task<TResponse> MakeCachedRequest<TResponse>(string cacheKey,
+        Func<Task<TResponse>> requestFunc)
+        where TResponse : notnull
+    {
+        
+        if (memoryCache.TryGetValue(cacheKey, out TResponse? cachedResponse))
+        {
+            if (cachedResponse is not null)
+            {
+                logger.LogInformation("Returning cached payload for cache key {CacheKey}", cacheKey);
+                return cachedResponse;
+            }
+        }
+
+        var response = await requestFunc();
+        memoryCache.Set(cacheKey, response, TimeSpan.FromMinutes(5));
+        return response;
     }
 
     private async Task<TModel> DeserializeContent<TModel>(HttpResponseMessage response)
     {
         var body = await response.Content.ReadAsStringAsync();
+        LogRateLimit(response);
+
         if (response.IsSuccessStatusCode)
         {
             logger.LogInformation(
@@ -108,7 +141,7 @@ public class DiscordClient
                 body);
 
             return JsonSerializer.Deserialize<TModel>(body, jsonSerializerOptions) ??
-                   throw new NullReferenceException($"Could not deserialize Discord response to {nameof(TModel)}");
+                throw new NullReferenceException($"Could not deserialize Discord response to {nameof(TModel)}");
         }
 
         logger.LogError(
@@ -116,12 +149,39 @@ public class DiscordClient
             new { response.StatusCode, Body = body, });
 
         throw new DiscordException($"Non-successful response code from Discord {response.StatusCode}")
-            {
-                StatusCode = response.StatusCode,
-                Body = body,
-            };
+        {
+            StatusCode = response.StatusCode,
+            Body = body,
+        };
+    }
+
+    private void LogRateLimit(HttpResponseMessage response)
+    {
+        response.Headers.TryGetValues("X-RateLimit-Limit", out var limit);
+        response.Headers.TryGetValues("X-RateLimit-Remaining", out var remaining);
+        response.Headers.TryGetValues("X-RateLimit-Reset", out var reset);
+        response.Headers.TryGetValues("X-RateLimit-Reset-After", out var resetAfter);
+        response.Headers.TryGetValues("X-RateLimit-Bucket", out var bucket);
+        response.Headers.TryGetValues("X-RateLimit-Global", out var global);
+        response.Headers.TryGetValues("X-RateLimit-Scope", out var scope);
+
+        var rateLimit = new DiscordRateLimit(
+            limit?.FirstOrDefault(),
+            remaining?.FirstOrDefault(),
+            reset?.FirstOrDefault(),
+            resetAfter?.FirstOrDefault(),
+            bucket?.FirstOrDefault(),
+            global?.FirstOrDefault(),
+            scope?.FirstOrDefault()
+        );
+
+        logger.LogInformation("Discord rate limit: {@RateLimit}", rateLimit);
     }
 }
+
+public record DiscordRateLimit(string? Limit, string? Remaining, string? Reset, string? ResetAfter, string? Bucket,
+    string? Global,
+    string? Scope);
 
 public class DiscordAccessToken
 {

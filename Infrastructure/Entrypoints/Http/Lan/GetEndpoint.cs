@@ -14,9 +14,9 @@ public class GetEndpoint
         [FromServices] IDocumentReader documentReader)
     {
         var lans = documentReader.Query<ProjectedLan>()
-            .OrderByDescending(lan => lan.CreatedAt) 
+            .OrderByDescending(lan => lan.CreatedAt)
             .AsEnumerable()
-            .Select(lan => new Response(lan.Id, lan.Title, lan.Background, lan.CreatedAt, lan.UpdatedAt));
+            .Select(lan => new Response(lan.Id, lan.GuildId, lan.Active, lan.Title, lan.Background, lan.CreatedAt, lan.UpdatedAt));
 
         return Task.FromResult<ActionResult<Response[]>>(new OkObjectResult(lans));
     }
@@ -31,8 +31,10 @@ public class GetEndpoint
 
         if (lan is null) return Task.FromResult<ActionResult<Response>>(new NotFoundResult());
 
-        return Task.FromResult<ActionResult<Response>>(new OkObjectResult(new Response(lan.Id, lan.Title, lan.Background, lan.CreatedAt, lan.UpdatedAt)));
+        return Task.FromResult<ActionResult<Response>>(
+            new OkObjectResult(new Response(lan.Id, lan.GuildId, lan.Active, lan.Title, lan.Background, lan.CreatedAt, lan.UpdatedAt)));
     }
 
-    public record Response(Guid Id, string Title, byte[] Background, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt);
+    public record Response(Guid Id, string GuildId, bool Active, string Title, byte[] Background,
+        DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt);
 }

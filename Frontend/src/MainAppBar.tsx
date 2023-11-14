@@ -11,7 +11,7 @@ import Button from "@mui/material/Button"
 import Tooltip from "@mui/material/Tooltip"
 import MenuItem from "@mui/material/MenuItem"
 import { useNavigate } from "react-router-dom"
-import DiscordAvatar from "./Components/DiscordAvatar"
+import { DiscordUserAvatar } from "./Components/DiscordAvatar"
 import {
   Role,
   useAuthenticationAdapter,
@@ -161,7 +161,7 @@ function ResponsiveAppBar() {
             <Box sx={{ flexGrow: 0 }}>
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <DiscordAvatar user={loggedInUser} />
+                  <DiscordUserAvatar user={loggedInUser} />
                 </IconButton>
               </Tooltip>
               <Menu

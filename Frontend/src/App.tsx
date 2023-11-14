@@ -4,7 +4,7 @@ import { Route, Routes } from "react-router-dom"
 import NotFound from "./Pages/NotFound"
 import Seats from "./Pages/Seats"
 import RedirectLogin from "./Pages/RedirectLogin"
-import Admin from "./Pages/Admin/Admin"
+import Admin from "./Pages/Admin"
 import MainAppBar from "./MainAppBar"
 import { AlertContext, AlertModel } from "./Contexts/AlertContext"
 import Cookies from "universal-cookie"
@@ -130,7 +130,7 @@ export default function App() {
           <Button
             onClick={() => {
               dialog.resolve({
-                positive: true,
+                positive: false,
                 metadata: dialog.metadata,
               })
 
@@ -142,7 +142,7 @@ export default function App() {
           <Button
             onClick={() => {
               dialog.resolve({
-                positive: false,
+                positive: true,
                 metadata: dialog.metadata,
               })
 

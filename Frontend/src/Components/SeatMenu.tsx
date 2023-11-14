@@ -3,7 +3,7 @@ import MenuItem from "@mui/material/MenuItem"
 import ListItemText from "@mui/material/ListItemText"
 import ListItemIcon from "@mui/material/ListItemIcon"
 import Menu, { MenuProps } from "@mui/material/Menu"
-import DiscordAvatar from "./DiscordAvatar"
+import { DiscordUserAvatar } from "./DiscordAvatar"
 import { Add, Delete, Shuffle } from "@mui/icons-material"
 import Typography from "@mui/material/Typography"
 import {
@@ -57,7 +57,7 @@ export function SeatMenu(props: SeatMenuProps & MenuProps) {
       return (
         <MenuItem>
           <ListItemIcon>
-            <DiscordAvatar
+            <DiscordUserAvatar
               sx={{ height: "1em", width: "1em" }}
               user={props.seat.reservedBy}
             />

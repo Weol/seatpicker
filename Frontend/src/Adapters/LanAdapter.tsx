@@ -4,6 +4,7 @@ import useApiRequests from "./ApiRequestHook"
 export interface Lan {
   id: string
   guildId: string
+  active: boolean
   title: string
   background: string
   createdAt: Date
@@ -19,10 +20,11 @@ export function useLanAdapter() {
   }, [])
 
   const createNewLan = async (
+    guildId: string,
     title: string,
     background: string
   ): Promise<Response> => {
-    return await apiRequest("POST", "lan", { title, background })
+    return await apiRequest("POST", "lan", { guildId, title, background })
   }
 
   const updateLan = async (
@@ -46,7 +48,7 @@ export function useLanAdapter() {
 
     lans.forEach((lan) => {
       lan.createdAt = new Date(lan.createdAt)
-      lan.updatedAt = new Date(lan.createdAt)
+      lan.updatedAt = new Date(lan.updatedAt)
     })
 
     setLans(lans)
