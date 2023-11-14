@@ -21,7 +21,7 @@ public class UpdateEndpoint
     {
         if (id != request.Id) throw new BadRequestException("Route parameter id does not match the request model id");
 
-        if (request.Title is null && request.Background is null)
+        if (request.Active is null && request.Title is null && request.Background is null)
             throw new BadRequestException("At least one property besides id must be set");
 
         var user = await loggedInUserAccessor.Get();

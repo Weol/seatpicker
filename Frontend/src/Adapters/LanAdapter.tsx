@@ -43,6 +43,13 @@ export function useLanAdapter() {
     return await apiRequest("DELETE", `lan/${lan.id}`)
   }
 
+  const setLanActive = async (lan: Lan, active: boolean): Promise<Response> => {
+    return await apiRequest("PUT", `lan/${lan.id}`, {
+      id: lan.id,
+      active,
+    })
+  }
+
   const reloadLans = async (): Promise<Lan[]> => {
     const lans = await apiRequestJson<Lan[]>("GET", "lan")
 
@@ -55,5 +62,5 @@ export function useLanAdapter() {
     return lans
   }
 
-  return { createNewLan, lans, reloadLans, deleteLan, updateLan }
+  return { createNewLan, lans, reloadLans, deleteLan, updateLan, setLanActive }
 }

@@ -4,12 +4,14 @@ import {
   AccordionDetails,
   AccordionSummary,
   Box,
+  FormControlLabel,
   IconButton,
   List,
   ListItemButton,
   Modal,
   Paper,
   Stack,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -43,7 +45,7 @@ import DiscordGuildAvatar from "../Components/DiscordAvatar"
 export default function Admin() {
   const { alertSuccess, alertLoading, alertError } = useAlerts()
   const { showDialog } = useDialogs()
-  const { lans, reloadLans, createNewLan, deleteLan, updateLan } =
+  const { lans, reloadLans, createNewLan, deleteLan, updateLan, setLanActive } =
     useLanAdapter()
   const { guilds } = useGuildAdapter()
   const [selectedGuild, setSelectedGuild] = useState<Guild | null>(null)
@@ -77,6 +79,14 @@ export default function Admin() {
       await reloadLans()
     })
     alertSuccess(title + " har blitt oppdatert")
+  }
+
+  const onActiveChange = async (lan: Lan, active: boolean) => {
+    await alertLoading(`Setter ${lan.title} til aktiv`, async () => {
+      await setLanActive(lan, active)
+      await reloadLans()
+    })
+    alertSuccess(lan.title + " har blitt aktic")
   }
 
   const onDeleteLan = async (lan: Lan) => {
@@ -125,6 +135,7 @@ export default function Admin() {
           lans={selectedGuildLans}
           onDeleteLan={onDeleteLan}
           onUpdateLan={onUpdateLan}
+          onActiveChange={onActiveChange}
         />
       ) : selectedGuild ? (
         <NoLanExists />
@@ -205,6 +216,7 @@ function LanListHeader(props: {
 function LanList(props: {
   lans: Lan[]
   onDeleteLan: (lan: Lan) => Promise<void>
+  onActiveChange: (lan: Lan, active: boolean) => Promise<void>
   onUpdateLan: (
     lan: Lan,
     newTitle: string,
@@ -230,7 +242,9 @@ function LanList(props: {
         <Accordion
           key={lan.id}
           expanded={selectedLan?.id == lan.id}
-          onChange={() => setSelectedLan(lan)}
+          onChange={() =>
+            setSelectedLan(lan.id == selectedLan?.id ? null : lan)
+          }
           sx={{ width: "100%" }}
         >
           <AccordionSummary sx={{ width: "100%" }}>
@@ -241,12 +255,8 @@ function LanList(props: {
               justifyContent="space-between"
             >
               <Typography>{lan.title}</Typography>
-              <Typography color="textSecondary" variant="subtitle2">
-                {lan.createdAt.toLocaleDateString("no", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                })}
+              <Typography color={"textSecondary"} variant="subtitle2">
+                {lan.active ? "Aktiv" : "Inaktiv"}
               </Typography>
             </Stack>
           </AccordionSummary>
@@ -269,6 +279,7 @@ function LanList(props: {
                   lan={lan}
                   onDelete={props.onDeleteLan}
                   onEdit={() => setViewEdit(true)}
+                  onActiveChange={props.onActiveChange}
                 />
               )}
             </Stack>
@@ -283,6 +294,7 @@ function LanDetails(props: {
   lan: Lan
   onDelete: (lan: Lan) => Promise<void>
   onEdit: (lan: Lan) => void
+  onActiveChange: (lan: Lan, active: boolean) => Promise<void>
 }) {
   const [viewBackground, setViewBackground] = useState<boolean>(false)
   const formatTime = (date: Date) => {
@@ -337,6 +349,18 @@ function LanDetails(props: {
         <IconButton onClick={() => props.onEdit(props.lan)}>
           <Edit />
         </IconButton>
+        <FormControlLabel
+          control={
+            <Switch
+              onChange={() =>
+                props.onActiveChange(props.lan, !props.lan.active)
+              }
+              checked={props.lan.active}
+              color="success"
+            />
+          }
+          label="Aktiv"
+        />
         <IconButton color="error" onClick={() => props.onDelete(props.lan)}>
           <DeleteIcon />
         </IconButton>
