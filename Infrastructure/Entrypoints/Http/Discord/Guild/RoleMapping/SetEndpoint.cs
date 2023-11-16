@@ -22,11 +22,4 @@ public class SetEndpoint
     }
 
     public record Request(IEnumerable<(string RoleId, Role Role)> RoleMappings);
-
-    public record Response(
-        string DiscordRoleId,
-        string DiscordRoleName,
-        int DiscordRoleColor,
-        string? DiscordRoleIcon,
-        Role? Role);
 }

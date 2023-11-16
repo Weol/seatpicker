@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react"
 import useApiRequests from "./ApiRequestHook"
+import { useApi } from "../Contexts/ApiContext"
+import { useEffect, useRef } from "react"
 
 export interface Lan {
   id: string
@@ -12,14 +13,18 @@ export interface Lan {
 }
 
 export function useLanAdapter() {
-  const { apiRequest, apiRequestJson } = useApiRequests()
-  const [lans, setLans] = useState<Lan[] | null>(null)
+  const { apiRequest } = useApiRequests()
+  const { lans, setLans } = useApi()
+  const isFetching = useRef<boolean>(false)
 
   useEffect(() => {
-    reloadLans()
+    if (lans == null && !isFetching.current) {
+      isFetching.current = true
+      reloadLans()
+    }
   }, [])
 
-  const createNewLan = async (
+  const createLan = async (
     guildId: string,
     title: string,
     background: string
@@ -43,7 +48,7 @@ export function useLanAdapter() {
     return await apiRequest("DELETE", `lan/${lan.id}`)
   }
 
-  const setLanActive = async (lan: Lan, active: boolean): Promise<Response> => {
+  const setActiveLan = async (lan: Lan, active: boolean): Promise<Response> => {
     return await apiRequest("PUT", `lan/${lan.id}`, {
       id: lan.id,
       active,
@@ -51,16 +56,24 @@ export function useLanAdapter() {
   }
 
   const reloadLans = async (): Promise<Lan[]> => {
-    const lans = await apiRequestJson<Lan[]>("GET", "lan")
+    const response = await apiRequest("GET", "lan")
 
+    const lans = (await response.json()) as Lan[]
     lans.forEach((lan) => {
       lan.createdAt = new Date(lan.createdAt)
       lan.updatedAt = new Date(lan.updatedAt)
     })
 
     setLans(lans)
+    isFetching.current = false
     return lans
   }
 
-  return { createNewLan, lans, reloadLans, deleteLan, updateLan, setLanActive }
+  return {
+    createLan,
+    lans,
+    deleteLan,
+    updateLan,
+    setActiveLan,
+  }
 }

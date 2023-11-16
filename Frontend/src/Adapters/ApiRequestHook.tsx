@@ -12,18 +12,6 @@ export default function useApiRequests() {
   const { getToken } = useAuthenticationAdapter()
   const { alertError } = useAlerts()
 
-  async function apiRequestJson<T>(
-    method: "POST" | "DELETE" | "GET" | "PUT",
-    path: string,
-    body?: unknown
-  ): Promise<T> {
-    const response = await apiRequest(method, path, body)
-    return await response.json().then<T>((json) => {
-      console.log(json)
-      return json as T
-    })
-  }
-
   async function apiRequest(
     method: "POST" | "DELETE" | "GET" | "PUT",
     path: string,
@@ -48,7 +36,22 @@ export default function useApiRequests() {
     }
 
     const response = await fetch(Config.ApiBaseUrl + path, requestInit)
-    console.log(response)
+
+    const responseClone = response.clone()
+    const text = await responseClone.text()
+    let logBody
+    try {
+      logBody = JSON.parse(text)
+    } catch {
+      logBody = text
+    }
+
+    console.log({
+      method: method,
+      status: response.status,
+      url: response.url,
+      body: logBody,
+    })
 
     if (response.status > 299) {
       if (response.status > 499) {
@@ -72,5 +75,5 @@ export default function useApiRequests() {
     return response
   }
 
-  return { apiRequest, apiRequestJson }
+  return { apiRequest }
 }

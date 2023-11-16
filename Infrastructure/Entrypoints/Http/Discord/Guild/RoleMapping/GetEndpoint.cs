@@ -23,9 +23,9 @@ public class GetEndpoint
     }
 
     public record Response(
-        string DiscordRoleId,
-        string DiscordRoleName,
-        int DiscordRoleColor,
-        string? DiscordRoleIcon,
+        string RoleId,
+        string RoleName,
+        int RoleColor,
+        string? RoleIcon,
         Role? Role);
 }

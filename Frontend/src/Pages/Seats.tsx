@@ -15,7 +15,7 @@ export default function Seats() {
   const { alertWarning, alertInfo, alertLoading } = useAlerts()
   const { showDialog } = useDialogs()
   const { loggedInUser } = useAuthenticationAdapter()
-  const { seats, reloadSeats, reservedSeat } = useSeats()
+  const { seats, reservedSeat } = useSeats()
   const { makeReservation, deleteReservation, moveReservation } =
     useReservationAdapter()
   const [freeze, setFreeze] = useState<boolean>(false)
@@ -46,7 +46,6 @@ export default function Seats() {
         setFreeze(true)
         await alertLoading("Sletter reservasjon...", async () => {
           await deleteReservation(result.metadata)
-          await reloadSeats()
         })
 
         setFreeze(false)
@@ -68,7 +67,6 @@ export default function Seats() {
         const fromSeat = reservedSeat
         await alertLoading("Flytter reservasjon...", async () => {
           await moveReservation(fromSeat, toSeat)
-          await reloadSeats()
         })
 
         setFreeze(false)
@@ -80,7 +78,6 @@ export default function Seats() {
       setFreeze(true)
       await alertLoading("Reserverer...", async () => {
         await makeReservation(seat)
-        await reloadSeats()
       })
 
       setFreeze(false)

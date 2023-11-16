@@ -1,143 +1,53 @@
-import * as React from "react"
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  FormControlLabel,
-  IconButton,
-  List,
-  ListItemButton,
-  Modal,
-  Paper,
-  Stack,
-  Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
-  TextField,
-  styled,
-} from "@mui/material"
-import CancelIcon from "@mui/icons-material/Cancel"
-import DeleteIcon from "@mui/icons-material/Delete"
-import Button from "@mui/material/Button"
-import Typography from "@mui/material/Typography"
-import Divider from "@mui/material/Divider"
-import { useEffect, useState } from "react"
-import { useAlerts } from "../Contexts/AlertContext"
+import styled from "@emotion/styled"
 import {
   Add,
   Edit,
-  Fullscreen,
-  FullscreenExit,
   Upload,
+  Fullscreen,
+  Delete,
+  Cancel,
 } from "@mui/icons-material"
-import DelayedCircularProgress from "../Components/DelayedCircularProgress"
-import { useDialogs } from "../Contexts/DialogContext"
-import ListItemText from "@mui/material/ListItemText"
-import ListItemIcon from "@mui/material/ListItemIcon"
-import { Lan, useLanAdapter } from "../Adapters/LanAdapter"
-import { Guild, useGuildAdapter } from "../Adapters/GuildAdapter"
-import DiscordGuildAvatar from "../Components/DiscordAvatar"
+import {
+  Stack,
+  Typography,
+  Button,
+  Accordion,
+  AccordionSummary,
+  Divider,
+  AccordionDetails,
+  TableContainer,
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
+  IconButton,
+  FormControlLabel,
+  Switch,
+  Modal,
+  Box,
+  TextField,
+} from "@mui/material"
+import { useState } from "react"
+import { Guild } from "../../Adapters/GuildAdapter"
+import { useLanAdapter, Lan } from "../../Adapters/LanAdapter"
+import DelayedCircularProgress from "../../Components/DelayedCircularProgress"
+import { useAlerts } from "../../Contexts/AlertContext"
+import { useOutletContext } from "react-router-dom"
+import { AdminRouteContext } from "./Admin"
 
-export default function Admin() {
-  const { alertSuccess, alertLoading, alertError } = useAlerts()
-  const { showDialog } = useDialogs()
-  const { lans, reloadLans, createNewLan, deleteLan, updateLan, setLanActive } =
-    useLanAdapter()
-  const { guilds } = useGuildAdapter()
-  const [selectedGuild, setSelectedGuild] = useState<Guild | null>(null)
-
+export default function Lans() {
+  const { lans } = useLanAdapter()
+  const routeContext = useOutletContext<AdminRouteContext>()
+  const guild = routeContext.guild
   const selectedGuildLans =
-    lans && lans.filter((lan) => lan.guildId == selectedGuild?.id)
-
-  useEffect(() => {
-    setSelectedGuild(guilds?.length ? guilds[0] : null)
-  }, [guilds])
-
-  const onCreateLan = async (
-    guild: Guild,
-    title: string,
-    background: string
-  ) => {
-    if (selectedGuild == null) {
-      alertError("No guild is selected")
-    } else {
-      await alertLoading("Oppretter " + title, async () => {
-        await createNewLan(guild.id, title, background)
-        await reloadLans()
-      })
-      alertSuccess(title + " har blitt opprettet")
-    }
-  }
-
-  const onUpdateLan = async (lan: Lan, title: string, background: string) => {
-    await alertLoading("Oppdaterer " + title, async () => {
-      await updateLan(lan, title, background)
-      await reloadLans()
-    })
-    alertSuccess(title + " har blitt oppdatert")
-  }
-
-  const onActiveChange = async (lan: Lan, active: boolean) => {
-    await alertLoading(`Setter ${lan.title} til aktiv`, async () => {
-      await setLanActive(lan, active)
-      await reloadLans()
-    })
-    alertSuccess(lan.title + " har blitt aktic")
-  }
-
-  const onDeleteLan = async (lan: Lan) => {
-    const result = await showDialog<Lan>(
-      "Er du sikker?",
-      `Er du sikker på at du vil slette lanet "${lan.title}"? Denne operasjonen kan ikke angres.`,
-      lan,
-      "Ja",
-      "Nei"
-    )
-
-    if (result.positive) {
-      await alertLoading("Sletter " + result.metadata.title, async () => {
-        await deleteLan(lan)
-        await reloadLans()
-      })
-
-      alertSuccess(lan.title + " har blitt slettet")
-    }
-  }
+    lans && lans.filter((lan) => lan.guildId == guild.id)
 
   return (
-    <Stack
-      divider={<Divider orientation="horizontal" flexItem />}
-      spacing={2}
-      justifyContent="center"
-      alignItems="center"
-      sx={{ marginTop: "1em" }}
-    >
-      <Typography variant="h4">Alle servere</Typography>
-      {guilds && selectedGuild ? (
-        <GuildList
-          guilds={guilds}
-          selectedGuild={selectedGuild}
-          onGuildSelected={setSelectedGuild}
-        />
-      ) : (
-        <DelayedCircularProgress />
-      )}
-      {selectedGuild && (
-        <LanListHeader guild={selectedGuild} onCreateLan={onCreateLan} />
-      )}
-
+    <Stack width={"100%"}>
+      <LanListHeader guild={guild} />
       {selectedGuildLans?.length ? (
-        <LanList
-          lans={selectedGuildLans}
-          onDeleteLan={onDeleteLan}
-          onUpdateLan={onUpdateLan}
-          onActiveChange={onActiveChange}
-        />
-      ) : selectedGuild ? (
+        <LanList lans={selectedGuildLans} />
+      ) : selectedGuildLans ? (
         <NoLanExists />
       ) : (
         <DelayedCircularProgress />
@@ -146,47 +56,20 @@ export default function Admin() {
   )
 }
 
-function GuildList(props: {
-  guilds: Guild[]
-  selectedGuild: Guild
-  onGuildSelected: (guild: Guild) => void
-}) {
-  return (
-    <Paper sx={{ width: "100%" }}>
-      <List component={"nav"}>
-        {props.guilds.map((guild) => (
-          <ListItemButton
-            onClick={() => props.onGuildSelected(guild)}
-            selected={props.selectedGuild.id == guild.id}
-            key={guild.id}
-          >
-            <ListItemIcon>
-              <DiscordGuildAvatar guild={guild} />
-            </ListItemIcon>
-            <ListItemText primary={guild.name} />
-          </ListItemButton>
-        ))}
-      </List>
-    </Paper>
-  )
-}
-
-function LanListHeader(props: {
-  guild: Guild
-  onCreateLan: (
-    guild: Guild,
-    title: string,
-    background: string
-  ) => Promise<void>
-}) {
+function LanListHeader(props: { guild: Guild }) {
+  const { alertSuccess, alertLoading } = useAlerts()
+  const { createLan } = useLanAdapter()
   const [createLanVisibility, setCreateVisibility] = useState<boolean>(false)
 
-  const handleCancelPressed = () => {
+  const handleCancelClicked = () => {
     setCreateVisibility(false)
   }
 
   const handleCreatePressed = async (title: string, background: string) => {
-    await props.onCreateLan(props.guild, title, background)
+    await alertLoading("Oppretter " + title, async () => {
+      await createLan(props.guild.id, title, background)
+    })
+    alertSuccess(title + " har blitt opprettet")
     setCreateVisibility(false)
   }
 
@@ -205,30 +88,31 @@ function LanListHeader(props: {
       </Stack>
       {createLanVisibility && (
         <LanEditor
-          onSave={(title, background) => handleCreatePressed(title, background)}
-          onCancel={handleCancelPressed}
+          onSaveClicked={(title, background) =>
+            handleCreatePressed(title, background)
+          }
+          onCancelClicked={handleCancelClicked}
         />
       )}
     </Stack>
   )
 }
 
-function LanList(props: {
-  lans: Lan[]
-  onDeleteLan: (lan: Lan) => Promise<void>
-  onActiveChange: (lan: Lan, active: boolean) => Promise<void>
-  onUpdateLan: (
-    lan: Lan,
-    newTitle: string,
-    newBackground: string
-  ) => Promise<void>
-}) {
+function LanList(props: { lans: Lan[] }) {
+  const { updateLan } = useLanAdapter()
   const [selectedLan, setSelectedLan] = useState<Lan | null>(null)
-  const [viewEdit, setViewEdit] = useState<boolean>(false)
+  const [viewEditor, setViewEditor] = useState<boolean>(false)
 
-  const onSave = async (lan: Lan, title: string, background: string) => {
-    await props.onUpdateLan(lan, title, background)
-    setViewEdit(false)
+  function handleEditClicked() {
+    setViewEditor(true)
+  }
+
+  function handleSaveClicked(lan: Lan, title: string, background: string) {
+    updateLan(lan, title, background)
+  }
+
+  function handleCancelClicked() {
+    setViewEditor(false)
   }
 
   return (
@@ -268,19 +152,16 @@ function LanList(props: {
               justifyContent="space-between"
               alignItems="center"
             >
-              {viewEdit ? (
+              {viewEditor ? (
                 <LanEditor
                   lan={lan}
-                  onSave={(title, background) => onSave(lan, title, background)}
-                  onCancel={() => setViewEdit(false)}
+                  onSaveClicked={(title, background) =>
+                    handleSaveClicked(lan, title, background)
+                  }
+                  onCancelClicked={handleCancelClicked}
                 />
               ) : (
-                <LanDetails
-                  lan={lan}
-                  onDelete={props.onDeleteLan}
-                  onEdit={() => setViewEdit(true)}
-                  onActiveChange={props.onActiveChange}
-                />
+                <LanDetails lan={lan} onEditClick={handleEditClicked} />
               )}
             </Stack>
           </AccordionDetails>
@@ -290,14 +171,11 @@ function LanList(props: {
   )
 }
 
-function LanDetails(props: {
-  lan: Lan
-  onDelete: (lan: Lan) => Promise<void>
-  onEdit: (lan: Lan) => void
-  onActiveChange: (lan: Lan, active: boolean) => Promise<void>
-}) {
+function LanDetails(props: { lan: Lan; onEditClick: (lan: Lan) => void }) {
+  const { deleteLan, setActiveLan } = useLanAdapter()
   const [viewBackground, setViewBackground] = useState<boolean>(false)
-  const formatTime = (date: Date) => {
+
+  function formatTime(date: Date) {
     return date.toLocaleTimeString("no", {
       day: "2-digit",
       month: "2-digit",
@@ -314,6 +192,19 @@ function LanDetails(props: {
     { label: "Opprettet", value: formatTime(props.lan.createdAt) },
     { label: "Oppdatert", value: formatTime(props.lan.updatedAt) },
   ]
+
+  function handleDeleteClick(lan: Lan) {
+    deleteLan(lan)
+  }
+
+  function handleActiveChange(lan: Lan) {
+    setActiveLan(lan, !lan.active)
+  }
+
+  function handleEditClick(lan: Lan) {
+    props.onEditClick(lan)
+  }
+
   return (
     <Stack sx={{ width: "100%" }}>
       <TableContainer>
@@ -346,27 +237,25 @@ function LanDetails(props: {
       </TableContainer>
 
       <Stack direction={"row"} justifyContent={"space-between"}>
-        <IconButton onClick={() => props.onEdit(props.lan)}>
+        <IconButton onClick={() => handleEditClick(props.lan)}>
           <Edit />
         </IconButton>
         <FormControlLabel
           control={
             <Switch
-              onChange={() =>
-                props.onActiveChange(props.lan, !props.lan.active)
-              }
+              onChange={() => handleActiveChange(props.lan)}
               checked={props.lan.active}
               color="success"
             />
           }
           label="Aktiv"
         />
-        <IconButton color="error" onClick={() => props.onDelete(props.lan)}>
-          <DeleteIcon />
+        <IconButton color="error" onClick={() => handleDeleteClick(props.lan)}>
+          <Delete />
         </IconButton>
       </Stack>
 
-      <BackgroundModal
+      <BackgroundPreviewModal
         background={props.lan.background}
         open={viewBackground}
         onClose={() => setViewBackground(false)}
@@ -375,7 +264,7 @@ function LanDetails(props: {
   )
 }
 
-function BackgroundModal(props: {
+function BackgroundPreviewModal(props: {
   background: string
   open: boolean
   onClose: () => void
@@ -421,8 +310,8 @@ const VisuallyHiddenInput = styled("input")({
 
 function LanEditor(props: {
   lan?: Lan
-  onSave: (title: string, background: string) => Promise<void>
-  onCancel: () => void
+  onSaveClicked: (title: string, background: string) => void
+  onCancelClicked: () => void
 }) {
   const [title, setTitle] = useState<string | null>(
     props.lan == undefined ? null : props.lan.title
@@ -452,22 +341,34 @@ function LanEditor(props: {
     })
   }
 
-  const onSavePressed = async () => {
+  async function handleSaveClicked() {
     setErrors({
       title: title == null || title.length == 0,
       background: background == null || background.length == 0,
     })
 
     if (title != null && background != null) {
-      props.onSave(title, background)
+      props.onSaveClicked(title, background)
     }
   }
 
-  const onTitleChanged = (event: React.ChangeEvent<HTMLInputElement>) => {
+  function handlePreviewBackgroundClicked() {
+    setViewBackground(true)
+  }
+
+  function handleBackgroundPreviewClosed() {
+    setViewBackground(false)
+  }
+
+  function handleCancelClicked() {
+    props.onCancelClicked()
+  }
+
+  function handleTitleChanged(event: React.ChangeEvent<HTMLInputElement>) {
     setTitle(event.target.value)
   }
 
-  const onBackgroundChanged = (event: React.ChangeEvent<HTMLInputElement>) => {
+  function handleBackgroundChanged(event: React.ChangeEvent<HTMLInputElement>) {
     const files = event.target.files
     if (files != null) {
       const file = files[0]
@@ -499,7 +400,7 @@ function LanEditor(props: {
         required
         label="Lan name"
         variant="outlined"
-        onChange={onTitleChanged}
+        onChange={handleTitleChanged}
         error={errors.title}
       />
       <Button
@@ -514,22 +415,22 @@ function LanEditor(props: {
         </Typography>
         <VisuallyHiddenInput
           type="file"
-          onInput={onBackgroundChanged}
+          onInput={handleBackgroundChanged}
           accept="image/svg"
         />
       </Button>
       {background && (
         <Button
-          onClick={() => setViewBackground(!viewBackground)}
-          startIcon={viewBackground ? <FullscreenExit /> : <Fullscreen />}
+          onClick={handlePreviewBackgroundClicked}
+          startIcon={<Fullscreen />}
         >
-          {viewBackground ? "Gjem forhåndsvisning" : "Forhåndsvis bakgrunn"}
+          Forhåndsvis bakgrunn
         </Button>
       )}
       {background && (
-        <BackgroundModal
+        <BackgroundPreviewModal
           open={viewBackground}
-          onClose={() => setViewBackground(false)}
+          onClose={handleBackgroundPreviewClosed}
           background={background}
         />
       )}
@@ -540,11 +441,15 @@ function LanEditor(props: {
         justifyContent="space-between"
         alignItems="center"
       >
-        <Button onClick={onSavePressed} color="secondary" variant="contained">
+        <Button
+          onClick={handleSaveClicked}
+          color="secondary"
+          variant="contained"
+        >
           Lagre
         </Button>
-        <IconButton aria-label="cancel" onClick={props.onCancel}>
-          <CancelIcon />
+        <IconButton aria-label="cancel" onClick={handleCancelClicked}>
+          <Cancel />
         </IconButton>
       </Stack>
     </Stack>
