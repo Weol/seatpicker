@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Authentication.Discord;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Http.Discord.Guild.RoleMapping;
+namespace Seatpicker.Infrastructure.Entrypoints.Http.Guild.RoleMapping;
 
 [ApiController]
-[Route("api/discord/guild/{guildId}/roles")]
-[Area("discord")]
+[Route("api/guilds/{guildId}/roles/mapping")]
+[Area("guilds")]
 [Authorize(Roles = "Admin")]
 public class GetEndpoint
 {
@@ -17,15 +17,12 @@ public class GetEndpoint
         [FromRoute] string guildId)
     {
         var response = discordAuthenticationService.GetRoleMapping(guildId)
-            .Select(tuple => new Response(tuple.RoleId, tuple.RoleName, tuple.Color, tuple.Icon, tuple.Role));
+            .Select(mapping => new Response(mapping.RoleId, mapping.Role));
 
         return Task.FromResult<ActionResult<IEnumerable<Response>>>(new OkObjectResult(response));
     }
 
     public record Response(
         string RoleId,
-        string RoleName,
-        int RoleColor,
-        string? RoleIcon,
         Role? Role);
 }

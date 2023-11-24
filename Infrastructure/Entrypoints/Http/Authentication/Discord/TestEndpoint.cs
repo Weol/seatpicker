@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Infrastructure.Entrypoints.Utils;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Http.Discord.Authentication;
+namespace Seatpicker.Infrastructure.Entrypoints.Http.Authentication.Discord;
 
 [ApiController]
 [Route("api/discord/authentication")]

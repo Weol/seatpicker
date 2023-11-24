@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Authentication.Discord;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Http.Discord.Guild.RoleMapping;
+namespace Seatpicker.Infrastructure.Entrypoints.Http.Guild.RoleMapping;
 
 [ApiController]
-[Route("api/discord/guilds/{guildId}/roles")]
+[Route("api/guilds/{guildId}/roles/mapping")]
 [Area("discord")]
 [Authorize(Roles = "Admin")]
 public class SetEndpoint

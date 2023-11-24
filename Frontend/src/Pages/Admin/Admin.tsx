@@ -8,27 +8,33 @@ import {
 } from "@mui/material"
 import Typography from "@mui/material/Typography"
 import Divider from "@mui/material/Divider"
-import { useState } from "react"
 import { Edit } from "@mui/icons-material"
 import DelayedCircularProgress from "../../Components/DelayedCircularProgress"
 import ListItemText from "@mui/material/ListItemText"
 import ListItemIcon from "@mui/material/ListItemIcon"
-import { Guild, useGuildAdapter } from "../../Adapters/GuildAdapter"
+import { Guild, useGuilds } from "../../Adapters/GuildAdapter"
 import DiscordGuildAvatar from "../../Components/DiscordAvatar"
-import { Outlet, useNavigate } from "react-router-dom"
+import LanOverview from "./LanOverview"
+import { useState } from "react"
+import { RoleMappingModal } from "./RoleMappingModal"
 
-export type AdminRouteContext = {
-  guild: Guild
+function GetFirstGuildOrNull(guilds: Guild[] | null) {
+  return guilds && guilds.length > 0 ? guilds[0] : null
 }
 
 export default function Admin() {
-  const navigate = useNavigate()
-  const { guilds } = useGuildAdapter()
-  const [selectedGuild, setSelectedGuild] = useState<Guild | null>(null)
+  const guilds = useGuilds()
+  const [selectedGuild, setSelectedGuild] = useState<Guild | null>(
+    GetFirstGuildOrNull(guilds)
+  )
+  const [editingGuild, setEditingGuild] = useState<Guild | null>(null)
 
   function handleGuildSelected(guild: Guild) {
     setSelectedGuild(guild)
-    navigate(`guild/${guild.id}`)
+  }
+
+  function handleGuildEditPressed(guild: Guild) {
+    setEditingGuild(guild)
   }
 
   return (
@@ -45,15 +51,15 @@ export default function Admin() {
           guilds={guilds}
           selectedGuild={selectedGuild}
           onGuildSelected={handleGuildSelected}
+          onGuildEditPressed={handleGuildEditPressed}
         />
       ) : (
         <DelayedCircularProgress />
       )}
 
+      {selectedGuild && <LanOverview guild={selectedGuild} />}
       {selectedGuild && (
-        <Outlet
-          context={{ guild: selectedGuild } satisfies AdminRouteContext}
-        />
+        <RoleMappingModal guild={selectedGuild} open={editingGuild != null} />
       )}
     </Stack>
   )
@@ -63,9 +69,8 @@ function GuildList(props: {
   guilds: Guild[]
   selectedGuild: Guild | null
   onGuildSelected: (guild: Guild) => void
+  onGuildEditPressed: (guild: Guild) => void
 }) {
-  const navigate = useNavigate()
-
   return (
     <Paper sx={{ width: "100%" }}>
       <List component={"nav"}>
@@ -76,14 +81,14 @@ function GuildList(props: {
             key={guild.id}
           >
             <ListItemSecondaryAction>
-              <IconButton onClick={() => navigate(`roles/${guild.id}`)}>
+              <IconButton onClick={() => props.onGuildEditPressed(guild)}>
                 <Edit />
               </IconButton>
             </ListItemSecondaryAction>
             <ListItemIcon>
               <DiscordGuildAvatar guild={guild} />
             </ListItemIcon>
-            <ListItemText primary={guild.name} />
+            <ListItemText primary={guild.name} secondary={"Id: " + guild.id} />
           </ListItemButton>
         ))}
       </List>

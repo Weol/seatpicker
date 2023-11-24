@@ -1,8 +1,8 @@
-import { useAppState } from "../Contexts/AppStateContext"
 import { useEffect, useState } from "react"
 import useApiRequests from "./ApiRequestHook"
 import { User, useAuthenticationAdapter } from "./AuthenticationAdapter"
-import { useApi } from "../Contexts/ApiContext"
+import useVersionId from "./VersionIdHook"
+import { Lan } from "./LanAdapter"
 
 export interface Bounds {
   x: number
@@ -18,44 +18,48 @@ export interface Seat {
   reservedBy: User | null
 }
 
-export default function useSeats() {
+export function useSeats(lan: Lan | null) {
   const { apiRequest } = useApiRequests()
-  const { activeLan } = useAppState()
   const { loggedInUser } = useAuthenticationAdapter()
-  const { seats, setSeats } = useApi()
-  const [reservedSeat, setReservedSeat] = useState<Seat | null>(null)
+  const { versionId } = useVersionId("Seats")
+  const [seats, setSeats] = useState<Seat[] | null>(null)
+  const reservedSeat = findSeatReservedBy(seats, loggedInUser)
+
+  function findSeatReservedBy(seats: Seat[] | null, loggedInUser: User | null) {
+    if (seats && loggedInUser) {
+      for (let i = 0; i < seats.length; i++) {
+        const seat = seats[i]
+        if (seat.reservedBy != null && seat.reservedBy.id == loggedInUser.id) {
+          return seat
+        }
+      }
+    }
+    return null
+  }
 
   useEffect(() => {
-    if (seats == null) {
-      reloadSeats()
-    }
-  }, [])
+    loadSeats()
+  }, [lan?.id, versionId])
 
-  const reloadSeats = async () => {
-    const response = await apiRequest("GET", `lan/${activeLan}/seat`)
+  async function loadSeats() {
+    const response = await apiRequest("GET", `lan/${lan?.id}/seat`)
 
     const seats = (await response.json()) as Seat[]
     setSeats(seats)
-
-    if (loggedInUser != null) {
-      let hasReservedSeat = false
-      seats.forEach((seat) => {
-        if (seat.reservedBy != null && seat.reservedBy.id == loggedInUser.id) {
-          setReservedSeat(seat)
-          hasReservedSeat = true
-        }
-      })
-
-      if (!hasReservedSeat) setReservedSeat(null)
-    }
   }
 
+  return { seats, reservedSeat }
+}
+
+export function useSeatAdapter(lan: Lan) {
+  const { apiRequest } = useApiRequests()
+
   const createNewSeat = (seat: Seat) => {
-    return apiRequest("POST", `lan/${activeLan}/seat`, {
+    return apiRequest("POST", `lan/${lan.id}/seat`, {
       title: seat.title,
       bounds: seat.bounds,
     })
   }
 
-  return { seats, reservedSeat, createNewSeat }
+  return { createNewSeat }
 }

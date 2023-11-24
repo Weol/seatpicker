@@ -1,7 +1,7 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import useApiRequests from "./ApiRequestHook"
 import { Role } from "./AuthenticationAdapter"
-import { useApi } from "../Contexts/ApiContext"
+import useVersionId from "./VersionIdHook"
 
 export interface Guild {
   id: string
@@ -10,43 +10,78 @@ export interface Guild {
 }
 
 export interface GuildRoleMapping {
-  roleId: string
-  roleName: string
-  roleColor: number
-  roleIcon?: string
+  roleId: string | null
   role: Role | null
+}
+
+export interface GuildRole {
+  id: string
+  name: string
+  color: number
+}
+
+export function useGuilds(
+  sideEffects?: ((guilds: Guild[]) => Promise<void> | void)[]
+) {
+  const { apiRequest } = useApiRequests()
+  const { versionId } = useVersionId("guilds")
+  const [guilds, setGuilds] = useState<Guild[] | null>(null)
+
+  useEffect(() => {
+    loadGuilds()
+  }, [versionId])
+
+  async function loadGuilds(): Promise<Guild[]> {
+    const response = await apiRequest("GET", `guilds`)
+
+    const guilds = (await response.json()) as Guild[]
+    setGuilds(guilds)
+    sideEffects?.forEach(async (sideEffect) => await sideEffect(guilds))
+    return guilds
+  }
+
+  return guilds
+}
+
+export function useGuildRoles(guildId: string) {
+  const { apiRequest } = useApiRequests()
+  const { versionId } = useVersionId("guild_roles_" + guildId)
+  const [roleMappings, setRoleMappings] = useState<GuildRoleMapping[] | null>(
+    null
+  )
+  const [roles, setRoles] = useState<GuildRole[] | null>(null)
+
+  useEffect(() => {
+    loadRoles()
+    loadRoleMapping()
+  }, [versionId])
+
+  const loadRoles = async () => {
+    const response = await apiRequest("GET", `guilds/${guildId}/roles`)
+
+    const roles = (await response.json()) as GuildRole[]
+    setRoles(roles)
+  }
+
+  const loadRoleMapping = async () => {
+    const response = await apiRequest("GET", `guilds/${guildId}/roles/mapping`)
+
+    const roleMappings = (await response.json()) as GuildRoleMapping[]
+    setRoleMappings(roleMappings)
+  }
+
+  return { roles, roleMappings }
 }
 
 export function useGuildAdapter() {
   const { apiRequest } = useApiRequests()
-  const { guilds, setGuilds } = useApi()
-
-  useEffect(() => {
-    if (guilds == null) {
-      reloadGuilds()
-    }
-  }, [])
-
-  const reloadGuilds = async (): Promise<Guild[]> => {
-    const response = await apiRequest("GET", `discord/guilds`)
-
-    const guilds = (await response.json()) as Guild[]
-    setGuilds(guilds)
-    return guilds
-  }
-
-  const getGuildRoleMapping = async (guildId: string) => {
-    const response = await apiRequest("GET", `discord/guild/${guildId}/roles`)
-
-    return (await response.json()) as GuildRoleMapping[]
-  }
 
   const setGuildRoleMapping = async (
     guild: Guild,
     mappings: { roleId: string; role: Role }[]
   ) => {
-    return await apiRequest("PUT", `discord/guild/${guild.id}/roles`, mappings)
+    return await apiRequest("PUT", `guild/${guild.id}/roles/mapping`, mappings)
   }
 
-  return { guilds, getGuildRoleMapping, setGuildRoleMapping }
+  return { setGuildRoleMapping }
 }

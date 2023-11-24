@@ -28,25 +28,39 @@ import {
   TextField,
 } from "@mui/material"
 import { useState } from "react"
-import { Guild } from "../../Adapters/GuildAdapter"
-import { useLanAdapter, Lan } from "../../Adapters/LanAdapter"
+import { useLanAdapter, Lan, useLans } from "../../Adapters/LanAdapter"
 import DelayedCircularProgress from "../../Components/DelayedCircularProgress"
 import { useAlerts } from "../../Contexts/AlertContext"
-import { useOutletContext } from "react-router-dom"
-import { AdminRouteContext } from "./Admin"
+import { Guild } from "../../Adapters/GuildAdapter"
 
-export default function Lans() {
-  const { lans } = useLanAdapter()
-  const routeContext = useOutletContext<AdminRouteContext>()
-  const guild = routeContext.guild
-  const selectedGuildLans =
-    lans && lans.filter((lan) => lan.guildId == guild.id)
+function GetFirstLanOrNull(lans: Lan[] | null) {
+  return lans && lans.length > 0 ? lans[0] : null
+}
+
+function getSelectedGuildLans(lans: Lan[] | null, guildId: string) {
+  return lans && lans.filter((lan) => lan.guildId == guildId)
+}
+
+export default function LanOverview(props: { guild: Guild }) {
+  const lans = useLans()
+  const selectedGuildLans = getSelectedGuildLans(lans, props.guild.id)
+  const [selectedLan, setSelectedLan] = useState<Lan | null>(
+    GetFirstLanOrNull(selectedGuildLans)
+  )
+
+  function handleLanSelected(lan: Lan) {
+    setSelectedLan(lan)
+  }
 
   return (
     <Stack width={"100%"}>
-      <LanListHeader guild={guild} />
+      <LanListHeader guild={props.guild} />
       {selectedGuildLans?.length ? (
-        <LanList lans={selectedGuildLans} />
+        <LanList
+          lans={selectedGuildLans}
+          selectedLan={selectedLan}
+          onLanSelected={handleLanSelected}
+        />
       ) : selectedGuildLans ? (
         <NoLanExists />
       ) : (
@@ -61,11 +75,11 @@ function LanListHeader(props: { guild: Guild }) {
   const { createLan } = useLanAdapter()
   const [createLanVisibility, setCreateVisibility] = useState<boolean>(false)
 
-  const handleCancelClicked = () => {
+  function handleCancelClicked() {
     setCreateVisibility(false)
   }
 
-  const handleCreatePressed = async (title: string, background: string) => {
+  async function handleCreatePressed(title: string, background: string) {
     await alertLoading("Oppretter " + title, async () => {
       await createLan(props.guild.id, title, background)
     })
@@ -98,9 +112,12 @@ function LanListHeader(props: { guild: Guild }) {
   )
 }
 
-function LanList(props: { lans: Lan[] }) {
+function LanList(props: {
+  lans: Lan[]
+  selectedLan: Lan | null
+  onLanSelected: (lan: Lan) => void
+}) {
   const { updateLan } = useLanAdapter()
-  const [selectedLan, setSelectedLan] = useState<Lan | null>(null)
   const [viewEditor, setViewEditor] = useState<boolean>(false)
 
   function handleEditClicked() {
@@ -125,10 +142,8 @@ function LanList(props: { lans: Lan[] }) {
       {props.lans.map((lan) => (
         <Accordion
           key={lan.id}
-          expanded={selectedLan?.id == lan.id}
-          onChange={() =>
-            setSelectedLan(lan.id == selectedLan?.id ? null : lan)
-          }
+          expanded={props.selectedLan != null && props.selectedLan.id == lan.id}
+          onChange={() => props.onLanSelected(lan)}
           sx={{ width: "100%" }}
         >
           <AccordionSummary sx={{ width: "100%" }}>
@@ -172,7 +187,8 @@ function LanList(props: { lans: Lan[] }) {
 }
 
 function LanDetails(props: { lan: Lan; onEditClick: (lan: Lan) => void }) {
-  const { deleteLan, setActiveLan } = useLanAdapter()
+  const { alertLoading, alertSuccess } = useAlerts()
+  const { deleteLan, setActiveLan: setActiveGuildId } = useLanAdapter()
   const [viewBackground, setViewBackground] = useState<boolean>(false)
 
   function formatTime(date: Date) {
@@ -193,12 +209,15 @@ function LanDetails(props: { lan: Lan; onEditClick: (lan: Lan) => void }) {
     { label: "Oppdatert", value: formatTime(props.lan.updatedAt) },
   ]
 
-  function handleDeleteClick(lan: Lan) {
-    deleteLan(lan)
+  async function handleDeleteClick(lan: Lan) {
+    await alertLoading(`Sletter ${lan.title} ...`, async () => {
+      await deleteLan(lan)
+    })
+    alertSuccess(`${lan.title} har blitt slettet`)
   }
 
   function handleActiveChange(lan: Lan) {
-    setActiveLan(lan, !lan.active)
+    setActiveGuildId(lan, !lan.active)
   }
 
   function handleEditClick(lan: Lan) {

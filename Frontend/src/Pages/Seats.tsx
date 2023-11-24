@@ -1,23 +1,31 @@
 import * as React from "react"
 import { useState } from "react"
-import { Box, Stack } from "@mui/material"
+import { Box, Stack, Typography } from "@mui/material"
 import { useAlerts } from "../Contexts/AlertContext"
 import SeatComponent from "../Components/SeatComponent"
-import useSeats, { Seat } from "../Adapters/SeatsAdapter"
 import useReservationAdapter from "../Adapters/ReservationAdapter"
 import { useDialogs } from "../Contexts/DialogContext"
 import { useAuthenticationAdapter } from "../Adapters/AuthenticationAdapter"
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const background = require("../Media/background.svg").default
+import { Seat, useSeats } from "../Adapters/SeatsAdapter"
+import { Lan, useActiveLan } from "../Adapters/LanAdapter"
 
 export default function Seats() {
+  const activeLan = useActiveLan()
+
+  return activeLan ? <SeatsWithLan activeLan={activeLan} /> : <NoActiveLan />
+}
+
+function NoActiveLan() {
+  return <Typography>No active lan is configured</Typography>
+}
+
+function SeatsWithLan(props: { activeLan: Lan }) {
   const { alertWarning, alertInfo, alertLoading } = useAlerts()
   const { showDialog } = useDialogs()
   const { loggedInUser } = useAuthenticationAdapter()
-  const { seats, reservedSeat } = useSeats()
+  const { seats, reservedSeat } = useSeats(props.activeLan)
   const { makeReservation, deleteReservation, moveReservation } =
-    useReservationAdapter()
+    useReservationAdapter(props.activeLan)
   const [freeze, setFreeze] = useState<boolean>(false)
 
   async function onSeatClick(seat: Seat) {
@@ -119,7 +127,7 @@ export default function Seats() {
             }}
           >
             <img
-              src={background}
+              src={`data:image/svg+xml;base64,${props.activeLan.background}`}
               alt=""
               style={{
                 width: "100%",

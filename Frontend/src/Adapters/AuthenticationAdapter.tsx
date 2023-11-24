@@ -1,5 +1,5 @@
-import { useAppState } from "../Contexts/AppStateContext"
 import Config from "../config"
+import { useLocalStorage } from "usehooks-ts"
 
 export enum Role {
   ADMIN = "Admin",
@@ -36,13 +36,15 @@ export interface AuthenticationToken {
 }
 
 export function useAuthenticationAdapter() {
-  const { authenticationToken, setAuthenticationToken } = useAppState()
-  const loggedInUser = authenticationToken && new User(authenticationToken)
+  const [authenticationToken, setAuthenticationToken] =
+    useLocalStorage<AuthenticationToken | null>("authenticationToken", null)
+  const loggedInUser =
+    authenticationToken == null ? null : new User(authenticationToken)
 
   const login = async (discordToken: string): Promise<User> => {
     const authenticationToken = await makeRequest<AuthenticationToken>(
       "POST",
-      `discord/authentication/login`,
+      `authentication/discord/login`,
       { token: discordToken }
     )
 
@@ -57,7 +59,7 @@ export function useAuthenticationAdapter() {
   const renew = async (refreshToken: string): Promise<AuthenticationToken> => {
     const authenticationToken = await makeRequest<AuthenticationToken>(
       "POST",
-      `discord/authentication/renew`,
+      `authentication/discord/renew`,
       { refreshToken: refreshToken }
     )
     if (authenticationToken == null) {

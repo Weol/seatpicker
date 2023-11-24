@@ -58,14 +58,14 @@ public class DiscordAuthenticationService
             if (options.Admins.Any(admin => admin == discordUser.Id))
                 roles = Enum.GetValues<Role>();
             else
-                throw new DiscordAuthenticationException("Only whitelisted users can request a token with no tenant claim");
+                throw new DiscordAuthenticationException("Only whitelisted users can request a token with no guild claim");
         }
         else
         {
             var guildMember = await discordClient.GetGuildMember(guildId, discordUser.Id);
-            var roleMappings = await GetGuildRoleMapping(guildId);
+            var roleMappings = await GetRoleMapping(guildId).ToArrayAsync();
 
-            roles = GetGuildMemberRoles(roleMappings.Mappings.ToArray(), guildMember).Distinct().ToArray();
+            roles = GetGuildMemberRoles(roleMappings, guildMember).Distinct().ToArray();
         }
 
         var token = new DiscordToken(
@@ -82,7 +82,7 @@ public class DiscordAuthenticationService
         return (jwtToken, expiresAt, accessToken.RefreshToken, discordUser, roles);
     }
 
-    private IEnumerable<Role> GetGuildMemberRoles(ICollection<(string RoleId, Role Role)> roleMapping, GuildMember guildMember)
+    private IEnumerable<Role> GetGuildMemberRoles((string RoleId, Role Role)[] roleMapping, GuildMember guildMember)
     {
         yield return Role.User;
 
@@ -104,31 +104,16 @@ public class DiscordAuthenticationService
         transaction.Commit();
     }
 
-    private async Task<GuildRoleMapping> GetGuildRoleMapping(string guildId)
+    public async IAsyncEnumerable<(string RoleId, Role Role)> GetRoleMapping(string guildId)
     {
         var reader = documentRepository.CreateReader();
 
         var roleMappings = await reader.Get<GuildRoleMapping>(guildId) ??
                            new GuildRoleMapping(guildId, Array.Empty<(string RoleId, Role Role)>());
 
-        return roleMappings;
-    }
-
-    public async IAsyncEnumerable<(string RoleId, string RoleName, int Color, string? Icon, Role? Role)> GetRoleMapping(string guildId)
-    {
-        var roleMappings = await GetGuildRoleMapping(guildId);
-
-        var guildRoles = await discordClient.GetGuildRoles(guildId);
-
-        foreach (var guildRole in guildRoles)
+        foreach (var roleMappingsMapping in roleMappings.Mappings)
         {
-            Role? role = null;
-            foreach (var mapping in roleMappings.Mappings)
-            {
-                if (guildRole.Id == mapping.RoleId) role = mapping.Role;
-            }
-
-            yield return (guildRole.Id, guildRole.Name, guildRole.Color, guildRole.Icon, role);
+            yield return roleMappingsMapping;
         }
     }
 

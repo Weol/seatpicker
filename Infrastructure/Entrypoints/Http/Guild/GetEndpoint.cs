@@ -2,11 +2,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Http.Discord.Guild;
+namespace Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 
 [ApiController]
-[Route("api/discord/guilds")]
-[Area("discord")]
+[Route("api/guilds")]
+[Area("guilds")]
 [Authorize(Roles = "Admin")]
 public class GetEndpoint
 {
@@ -19,6 +19,6 @@ public class GetEndpoint
 
         return new OkObjectResult(guilds);
     }
-
+    
     public record Response(string Id, string Name, string? Icon);
 }
