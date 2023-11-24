@@ -5,7 +5,7 @@ using Seatpicker.Infrastructure.Entrypoints.Utils;
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Authentication.Discord;
 
 [ApiController]
-[Route("api/discord/authentication")]
+[Route("api/authentication/discord")]
 [Area("discord")]
 [Authorize]
 public class TestEndpoint

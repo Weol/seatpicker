@@ -4,7 +4,7 @@ import {
   Box,
   Button,
   Container,
-  Divider,
+  Divider, Icon,
   IconButton,
   Modal,
   Stack,
@@ -18,18 +18,21 @@ import {
   useGuildAdapter,
   useGuildRoles,
 } from "../../Adapters/GuildAdapter"
-import { Add } from "@mui/icons-material"
+import {Add, Cancel} from "@mui/icons-material"
 import DelayedCircularProgress from "../../Components/DelayedCircularProgress"
-import { Role } from "../../Adapters/AuthenticationAdapter"
-import { useEffect, useState } from "react"
+import {Role} from "../../Adapters/AuthenticationAdapter"
+import {useEffect, useState} from "react"
 
 function Line(props: {
+  key: number,
   roles: GuildRole[]
   selectedGuildRoleId: string | null
   selectedRole: Role | null
-  onSelectedRoleChanged: (role: GuildRole) => void
-  onSelectedGuildRoleChanged: (guildRole: Role) => void
-}) {
+  onSelectedRoleChanged: (key: number, role: Role) => void
+  onSelectedGuildRoleChanged: (key: number, guildRole: GuildRole) => void
+  onDeleteLine: (key: number) => void
+})
+{
   return (
     <Stack
       spacing={1}
@@ -40,6 +43,7 @@ function Line(props: {
       <Autocomplete
         options={props.roles}
         autoHighlight
+        sx={{ width: "50%" }}
         getOptionLabel={(option) => option.name}
         renderOption={(props, option) => (
           <Box component="li" {...props}>
@@ -49,7 +53,6 @@ function Line(props: {
         renderInput={(params) => (
           <TextField
             {...params}
-            fullWidth
             size="small"
             label="Guild role"
             inputProps={{
@@ -61,6 +64,7 @@ function Line(props: {
       <Autocomplete
         options={Object.values(Role)}
         autoHighlight
+        sx={{ width: "50%" }}
         getOptionLabel={(option) => option.toString()}
         renderOption={(props, option) => (
           <Box component="li" {...props}>
@@ -70,7 +74,6 @@ function Line(props: {
         renderInput={(params) => (
           <TextField
             {...params}
-            fullWidth
             size="small"
             label="Role"
             inputProps={{
@@ -79,6 +82,7 @@ function Line(props: {
           />
         )}
       />
+      <IconButton onClick={() => props.onDeleteLine(props.key)}><Cancel /></IconButton>
     </Stack>
   )
 }
@@ -86,15 +90,13 @@ function Line(props: {
 export function RoleMappingModal(props: { guild: Guild; open: boolean }) {
   const { setGuildRoleMapping } = useGuildAdapter()
   const { roles, roleMappings } = useGuildRoles(props.guild.id)
-  const [stagedRoleMappings, setStagedRoleMappings] = useState<
-    GuildRoleMapping[] | null
-  >(null)
+  const [ stagedRoleMappings, setStagedRoleMappings ] = useState<GuildRoleMapping[] | null>(null)
 
   useEffect(() => {
     if (!stagedRoleMappings && roleMappings) {
       setStagedRoleMappings(roleMappings)
     }
-  }, [roleMappings])
+  }, [ roleMappings ])
 
   function handleAddMappingPressed() {
     if (stagedRoleMappings)
@@ -104,9 +106,14 @@ export function RoleMappingModal(props: { guild: Guild; open: boolean }) {
       ])
   }
 
-  function handleGuildRoleSelected(guildRole: string | null) {}
+  function handleGuildRoleSelected(key: number, guildRole: GuildRole | null) {
+  }
 
-  function handleRoleSelected(role: Role | null) {}
+  function handleRoleSelected(key: number, role: Role | null) {
+  }
+
+  function handleLineDeleted(key: number) {
+  }
 
   return (
     <Modal {...props}>
@@ -116,37 +123,43 @@ export function RoleMappingModal(props: { guild: Guild; open: boolean }) {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          minWidth: "60%",
+          width: [ "90%", "50%" ],
           bgcolor: "background.paper",
           p: 4,
         }}
       >
-        <Stack spacing={1} justifyContent="center" alignItems="center">
-          <Typography height={"100%"} variant={"h5"}>
-            {props.guild.name}
-          </Typography>
-          <Divider />
+        <Stack spacing={2} justifyContent="center" alignItems="center">
+          <Stack direction={"row"} width="100%" justifyContent="space-between" alignItems="center">
+            <Typography height={"100%"} variant={"h5"}>
+              {props.guild.name}
+            </Typography>
+            <Button variant={"outlined"}>Lagre</Button>
+          </Stack>
+          <Divider sx={{ width: "100%" }}/>
           {stagedRoleMappings && roles ? (
-            <Stack spacing={1} width={"100%"}>
-              {stagedRoleMappings.map((mapping, i) => (
+            <Stack spacing={2} width={"100%"} justifyContent="center" alignItems="center">
+              {stagedRoleMappings.length > 0 ? stagedRoleMappings.map((mapping, i) => (
                 <Line
                   key={i}
                   roles={roles}
                   selectedRole={mapping.role}
                   selectedGuildRoleId={mapping.roleId}
-                  onSelectedGuildRoleChanged={() =>
-                    handleGuildRoleSelected(mapping.roleId)
+                  onSelectedGuildRoleChanged={(key, guildRole) =>
+                    handleGuildRoleSelected(key, guildRole)
                   }
-                  onSelectedRoleChanged={() => handleRoleSelected(mapping.role)}
-                />
-              ))}
+                  onSelectedRoleChanged={(key, role) => handleRoleSelected(key, role)}
+                  onDeleteLine={(key) => handleLineDeleted(key)}/>
+              )) : (
+                <Typography>Ingen mappinger registrert</Typography>
+              )}
+              <Divider/>
               <Button variant="outlined" onClick={handleAddMappingPressed}>
-                Add mapping
+                Legg til mapping
               </Button>
             </Stack>
           ) : (
             <Stack width="100%" justifyContent="center" alignItems="center">
-              <DelayedCircularProgress />
+              <DelayedCircularProgress/>
             </Stack>
           )}
         </Stack>
