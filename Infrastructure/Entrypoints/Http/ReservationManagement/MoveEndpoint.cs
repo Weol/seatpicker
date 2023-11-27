@@ -13,7 +13,7 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement;
 [Authorize(Roles = "Operator")]
 public class MoveEndpoint
 {
-    [HttpPut("{id:guid}")]
+    [HttpPut("")]
     public async Task<IActionResult> Move(
         [FromRoute] Guid lanId,
         [FromRoute] Guid seatId,

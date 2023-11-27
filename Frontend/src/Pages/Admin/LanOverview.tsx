@@ -49,7 +49,7 @@ export default function LanOverview(props: { guild: Guild }) {
   )
 
   function handleLanSelected(lan: Lan) {
-    setSelectedLan(lan)
+    setSelectedLan(selectedLan?.id == lan.id ? null : lan)
   }
 
   return (
@@ -64,7 +64,9 @@ export default function LanOverview(props: { guild: Guild }) {
       ) : selectedGuildLans ? (
         <NoLanExists />
       ) : (
-        <DelayedCircularProgress />
+        <Stack width="100%" justifyContent="center" alignItems="center">
+          <DelayedCircularProgress />
+        </Stack>
       )}
     </Stack>
   )
@@ -124,8 +126,13 @@ function LanList(props: {
     setViewEditor(true)
   }
 
-  function handleSaveClicked(lan: Lan, title: string, background: string) {
-    updateLan(lan, title, background)
+  async function handleSaveClicked(
+    lan: Lan,
+    title: string,
+    background: string
+  ) {
+    await updateLan(lan, title, background)
+    setViewEditor(false)
   }
 
   function handleCancelClicked() {

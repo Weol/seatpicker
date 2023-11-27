@@ -37,6 +37,10 @@ export default function Admin() {
     setEditingGuild(guild)
   }
 
+  function handleRoleMappingModalClose(): void {
+    setEditingGuild(null)
+  }
+
   return (
     <Stack
       divider={<Divider orientation="horizontal" flexItem />}
@@ -59,7 +63,11 @@ export default function Admin() {
 
       {selectedGuild && <LanOverview guild={selectedGuild} />}
       {selectedGuild && (
-        <RoleMappingModal guild={selectedGuild} open={editingGuild != null} />
+        <RoleMappingModal
+          guild={selectedGuild}
+          open={editingGuild != null}
+          onClose={handleRoleMappingModalClose}
+        />
       )}
     </Stack>
   )

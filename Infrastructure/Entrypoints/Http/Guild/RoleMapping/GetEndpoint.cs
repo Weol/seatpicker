@@ -6,13 +6,13 @@ using Seatpicker.Infrastructure.Authentication.Discord;
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Guild.RoleMapping;
 
 [ApiController]
-[Route("api/guilds/{guildId}/roles/mapping")]
+[Route("api/guild/{guildId}/roles/mapping")]
 [Area("guilds")]
 [Authorize(Roles = "Admin")]
 public class GetEndpoint
 {
     [HttpGet("")]
-    public Task<ActionResult<IEnumerable<Response>>> Set(
+    public Task<ActionResult<IEnumerable<Response>>> Get(
         [FromServices] DiscordAuthenticationService discordAuthenticationService,
         [FromRoute] string guildId)
     {

@@ -22,12 +22,14 @@ function stringToColor(string: string) {
   return color
 }
 
-function stringAvatar(name: string) {
+function stringAvatar(name: string, props: AvatarProps) {
   return {
+    ...props,
     sx: {
       bgcolor: stringToColor(name),
+      ...props.sx,
     },
-    children: `${name.split(" ")[0][0]}${name.split(" ")[1][0]}`,
+    children: `${name[0]}`,
   }
 }
 
@@ -41,7 +43,7 @@ export function DiscordUserAvatar(props: { user: User } & AvatarProps) {
       {...props}
     />
   ) : (
-    <Avatar {...stringAvatar(props.user.name)} />
+    <Avatar {...stringAvatar(props.user.name, props)} />
   )
 }
 
@@ -57,6 +59,6 @@ export default function DiscordGuildAvatar(
       {...props}
     />
   ) : (
-    <Avatar {...stringAvatar(props.guild.name)} />
+    <Avatar {...props} {...stringAvatar(props.guild.name, props)} />
   )
 }

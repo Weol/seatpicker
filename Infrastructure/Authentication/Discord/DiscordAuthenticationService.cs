@@ -47,25 +47,29 @@ public class DiscordAuthenticationService
     private async Task<(string Token, DateTimeOffset ExpiresAt, string, DiscordUser DiscordUser, Role[] Roles)> CreateTokenRequest(
         DiscordAccessToken accessToken,
         DiscordUser discordUser,
-        string? guildId)
+        string guildId)
     {
         // Minus 10 just to make sure that the discord token expires a bit after the jwt token actually expires
         var expiresAt = DateTimeOffset.UtcNow.AddSeconds(accessToken.ExpiresIn - 10);
 
         Role[] roles;
-        if (guildId is null)
+        if (options.Admins.Any(admin => admin == discordUser.Id))
         {
-            if (options.Admins.Any(admin => admin == discordUser.Id))
-                roles = Enum.GetValues<Role>();
-            else
-                throw new DiscordAuthenticationException("Only whitelisted users can request a token with no guild claim");
+            roles = Enum.GetValues<Role>();
         }
         else
         {
             var guildMember = await discordClient.GetGuildMember(guildId, discordUser.Id);
-            var roleMappings = await GetRoleMapping(guildId).ToArrayAsync();
+            if (guildMember != null)
+            {
+                var roleMappings = await GetRoleMapping(guildId).ToArrayAsync();
 
-            roles = GetGuildMemberRoles(roleMappings, guildMember).Distinct().ToArray();
+                roles = GetGuildMemberRoles(roleMappings, guildMember).Distinct().ToArray();
+            }
+            else
+            {
+                roles = new[] { Role.User };
+            }
         }
 
         var token = new DiscordToken(
@@ -100,7 +104,14 @@ public class DiscordAuthenticationService
     public async Task SetRoleMapping(string guildId, IEnumerable<(string RoleId, Role Role)> mappings)
     {
         await using var transaction = documentRepository.CreateTransaction();
-        transaction.Store(new GuildRoleMapping(guildId, mappings));
+        
+        var transformed = mappings
+            .Select(mapping => new GuildRoleMappingEntry(mapping.RoleId, mapping.Role))
+            .ToArray();
+        
+        transaction.Store(new GuildRoleMapping(
+            guildId, 
+            transformed));
         transaction.Commit();
     }
 
@@ -109,18 +120,20 @@ public class DiscordAuthenticationService
         var reader = documentRepository.CreateReader();
 
         var roleMappings = await reader.Get<GuildRoleMapping>(guildId) ??
-                           new GuildRoleMapping(guildId, Array.Empty<(string RoleId, Role Role)>());
+                           new GuildRoleMapping(guildId, Array.Empty<GuildRoleMappingEntry>());
 
         foreach (var roleMappingsMapping in roleMappings.Mappings)
         {
-            yield return roleMappingsMapping;
+            yield return (roleMappingsMapping.RoleId, roleMappingsMapping.Role);
         }
     }
 
-    public record GuildRoleMapping(string GuildId, IEnumerable<(string RoleId, Role Role)> Mappings) : IDocument
+    public record GuildRoleMapping(string GuildId, IEnumerable<GuildRoleMappingEntry> Mappings) : IDocument
     {
         public string Id => GuildId;
     }
+
+    public record GuildRoleMappingEntry(string RoleId, Role Role);
 }
 
 public class DiscordAuthenticationException : Exception

@@ -1,25 +1,42 @@
 ﻿import * as React from "react"
 import { Box, Container, Typography } from "@mui/material"
-import { SeatMenu } from "./SeatMenu"
+import { SeatMenu, SeatMenuProps } from "./SeatMenu"
 import { Seat } from "../Adapters/SeatsAdapter"
 
-interface SeatProperties {
-  seat: Seat
+type SeatProperties = {
   color: string
-  onClick: (seat: Seat) => void
-}
+  onSeatClick?: (seat: Seat) => void
+} & SeatMenuProps
 
 export default function SeatComponent(props: SeatProperties) {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
+  const [menuAnchor, setAnchor] = React.useState<null | HTMLElement>(null)
+  const menuOpen = Boolean(menuAnchor)
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget)
-    // props.onClick(props.seat)
+    if (props.onSeatClick != undefined) {
+      props.onSeatClick(props.seat)
+    } else {
+      setAnchor(event.currentTarget)
+    }
   }
 
   const handleClose = () => {
-    setAnchorEl(null)
+    setAnchor(null)
+  }
+
+  function handleRemove(seat: Seat) {
+    props.onRemove(seat)
+    handleClose()
+  }
+
+  function handleRemoveFor(seat: Seat) {
+    props.onRemoveFor(seat)
+    handleClose()
+  }
+
+  function handleMoveFor(seat: Seat) {
+    props.onMoveFor(seat)
+    handleClose()
   }
 
   const renderSeat = (seat: Seat) => {
@@ -52,11 +69,15 @@ export default function SeatComponent(props: SeatProperties) {
           </Typography>
         </Box>
         <SeatMenu
-          open={open}
+          {...props}
+          onRemove={handleRemove}
+          onRemoveFor={handleRemoveFor}
+          onMoveFor={handleMoveFor}
+          open={menuOpen}
           seat={seat}
           id="demo-positioned-menu"
           aria-labelledby="demo-positioned-button"
-          anchorEl={anchorEl}
+          anchorEl={menuAnchor}
           onClose={handleClose}
           anchorOrigin={{
             vertical: "top",

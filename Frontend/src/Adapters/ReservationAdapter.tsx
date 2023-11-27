@@ -1,23 +1,54 @@
 import useApiRequests from "./ApiRequestHook"
 import { Lan } from "./LanAdapter"
 import { Seat } from "./SeatsAdapter"
+import useVersionId from "./VersionIdHook"
 
 export default function useReservationAdapter(lan: Lan | null) {
   const { apiRequest } = useApiRequests()
+  const { invalidate } = useVersionId("Seats")
 
-  const makeReservation = (seat: Seat) => {
-    return apiRequest("POST", `lan/${lan?.id}/seat/${seat.id}/reservation`)
+  const makeReservation = async (seat: Seat) => {
+    await apiRequest("POST", `lan/${lan?.id}/seat/${seat.id}/reservation`)
+    invalidate()
   }
 
-  const deleteReservation = (seat: Seat) => {
-    return apiRequest("DELETE", `lan/${lan?.id}/seat/${seat.id}/reservation`)
+  const deleteReservation = async (seat: Seat) => {
+    await apiRequest("DELETE", `lan/${lan?.id}/seat/${seat.id}/reservation`)
+    invalidate()
   }
 
-  const moveReservation = (fromSeat: Seat, toSeat: Seat) => {
-    return apiRequest("PUT", `lan/${lan?.id}/seat/${fromSeat.id}/reservation`, {
-      moveToSeatId: toSeat.id,
+  const moveReservation = async (fromSeat: Seat, toSeat: Seat) => {
+    await apiRequest("PUT", `lan/${lan?.id}/seat/${fromSeat.id}/reservation`, {
+      toSeatId: toSeat.id,
     })
+    invalidate()
   }
 
-  return { makeReservation, deleteReservation, moveReservation }
+  const moveReservationFor = async (fromSeat: Seat, toSeat: Seat) => {
+    await apiRequest(
+      "PUT",
+      `lan/${lan?.id}/seat/${fromSeat.id}/reservationmanagement`,
+      {
+        toSeatId: toSeat.id,
+        userId: fromSeat.reservedBy?.id,
+      }
+    )
+    invalidate()
+  }
+
+  const deleteReservationFor = async (seat: Seat) => {
+    await apiRequest(
+      "DELETE",
+      `lan/${lan?.id}/seat/${seat.id}/reservationmanagement`
+    )
+    invalidate()
+  }
+
+  return {
+    makeReservation,
+    deleteReservation,
+    deleteReservationFor,
+    moveReservation,
+    moveReservationFor,
+  }
 }

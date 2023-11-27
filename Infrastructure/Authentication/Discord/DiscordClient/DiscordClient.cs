@@ -73,14 +73,22 @@ public class DiscordClient
         return await DeserializeContent<DiscordUser>(response);
     }
 
-    public async Task<GuildMember> GetGuildMember(string guildId, string memberId)
+    public async Task<GuildMember?> GetGuildMember(string guildId, string memberId)
     {
         using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"guilds/{guildId}/members/{memberId}");
 
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
 
         var response = await httpClient.SendAsync(requestMessage);
-        return await DeserializeContent<GuildMember>(response);
+        try
+        {
+            return await DeserializeContent<GuildMember>(response);
+        }
+        catch (DiscordException e) when (e.StatusCode == HttpStatusCode.NotFound)
+        {
+            logger.LogInformation("Could not find member with id {MemberId} in guild {GuildId}", memberId, guildId);
+            return null;
+        }
     }
 
     public async Task<IEnumerable<GuildRole>> GetGuildRoles(string guildId)

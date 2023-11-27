@@ -1,7 +1,6 @@
 import * as React from "react"
 import Typography from "@mui/material/Typography"
 import { Link, useSearchParams } from "react-router-dom"
-import Config from "../config"
 import { CircularProgress, Stack } from "@mui/material"
 import Button from "@mui/material/Button"
 import {
@@ -9,6 +8,7 @@ import {
   useAuthenticationAdapter,
 } from "../Adapters/AuthenticationAdapter"
 import { useEffect } from "react"
+import { DiscordUserAvatar } from "../Components/DiscordAvatar"
 
 export default function RedirectLogin() {
   const { login, loggedInUser } = useAuthenticationAdapter()
@@ -28,8 +28,8 @@ export default function RedirectLogin() {
           {"Velkommen, " + user.name}
         </Typography>
 
-        <img
-          src={Config.DiscordAvatarBaseUrl + user.id + "/" + user.avatar}
+        <DiscordUserAvatar
+          user={user}
           style={{ maxWidth: "150px", borderRadius: "50%" }}
         />
 

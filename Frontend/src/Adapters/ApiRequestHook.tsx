@@ -1,16 +1,8 @@
 ﻿import Config from "../config"
-import { useAlerts } from "../Contexts/AlertContext"
 import { useAuthenticationAdapter } from "./AuthenticationAdapter"
-
-interface ApiError {
-  propertyName: string
-  errorMessage: string
-  attemptedValue: string
-}
 
 export default function useApiRequests() {
   const { getToken } = useAuthenticationAdapter()
-  const { alertError } = useAlerts()
 
   async function apiRequest(
     method: "POST" | "DELETE" | "GET" | "PUT",
@@ -54,22 +46,6 @@ export default function useApiRequests() {
     })
 
     if (response.status > 299) {
-      if (response.status > 499) {
-        alertError("Noe gikk galt")
-      } else {
-        let text = await response.text()
-        try {
-          const json = JSON.parse(text) as ApiError[]
-          const errors = json.map((error: ApiError) => error.errorMessage)
-          if (errors.length > 0) {
-            text = errors.join("\n")
-          }
-        } catch {
-          // Ignore
-        } finally {
-          alertError("Du har gjort noe feil", text)
-        }
-      }
       throw response
     }
     return response

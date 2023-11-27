@@ -32,7 +32,7 @@ export function useGuilds(
   }, [versionId])
 
   async function loadGuilds(): Promise<Guild[]> {
-    const response = await apiRequest("GET", `guilds`)
+    const response = await apiRequest("GET", `guild`)
 
     const guilds = (await response.json()) as Guild[]
     setGuilds(guilds)
@@ -54,17 +54,17 @@ export function useGuildRoles(guildId: string) {
   useEffect(() => {
     loadRoles()
     loadRoleMapping()
-  }, [versionId])
+  }, [versionId, guildId])
 
   const loadRoles = async () => {
-    const response = await apiRequest("GET", `guilds/${guildId}/roles`)
+    const response = await apiRequest("GET", `guild/${guildId}/roles`)
 
     const roles = (await response.json()) as GuildRole[]
     setRoles(roles)
   }
 
   const loadRoleMapping = async () => {
-    const response = await apiRequest("GET", `guilds/${guildId}/roles/mapping`)
+    const response = await apiRequest("GET", `guild/${guildId}/roles/mapping`)
 
     const roleMappings = (await response.json()) as GuildRoleMapping[]
     setRoleMappings(roleMappings)

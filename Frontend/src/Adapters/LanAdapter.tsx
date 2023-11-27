@@ -48,19 +48,26 @@ export function useActiveLan() {
     loadActiveLan()
   }, [activeGuildId])
 
-  async function loadActiveLan(): Promise<Lan> {
-    const response = await apiRequest(
-      "GET",
-      `lan/active?guildId=${activeGuildId}`
-    )
-    const lan = (await response.json()) as Lan
+  async function loadActiveLan(): Promise<Lan | null> {
+    try {
+      const response = await apiRequest(
+        "GET",
+        `lan/active?guildId=${activeGuildId}`
+      )
+      const lan = (await response.json()) as Lan
 
-    lan.createdAt = new Date(lan.createdAt)
-    lan.updatedAt = new Date(lan.updatedAt)
+      lan.createdAt = new Date(lan.createdAt)
+      lan.updatedAt = new Date(lan.updatedAt)
 
-    setActiveLan(lan)
+      setActiveLan(lan)
 
-    return lan
+      return lan
+    } catch (response) {
+      if (response instanceof Response && response.status == 404) {
+        return null
+      }
+      throw response
+    }
   }
 
   return activeLan

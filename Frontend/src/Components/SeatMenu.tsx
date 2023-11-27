@@ -4,35 +4,42 @@ import ListItemText from "@mui/material/ListItemText"
 import ListItemIcon from "@mui/material/ListItemIcon"
 import Menu, { MenuProps } from "@mui/material/Menu"
 import { DiscordUserAvatar } from "./DiscordAvatar"
-import { Add, Delete, Shuffle } from "@mui/icons-material"
+import { AddCircleOutline, AddLink, Delete, Shuffle } from "@mui/icons-material"
 import Typography from "@mui/material/Typography"
 import {
   Role,
+  User,
   useAuthenticationAdapter,
 } from "../Adapters/AuthenticationAdapter"
 import { Seat } from "../Adapters/SeatsAdapter"
+import { Stack } from "@mui/material"
 
-interface SeatMenuProps {
+export type SeatMenuProps = {
   seat: Seat
+  onReserve: (seat: Seat) => void
+  onRemove: (seat: Seat) => void
+  onReserveFor: (seat: Seat) => void
+  onRemoveFor: (seat: Seat) => void
+  onMoveFor: (fromSeat: Seat) => void
 }
 
 export function SeatMenu(props: SeatMenuProps & MenuProps) {
   const { loggedInUser } = useAuthenticationAdapter()
 
-  const addReservation = () => {
+  const makeReservationFor = () => {
     return (
-      <MenuItem>
+      <MenuItem onClick={() => props.onReserveFor(props.seat)}>
         <ListItemIcon>
-          <Add fontSize="small" />
+          <AddLink fontSize="small" />
         </ListItemIcon>
         <ListItemText>Legg til reservasjon</ListItemText>
       </MenuItem>
     )
   }
 
-  const moveReservation = () => {
+  const moveReservationFor = () => {
     return (
-      <MenuItem>
+      <MenuItem onClick={() => props.onMoveFor(props.seat)}>
         <ListItemIcon>
           <Shuffle fontSize="small" />
         </ListItemIcon>
@@ -41,9 +48,9 @@ export function SeatMenu(props: SeatMenuProps & MenuProps) {
     )
   }
 
-  const deleteReservation = () => {
+  const removeReservationFor = () => {
     return (
-      <MenuItem>
+      <MenuItem onClick={() => props.onRemoveFor(props.seat)}>
         <ListItemIcon>
           <Delete fontSize="small" />
         </ListItemIcon>
@@ -53,21 +60,27 @@ export function SeatMenu(props: SeatMenuProps & MenuProps) {
   }
 
   const makeReservation = () => {
-    if (props.seat.reservedBy != null) {
-      return (
-        <MenuItem>
+    return (
+      <MenuItem onClick={() => props.onReserve(props.seat)}>
+        <ListItemIcon>
+          <AddCircleOutline fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Reserver denne plassen</ListItemText>
+      </MenuItem>
+    )
+  }
+
+  const removeReservation = () => {
+    return (
+      <MenuItem onClick={() => props.onRemove(props.seat)}>
+        <ListItemIcon>
           <ListItemIcon>
-            <DiscordUserAvatar
-              sx={{ height: "1em", width: "1em" }}
-              user={props.seat.reservedBy}
-            />
+            <Delete fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Reservert av {props.seat.reservedBy.name}</ListItemText>
-        </MenuItem>
-      )
-    } else {
-      return <MenuItem>Reserver</MenuItem>
-    }
+        </ListItemIcon>
+        <ListItemText>Fjern din reservasjon</ListItemText>
+      </MenuItem>
+    )
   }
 
   const header = (text: string) => (
@@ -78,37 +91,86 @@ export function SeatMenu(props: SeatMenuProps & MenuProps) {
     </Divider>
   )
 
+  const message = (text: string) => (
+    <MenuItem
+      disabled
+      sx={{
+        "&.Mui-disabled": {
+          opacity: 1,
+        },
+      }}
+    >
+      {text}
+    </MenuItem>
+  )
+
+  const reservedByHeader = (reservedBy: User) => {
+    return (
+      <Stack
+        direction={"row"}
+        justifyContent={"flex-start"}
+        alignItems="stretch"
+        maxWidth={"100%"}
+        minWidth={0}
+        sx={{ cursor: "default", padding: "0.5em" }}
+      >
+        <ListItemIcon>
+          <DiscordUserAvatar user={reservedBy} />
+        </ListItemIcon>
+        <Stack>
+          <Typography variant="caption" noWrap color={"text.secondary"}>
+            Resevert av
+          </Typography>
+          <Stack direction="row" sx={{ minWidth: 0, maxWidth: "10em" }}>
+            <Typography sx={{ fontWeight: "medium" }} noWrap>
+              {reservedBy.name}
+              aaaaaaaaaaaaaaaaaaasdasdsdkjlhsduiweuhikhuiahuifsdhuasfiduuiyohs
+            </Typography>
+          </Stack>
+        </Stack>
+      </Stack>
+    )
+  }
+
   const getMenuComponents = () => {
+    const components: JSX.Element[] = []
+    if (props.seat.reservedBy != null) {
+      components.push(reservedByHeader(props.seat.reservedBy))
+    }
+
     if (loggedInUser == null) {
-      if (props.seat.reservedBy != null) {
-        return [makeReservation()]
+      if (props.seat.reservedBy == null) {
+        components.push(message("Logg inn for å reservere plass"))
       }
-    } else {
+    } else if (loggedInUser != null) {
       if (loggedInUser.isInRole(Role.OPERATOR)) {
         if (props.seat.reservedBy != null) {
-          return [
+          components.push(
             header("ADMIN"),
-            deleteReservation(),
-            moveReservation(),
-            header("USER"),
-            makeReservation(),
-          ]
+            removeReservationFor(),
+            moveReservationFor()
+          )
         } else {
-          return [
-            header("ADMIN"),
-            addReservation(),
-            header("USER"),
-            makeReservation(),
-          ]
+          components.push(header("ADMIN"), makeReservationFor())
         }
-      } else {
-        return [makeReservation()]
+      }
+
+      if (
+        props.seat.reservedBy != null &&
+        props.seat.reservedBy.id == loggedInUser.id
+      ) {
+        if (components.length > 0) components.push(header("VALG"))
+        components.push(removeReservation())
+      } else if (props.seat.reservedBy == null) {
+        if (components.length > 0) components.push(header("VALG"))
+        components.push(makeReservation())
       }
     }
+    return components
   }
 
   return (
-    <Menu sx={{ width: 320, maxWidth: "100%" }} {...props}>
+    <Menu sx={{ width: 320 }} {...props}>
       {getMenuComponents()}
     </Menu>
   )

@@ -46,7 +46,10 @@ public class SeatProjection : SingleStreamProjection<ProjectedSeat>
 
     public void Apply(SeatReservationMovedFor evt, ProjectedSeat seat)
     {
-        seat.ReservedBy = evt.UserId;
+       if (evt.ToSeatId == seat.Id)
+            seat.ReservedBy = evt.UserId;
+       else if (evt.FromSeatId == seat.Id)
+            seat.ReservedBy = null;
     }
 
     public void Apply(SeatTitleChanged evt, ProjectedSeat seat)

@@ -1,5 +1,6 @@
 import Config from "../config"
 import { useLocalStorage } from "usehooks-ts"
+import { useActiveGuildId } from "./ActiveGuildAdapter"
 
 export enum Role {
   ADMIN = "Admin",
@@ -36,6 +37,7 @@ export interface AuthenticationToken {
 }
 
 export function useAuthenticationAdapter() {
+  const { activeGuildId } = useActiveGuildId()
   const [authenticationToken, setAuthenticationToken] =
     useLocalStorage<AuthenticationToken | null>("authenticationToken", null)
   const loggedInUser =
@@ -45,7 +47,7 @@ export function useAuthenticationAdapter() {
     const authenticationToken = await makeRequest<AuthenticationToken>(
       "POST",
       `authentication/discord/login`,
-      { token: discordToken }
+      { token: discordToken, guildId: activeGuildId }
     )
 
     if (authenticationToken == null) {
@@ -60,7 +62,7 @@ export function useAuthenticationAdapter() {
     const authenticationToken = await makeRequest<AuthenticationToken>(
       "POST",
       `authentication/discord/renew`,
-      { refreshToken: refreshToken }
+      { refreshToken: refreshToken, guildId: activeGuildId }
     )
     if (authenticationToken == null) {
       throw "authenticationToken is null"
@@ -109,8 +111,15 @@ export function useAuthenticationAdapter() {
 
     return await fetch(Config.ApiBaseUrl + path, requestInit).then<T>(
       (response) => {
-        console.log(response)
-        return response.json() as T
+        const body = response.json() as T
+        console.log({
+          body: body,
+          status: response.status,
+          url: response.url,
+          method: method,
+          headers: response.headers,
+        })
+        return body
       }
     )
   }

@@ -22,18 +22,18 @@ public class MoveEndpoint
     {
         var user = await loggedInUserAccessor.Get();
 
-        await reservationService.Move(lanId, seatId, request.MoveToSeatId, user);
+        await reservationService.Move(lanId, seatId, request.ToSeatId, user);
 
         return new OkResult();
     }
 
-    public record Request(Guid MoveToSeatId);
+    public record Request(Guid ToSeatId);
 
     public class Validator : AbstractValidator<Request>
     {
         public Validator()
         {
-            RuleFor(x => x.MoveToSeatId).NotEmpty();
+            RuleFor(x => x.ToSeatId).NotEmpty();
         }
     }
 }
