@@ -20,6 +20,26 @@ export interface GuildRole {
   color: number
 }
 
+export function useGuild(guildId: string) {
+  const { apiRequest } = useApiRequests()
+  const { versionId } = useVersionId("guild_" + guildId)
+  const [guild, setGuild] = useState<Guild | "loading" | "not found">("loading")
+
+  useEffect(() => {
+    loadGuild()
+  }, [versionId])
+
+  async function loadGuild(): Promise<Guild> {
+    const response = await apiRequest("GET", `guild/${guildId}`)
+
+    const guild = (await response.json()) as Guild
+    setGuild(guild)
+    return guild
+  }
+
+  return guild
+}
+
 export function useGuilds() {
   const { apiRequest } = useApiRequests()
   const { versionId } = useVersionId("guilds")
@@ -42,43 +62,38 @@ export function useGuilds() {
 
 export function useGuildRoles(guildId: string) {
   const { apiRequest } = useApiRequests()
-  const { versionId } = useVersionId("guild_roles_" + guildId)
-  const [roleMappings, setRoleMappings] = useState<GuildRoleMapping[] | null>(
-    null
-  )
-  const [roles, setRoles] = useState<GuildRole[] | null>(null)
+  const { versionId, invalidate } = useVersionId("guild_roles_" + guildId)
+  const [roleMappings, setRoleMappingsState] = useState<
+    GuildRoleMapping[] | null
+  >(null)
+  const [guildRoles, setGuildRoles] = useState<GuildRole[] | null>(null)
 
   useEffect(() => {
     loadRoles()
-    loadRoleMapping()
+    loadRoleMappings()
   }, [versionId, guildId])
 
   const loadRoles = async () => {
     const response = await apiRequest("GET", `guild/${guildId}/roles`)
 
     const roles = (await response.json()) as GuildRole[]
-    setRoles(roles)
+    setGuildRoles(roles)
   }
 
-  const loadRoleMapping = async () => {
+  const loadRoleMappings = async () => {
     const response = await apiRequest("GET", `guild/${guildId}/roles/mapping`)
 
     const roleMappings = (await response.json()) as GuildRoleMapping[]
-    setRoleMappings(roleMappings)
+    setRoleMappingsState(roleMappings)
   }
 
-  return { roles, roleMappings }
-}
-
-export function useGuildAdapter() {
-  const { apiRequest } = useApiRequests()
-
-  const setGuildRoleMapping = async (
+  const setRoleMappings = async (
     guild: Guild,
-    mappings: { roleId: string; role: Role }[]
+    mappings: GuildRoleMapping[]
   ) => {
-    return await apiRequest("PUT", `guild/${guild.id}/roles/mapping`, mappings)
+    await apiRequest("PUT", `guild/${guild.id}/roles/mapping`, mappings)
+    invalidate()
   }
 
-  return { setGuildRoleMapping }
+  return { guildRoles, roleMappings, setRoleMappings }
 }

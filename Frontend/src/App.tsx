@@ -1,17 +1,28 @@
-import { useState } from "react"
-import { Route, Routes } from "react-router-dom"
-import NotFound from "./Pages/NotFound"
-import Seats from "./Pages/Seats"
-import RedirectLogin from "./Pages/RedirectLogin"
-import Admin from "./Pages/Admin"
-import MainAppBar from "./MainAppBar"
-import { AlertContext, AlertModel, setupAlerts } from "./Contexts/AlertContext"
 import Container from "@mui/material/Container"
+import { useState } from "react"
+import { Route, Routes, useParams } from "react-router-dom"
+import { AlertContext, AlertModel, setupAlerts } from "./Contexts/AlertContext"
 import {
-  DialogModel,
   DialogContext,
+  DialogModel,
   setupDialogs,
 } from "./Contexts/DialogContext"
+import MainAppBar from "./MainAppBar"
+import Admin from "./Pages/Admin"
+import GuildSettings from "./Pages/GuildSettings"
+import NotFound from "./Pages/NotFound"
+import RedirectLogin from "./Pages/RedirectLogin"
+import Seats from "./Pages/Seats"
+
+function GuildSettingsWrapper() {
+  const params = useParams<{ guildId: string }>()
+
+  return <GuildSettings guildId={params.guildId as string} />
+}
+
+export function GuildSettingsPath(guildId: string) {
+  return `/admin/guild/${guildId}`
+}
 
 export default function App() {
   const [alert, setAlert] = useState<AlertModel | null>(null)
@@ -25,11 +36,15 @@ export default function App() {
         {alert && <Alert alert={alert} />}
         {dialog && <Dialog dialog={dialog} />}
         <MainAppBar />
-        <Container maxWidth="sm">
+        <Container maxWidth="sm" sx={{ paddingTop: "1em" }}>
           <Routes>
             <Route path="/" element={<Seats />} />
             <Route path="/redirect-login" element={<RedirectLogin />} />
             <Route path="/admin" element={<Admin />} />
+            <Route
+              path="/admin/guild/:guildId"
+              element={<GuildSettingsWrapper />}
+            />
             <Route path="/*" element={<NotFound />} />
           </Routes>
         </Container>

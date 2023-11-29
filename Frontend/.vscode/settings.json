@@ -2,43 +2,18 @@
     "editor.minimap.enabled": false,
     "window.zoomLevel": 1,
     "explorer.confirmDelete": false,
-    "eslint.codeActionsOnSave.rules": null,
     "eslint.format.enable": true,
     "[typescriptreact]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[typescript]": {
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "vim.handleKeys": {
         "<C-d>": true,
         "<C-s>": false,
         "<C-z>": false
     },
-    "vim.normalModeKeyBindingsNonRecursive": [
-        {
-            "before": [
-                "u"
-            ],
-            "after": [],
-            "commands": [
-                {
-                    "command": "undo"
-                }
-            ]
-        },
-        {
-            "before": [
-                "<C-r>"
-            ],
-            "after": [],
-            "commands": [
-                {
-                    "command": "redo"
-                }
-            ]
-        }
-    ],
     "editor.formatOnSave": true,
     "[javascript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -47,6 +22,7 @@
     "files.autoSave": "onFocusChange",
     "editor.codeActionsOnSave": {
        "source.fixAll": true,
+       "source.organizeImports": true
     },
     "explorer.confirmDragAndDrop": false,
 }

@@ -117,7 +117,7 @@ public class DiscordAuthenticationService
 
     public async IAsyncEnumerable<(string RoleId, Role Role)> GetRoleMapping(string guildId)
     {
-        var reader = documentRepository.CreateReader();
+        await using var reader = documentRepository.CreateReader();
 
         var roleMappings = await reader.Get<GuildRoleMapping>(guildId) ??
                            new GuildRoleMapping(guildId, Array.Empty<GuildRoleMappingEntry>());

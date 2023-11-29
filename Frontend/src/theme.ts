@@ -1,4 +1,4 @@
-import { createTheme } from "@mui/material/styles";
+import { createTheme } from "@mui/material/styles"
 
 // A custom theme for this app
 const theme = createTheme({
@@ -15,6 +15,6 @@ const theme = createTheme({
       paper: "#353535",
     },
   },
-});
+})
 
-export default theme;
+export default theme

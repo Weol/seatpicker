@@ -1,31 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Autocomplete,
-  Box,
-  Button,
-  Container,
-  FormControlLabel,
-  IconButton,
-  List,
-  ListItemButton,
-  ListItemSecondaryAction,
-  Paper,
-  Stack,
-  styled,
-  Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
-  TextField,
-} from "@mui/material"
-import Typography from "@mui/material/Typography"
-import Divider from "@mui/material/Divider"
-import {
   Add,
   Cancel,
   Delete,
@@ -33,22 +7,45 @@ import {
   Fullscreen,
   Upload,
 } from "@mui/icons-material"
-import DelayedCircularProgress from "../Components/DelayedCircularProgress"
-import ListItemText from "@mui/material/ListItemText"
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Autocomplete,
+  Box,
+  Button,
+  FormControlLabel,
+  IconButton,
+  List,
+  ListItemButton,
+  ListItemSecondaryAction,
+  Paper,
+  Stack,
+  Switch,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  TextField,
+  styled,
+} from "@mui/material"
+import Divider from "@mui/material/Divider"
 import ListItemIcon from "@mui/material/ListItemIcon"
+import ListItemText from "@mui/material/ListItemText"
+import Typography from "@mui/material/Typography"
+import { useState } from "react"
+import { Role } from "../Adapters/AuthenticationAdapter"
 import {
   Guild,
   GuildRole,
   GuildRoleMapping,
-  useGuildAdapter,
-  useGuildRoles,
   useGuilds,
 } from "../Adapters/GuildAdapter"
+import { Lan, useLanAdapter, useLans } from "../Adapters/LanAdapter"
+import { GuildSettingsPath } from "../App"
+import DelayedCircularProgress from "../Components/DelayedCircularProgress"
 import DiscordGuildAvatar from "../Components/DiscordAvatar"
-import { useEffect, useState } from "react"
-import { Lan, useLans, useLanAdapter } from "../Adapters/LanAdapter"
-import { useAlerts } from "../Contexts/AlertContext"
-import { Role } from "../Adapters/AuthenticationAdapter"
 import Modal from "../Components/Modal"
 
 export default function Admin() {
@@ -60,16 +57,23 @@ export default function Admin() {
 
 function Loading() {
   return (
-    <Container>
+    <Stack
+      width="100%"
+      justifyContent="center"
+      alignItems="center"
+      sx={{ marginTop: "1em" }}
+    >
       <DelayedCircularProgress />
-    </Container>
+    </Stack>
   )
 }
 
 function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
   const { updateLan } = useLanAdapter()
   const [selectedGuild, setSelectedGuild] = useState<Guild | null>(null)
-  const [editingGuild, setEditingGuild] = useState<Guild | null>(null)
+  const [previewBackground, setPreviewBackground] = useState<string | null>(
+    null
+  )
   const [editingLan, setEditingLan] = useState<Lan | null>(null)
   const [selectedLan, setSelectedLan] = useState<Lan | null>(null)
   const selectedGuildLans =
@@ -79,10 +83,6 @@ function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
 
   function handleGuildSelect(guild: Guild) {
     setSelectedGuild(guild)
-  }
-
-  function handleGuildEditClick(guild: Guild) {
-    setEditingGuild(guild)
   }
 
   function handleEditLanClose() {
@@ -116,7 +116,13 @@ function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
 
   function handleDeleteClick(lan: Lan) {}
 
-  function handlePreviewBackgrundClick(lan: Lan) {}
+  function handlePreviewBackgrundClick(background: string) {
+    setPreviewBackground(background)
+  }
+
+  function handlePreviewBackgrundClose() {
+    setPreviewBackground(null)
+  }
 
   return (
     <Stack
@@ -124,14 +130,12 @@ function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
       spacing={2}
       justifyContent="center"
       alignItems="center"
-      sx={{ marginTop: "1em" }}
     >
       <Typography variant="h4">Alle servere</Typography>
       <GuildList
         guilds={props.guilds}
         selectedGuild={selectedGuild}
         onGuildSelect={handleGuildSelect}
-        onEditClick={handleGuildEditClick}
       />
 
       {selectedGuild && (
@@ -148,6 +152,7 @@ function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
           >
             {selectedGuildLans.map((lan) => (
               <LanDetails
+                key={lan.id}
                 lan={lan}
                 selected={selectedLan?.id == lan.id}
                 onEditClick={() => handleLanEditClick(lan)}
@@ -155,7 +160,7 @@ function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
                 onActiveToggleClick={() => handleActiveToggleClick(lan)}
                 onDeleteClick={() => handleDeleteClick(lan)}
                 onPreviewBackgroundClick={() =>
-                  handlePreviewBackgrundClick(lan)
+                  handlePreviewBackgrundClick(lan.background)
                 }
               />
             ))}
@@ -168,13 +173,20 @@ function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
           open={Boolean(editingLan)}
           lan={editingLan}
           onClose={handleEditLanClose}
-          onPreviewBackgroundClick={() =>
-            handlePreviewBackgrundClick(editingLan)
+          onPreviewBackgroundClick={(background: string) =>
+            handlePreviewBackgrundClick(background)
           }
           onSaveClick={(title: string, background: string) =>
             handleSaveEditedLanClick(editingLan, title, background)
           }
           onCancelClick={handleEditLanCancelClick}
+        />
+      )}
+      {previewBackground && (
+        <BackgroundPreviewModal
+          background={previewBackground}
+          open={Boolean(previewBackground)}
+          onClose={handlePreviewBackgrundClose}
         />
       )}
     </Stack>
@@ -185,7 +197,6 @@ function GuildList(props: {
   guilds: Guild[]
   selectedGuild: Guild | null
   onGuildSelect: (guild: Guild) => void
-  onEditClick: (guild: Guild) => void
 }) {
   return (
     <Paper sx={{ width: "100%" }}>
@@ -197,7 +208,7 @@ function GuildList(props: {
             key={guild.id}
           >
             <ListItemSecondaryAction>
-              <IconButton onClick={() => props.onEditClick(guild)}>
+              <IconButton href={GuildSettingsPath(guild.id)}>
                 <Edit />
               </IconButton>
             </ListItemSecondaryAction>
@@ -290,7 +301,11 @@ function LanDetails(props: {
               Bakgrunn
             </TableCell>
             <TableCell align="right">
-              <Button variant="text" size="small" onClick={() => true}>
+              <Button
+                variant="text"
+                size="small"
+                onClick={() => props.onPreviewBackgroundClick()}
+              >
                 Vis bakgrunn
               </Button>
             </TableCell>
@@ -350,7 +365,7 @@ function BackgroundPreviewModal(props: {
   }
 
   return (
-    <Modal {...props}>
+    <Modal title="Background preview" {...props}>
       <img
         alt="preview"
         style={{ width: "100%" }}
@@ -376,7 +391,7 @@ function LanEditorModal(props: {
   lan?: Lan
   open: boolean
   onClose: () => void
-  onPreviewBackgroundClick: () => void
+  onPreviewBackgroundClick: (background: string) => void
   onSaveClick: (title: string, background: string) => void
   onCancelClick: () => void
 }) {
@@ -442,14 +457,13 @@ function LanEditorModal(props: {
   }
 
   return (
-    <Modal {...props}>
+    <Modal title={props.lan?.title ?? "Opprett nytt lan"} {...props}>
       <Stack
         spacing={2}
         justifyContent="center"
         alignItems="center"
         sx={{ width: "100%" }}
       >
-        <Typography>{props.lan?.title ?? "Opprett nytt lan"}</Typography>
         <TextField
           defaultValue={title}
           sx={{ width: "100%" }}
@@ -477,7 +491,7 @@ function LanEditorModal(props: {
         </Button>
         {background && (
           <Button
-            onClick={() => props.onPreviewBackgroundClick()}
+            onClick={() => props.onPreviewBackgroundClick(background)}
             startIcon={<Fullscreen />}
           >
             Forhåndsvis bakgrunn
@@ -518,7 +532,7 @@ type RoleMapping = {
   roleError?: boolean
 }
 
-function RoleMppingModal(props: {
+function RoleMappingModal(props: {
   guild: Guild
   roles: Role[]
   guildRoles: GuildRole[]
@@ -651,7 +665,7 @@ function RoleMppingModal(props: {
     )
 
     return (
-      <Modal {...props}>
+      <Modal title="Role mappings" {...props}>
         <Stack spacing={2} justifyContent="center" alignItems="center">
           <Stack
             direction={"row"}
