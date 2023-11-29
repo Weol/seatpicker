@@ -10,8 +10,8 @@ export interface Guild {
 }
 
 export interface GuildRoleMapping {
-  roleId: string | null
-  role: Role | null
+  roleId: string
+  role: Role
 }
 
 export interface GuildRole {
@@ -20,9 +20,7 @@ export interface GuildRole {
   color: number
 }
 
-export function useGuilds(
-  sideEffects?: ((guilds: Guild[]) => Promise<void> | void)[]
-) {
+export function useGuilds() {
   const { apiRequest } = useApiRequests()
   const { versionId } = useVersionId("guilds")
   const [guilds, setGuilds] = useState<Guild[] | null>(null)
@@ -36,7 +34,6 @@ export function useGuilds(
 
     const guilds = (await response.json()) as Guild[]
     setGuilds(guilds)
-    sideEffects?.forEach(async (sideEffect) => await sideEffect(guilds))
     return guilds
   }
 

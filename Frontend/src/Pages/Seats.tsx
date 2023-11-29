@@ -7,20 +7,29 @@ import {
   Card,
   CardActions,
   CardContent,
+  Container,
+  Divider,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  MenuProps,
   Stack,
   Typography,
 } from "@mui/material"
 import { useAlerts } from "../Contexts/AlertContext"
-import SeatComponent from "../Components/SeatComponent"
 import useReservationAdapter from "../Adapters/ReservationAdapter"
 import { useDialogs } from "../Contexts/DialogContext"
 import {
   User,
   useAuthenticationAdapter,
+  Role,
 } from "../Adapters/AuthenticationAdapter"
 import { Seat, useSeats } from "../Adapters/SeatsAdapter"
 import { Lan, useActiveLan } from "../Adapters/LanAdapter"
 import DelayedCircularProgress from "../Components/DelayedCircularProgress"
+import { AddLink, Shuffle, Delete, AddCircleOutline } from "@mui/icons-material"
+import { DiscordUserAvatar } from "../Components/DiscordAvatar"
 
 export default function Seats() {
   const activeLan = useActiveLan()
@@ -42,7 +51,7 @@ function NoActiveLan() {
 }
 
 type AwaitingSelectSeat = {
-  onSelected: (seat: Seat | null) => Promise<void>
+  onSelected: (seat: Seat) => Promise<void>
   seat: Seat
   tooltip: string
 }
@@ -135,38 +144,34 @@ function SeatsWithLan(props: { activeLan: Lan }) {
     throw new Error("Function not implemented.")
   }
 
-  async function onSeatSelectedForMove(fromSeat: Seat, toSeat: Seat | null) {
-    if (toSeat) {
-      const result = await showDialog(
-        "Endre sete",
-        `Sikker på at du vil flytte ${fromSeat.reservedBy?.name} fra plass ${fromSeat.title} til plass ${toSeat.title}?`,
-        toSeat,
-        "Ja",
-        "Nei"
+  async function handleSeatSelectedForMove(fromSeat: Seat, toSeat: Seat) {
+    const result = await showDialog(
+      "Endre sete",
+      `Sikker på at du vil flytte ${fromSeat.reservedBy?.name} fra plass ${fromSeat.title} til plass ${toSeat.title}?`,
+      toSeat,
+      "Ja",
+      "Nei"
+    )
+
+    if (result.positive) {
+      const toSeat = result.metadata
+
+      await alertLoading("Flytter reservasjon...", async () => {
+        await moveReservationFor(fromSeat, toSeat)
+      })
+
+      alertInfo(
+        `Du har flyttet ${fromSeat.reservedBy?.name} fra plass ${fromSeat.title} til plass ${toSeat.title}`
       )
-
-      if (result.positive) {
-        const toSeat = result.metadata
-
-        await alertLoading("Flytter reservasjon...", async () => {
-          await moveReservationFor(fromSeat, toSeat)
-        })
-
-        alertInfo(
-          `Du har flyttet ${fromSeat.reservedBy?.name} fra plass ${fromSeat.title} til plass ${toSeat.title}`
-        )
-      }
     }
   }
 
   function handleMoveFor(fromSeat: Seat) {
-    // This looks kind of wierd, but in order to set the state to a function we need to give the
-    // setter a function that returns a function, google it
     setAwaitingSelectSeat({
       seat: fromSeat,
       tooltip: `Velg hvilken plass du vil flytte ${fromSeat.reservedBy?.name} til`,
-      onSelected: async (toSeat: Seat | null) => {
-        await onSeatSelectedForMove(fromSeat, toSeat)
+      onSelected: async (toSeat: Seat) => {
+        await handleSeatSelectedForMove(fromSeat, toSeat)
       },
     })
   }
@@ -178,7 +183,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
     }
   }
 
-  function handleCancelMove() {
+  function handleCancelMoveFor() {
     setAwaitingSelectSeat(null)
   }
 
@@ -198,24 +203,12 @@ function SeatsWithLan(props: { activeLan: Lan }) {
 
   return (
     <Stack spacing={2} sx={{ my: 2, alignItems: "center" }}>
-      {awaitingSelectSeat && (
-        <Card>
-          <CardContent>
-            <Typography color="text.secondary" gutterBottom>
-              Du flytter på {awaitingSelectSeat.seat.reservedBy?.name} fra plass{" "}
-              {awaitingSelectSeat.seat.title}
-            </Typography>
-            <Typography>
-              Trykk på en plass for å velge hvor du vil flytte{" "}
-              {awaitingSelectSeat.seat.reservedBy?.name} til
-            </Typography>
-          </CardContent>
-          <CardActions>
-            <Button onClick={handleCancelMove} size="small">
-              Avbryt
-            </Button>
-          </CardActions>
-        </Card>
+      {awaitingSelectSeat && awaitingSelectSeat.seat.reservedBy && (
+        <AwaitingSelectInfoCard
+          userName={awaitingSelectSeat.seat.reservedBy.name}
+          seatTitle={awaitingSelectSeat.seat.title}
+          onCancelClick={handleCancelMoveFor}
+        />
       )}
       <Box sx={{ flexGrow: 1 }}>
         <Box
@@ -243,7 +236,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
             />
 
             {seats?.map((seat) => (
-              <SeatComponent
+              <SeatButton
                 key={seat.id}
                 color={getSeatColor(seat)}
                 seat={seat}
@@ -264,5 +257,284 @@ function SeatsWithLan(props: { activeLan: Lan }) {
         </Box>
       </Box>
     </Stack>
+  )
+}
+
+type SeatButtonProps = {
+  color: string
+  onSeatClick?: (seat: Seat) => void
+} & SeatMenuProps
+
+function AwaitingSelectInfoCard(props: {
+  userName: string
+  seatTitle: string
+  onCancelClick: () => void
+}) {
+  return (
+    <Card>
+      <CardContent>
+        <Typography color="text.secondary" gutterBottom>
+          Du flytter på {props.userName} fra plass {props.seatTitle}
+        </Typography>
+        <Typography>
+          Trykk på en plass for å velge hvor du vil flytte {props.userName} sin
+          reservasjon til, eller trykk avbryt for å avbryte.
+        </Typography>
+      </CardContent>
+      <CardActions>
+        <Button onClick={props.onCancelClick} size="small">
+          Avbryt
+        </Button>
+      </CardActions>
+    </Card>
+  )
+}
+
+function SeatButton(props: SeatButtonProps) {
+  const [menuAnchor, setMenuAnchor] = React.useState<null | HTMLElement>(null)
+  const menuOpen = Boolean(menuAnchor)
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    if (props.onSeatClick != undefined) {
+      props.onSeatClick(props.seat)
+    } else {
+      setMenuAnchor(event.currentTarget)
+    }
+  }
+
+  const handleClose = () => {
+    setMenuAnchor(null)
+  }
+
+  function handleRemove(seat: Seat) {
+    props.onRemove(seat)
+    handleClose()
+  }
+
+  function handleRemoveFor(seat: Seat) {
+    props.onRemoveFor(seat)
+    handleClose()
+  }
+
+  function handleMoveFor(seat: Seat) {
+    props.onMoveFor(seat)
+    handleClose()
+  }
+
+  const renderSeat = (seat: Seat) => {
+    return (
+      <Container>
+        <Box
+          key={seat.id}
+          onClick={handleClick}
+          sx={{
+            position: "absolute",
+            minWidth: "0",
+            top: seat.bounds.y + "%",
+            left: seat.bounds.x + "%",
+            width: seat.bounds.width + "%",
+            height: seat.bounds.height + "%",
+            border: "1px #ffffff61 solid",
+            backgroundColor: props.color,
+            cursor: "pointer",
+            textAlign: "center",
+            display: "flex",
+          }}
+        >
+          <Typography
+            variant="subtitle1"
+            gutterBottom
+            component="p"
+            sx={{ lineHeight: 1, fontSize: "0.9rem", margin: "auto" }}
+          >
+            {seat.title}
+          </Typography>
+        </Box>
+        <SeatMenu
+          {...props}
+          onRemove={handleRemove}
+          onRemoveFor={handleRemoveFor}
+          onMoveFor={handleMoveFor}
+          open={menuOpen}
+          seat={seat}
+          id="demo-positioned-menu"
+          aria-labelledby="demo-positioned-button"
+          anchorEl={menuAnchor}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: "top",
+            horizontal: "center",
+          }}
+          transformOrigin={{
+            vertical: "bottom",
+            horizontal: "center",
+          }}
+        />
+      </Container>
+    )
+  }
+
+  return renderSeat(props.seat)
+}
+
+type SeatMenuProps = {
+  seat: Seat
+  onReserve: (seat: Seat) => void
+  onRemove: (seat: Seat) => void
+  onReserveFor: (seat: Seat) => void
+  onRemoveFor: (seat: Seat) => void
+  onMoveFor: (fromSeat: Seat) => void
+}
+
+function SeatMenu(props: SeatMenuProps & MenuProps) {
+  const { loggedInUser } = useAuthenticationAdapter()
+
+  const makeReservationFor = () => {
+    return (
+      <MenuItem onClick={() => props.onReserveFor(props.seat)}>
+        <ListItemIcon>
+          <AddLink fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Legg til reservasjon</ListItemText>
+      </MenuItem>
+    )
+  }
+
+  const moveReservationFor = () => {
+    return (
+      <MenuItem onClick={() => props.onMoveFor(props.seat)}>
+        <ListItemIcon>
+          <Shuffle fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Flytt reservasjon</ListItemText>
+      </MenuItem>
+    )
+  }
+
+  const removeReservationFor = () => {
+    return (
+      <MenuItem onClick={() => props.onRemoveFor(props.seat)}>
+        <ListItemIcon>
+          <Delete fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Fjern reservasjon</ListItemText>
+      </MenuItem>
+    )
+  }
+
+  const makeReservation = () => {
+    return (
+      <MenuItem onClick={() => props.onReserve(props.seat)}>
+        <ListItemIcon>
+          <AddCircleOutline fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Reserver denne plassen</ListItemText>
+      </MenuItem>
+    )
+  }
+
+  const removeReservation = () => {
+    return (
+      <MenuItem onClick={() => props.onRemove(props.seat)}>
+        <ListItemIcon>
+          <ListItemIcon>
+            <Delete fontSize="small" />
+          </ListItemIcon>
+        </ListItemIcon>
+        <ListItemText>Fjern din reservasjon</ListItemText>
+      </MenuItem>
+    )
+  }
+
+  const header = (text: string) => (
+    <Divider flexItem sx={{ width: "100%" }} orientation={"horizontal"}>
+      <Typography color="text.secondary" variant={"subtitle2"}>
+        {text}
+      </Typography>
+    </Divider>
+  )
+
+  const message = (text: string) => (
+    <MenuItem
+      disabled
+      sx={{
+        "&.Mui-disabled": {
+          opacity: 1,
+        },
+      }}
+    >
+      {text}
+    </MenuItem>
+  )
+
+  const reservedByHeader = (reservedBy: User) => {
+    return (
+      <Stack
+        direction={"row"}
+        justifyContent={"flex-start"}
+        alignItems="stretch"
+        maxWidth={"100%"}
+        minWidth={0}
+        sx={{ cursor: "default", padding: "0.5em" }}
+      >
+        <ListItemIcon>
+          <DiscordUserAvatar user={reservedBy} />
+        </ListItemIcon>
+        <Stack>
+          <Typography variant="caption" noWrap color={"text.secondary"}>
+            Resevert av
+          </Typography>
+          <Stack direction="row" sx={{ minWidth: 0, maxWidth: "10em" }}>
+            <Typography sx={{ fontWeight: "medium" }} noWrap>
+              {reservedBy.name}
+              aaaaaaaaaaaaaaaaaaasdasdsdkjlhsduiweuhikhuiahuifsdhuasfiduuiyohs
+            </Typography>
+          </Stack>
+        </Stack>
+      </Stack>
+    )
+  }
+
+  const getMenuComponents = () => {
+    const components: JSX.Element[] = []
+    if (props.seat.reservedBy != null) {
+      components.push(reservedByHeader(props.seat.reservedBy))
+    }
+
+    if (loggedInUser == null) {
+      if (props.seat.reservedBy == null) {
+        components.push(message("Logg inn for å reservere plass"))
+      }
+    } else if (loggedInUser != null) {
+      if (loggedInUser.isInRole(Role.OPERATOR)) {
+        if (props.seat.reservedBy != null) {
+          components.push(
+            header("ADMIN"),
+            removeReservationFor(),
+            moveReservationFor()
+          )
+        } else {
+          components.push(header("ADMIN"), makeReservationFor())
+        }
+      }
+
+      if (
+        props.seat.reservedBy != null &&
+        props.seat.reservedBy.id == loggedInUser.id
+      ) {
+        if (components.length > 0) components.push(header("VALG"))
+        components.push(removeReservation())
+      } else if (props.seat.reservedBy == null) {
+        if (components.length > 0) components.push(header("VALG"))
+        components.push(makeReservation())
+      }
+    }
+    return components
+  }
+
+  return (
+    <Menu sx={{ width: 320 }} {...props}>
+      {getMenuComponents()}
+    </Menu>
   )
 }
