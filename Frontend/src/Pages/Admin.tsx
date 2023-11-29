@@ -21,6 +21,7 @@ import {
   ListItemSecondaryAction,
   Paper,
   Stack,
+  styled,
   Switch,
   Table,
   TableBody,
@@ -28,7 +29,6 @@ import {
   TableContainer,
   TableRow,
   TextField,
-  styled,
 } from "@mui/material"
 import Divider from "@mui/material/Divider"
 import ListItemIcon from "@mui/material/ListItemIcon"
@@ -47,6 +47,7 @@ import { GuildSettingsPath } from "../App"
 import DelayedCircularProgress from "../Components/DelayedCircularProgress"
 import DiscordGuildAvatar from "../Components/DiscordAvatar"
 import Modal from "../Components/Modal"
+import { useAlerts } from "../Contexts/AlertContext"
 
 export default function Admin() {
   const guilds = useGuilds()
@@ -69,13 +70,16 @@ function Loading() {
 }
 
 function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
-  const { updateLan } = useLanAdapter()
+  const { alertLoading, alertSuccess } = useAlerts()
+  const { updateLan, createLan } = useLanAdapter()
+  const { deleteLan, setActiveLan } = useLanAdapter()
   const [selectedGuild, setSelectedGuild] = useState<Guild | null>(null)
   const [previewBackground, setPreviewBackground] = useState<string | null>(
     null
   )
   const [editingLan, setEditingLan] = useState<Lan | null>(null)
   const [selectedLan, setSelectedLan] = useState<Lan | null>(null)
+  const [showCreateLan, setShowCreateLan] = useState<boolean>(false)
   const selectedGuildLans =
     (selectedGuild &&
       props.lans.filter((lan) => lan.guildId == selectedGuild?.id)) ??
@@ -93,28 +97,50 @@ function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
     setEditingLan(lan)
   }
 
+  async function handleDeleteClick(lan: Lan) {
+    await alertLoading(`Sletter ${lan.title} ...`, async () => {
+      await deleteLan(lan)
+    })
+    alertSuccess(`${lan.title} har blitt slettet`)
+  }
+
+  async function handleActiveToggleClick(lan: Lan) {
+    const active = lan.active ? "inaktiv" : "aktiv"
+    await alertLoading(`Endrer ${lan.title} til ${active}`, async () => {
+      await setActiveLan(lan, !lan.active)
+    })
+    alertSuccess(`${lan.title} ble satt til ${active}`)
+  }
+
   async function handleSaveEditedLanClick(
     lan: Lan,
     title: string,
     background: string
   ) {
-    await updateLan(lan, title, background)
+    await alertLoading(`Oppdaterer ${lan.title}`, async () => {
+      await updateLan(lan, title, background)
+    })
+    alertSuccess(`${lan.title} ble oppdatert`)
     setEditingLan(null)
   }
 
-  function handleEditLanCancelClick() {
-    setEditingLan(null)
+  function handleLanCreateClick() {
+    setShowCreateLan(true)
   }
 
-  function handleLanCreateClick() {}
+  async function handleCreateLanClick(title: string, background: string) {
+    if (selectedGuild) {
+      await alertLoading("Oppretter " + title, async () => {
+        await createLan(selectedGuild.id, title, background)
+      })
+      alertSuccess(title + " har blitt opprettet")
+      handleCreateLanClose()
+    }
+  }
 
   function handleOnLanClick(lan: Lan) {
     setSelectedLan(selectedLan?.id == lan.id ? null : lan)
   }
-
-  function handleActiveToggleClick(lan: Lan) {}
-
-  function handleDeleteClick(lan: Lan) {}
 
   function handlePreviewBackgrundClick(background: string) {
     setPreviewBackground(background)
@@ -124,13 +150,12 @@ function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
     setPreviewBackground(null)
   }
 
+  function handleCreateLanClose() {
+    setShowCreateLan(false)
+  }
+
   return (
-    <Stack
-      divider={<Divider orientation="horizontal" flexItem />}
-      spacing={2}
-      justifyContent="center"
-      alignItems="center"
-    >
+    <Stack spacing={2} justifyContent="center" alignItems="center">
       <Typography variant="h4">Alle servere</Typography>
       <GuildList
         guilds={props.guilds}
@@ -138,6 +163,9 @@ function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
         onGuildSelect={handleGuildSelect}
       />
 
+      {selectedGuild && (
+        <Divider orientation="horizontal" sx={{ width: "100%" }} />
+      )}
       {selectedGuild && (
         <Stack width={"100%"}>
           <LanListHeader
@@ -179,7 +207,18 @@ function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
           onSaveClick={(title: string, background: string) =>
             handleSaveEditedLanClick(editingLan, title, background)
           }
-          onCancelClick={handleEditLanCancelClick}
+        />
+      )}
+      {showCreateLan && (
+        <LanEditorModal
+          open={showCreateLan}
+          onClose={handleCreateLanClose}
+          onPreviewBackgroundClick={(background: string) =>
+            handlePreviewBackgrundClick(background)
+          }
+          onSaveClick={(title: string, background: string) =>
+            handleCreateLanClick(title, background)
+          }
         />
       )}
       {previewBackground && (
@@ -393,7 +432,6 @@ function LanEditorModal(props: {
   onClose: () => void
   onPreviewBackgroundClick: (background: string) => void
   onSaveClick: (title: string, background: string) => void
-  onCancelClick: () => void
 }) {
   const [title, setTitle] = useState<string | null>(
     props.lan == undefined ? null : props.lan.title
@@ -497,24 +535,13 @@ function LanEditorModal(props: {
             Forhåndsvis bakgrunn
           </Button>
         )}
-        <Stack
-          sx={{ width: "100%" }}
-          spacing={1}
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
+        <Button
+          onClick={handleSaveClicked}
+          color="secondary"
+          variant="contained"
         >
-          <Button
-            onClick={handleSaveClicked}
-            color="secondary"
-            variant="contained"
-          >
-            Lagre
-          </Button>
-          <IconButton aria-label="cancel" onClick={() => props.onCancelClick()}>
-            <Cancel />
-          </IconButton>
-        </Stack>
+          Lagre
+        </Button>
       </Stack>
     </Modal>
   )

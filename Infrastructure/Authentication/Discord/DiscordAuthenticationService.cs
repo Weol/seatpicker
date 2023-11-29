@@ -81,7 +81,7 @@ public class DiscordAuthenticationService
             expiresAt);
 
         var jwtToken = await tokenCreator.CreateToken(token, roles);
-        await userManager.Store(new User(new UserId(discordUser.Id), discordUser.Username, discordUser.Avatar));
+        await userManager.Store(new User(new UserId(discordUser.Id), discordUser.Username, discordUser.Avatar), guildId);
 
         return (jwtToken, expiresAt, accessToken.RefreshToken, discordUser, roles);
     }
@@ -104,13 +104,13 @@ public class DiscordAuthenticationService
     public async Task SetRoleMapping(string guildId, IEnumerable<(string RoleId, Role Role)> mappings)
     {
         await using var transaction = documentRepository.CreateTransaction();
-        
+
         var transformed = mappings
             .Select(mapping => new GuildRoleMappingEntry(mapping.RoleId, mapping.Role))
             .ToArray();
-        
+
         transaction.Store(new GuildRoleMapping(
-            guildId, 
+            guildId,
             transformed));
         transaction.Commit();
     }

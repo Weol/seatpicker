@@ -4,6 +4,6 @@ public record User(string Id, string Name, string? Avatar)
 {
     public static User FromDomainUser(Domain.User user)
     {
-        return new User(user.Id, user.Name, user.Avatar);
+        return new User(user.Id.ToString(), user.Name, user.Avatar);
     }
 }

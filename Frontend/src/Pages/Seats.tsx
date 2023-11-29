@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import * as React from "react"
-import { useState } from "react"
+import { AddCircleOutline, AddLink, Delete, Shuffle } from "@mui/icons-material"
 import {
+  Autocomplete,
   Box,
   Button,
   Card,
@@ -15,21 +15,24 @@ import {
   MenuItem,
   MenuProps,
   Stack,
+  TextField,
   Typography,
 } from "@mui/material"
-import { useAlerts } from "../Contexts/AlertContext"
-import useReservationAdapter from "../Adapters/ReservationAdapter"
-import { useDialogs } from "../Contexts/DialogContext"
+import * as React from "react"
+import { useState } from "react"
 import {
-  User,
-  useAuthenticationAdapter,
   Role,
+  useAuthenticationAdapter,
+  User,
 } from "../Adapters/AuthenticationAdapter"
-import { Seat, useSeats } from "../Adapters/SeatsAdapter"
+import { useGuildUsers } from "../Adapters/GuildAdapter"
 import { Lan, useActiveLan } from "../Adapters/LanAdapter"
+import useReservationAdapter from "../Adapters/ReservationAdapter"
+import { Seat, useSeats } from "../Adapters/SeatsAdapter"
 import DelayedCircularProgress from "../Components/DelayedCircularProgress"
-import { AddLink, Shuffle, Delete, AddCircleOutline } from "@mui/icons-material"
 import { DiscordUserAvatar } from "../Components/DiscordAvatar"
+import { useAlerts } from "../Contexts/AlertContext"
+import { useDialogs } from "../Contexts/DialogContext"
 
 export default function Seats() {
   const activeLan = useActiveLan()
@@ -61,6 +64,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
   const { showDialog } = useDialogs()
   const { loggedInUser } = useAuthenticationAdapter()
   const { seats, reservedSeat } = useSeats(props.activeLan)
+  const { users, loadUsers } = useGuildUsers(props.activeLan.guildId)
   const {
     makeReservation,
     deleteReservation,
@@ -238,8 +242,10 @@ function SeatsWithLan(props: { activeLan: Lan }) {
             {seats?.map((seat) => (
               <SeatButton
                 key={seat.id}
-                color={getSeatColor(seat)}
                 seat={seat}
+                users={users}
+                loadUsers={loadUsers}
+                color={getSeatColor(seat)}
                 onSeatClick={awaitingSelectSeat ? handleSeatClick : undefined}
                 onReserve={handleReserve}
                 onRemove={handleRemove}
@@ -379,6 +385,8 @@ function SeatButton(props: SeatButtonProps) {
 
 type SeatMenuProps = {
   seat: Seat
+  users: User[] | null
+  loadUsers: () => Promise<User[]>
   onReserve: (seat: Seat) => void
   onRemove: (seat: Seat) => void
   onReserveFor: (seat: Seat) => void
@@ -388,14 +396,38 @@ type SeatMenuProps = {
 
 function SeatMenu(props: SeatMenuProps & MenuProps) {
   const { loggedInUser } = useAuthenticationAdapter()
+  const [showUserList, setShowUserList] = useState<boolean>(false)
+
+  function handleMakeReservationForClick() {
+    props.loadUsers()
+    setShowUserList(true)
+  }
 
   const makeReservationFor = () => {
     return (
-      <MenuItem onClick={() => props.onReserveFor(props.seat)}>
+      <MenuItem onClick={() => handleMakeReservationForClick()}>
         <ListItemIcon>
           <AddLink fontSize="small" />
         </ListItemIcon>
         <ListItemText>Legg til reservasjon</ListItemText>
+        {showUserList && props.users && (
+          <Autocomplete
+            autoHighlight
+            options={props.users}
+            getOptionLabel={(option) => option.name}
+            renderOption={(props, option) => (
+              <Box
+                component="li"
+                sx={{ "& > img": { mr: 2, flexShrink: 0 } }}
+                {...props}
+              >
+                <DiscordUserAvatar user={option} />
+                {option.name}
+              </Box>
+            )}
+            renderInput={(params) => <TextField {...params} label="User" />}
+          />
+        )}
       </MenuItem>
     )
   }

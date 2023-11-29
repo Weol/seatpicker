@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import useApiRequests from "./ApiRequestHook"
-import { Role } from "./AuthenticationAdapter"
+import { Role, User } from "./AuthenticationAdapter"
 import useVersionId from "./VersionIdHook"
 
 export interface Guild {
@@ -38,6 +38,21 @@ export function useGuild(guildId: string) {
   }
 
   return guild
+}
+
+export function useGuildUsers(guildId: string) {
+  const { apiRequest } = useApiRequests()
+  const [users, setUsers] = useState<User[] | null>(null)
+
+  async function loadUsers(): Promise<User[]> {
+    const response = await apiRequest("GET", `guild/${guildId}/users`)
+
+    const users = (await response.json()) as User[]
+    setUsers(users)
+    return users
+  }
+
+  return { users, loadUsers }
 }
 
 export function useGuilds() {

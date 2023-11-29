@@ -22,14 +22,22 @@ public class UserManager : IUserProvider
         return userDocument is null ? null : new User(new UserId(userDocument.Id), userDocument.Name, userDocument.Avatar);
     }
 
-    public async Task Store(User user)
+    public async Task<IEnumerable<User>> GetAllInGuild(string guildId)
+    {
+        await using var reader = documentRepository.CreateReader();
+        return reader.Query<UserDocument>()
+            .Where(user => user.GuildId == guildId)
+            .Select(document => new User(new UserId(document.Id), document.Name, document.Avatar));
+    }
+
+    public async Task Store(User user, string guildId)
     {
         await using var transaction = documentRepository.CreateTransaction();
-        transaction.Store(new UserDocument(user.Id, user.Name, user.Avatar));
+        transaction.Store(new UserDocument(user.Id, guildId, user.Name, user.Avatar));
         transaction.Commit();
     }
 
-    public record UserDocument(string Id, string Name, string? Avatar) : IDocument;
+    public record UserDocument(string Id, string GuildId, string Name, string? Avatar) : IDocument;
 }
 
 public static class UserManagerExtensions
