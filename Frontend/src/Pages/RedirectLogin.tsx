@@ -1,13 +1,9 @@
-import * as React from "react"
-import Typography from "@mui/material/Typography"
-import { Link, useSearchParams } from "react-router-dom"
 import { CircularProgress, Stack } from "@mui/material"
 import Button from "@mui/material/Button"
-import {
-  User,
-  useAuthenticationAdapter,
-} from "../Adapters/AuthenticationAdapter"
+import Typography from "@mui/material/Typography"
 import { useEffect } from "react"
+import { Link, useSearchParams } from "react-router-dom"
+import { User, useAuthenticationAdapter } from "../Adapters/LoggedInUserAdapter"
 import { DiscordUserAvatar } from "../Components/DiscordAvatar"
 
 export default function RedirectLogin() {
@@ -28,10 +24,7 @@ export default function RedirectLogin() {
           {"Velkommen, " + user.name}
         </Typography>
 
-        <DiscordUserAvatar
-          user={user}
-          style={{ maxWidth: "150px", borderRadius: "50%" }}
-        />
+        <DiscordUserAvatar user={user} style={{ maxWidth: "150px", borderRadius: "50%" }} />
 
         <Button component={Link} to="/" variant="contained">
           Gå til sete reservasjon

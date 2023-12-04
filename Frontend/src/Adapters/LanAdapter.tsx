@@ -1,9 +1,10 @@
-import { useActiveGuildId } from "./ActiveGuildAdapter"
-import useApiRequests from "./ApiRequestHook"
 import { useEffect, useState } from "react"
+import { selector, useRecoilValue } from "recoil"
+import { default as ApiRequest, default as useApiRequests } from "./ApiRequestAdapter"
+import { activeGuildIdAtom } from "./GuildAdapter"
 import useVersionId from "./VersionIdHook"
 
-export interface Lan {
+export type Lan = {
   id: string
   guildId: string
   active: boolean
@@ -13,11 +14,22 @@ export interface Lan {
   updatedAt: Date
 }
 
-const allLansVersionName = "AllLans"
+const activeLanSelector = selector<Lan>({
+  key: "activeLan",
+  get: async ({ get }) => {
+    const activeGuildId = get(activeGuildIdAtom)
+    const response = await ApiRequest("GET", `lan/active?guildId=${activeGuildId}`)
+
+    const lan = (await response.json()) as Lan
+
+    lan.createdAt = new Date(lan.createdAt)
+    lan.updatedAt = new Date(lan.updatedAt)
+
+    return lan
+  },
+})
 
 export function useLans() {
-  const { apiRequest } = useApiRequests()
-  const { versionId } = useVersionId(allLansVersionName)
   const [lans, setLans] = useState<Lan[] | null>(null)
 
   useEffect(() => {
@@ -25,8 +37,6 @@ export function useLans() {
   }, [versionId])
 
   const loadAllLans = async () => {
-    const response = await apiRequest("GET", "lan")
-
     const lans = (await response.json()) as Lan[]
     lans.forEach((lan) => {
       lan.createdAt = new Date(lan.createdAt)
@@ -40,35 +50,7 @@ export function useLans() {
 }
 
 export function useActiveLan() {
-  const { apiRequest } = useApiRequests()
-  const { activeGuildId } = useActiveGuildId()
-  const [activeLan, setActiveLan] = useState<Lan | null>(null)
-
-  useEffect(() => {
-    loadActiveLan()
-  }, [activeGuildId])
-
-  async function loadActiveLan(): Promise<Lan | null> {
-    try {
-      const response = await apiRequest(
-        "GET",
-        `lan/active?guildId=${activeGuildId}`
-      )
-      const lan = (await response.json()) as Lan
-
-      lan.createdAt = new Date(lan.createdAt)
-      lan.updatedAt = new Date(lan.updatedAt)
-
-      setActiveLan(lan)
-
-      return lan
-    } catch (response) {
-      if (response instanceof Response && response.status == 404) {
-        return null
-      }
-      throw response
-    }
-  }
+  const activeLan = useRecoilValue(activeLanSelector)
 
   return activeLan
 }
@@ -91,11 +73,7 @@ export function useLanAdapter() {
     return response
   }
 
-  const updateLan = async (
-    lan: Lan,
-    title: string,
-    background: string
-  ): Promise<Response> => {
+  const updateLan = async (lan: Lan, title: string, background: string): Promise<Response> => {
     const response = await apiRequest("PUT", `lan/${lan.id}`, {
       id: lan.id,
       title,

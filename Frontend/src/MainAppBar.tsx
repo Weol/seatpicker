@@ -1,22 +1,19 @@
-import * as React from "react"
+import MenuIcon from "@mui/icons-material/Menu"
 import AppBar from "@mui/material/AppBar"
 import Box from "@mui/material/Box"
-import Toolbar from "@mui/material/Toolbar"
-import IconButton from "@mui/material/IconButton"
-import Typography from "@mui/material/Typography"
-import Menu from "@mui/material/Menu"
-import MenuIcon from "@mui/icons-material/Menu"
-import Container from "@mui/material/Container"
 import Button from "@mui/material/Button"
-import Tooltip from "@mui/material/Tooltip"
+import Container from "@mui/material/Container"
+import IconButton from "@mui/material/IconButton"
+import Menu from "@mui/material/Menu"
 import MenuItem from "@mui/material/MenuItem"
+import Toolbar from "@mui/material/Toolbar"
+import Tooltip from "@mui/material/Tooltip"
+import Typography from "@mui/material/Typography"
+import * as React from "react"
 import { useNavigate } from "react-router-dom"
-import { DiscordUserAvatar } from "./Components/DiscordAvatar"
-import {
-  Role,
-  useAuthenticationAdapter,
-} from "./Adapters/AuthenticationAdapter"
+import { Role, useAuthenticationAdapter } from "./Adapters/LoggedInUserAdapter"
 import RedirectToDiscordLogin from "./Adapters/RedirectToDiscordLogin"
+import { DiscordUserAvatar } from "./Components/DiscordAvatar"
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const discordIcon = require("./Media/discord.svg").default
@@ -25,9 +22,7 @@ const settings = ["Logg ut"]
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null)
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
-    null
-  )
+  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
   const { logout, loggedInUser } = useAuthenticationAdapter()
   const navigate = useNavigate()
 
@@ -196,9 +191,7 @@ function ResponsiveAppBar() {
             <Box sx={{ flexGrow: 0 }}>
               <Button
                 sx={{ color: "text.primary" }}
-                startIcon={
-                  <img src={discordIcon} style={{ width: 20 }} alt="avatar" />
-                }
+                startIcon={<img src={discordIcon} style={{ width: 20 }} alt="avatar" />}
                 variant="text"
                 onClick={RedirectToDiscordLogin}
               >

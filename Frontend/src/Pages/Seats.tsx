@@ -20,13 +20,9 @@ import {
 } from "@mui/material"
 import * as React from "react"
 import { useState } from "react"
-import {
-  Role,
-  useAuthenticationAdapter,
-  User,
-} from "../Adapters/AuthenticationAdapter"
 import { useGuildUsers } from "../Adapters/GuildAdapter"
 import { Lan, useActiveLan } from "../Adapters/LanAdapter"
+import { Role, User, useAuthenticationAdapter } from "../Adapters/LoggedInUserAdapter"
 import useReservationAdapter from "../Adapters/ReservationAdapter"
 import { Seat, useSeats } from "../Adapters/SeatsAdapter"
 import DelayedCircularProgress from "../Components/DelayedCircularProgress"
@@ -42,12 +38,7 @@ export default function Seats() {
 
 function NoActiveLan() {
   return (
-    <Stack
-      width="100%"
-      justifyContent="center"
-      alignItems="center"
-      sx={{ marginTop: "1em" }}
-    >
+    <Stack width="100%" justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }}>
       <Typography>No active lan is configured</Typography>
     </Stack>
   )
@@ -72,8 +63,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
     moveReservation,
     moveReservationFor,
   } = useReservationAdapter(props.activeLan)
-  const [awaitingSelectSeat, setAwaitingSelectSeat] =
-    useState<AwaitingSelectSeat | null>(null)
+  const [awaitingSelectSeat, setAwaitingSelectSeat] = useState<AwaitingSelectSeat | null>(null)
 
   async function handleReserve(toSeat: Seat) {
     if (reservedSeat != null) {
@@ -192,11 +182,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
   }
 
   const getSeatColor = (seat: Seat): string => {
-    if (
-      seat.reservedBy != null &&
-      loggedInUser != null &&
-      seat.reservedBy.id === loggedInUser.id
-    ) {
+    if (seat.reservedBy != null && loggedInUser != null && seat.reservedBy.id === loggedInUser.id) {
       return "#0f3f6a"
     } else if (seat.reservedBy != null) {
       return "#aa3030"
@@ -283,8 +269,8 @@ function AwaitingSelectInfoCard(props: {
           Du flytter på {props.userName} fra plass {props.seatTitle}
         </Typography>
         <Typography>
-          Trykk på en plass for å velge hvor du vil flytte {props.userName} sin
-          reservasjon til, eller trykk avbryt for å avbryte.
+          Trykk på en plass for å velge hvor du vil flytte {props.userName} sin reservasjon til,
+          eller trykk avbryt for å avbryte.
         </Typography>
       </CardContent>
       <CardActions>
@@ -416,11 +402,7 @@ function SeatMenu(props: SeatMenuProps & MenuProps) {
             options={props.users}
             getOptionLabel={(option) => option.name}
             renderOption={(props, option) => (
-              <Box
-                component="li"
-                sx={{ "& > img": { mr: 2, flexShrink: 0 } }}
-                {...props}
-              >
+              <Box component="li" sx={{ "& > img": { mr: 2, flexShrink: 0 } }} {...props}>
                 <DiscordUserAvatar user={option} />
                 {option.name}
               </Box>
@@ -540,20 +522,13 @@ function SeatMenu(props: SeatMenuProps & MenuProps) {
     } else if (loggedInUser != null) {
       if (loggedInUser.isInRole(Role.OPERATOR)) {
         if (props.seat.reservedBy != null) {
-          components.push(
-            header("ADMIN"),
-            removeReservationFor(),
-            moveReservationFor()
-          )
+          components.push(header("ADMIN"), removeReservationFor(), moveReservationFor())
         } else {
           components.push(header("ADMIN"), makeReservationFor())
         }
       }
 
-      if (
-        props.seat.reservedBy != null &&
-        props.seat.reservedBy.id == loggedInUser.id
-      ) {
+      if (props.seat.reservedBy != null && props.seat.reservedBy.id == loggedInUser.id) {
         if (components.length > 0) components.push(header("VALG"))
         components.push(removeReservation())
       } else if (props.seat.reservedBy == null) {

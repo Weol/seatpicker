@@ -13,21 +13,13 @@ import {
 import Divider from "@mui/material/Divider"
 import Typography from "@mui/material/Typography"
 import { useState } from "react"
-import { Role } from "../Adapters/AuthenticationAdapter"
-import {
-  Guild,
-  GuildRole,
-  GuildRoleMapping,
-  useGuild,
-  useGuildRoles,
-} from "../Adapters/GuildAdapter"
+import { Guild, GuildRole, useGuild, useGuildRoles } from "../Adapters/GuildAdapter"
+import { Role } from "../Adapters/LoggedInUserAdapter"
 import DelayedCircularProgress from "../Components/DelayedCircularProgress"
 import { useAlerts } from "../Contexts/AlertContext"
 
 export default function GuildSettings(props: { guildId: string }) {
-  const { guildRoles, roleMappings, setRoleMappings } = useGuildRoles(
-    props.guildId
-  )
+  const { guildRoles, setGuildRoles } = useGuildRoles(props.guildId)
   const guild = useGuild(props.guildId)
 
   switch (guild) {
@@ -36,13 +28,8 @@ export default function GuildSettings(props: { guildId: string }) {
     case "not found":
       return <NotFound />
     default:
-      return guildRoles && roleMappings ? (
-        <Loaded
-          guild={guild}
-          guildRoles={guildRoles}
-          roleMappings={roleMappings}
-          setRoleMappings={setRoleMappings}
-        />
+      return guildRoles ? (
+        <Loaded guild={guild} guildRoles={guildRoles} setGuildRoles={setGuildRoles} />
       ) : (
         <Loading />
       )
@@ -51,12 +38,7 @@ export default function GuildSettings(props: { guildId: string }) {
 
 function Loading() {
   return (
-    <Stack
-      width="100%"
-      justifyContent="center"
-      alignItems="center"
-      sx={{ marginTop: "1em" }}
-    >
+    <Stack width="100%" justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }}>
       <DelayedCircularProgress />
     </Stack>
   )
@@ -76,29 +58,16 @@ type RoleMapping = {
   guildRole: GuildRole | null
 }
 
-function initStagedMappings(
-  exitingMappings: GuildRoleMapping[],
-  guildRoles: GuildRole[]
-) {
-  const mappings = exitingMappings.reduce(
-    (groups, existingMapping) => {
-      const guildRole =
-        guildRoles.find(
-          (guildRole) => guildRole.id == existingMapping.roleId
-        ) ?? null
-
-      const roleMapping = groups[existingMapping.roleId] ?? {
+function initStagedMappings(savedGuildRoles: GuildRole[]) {
+  return savedGuildRoles
+    .filter((guildRole) => guildRole.roles.length > 0)
+    .map((guildRole) => {
+      return {
         id: crypto.randomUUID(),
-        roles: [],
+        roles: guildRole.roles,
         guildRole: guildRole,
-      }
-      roleMapping.roles.push(existingMapping.role)
-      groups[existingMapping.roleId] = roleMapping
-      return groups
-    },
-    {} as { [name: string]: RoleMapping }
-  )
-  return Object.values(mappings)
+      } as RoleMapping
+    })
 }
 
 function hasStagedMappingsErrors(stagedMappings: RoleMapping[]) {
@@ -109,22 +78,16 @@ function hasStagedMappingsErrors(stagedMappings: RoleMapping[]) {
   return false
 }
 
-function hasUnsavedChanges(
-  stagedMappings: RoleMapping[],
-  savedMappings: GuildRoleMapping[]
-) {
-  const count = stagedMappings.reduce(
-    (count, staged) => count + staged.roles.length,
-    0
-  )
-  if (count != savedMappings.length) return true
-  for (const stagedMapping of stagedMappings) {
-    for (const role of stagedMapping.roles) {
-      const match = savedMappings.find(
-        (saved) =>
-          saved.role == role && saved.roleId == stagedMapping.guildRole?.id
-      )
-      if (!match) return true
+function hasUnsavedChanges(stagedMappings: RoleMapping[], savedMappings: GuildRole[]) {
+  const stagedCount = stagedMappings.reduce((count, staged) => count + staged.roles.length ?? 0, 0)
+  const savedCount = savedMappings.reduce((count, saved) => count + saved.roles.length ?? 0, 0)
+  if (savedCount != stagedCount) return true
+
+  for (const staged of stagedMappings) {
+    const saved = savedMappings.find((saved) => saved.id == staged.guildRole?.id)
+    if (!saved) return true
+    for (const stagedRole of staged.roles) {
+      if (!saved.roles.includes(stagedRole)) return true
     }
   }
   return false
@@ -133,26 +96,20 @@ function hasUnsavedChanges(
 function Loaded(props: {
   guild: Guild
   guildRoles: GuildRole[]
-  roleMappings: GuildRoleMapping[]
-  setRoleMappings: (
-    guild: Guild,
-    roleMappings: GuildRoleMapping[]
-  ) => Promise<void>
+  setGuildRoles: (guild: Guild, roleMappings: GuildRole[]) => Promise<void>
 }) {
   const { alertLoading, alertSuccess } = useAlerts()
   const [stagedMappings, setStagedMappings] = useState<RoleMapping[]>(
-    initStagedMappings(props.roleMappings, props.guildRoles)
+    initStagedMappings(props.guildRoles)
   )
-  const hasChanges = hasUnsavedChanges(stagedMappings, props.roleMappings)
+  const hasChanges = hasUnsavedChanges(stagedMappings, props.guildRoles)
   const hasErrors = hasStagedMappingsErrors(stagedMappings)
   const saveButtondEnabled = !hasErrors && hasChanges
   const availableGuildRoles = props.guildRoles.filter(
-    (guildRole) =>
-      !stagedMappings.find((staged) => staged.guildRole?.id == guildRole.id)
+    (guildRole) => !stagedMappings.find((staged) => staged.guildRole?.id == guildRole.id)
   )
   const addMappingButtonDisabled =
-    availableGuildRoles.length == 0 ||
-    stagedMappings.length >= props.guildRoles.length
+    availableGuildRoles.length == 0 || stagedMappings.length >= props.guildRoles.length
 
   function handleAddMappingPressed() {
     setStagedMappings([
@@ -195,19 +152,12 @@ function Loaded(props: {
   async function handleSaveClick() {
     if (!hasChanges || hasErrors) return
 
-    const staged: GuildRoleMapping[] = []
-    for (const mapping of stagedMappings) {
-      for (const role of mapping.roles) {
-        if (mapping.guildRole != null && mapping.roles != null) {
-          staged.push({ role: role, roleId: mapping.guildRole.id })
-        } else {
-          throw "something is null"
-        }
-      }
-    }
+    const staged = stagedMappings
+      .filter((staged) => staged.guildRole)
+      .map((staged) => ({ ...staged.guildRole, roles: staged.roles }) as GuildRole)
 
     await alertLoading("Lagrer endringer...", async () => {
-      await props.setRoleMappings(props.guild, staged)
+      await props.setGuildRoles(props.guild, staged)
     })
     alertSuccess("Endringer lagret")
   }
@@ -232,11 +182,7 @@ function Loaded(props: {
           !availableGuildRoles.find((guildRole) => guildRole.id == option.id)
         }
         renderOption={(props, option) => (
-          <Box
-            component="li"
-            sx={{ color: "#" + option.color.toString(16) }}
-            {...props}
-          >
+          <Box component="li" sx={{ color: "#" + option.color.toString(16) }} {...props}>
             {option.name}
           </Box>
         )}
@@ -277,13 +223,7 @@ function Loaded(props: {
           params.inputProps["aria-expanded"] = false
           params.inputProps["aria-controls"] = undefined
           params.inputProps["aria-activedescendant"] = undefined
-          return (
-            <TextField
-              {...params}
-              label="Role"
-              error={mapping.roles.length == 0}
-            />
-          )
+          return <TextField {...params} label="Role" error={mapping.roles.length == 0} />
         }}
       />
       <IconButton onClick={() => handleRoleMappingDeleteClick(mapping.id)}>
@@ -294,12 +234,7 @@ function Loaded(props: {
 
   return (
     <Stack spacing={2} justifyContent="center" alignItems="center">
-      <Stack
-        direction={"row"}
-        width="100%"
-        justifyContent="space-between"
-        alignItems="center"
-      >
+      <Stack direction={"row"} width="100%" justifyContent="space-between" alignItems="center">
         <Typography height={"100%"} variant={"h5"}>
           {props.guild.name}
         </Typography>
@@ -312,12 +247,7 @@ function Loaded(props: {
         </Button>
       </Stack>
       <Divider sx={{ width: "100%" }} />
-      <Stack
-        spacing={2}
-        width={"100%"}
-        justifyContent="center"
-        alignItems="center"
-      >
+      <Stack spacing={2} width={"100%"} justifyContent="center" alignItems="center">
         {stagedMappings.length > 0 ? (
           stagedMappings.map((mapping) => renderRoleMappingEntry(mapping))
         ) : (

@@ -1,4 +1,4 @@
-import useApiRequests from "./ApiRequestHook"
+import useApiRequests from "./ApiRequestAdapter"
 import { Lan } from "./LanAdapter"
 import { Seat } from "./SeatsAdapter"
 import useVersionId from "./VersionIdHook"
@@ -25,22 +25,15 @@ export default function useReservationAdapter(lan: Lan | null) {
   }
 
   const moveReservationFor = async (fromSeat: Seat, toSeat: Seat) => {
-    await apiRequest(
-      "PUT",
-      `lan/${lan?.id}/seat/${fromSeat.id}/reservationmanagement`,
-      {
-        toSeatId: toSeat.id,
-        userId: fromSeat.reservedBy?.id,
-      }
-    )
+    await apiRequest("PUT", `lan/${lan?.id}/seat/${fromSeat.id}/reservationmanagement`, {
+      toSeatId: toSeat.id,
+      userId: fromSeat.reservedBy?.id,
+    })
     invalidate()
   }
 
   const deleteReservationFor = async (seat: Seat) => {
-    await apiRequest(
-      "DELETE",
-      `lan/${lan?.id}/seat/${seat.id}/reservationmanagement`
-    )
+    await apiRequest("DELETE", `lan/${lan?.id}/seat/${seat.id}/reservationmanagement`)
     invalidate()
   }
 

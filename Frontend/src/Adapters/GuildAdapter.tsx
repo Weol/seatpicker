@@ -1,114 +1,103 @@
-import { useEffect, useState } from "react"
-import useApiRequests from "./ApiRequestHook"
-import { Role, User } from "./AuthenticationAdapter"
-import useVersionId from "./VersionIdHook"
+import { atom, atomFamily, selector, useRecoilState, useRecoilValue } from "recoil"
+import ApiRequest from "./ApiRequestAdapter"
+import { Role, User } from "./AuthAdapter"
+import { synchronizeWithLocalStorage } from "./Utils"
 
-export interface Guild {
+export type Guild = {
   id: string
   name: string
   icon: string | null
 }
 
-export interface GuildRoleMapping {
-  roleId: string
-  role: Role
-}
-
-export interface GuildRole {
+export type GuildRole = {
   id: string
   name: string
   color: number
+  roles: Role[]
 }
 
-export function useGuild(guildId: string) {
-  const { apiRequest } = useApiRequests()
-  const { versionId } = useVersionId("guild_" + guildId)
-  const [guild, setGuild] = useState<Guild | "loading" | "not found">("loading")
+export const activeGuildIdAtom = atom<string>({
+  key: "activeGuildId",
+  default: "65401637126026412",
+  effects: [synchronizeWithLocalStorage("activeGuildId")],
+})
 
-  useEffect(() => {
-    loadGuild()
-  }, [versionId])
+export const guildAtomFamily = atomFamily({
+  key: "guilds",
+  default: async (id: string) => {
+    const response = await ApiRequest("GET", `guild/${id}`)
 
-  async function loadGuild(): Promise<Guild> {
-    const response = await apiRequest("GET", `guild/${guildId}`)
+    const guild = response.status == 404 ? null : ((await response.json()) as Guild)
 
-    const guild = (await response.json()) as Guild
-    setGuild(guild)
     return guild
-  }
+  },
+})
+
+export function useGuild(guildId: string) {
+  const guild = useRecoilValue(guildAtomFamily(guildId))
 
   return guild
 }
 
-export function useGuildUsers(guildId: string) {
-  const { apiRequest } = useApiRequests()
-  const [users, setUsers] = useState<User[] | null>(null)
-
-  async function loadUsers(): Promise<User[]> {
-    const response = await apiRequest("GET", `guild/${guildId}/users`)
-
-    const users = (await response.json()) as User[]
-    setUsers(users)
-    return users
-  }
-
-  return { users, loadUsers }
-}
-
-export function useGuilds() {
-  const { apiRequest } = useApiRequests()
-  const { versionId } = useVersionId("guilds")
-  const [guilds, setGuilds] = useState<Guild[] | null>(null)
-
-  useEffect(() => {
-    loadGuilds()
-  }, [versionId])
-
-  async function loadGuilds(): Promise<Guild[]> {
-    const response = await apiRequest("GET", `guild`)
+export const allGuildsAtom = atom({
+  key: "allGuilds",
+  default: async () => {
+    const response = await ApiRequest("GET", `guild`)
 
     const guilds = (await response.json()) as Guild[]
-    setGuilds(guilds)
+
     return guilds
-  }
+  },
+})
+
+export function useGuilds() {
+  const guilds = useRecoilValue(allGuildsAtom)
 
   return guilds
 }
 
+export const guildUsersSelector = selector({
+  key: "guildUsers",
+  get: async ({ get }) => {
+    const activeGuildId = get(activeGuildIdAtom)
+
+    const response = await ApiRequest("GET", `guild/${activeGuildId}/users`)
+
+    const users = response.status == 404 ? null : ((await response.json()) as User[])
+
+    return users
+  },
+})
+
+export function useGuildUsers() {
+  const guildUsers = useRecoilValue(guildUsersSelector)
+
+  return guildUsers
+}
+
+export const guildRolesAtomFamily = atomFamily({
+  key: "guildRoles",
+  default: async (id: string) => {
+    const response = await ApiRequest("GET", `guild/${id}/roles`)
+
+    return (await response.json()) as GuildRole[]
+  },
+})
+
 export function useGuildRoles(guildId: string) {
-  const { apiRequest } = useApiRequests()
-  const { versionId, invalidate } = useVersionId("guild_roles_" + guildId)
-  const [roleMappings, setRoleMappingsState] = useState<
-    GuildRoleMapping[] | null
-  >(null)
-  const [guildRoles, setGuildRoles] = useState<GuildRole[] | null>(null)
+  const [guildRoles, setGuildRoles] = useRecoilState(guildRolesAtomFamily(guildId))
 
-  useEffect(() => {
-    loadRoles()
-    loadRoleMappings()
-  }, [versionId, guildId])
-
-  const loadRoles = async () => {
-    const response = await apiRequest("GET", `guild/${guildId}/roles`)
+  const reloadGuildRoles = async () => {
+    const response = await ApiRequest("GET", `guild/${guildId}/roles`)
 
     const roles = (await response.json()) as GuildRole[]
     setGuildRoles(roles)
   }
 
-  const loadRoleMappings = async () => {
-    const response = await apiRequest("GET", `guild/${guildId}/roles/mapping`)
-
-    const roleMappings = (await response.json()) as GuildRoleMapping[]
-    setRoleMappingsState(roleMappings)
+  const updateGuildRoles = async (guild: Guild, roles: GuildRole[]) => {
+    await ApiRequest("PUT", `guild/${guild.id}/roles/mapping`, roles)
+    await reloadGuildRoles()
   }
 
-  const setRoleMappings = async (
-    guild: Guild,
-    mappings: GuildRoleMapping[]
-  ) => {
-    await apiRequest("PUT", `guild/${guild.id}/roles/mapping`, mappings)
-    invalidate()
-  }
-
-  return { guildRoles, roleMappings, setRoleMappings }
+  return { guildRoles, updateGuildRoles }
 }
