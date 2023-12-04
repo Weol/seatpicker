@@ -1,6 +1,6 @@
 {
     "editor.minimap.enabled": false,
-    "window.zoomLevel": 1,
+    "window.zoomLevel": 0,
     "explorer.confirmDelete": false,
     "eslint.format.enable": true,
     "[typescriptreact]": {

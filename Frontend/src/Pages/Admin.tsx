@@ -1,18 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  Add,
-  Cancel,
-  Delete,
-  Edit,
-  Fullscreen,
-  Upload,
-} from "@mui/icons-material"
+import { Add, Delete, Edit, Fullscreen, Upload } from "@mui/icons-material"
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Autocomplete,
-  Box,
   Button,
   FormControlLabel,
   IconButton,
@@ -21,7 +12,6 @@ import {
   ListItemSecondaryAction,
   Paper,
   Stack,
-  styled,
   Switch,
   Table,
   TableBody,
@@ -29,19 +19,14 @@ import {
   TableContainer,
   TableRow,
   TextField,
+  styled,
 } from "@mui/material"
 import Divider from "@mui/material/Divider"
 import ListItemIcon from "@mui/material/ListItemIcon"
 import ListItemText from "@mui/material/ListItemText"
 import Typography from "@mui/material/Typography"
 import { useState } from "react"
-import { Role } from "../Adapters/AuthenticationAdapter"
-import {
-  Guild,
-  GuildRole,
-  GuildRoleMapping,
-  useGuilds,
-} from "../Adapters/GuildAdapter"
+import { Guild, useGuilds } from "../Adapters/GuildAdapter"
 import { Lan, useLanAdapter, useLans } from "../Adapters/LanAdapter"
 import { GuildSettingsPath } from "../App"
 import DelayedCircularProgress from "../Components/DelayedCircularProgress"
@@ -58,12 +43,7 @@ export default function Admin() {
 
 function Loading() {
   return (
-    <Stack
-      width="100%"
-      justifyContent="center"
-      alignItems="center"
-      sx={{ marginTop: "1em" }}
-    >
+    <Stack width="100%" justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }}>
       <DelayedCircularProgress />
     </Stack>
   )
@@ -74,16 +54,12 @@ function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
   const { updateLan, createLan } = useLanAdapter()
   const { deleteLan, setActiveLan } = useLanAdapter()
   const [selectedGuild, setSelectedGuild] = useState<Guild | null>(null)
-  const [previewBackground, setPreviewBackground] = useState<string | null>(
-    null
-  )
+  const [previewBackground, setPreviewBackground] = useState<string | null>(null)
   const [editingLan, setEditingLan] = useState<Lan | null>(null)
   const [selectedLan, setSelectedLan] = useState<Lan | null>(null)
   const [showCreateLan, setShowCreateLan] = useState<boolean>(false)
   const selectedGuildLans =
-    (selectedGuild &&
-      props.lans.filter((lan) => lan.guildId == selectedGuild?.id)) ??
-    []
+    (selectedGuild && props.lans.filter((lan) => lan.guildId == selectedGuild?.id)) ?? []
 
   function handleGuildSelect(guild: Guild) {
     setSelectedGuild(guild)
@@ -112,11 +88,7 @@ function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
     alertSuccess(`${lan.title} ble satt til ${active}`)
   }
 
-  async function handleSaveEditedLanClick(
-    lan: Lan,
-    title: string,
-    background: string
-  ) {
+  async function handleSaveEditedLanClick(lan: Lan, title: string, background: string) {
     await alertLoading(`Oppdaterer ${lan.title}`, async () => {
       await updateLan(lan, title, background)
     })
@@ -163,21 +135,11 @@ function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
         onGuildSelect={handleGuildSelect}
       />
 
-      {selectedGuild && (
-        <Divider orientation="horizontal" sx={{ width: "100%" }} />
-      )}
+      {selectedGuild && <Divider orientation="horizontal" sx={{ width: "100%" }} />}
       {selectedGuild && (
         <Stack width={"100%"}>
-          <LanListHeader
-            guild={selectedGuild}
-            onCreateClick={handleLanCreateClick}
-          />
-          <Stack
-            justifyContent="center"
-            alignItems="center"
-            sx={{ marginTop: "1em" }}
-            width="100%"
-          >
+          <LanListHeader guild={selectedGuild} onCreateClick={handleLanCreateClick} />
+          <Stack justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }} width="100%">
             {selectedGuildLans.map((lan) => (
               <LanDetails
                 key={lan.id}
@@ -187,9 +149,7 @@ function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
                 onClick={() => handleOnLanClick(lan)}
                 onActiveToggleClick={() => handleActiveToggleClick(lan)}
                 onDeleteClick={() => handleDeleteClick(lan)}
-                onPreviewBackgroundClick={() =>
-                  handlePreviewBackgrundClick(lan.background)
-                }
+                onPreviewBackgroundClick={() => handlePreviewBackgrundClick(lan.background)}
               />
             ))}
             {selectedGuildLans.length == 0 && <NoLanExists />}
@@ -201,9 +161,7 @@ function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
           open={Boolean(editingLan)}
           lan={editingLan}
           onClose={handleEditLanClose}
-          onPreviewBackgroundClick={(background: string) =>
-            handlePreviewBackgrundClick(background)
-          }
+          onPreviewBackgroundClick={(background: string) => handlePreviewBackgrundClick(background)}
           onSaveClick={(title: string, background: string) =>
             handleSaveEditedLanClick(editingLan, title, background)
           }
@@ -213,12 +171,8 @@ function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
         <LanEditorModal
           open={showCreateLan}
           onClose={handleCreateLanClose}
-          onPreviewBackgroundClick={(background: string) =>
-            handlePreviewBackgrundClick(background)
-          }
-          onSaveClick={(title: string, background: string) =>
-            handleCreateLanClick(title, background)
-          }
+          onPreviewBackgroundClick={handlePreviewBackgrundClick}
+          onSaveClick={handleCreateLanClick}
         />
       )}
       {previewBackground && (
@@ -309,12 +263,7 @@ function LanDetails(props: {
 
   const Summary = () => (
     <AccordionSummary sx={{ width: "100%" }}>
-      <Stack
-        width="100%"
-        direction="row"
-        spacing={2}
-        justifyContent="space-between"
-      >
+      <Stack width="100%" direction="row" spacing={2} justifyContent="space-between">
         <Typography>{props.lan.title}</Typography>
         <Typography color={"textSecondary"} variant="subtitle2">
           {props.lan.active ? "Aktiv" : "Inaktiv"}
@@ -340,11 +289,7 @@ function LanDetails(props: {
               Bakgrunn
             </TableCell>
             <TableCell align="right">
-              <Button
-                variant="text"
-                size="small"
-                onClick={() => props.onPreviewBackgroundClick()}
-              >
+              <Button variant="text" size="small" onClick={() => props.onPreviewBackgroundClick()}>
                 Vis bakgrunn
               </Button>
             </TableCell>
@@ -394,11 +339,7 @@ function LanDetails(props: {
   )
 }
 
-function BackgroundPreviewModal(props: {
-  background: string
-  open: boolean
-  onClose: () => void
-}) {
+function BackgroundPreviewModal(props: { background: string; open: boolean; onClose: () => void }) {
   const base64ToBlob = (base64: string): Blob => {
     return new Blob([atob(base64)], { type: "image/svg+xml" })
   }
@@ -433,19 +374,15 @@ function LanEditorModal(props: {
   onPreviewBackgroundClick: (background: string) => void
   onSaveClick: (title: string, background: string) => void
 }) {
-  const [title, setTitle] = useState<string | null>(
-    props.lan == undefined ? null : props.lan.title
-  )
+  const [title, setTitle] = useState<string | null>(props.lan == undefined ? null : props.lan.title)
   const [background, setBackground] = useState<string | null>(
     props.lan == undefined ? null : props.lan.background
   )
   const [backgroundName, setBackgroundName] = useState<string | null>(null)
-  const [errors, setErrors] = useState<{ title: boolean; background: boolean }>(
-    {
-      title: false,
-      background: false,
-    }
-  )
+  const [errors, setErrors] = useState<{ title: boolean; background: boolean }>({
+    title: false,
+    background: false,
+  })
 
   const blobToBase64 = (blob: Blob): Promise<string> => {
     const reader = new FileReader()
@@ -496,12 +433,7 @@ function LanEditorModal(props: {
 
   return (
     <Modal title={props.lan?.title ?? "Opprett nytt lan"} {...props}>
-      <Stack
-        spacing={2}
-        justifyContent="center"
-        alignItems="center"
-        sx={{ width: "100%" }}
-      >
+      <Stack spacing={2} justifyContent="center" alignItems="center" sx={{ width: "100%" }}>
         <TextField
           defaultValue={title}
           sx={{ width: "100%" }}
@@ -518,14 +450,8 @@ function LanEditorModal(props: {
           variant="outlined"
           startIcon={<Upload />}
         >
-          <Typography noWrap={true}>
-            {backgroundName || "Last opp bakgrunn"}
-          </Typography>
-          <VisuallyHiddenInput
-            type="file"
-            onInput={handleBackgroundChanged}
-            accept="image/svg"
-          />
+          <Typography noWrap={true}>{backgroundName || "Last opp bakgrunn"}</Typography>
+          <VisuallyHiddenInput type="file" onInput={handleBackgroundChanged} accept="image/svg" />
         </Button>
         {background && (
           <Button
@@ -535,11 +461,7 @@ function LanEditorModal(props: {
             Forhåndsvis bakgrunn
           </Button>
         )}
-        <Button
-          onClick={handleSaveClicked}
-          color="secondary"
-          variant="contained"
-        >
+        <Button onClick={handleSaveClicked} color="secondary" variant="contained">
           Lagre
         </Button>
       </Stack>
@@ -549,183 +471,4 @@ function LanEditorModal(props: {
 
 function NoLanExists() {
   return <Typography color={"text.secondary"}>Ingen lan finnes</Typography>
-}
-
-type RoleMapping = {
-  id: string
-  role: Role | null
-  guildRole: GuildRole | null
-  guildRoleError?: boolean
-  roleError?: boolean
-}
-
-function RoleMappingModal(props: {
-  guild: Guild
-  roles: Role[]
-  guildRoles: GuildRole[]
-  roleMappings: GuildRoleMapping[]
-  open: boolean
-  onClose: () => void
-  onSaveClick: (mappings: GuildRoleMapping[]) => void
-}) {
-  const [stagedMappings, setStagedMappings] = useState<RoleMapping[]>(
-    props.roleMappings.map((mapping) => ({
-      id: crypto.randomUUID(),
-      role: mapping.role,
-      guildRole:
-        props.guildRoles.find((guildRole) => guildRole.id == mapping.roleId) ??
-        null,
-    }))
-  )
-
-  function handleAddMappingPressed() {
-    setStagedMappings([
-      ...stagedMappings,
-      { guildRole: null, role: null, id: crypto.randomUUID() },
-    ])
-  }
-
-  function handleRoleMappingDeleteClick(id: string) {
-    const updatedMappings = stagedMappings.filter((mapping) => mapping.id != id)
-
-    setStagedMappings(updatedMappings)
-  }
-
-  function handleGuildRoleChange(id: string, guildRole: GuildRole | null) {
-    const updatedMappings = stagedMappings.map((mapping) =>
-      mapping.id == id ? { ...mapping, guildRole: guildRole } : mapping
-    )
-
-    setStagedMappings(updatedMappings)
-  }
-
-  function handleRoleChange(id: string, role: Role | null) {
-    const updatedMappings = stagedMappings.map((mapping) =>
-      mapping.id == id ? { ...mapping, role: role } : mapping
-    )
-
-    setStagedMappings(updatedMappings)
-  }
-
-  function handleSaveClick() {
-    const staged: GuildRoleMapping[] = []
-    for (const mapping of stagedMappings) {
-      if (mapping.guildRole != null && mapping.role != null) {
-        staged.push({ role: mapping.role, roleId: mapping.guildRole.id })
-      } else {
-        setStagedMappings(
-          stagedMappings.map((stagedMapping) => {
-            if (stagedMapping.id == mapping.id) {
-              mapping.guildRoleError = mapping.guildRole == null
-              mapping.roleError = mapping.guildRole == null
-            }
-            return mapping
-          })
-        )
-      }
-
-      if (staged.length == stagedMappings.length) props.onSaveClick(staged)
-    }
-
-    const renderRoleMappingEntry = (mapping: RoleMapping) => (
-      <Stack
-        spacing={1}
-        width={"100%"}
-        direction={"row"}
-        justifyContent={"space-evenly"}
-      >
-        <Autocomplete
-          options={props.guildRoles}
-          autoHighlight
-          sx={{ width: "50%" }}
-          value={mapping.guildRole}
-          onChange={(e, value) => handleGuildRoleChange(mapping.id, value)}
-          getOptionLabel={(option) => option.name}
-          isOptionEqualToValue={(option, value) => option.id == value.id}
-          renderOption={(props, option) => (
-            <Box
-              component="li"
-              sx={{ color: "#" + option.color.toString(16) }}
-              {...props}
-            >
-              {option.name}
-            </Box>
-          )}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              size="small"
-              label="Guild role"
-              inputProps={{
-                ...params.inputProps,
-              }}
-            />
-          )}
-        />
-        <Autocomplete
-          options={props.roles}
-          autoHighlight
-          sx={{ width: "50%" }}
-          value={mapping.role}
-          onChange={(e, value) => handleRoleChange(mapping.id, value)}
-          getOptionLabel={(option) => option.toString()}
-          renderOption={(props, option) => (
-            <Box component="li" {...props}>
-              {option.toString()}
-            </Box>
-          )}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              size="small"
-              label="Role"
-              inputProps={{
-                ...params.inputProps,
-              }}
-            />
-          )}
-        />
-        <IconButton onClick={() => handleRoleMappingDeleteClick(mapping.id)}>
-          <Cancel />
-        </IconButton>
-      </Stack>
-    )
-
-    return (
-      <Modal title="Role mappings" {...props}>
-        <Stack spacing={2} justifyContent="center" alignItems="center">
-          <Stack
-            direction={"row"}
-            width="100%"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Typography height={"100%"} variant={"h5"}>
-              {props.guild.name}
-            </Typography>
-            <Button variant={"outlined"} onClick={() => handleSaveClick()}>
-              Lagre
-            </Button>
-          </Stack>
-          <Divider sx={{ width: "100%" }} />
-          <Stack
-            spacing={2}
-            width={"100%"}
-            justifyContent="center"
-            alignItems="center"
-          >
-            {stagedMappings.length > 0 ? (
-              stagedMappings.map((mapping) => renderRoleMappingEntry(mapping))
-            ) : (
-              <Typography>Ingen mappinger registrert</Typography>
-            )}
-            <Divider />
-            <Button variant="outlined" onClick={handleAddMappingPressed}>
-              Legg til mapping
-            </Button>
-          </Stack>
-        </Stack>
-      </Modal>
-    )
-  }
 }

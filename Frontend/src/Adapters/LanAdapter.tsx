@@ -1,9 +1,9 @@
+import { useEffect, useState } from "react"
 import { useActiveGuildId } from "./ActiveGuildAdapter"
 import useApiRequests from "./ApiRequestHook"
-import { useEffect, useState } from "react"
 import useVersionId from "./VersionIdHook"
 
-export interface Lan {
+export type Lan = {
   id: string
   guildId: string
   active: boolean
@@ -50,10 +50,7 @@ export function useActiveLan() {
 
   async function loadActiveLan(): Promise<Lan | null> {
     try {
-      const response = await apiRequest(
-        "GET",
-        `lan/active?guildId=${activeGuildId}`
-      )
+      const response = await apiRequest("GET", `lan/active?guildId=${activeGuildId}`)
       const lan = (await response.json()) as Lan
 
       lan.createdAt = new Date(lan.createdAt)
@@ -91,11 +88,7 @@ export function useLanAdapter() {
     return response
   }
 
-  const updateLan = async (
-    lan: Lan,
-    title: string,
-    background: string
-  ): Promise<Response> => {
+  const updateLan = async (lan: Lan, title: string, background: string): Promise<Response> => {
     const response = await apiRequest("PUT", `lan/${lan.id}`, {
       id: lan.id,
       title,

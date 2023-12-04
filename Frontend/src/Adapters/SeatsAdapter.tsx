@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import useApiRequests from "./ApiRequestHook"
 import { User, useAuthenticationAdapter } from "./AuthenticationAdapter"
-import useVersionId from "./VersionIdHook"
 import { Lan } from "./LanAdapter"
+import useVersionId from "./VersionIdHook"
 
 export interface Bounds {
   x: number

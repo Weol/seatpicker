@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { AddCircleOutline, AddLink, Delete, Shuffle } from "@mui/icons-material"
 import {
   Autocomplete,
@@ -20,11 +19,7 @@ import {
 } from "@mui/material"
 import * as React from "react"
 import { useState } from "react"
-import {
-  Role,
-  useAuthenticationAdapter,
-  User,
-} from "../Adapters/AuthenticationAdapter"
+import { Role, User, useAuthenticationAdapter } from "../Adapters/AuthenticationAdapter"
 import { useGuildUsers } from "../Adapters/GuildAdapter"
 import { Lan, useActiveLan } from "../Adapters/LanAdapter"
 import useReservationAdapter from "../Adapters/ReservationAdapter"
@@ -42,12 +37,7 @@ export default function Seats() {
 
 function NoActiveLan() {
   return (
-    <Stack
-      width="100%"
-      justifyContent="center"
-      alignItems="center"
-      sx={{ marginTop: "1em" }}
-    >
+    <Stack width="100%" justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }}>
       <Typography>No active lan is configured</Typography>
     </Stack>
   )
@@ -60,20 +50,20 @@ type AwaitingSelectSeat = {
 }
 
 function SeatsWithLan(props: { activeLan: Lan }) {
-  const { alertInfo, alertLoading } = useAlerts()
+  const { alertSuccess, alertLoading } = useAlerts()
   const { showDialog } = useDialogs()
   const { loggedInUser } = useAuthenticationAdapter()
   const { seats, reservedSeat } = useSeats(props.activeLan)
-  const { users, loadUsers } = useGuildUsers(props.activeLan.guildId)
+  const { guildUsers: users, loadGuildUsers: loadUsers } = useGuildUsers(props.activeLan.guildId)
   const {
     makeReservation,
+    makeReservationFor,
     deleteReservation,
     deleteReservationFor,
     moveReservation,
     moveReservationFor,
   } = useReservationAdapter(props.activeLan)
-  const [awaitingSelectSeat, setAwaitingSelectSeat] =
-    useState<AwaitingSelectSeat | null>(null)
+  const [awaitingSelectSeat, setAwaitingSelectSeat] = useState<AwaitingSelectSeat | null>(null)
 
   async function handleReserve(toSeat: Seat) {
     if (reservedSeat != null) {
@@ -93,7 +83,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
           await moveReservation(fromSeat, toSeat)
         })
 
-        alertInfo(
+        alertSuccess(
           `Du har flyttet din reservasjon fra plass ${fromSeat.title} til plass ${toSeat.title}`
         )
       }
@@ -102,7 +92,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
         await makeReservation(toSeat)
       })
 
-      alertInfo("Du har reservert plass " + toSeat.title)
+      alertSuccess("Du har reservert plass " + toSeat.title)
     }
   }
 
@@ -120,7 +110,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
         await deleteReservation(result.metadata)
       })
 
-      alertInfo("Du har slettet din reservasjon")
+      alertSuccess("Du har slettet din reservasjon")
     }
   }
 
@@ -139,13 +129,16 @@ function SeatsWithLan(props: { activeLan: Lan }) {
           await deleteReservationFor(result.metadata)
         })
 
-        alertInfo(`Du har fjernet ${seat.reservedBy.name} sin reservasjon`)
+        alertSuccess(`Du har fjernet ${seat.reservedBy.name} sin reservasjon`)
       }
     }
   }
 
-  function handleReserveFor(seat: Seat) {
-    throw new Error("Function not implemented.")
+  async function handleReserveFor(seat: Seat, user: User) {
+    await alertLoading(`Reserverer plass ${seat.title} for ${user.name} ...`, async () => {
+      await makeReservationFor(seat, user)
+    })
+    alertSuccess(`Plass ${seat.title} ble reservert for ${user.name}`)
   }
 
   async function handleSeatSelectedForMove(fromSeat: Seat, toSeat: Seat) {
@@ -164,7 +157,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
         await moveReservationFor(fromSeat, toSeat)
       })
 
-      alertInfo(
+      alertSuccess(
         `Du har flyttet ${fromSeat.reservedBy?.name} fra plass ${fromSeat.title} til plass ${toSeat.title}`
       )
     }
@@ -192,11 +185,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
   }
 
   const getSeatColor = (seat: Seat): string => {
-    if (
-      seat.reservedBy != null &&
-      loggedInUser != null &&
-      seat.reservedBy.id === loggedInUser.id
-    ) {
+    if (seat.reservedBy != null && loggedInUser != null && seat.reservedBy.id === loggedInUser.id) {
       return "#0f3f6a"
     } else if (seat.reservedBy != null) {
       return "#aa3030"
@@ -283,8 +272,8 @@ function AwaitingSelectInfoCard(props: {
           Du flytter på {props.userName} fra plass {props.seatTitle}
         </Typography>
         <Typography>
-          Trykk på en plass for å velge hvor du vil flytte {props.userName} sin
-          reservasjon til, eller trykk avbryt for å avbryte.
+          Trykk på en plass for å velge hvor du vil flytte {props.userName} sin reservasjon til,
+          eller trykk avbryt for å avbryte.
         </Typography>
       </CardContent>
       <CardActions>
@@ -356,26 +345,26 @@ function SeatButton(props: SeatButtonProps) {
             {seat.title}
           </Typography>
         </Box>
-        <SeatMenu
-          {...props}
-          onRemove={handleRemove}
-          onRemoveFor={handleRemoveFor}
-          onMoveFor={handleMoveFor}
-          open={menuOpen}
-          seat={seat}
-          id="demo-positioned-menu"
-          aria-labelledby="demo-positioned-button"
-          anchorEl={menuAnchor}
-          onClose={handleClose}
-          anchorOrigin={{
-            vertical: "top",
-            horizontal: "center",
-          }}
-          transformOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
-          }}
-        />
+        {menuOpen && (
+          <SeatMenu
+            {...props}
+            onRemove={handleRemove}
+            onRemoveFor={handleRemoveFor}
+            onMoveFor={handleMoveFor}
+            open={menuOpen}
+            seat={seat}
+            anchorEl={menuAnchor}
+            onClose={handleClose}
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "center",
+            }}
+            transformOrigin={{
+              vertical: "bottom",
+              horizontal: "center",
+            }}
+          />
+        )}
       </Container>
     )
   }
@@ -386,10 +375,10 @@ function SeatButton(props: SeatButtonProps) {
 type SeatMenuProps = {
   seat: Seat
   users: User[] | null
-  loadUsers: () => Promise<User[]>
+  loadUsers: () => Promise<void>
   onReserve: (seat: Seat) => void
   onRemove: (seat: Seat) => void
-  onReserveFor: (seat: Seat) => void
+  onReserveFor: (seat: Seat, user: User) => void
   onRemoveFor: (seat: Seat) => void
   onMoveFor: (fromSeat: Seat) => void
 }
@@ -403,6 +392,36 @@ function SeatMenu(props: SeatMenuProps & MenuProps) {
     setShowUserList(true)
   }
 
+  function handleuserSelectedForReservation(user: User | null) {
+    setShowUserList(false)
+    if (user != null) {
+      props.onReserveFor(props.seat, user)
+    }
+  }
+
+  const usersList = (users: User[]) => {
+    return (
+      <MenuItem onClick={() => handleMakeReservationForClick()}>
+        <Autocomplete
+          sx={{ width: "100%" }}
+          size="small"
+          autoHighlight
+          disableClearable
+          options={users}
+          getOptionLabel={(option) => option.name}
+          onChange={(e, value) => handleuserSelectedForReservation(value)}
+          renderOption={(props, option) => (
+            <Box component="li" sx={{ "& > img": { mr: 2, flexShrink: 0 } }} {...props}>
+              <DiscordUserAvatar user={option} sx={{ marginRight: "0.5em" }} />
+              <Typography noWrap>{option.name}</Typography>
+            </Box>
+          )}
+          renderInput={(params) => <TextField {...params} label="User" />}
+        />
+      </MenuItem>
+    )
+  }
+
   const makeReservationFor = () => {
     return (
       <MenuItem onClick={() => handleMakeReservationForClick()}>
@@ -410,24 +429,6 @@ function SeatMenu(props: SeatMenuProps & MenuProps) {
           <AddLink fontSize="small" />
         </ListItemIcon>
         <ListItemText>Legg til reservasjon</ListItemText>
-        {showUserList && props.users && (
-          <Autocomplete
-            autoHighlight
-            options={props.users}
-            getOptionLabel={(option) => option.name}
-            renderOption={(props, option) => (
-              <Box
-                component="li"
-                sx={{ "& > img": { mr: 2, flexShrink: 0 } }}
-                {...props}
-              >
-                <DiscordUserAvatar user={option} />
-                {option.name}
-              </Box>
-            )}
-            renderInput={(params) => <TextField {...params} label="User" />}
-          />
-        )}
       </MenuItem>
     )
   }
@@ -519,7 +520,6 @@ function SeatMenu(props: SeatMenuProps & MenuProps) {
           <Stack direction="row" sx={{ minWidth: 0, maxWidth: "10em" }}>
             <Typography sx={{ fontWeight: "medium" }} noWrap>
               {reservedBy.name}
-              aaaaaaaaaaaaaaaaaaasdasdsdkjlhsduiweuhikhuiahuifsdhuasfiduuiyohs
             </Typography>
           </Stack>
         </Stack>
@@ -540,20 +540,15 @@ function SeatMenu(props: SeatMenuProps & MenuProps) {
     } else if (loggedInUser != null) {
       if (loggedInUser.isInRole(Role.OPERATOR)) {
         if (props.seat.reservedBy != null) {
-          components.push(
-            header("ADMIN"),
-            removeReservationFor(),
-            moveReservationFor()
-          )
+          components.push(header("ADMIN"), removeReservationFor(), moveReservationFor())
+        } else if (showUserList && props.users) {
+          components.push(header("ADMIN"), usersList(props.users))
         } else {
           components.push(header("ADMIN"), makeReservationFor())
         }
       }
 
-      if (
-        props.seat.reservedBy != null &&
-        props.seat.reservedBy.id == loggedInUser.id
-      ) {
+      if (props.seat.reservedBy != null && props.seat.reservedBy.id == loggedInUser.id) {
         if (components.length > 0) components.push(header("VALG"))
         components.push(removeReservation())
       } else if (props.seat.reservedBy == null) {

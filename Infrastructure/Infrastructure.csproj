@@ -6,6 +6,7 @@
         <Nullable>enable</Nullable>
         <RootNamespace>Seatpicker.Infrastructure</RootNamespace>
         <LangVersion>11</LangVersion>
+        <EnableNETAnalyzers>true</EnableNETAnalyzers>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.2" />

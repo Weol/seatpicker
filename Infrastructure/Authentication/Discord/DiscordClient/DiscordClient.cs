@@ -121,7 +121,6 @@ public class DiscordClient
         Func<Task<TResponse>> requestFunc)
         where TResponse : notnull
     {
-        
         if (memoryCache.TryGetValue(cacheKey, out TResponse? cachedResponse))
         {
             if (cachedResponse is not null)

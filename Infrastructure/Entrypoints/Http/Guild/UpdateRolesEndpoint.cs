@@ -4,36 +4,36 @@ using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Authentication.Discord;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Http.Guild.RoleMapping;
+namespace Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 
 [ApiController]
-[Route("api/guild/{guildId}/roles/mapping")]
+[Route("api/guild/{guildId}")]
 [Area("guilds")]
 [Authorize(Roles = "Admin")]
-public class SetEndpoint
+public class UpdateRolesEndpoint
 {
-    [HttpPut("")]
+    [HttpPut("roles")]
     public async Task<IActionResult> Set(
         [FromServices] DiscordAuthenticationService discordAuthenticationService,
         [FromBody] IEnumerable<Request> request,
         [FromRoute] string guildId)
     {
         await discordAuthenticationService.SetRoleMapping(
-            guildId, 
-            request.Select(mapping => (mapping.RoleId, mapping.Role)));
+            guildId,
+            request.SelectMany(guildRole => guildRole.Roles.Select(role => (guildRole.Id, role))));
+        
         return new OkResult();
     }
-    
-    public record Request(string RoleId,
-        Role Role);
+
+    public record Request(string Id, IEnumerable<Role> Roles);
 
     public class RequestValidator : AbstractValidator<Request>
     {
         public RequestValidator()
         {
-            RuleFor(x => x.Role).NotEmpty();
-            
-            RuleFor(x => x.RoleId).NotEmpty();
+            RuleFor(x => x.Id).NotEmpty();
+
+            RuleFor(x => x.Roles).NotNull();
         }
     }
 }

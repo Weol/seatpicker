@@ -45,7 +45,7 @@ export default function useApiRequests() {
       body: logBody,
     })
 
-    if (response.status > 299) {
+    if (response.status > 499) {
       throw response
     }
     return response

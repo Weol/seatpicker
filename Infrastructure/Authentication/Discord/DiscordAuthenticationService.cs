@@ -28,7 +28,7 @@ public class DiscordAuthenticationService
         this.options = options.Value;
     }
 
-    public async Task<(string Token, DateTimeOffset ExpiresAt, string RefreshToken, DiscordUser DiscordUser, Role[] Roles)> Renew(string refreshToken, string? guildId)
+    public async Task<(string Token, DateTimeOffset ExpiresAt, string RefreshToken, DiscordUser DiscordUser, Role[] Roles)> Renew(string refreshToken, string guildId)
     {
         var accessToken = await discordClient.RefreshAccessToken(refreshToken);
         var discordUser = await discordClient.Lookup(accessToken.AccessToken);
@@ -36,7 +36,7 @@ public class DiscordAuthenticationService
         return await CreateTokenRequest(accessToken, discordUser, guildId);
     }
 
-    public async Task<(string Token, DateTimeOffset ExpiresAt, string RefreshToken, DiscordUser DiscordUser, Role[] Roles)> Login(string discordToken, string? guildId)
+    public async Task<(string Token, DateTimeOffset ExpiresAt, string RefreshToken, DiscordUser DiscordUser, Role[] Roles)> Login(string discordToken, string guildId)
     {
         var accessToken = await discordClient.GetAccessToken(discordToken);
         var discordUser = await discordClient.Lookup(accessToken.AccessToken);

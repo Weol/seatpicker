@@ -9,30 +9,27 @@ export interface Guild {
   icon: string | null
 }
 
-export interface GuildRoleMapping {
-  roleId: string
-  role: Role
-}
-
 export interface GuildRole {
   id: string
   name: string
   color: number
+  roles: Role[]
 }
 
 export function useGuild(guildId: string) {
   const { apiRequest } = useApiRequests()
   const { versionId } = useVersionId("guild_" + guildId)
-  const [guild, setGuild] = useState<Guild | "loading" | "not found">("loading")
+  const [guild, setGuild] = useState<Guild | null>(null)
 
   useEffect(() => {
     loadGuild()
   }, [versionId])
 
-  async function loadGuild(): Promise<Guild> {
+  async function loadGuild(): Promise<Guild | null> {
     const response = await apiRequest("GET", `guild/${guildId}`)
 
-    const guild = (await response.json()) as Guild
+    const guild = response.status == 404 ? null : ((await response.json()) as Guild)
+
     setGuild(guild)
     return guild
   }
@@ -42,17 +39,17 @@ export function useGuild(guildId: string) {
 
 export function useGuildUsers(guildId: string) {
   const { apiRequest } = useApiRequests()
-  const [users, setUsers] = useState<User[] | null>(null)
+  const [guildUsers, setGuildUsers] = useState<User[] | null>(null)
 
-  async function loadUsers(): Promise<User[]> {
+  async function loadGuildUsers() {
     const response = await apiRequest("GET", `guild/${guildId}/users`)
 
-    const users = (await response.json()) as User[]
-    setUsers(users)
-    return users
+    const users = response.status == 404 ? null : ((await response.json()) as User[])
+
+    setGuildUsers(users)
   }
 
-  return { users, loadUsers }
+  return { guildUsers, loadGuildUsers }
 }
 
 export function useGuilds() {
@@ -78,37 +75,23 @@ export function useGuilds() {
 export function useGuildRoles(guildId: string) {
   const { apiRequest } = useApiRequests()
   const { versionId, invalidate } = useVersionId("guild_roles_" + guildId)
-  const [roleMappings, setRoleMappingsState] = useState<
-    GuildRoleMapping[] | null
-  >(null)
-  const [guildRoles, setGuildRoles] = useState<GuildRole[] | null>(null)
+  const [guildRoles, setGuildRolesState] = useState<GuildRole[] | null>(null)
 
   useEffect(() => {
-    loadRoles()
-    loadRoleMappings()
+    loadGuildRoles()
   }, [versionId, guildId])
 
-  const loadRoles = async () => {
+  const loadGuildRoles = async () => {
     const response = await apiRequest("GET", `guild/${guildId}/roles`)
 
     const roles = (await response.json()) as GuildRole[]
-    setGuildRoles(roles)
+    setGuildRolesState(roles)
   }
 
-  const loadRoleMappings = async () => {
-    const response = await apiRequest("GET", `guild/${guildId}/roles/mapping`)
-
-    const roleMappings = (await response.json()) as GuildRoleMapping[]
-    setRoleMappingsState(roleMappings)
-  }
-
-  const setRoleMappings = async (
-    guild: Guild,
-    mappings: GuildRoleMapping[]
-  ) => {
-    await apiRequest("PUT", `guild/${guild.id}/roles/mapping`, mappings)
+  const setGuildRoles = async (guild: Guild, guildRoles: GuildRole[]) => {
+    await apiRequest("PUT", `guild/${guild.id}/roles`, guildRoles)
     invalidate()
   }
 
-  return { guildRoles, roleMappings, setRoleMappings }
+  return { guildRoles, setGuildRoles }
 }

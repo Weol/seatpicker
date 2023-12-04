@@ -36,7 +36,7 @@ public class ReservationManagementService : IReservationManagementService
 
         var numReservedSeatsByUser = reader.Query<ProjectedSeat>()
             .Where(seat => seat.LanId == lanId)
-            .Count(seat => seat.ReservedBy != null && seat.ReservedBy.Value == userId);
+            .Count(seat => seat.ReservedBy != null && seat.ReservedBy.Value == userId.Value);
 
         seatToReserve.MakeReservationFor(userToReserveFor, numReservedSeatsByUser, reservedBy);
 
