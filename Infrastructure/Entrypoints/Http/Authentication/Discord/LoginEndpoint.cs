@@ -14,12 +14,12 @@ public class LoginEndpoint
         [FromServices] DiscordAuthenticationService discordAuthenticationService,
         [FromBody] Request request)
     {
-        var (token, expiresAt, refreshToken, discordUser, roles) = await discordAuthenticationService.Login(request.Token, request.GuildId);
+        var (token, expiresAt, refreshToken, discordUser, roles) = await discordAuthenticationService.Login(request.Token, request.GuildId, request.RedirectUrl);
 
         return new OkObjectResult(new Response(token, request.GuildId, expiresAt, refreshToken, discordUser.Id, discordUser.Username, discordUser.Avatar, roles));
     }
 
-    public record Request(string Token, string GuildId);
+    public record Request(string Token, string GuildId, string RedirectUrl);
 
     public record Response(string Token, string GuildId, DateTimeOffset ExpiresAt, string RefreshToken, string UserId, string Nick, string? Avatar, ICollection<Role> Roles);
 }

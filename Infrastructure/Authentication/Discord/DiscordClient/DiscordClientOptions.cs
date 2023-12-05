@@ -14,9 +14,6 @@ public class DiscordClientOptions
     public string BotToken { get; set; } = null!;
 
     [Required]
-    public Uri RedirectUri { get; set; } = null!;
-
-    [Required]
     public Uri Uri { get; set; } = null!;
 
     [Required]

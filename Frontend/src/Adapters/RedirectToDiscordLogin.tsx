@@ -1,7 +1,10 @@
-﻿export default function RedirectToDiscordLogin() {
-  const redirectUrl = window.location.origin + "/redirect-login";
+﻿import Config from "../config"
+
+export const RedirectUrl = `${Config.Protocol}://${Config.ApiHost}/redirect-login`
+
+export function RedirectToDiscordLogin() {
   const uri = `https://discord.com/api/oauth2/authorize?client_id=1042448593312821248&redirect_uri=${encodeURIComponent(
-    redirectUrl
-  )}&response_type=code&scope=identify`;
-  window.location.replace(uri);
+    RedirectUrl
+  )}&response_type=code&scope=identify`
+  window.location.replace(uri)
 }

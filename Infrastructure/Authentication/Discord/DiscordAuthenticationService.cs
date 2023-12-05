@@ -36,9 +36,9 @@ public class DiscordAuthenticationService
         return await CreateTokenRequest(accessToken, discordUser, guildId);
     }
 
-    public async Task<(string Token, DateTimeOffset ExpiresAt, string RefreshToken, DiscordUser DiscordUser, Role[] Roles)> Login(string discordToken, string guildId)
+    public async Task<(string Token, DateTimeOffset ExpiresAt, string RefreshToken, DiscordUser DiscordUser, Role[] Roles)> Login(string discordToken, string guildId, string redirectUrl)
     {
-        var accessToken = await discordClient.GetAccessToken(discordToken);
+        var accessToken = await discordClient.GetAccessToken(discordToken, redirectUrl);
         var discordUser = await discordClient.Lookup(accessToken.AccessToken);
 
         return await CreateTokenRequest(accessToken, discordUser, guildId);

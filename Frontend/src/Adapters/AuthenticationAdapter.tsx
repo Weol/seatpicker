@@ -1,6 +1,7 @@
 import { useLocalStorage } from "usehooks-ts"
 import Config from "../config"
 import { useActiveGuildId } from "./ActiveGuildAdapter"
+import { RedirectUrl } from "./RedirectToDiscordLogin"
 
 export enum Role {
   ADMIN = "Admin",
@@ -48,7 +49,7 @@ export function useAuthenticationAdapter() {
     const authenticationToken = await makeRequest<AuthenticationToken>(
       "POST",
       `authentication/discord/login`,
-      { token: discordToken, guildId: activeGuildId }
+      { token: discordToken, guildId: activeGuildId, redirectUrl: RedirectUrl }
     )
 
     if (authenticationToken == null) {

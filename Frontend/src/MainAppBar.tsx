@@ -12,11 +12,8 @@ import Tooltip from "@mui/material/Tooltip"
 import MenuItem from "@mui/material/MenuItem"
 import { useNavigate } from "react-router-dom"
 import { DiscordUserAvatar } from "./Components/DiscordAvatar"
-import {
-  Role,
-  useAuthenticationAdapter,
-} from "./Adapters/AuthenticationAdapter"
-import RedirectToDiscordLogin from "./Adapters/RedirectToDiscordLogin"
+import { Role, useAuthenticationAdapter } from "./Adapters/AuthenticationAdapter"
+import { RedirectToDiscordLogin } from "./Adapters/RedirectToDiscordLogin"
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const discordIcon = require("./Media/discord.svg").default
@@ -25,9 +22,7 @@ const settings = ["Logg ut"]
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null)
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
-    null
-  )
+  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
   const { logout, loggedInUser } = useAuthenticationAdapter()
   const navigate = useNavigate()
 
@@ -196,9 +191,7 @@ function ResponsiveAppBar() {
             <Box sx={{ flexGrow: 0 }}>
               <Button
                 sx={{ color: "text.primary" }}
-                startIcon={
-                  <img src={discordIcon} style={{ width: 20 }} alt="avatar" />
-                }
+                startIcon={<img src={discordIcon} style={{ width: 20 }} alt="avatar" />}
                 variant="text"
                 onClick={RedirectToDiscordLogin}
               >

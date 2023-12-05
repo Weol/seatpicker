@@ -1,20 +1,21 @@
 type Config = {
   ApiHost: string
   ApiBaseUrl: string
+  Protocol: string
   DiscordAvatarBaseUrl: string
   DiscordGuildIconBaseUrl: string
 }
 
 const host = window.location.host
-let baseUrl = "https://" + host + "/api"
-
-if (host.includes("localhost")) {
-  baseUrl = "http://" + host
-}
+const protocol = host.includes("localhost") ? "http" : "https"
+const apiBaseUrl = host.includes("localhost")
+  ? `${protocol}://${host}`
+  : `${protocol}://${host}/api`
 
 const config: Config = {
   ApiHost: host,
-  ApiBaseUrl: baseUrl,
+  ApiBaseUrl: apiBaseUrl,
+  Protocol: protocol,
   DiscordAvatarBaseUrl: "https://cdn.discordapp.com/avatars/",
   DiscordGuildIconBaseUrl: "https://cdn.discordapp.com/icons/",
 }
