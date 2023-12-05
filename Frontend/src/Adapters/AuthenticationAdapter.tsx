@@ -1,5 +1,5 @@
-import Config from "../config"
 import { useLocalStorage } from "usehooks-ts"
+import Config from "../config"
 import { useActiveGuildId } from "./ActiveGuildAdapter"
 
 export enum Role {
@@ -38,10 +38,11 @@ export interface AuthenticationToken {
 
 export function useAuthenticationAdapter() {
   const { activeGuildId } = useActiveGuildId()
-  const [authenticationToken, setAuthenticationToken] =
-    useLocalStorage<AuthenticationToken | null>("authenticationToken", null)
-  const loggedInUser =
-    authenticationToken == null ? null : new User(authenticationToken)
+  const [authenticationToken, setAuthenticationToken] = useLocalStorage<AuthenticationToken | null>(
+    "authenticationToken",
+    null
+  )
+  const loggedInUser = authenticationToken == null ? null : new User(authenticationToken)
 
   const login = async (discordToken: string): Promise<User> => {
     const authenticationToken = await makeRequest<AuthenticationToken>(
@@ -81,9 +82,7 @@ export function useAuthenticationAdapter() {
       return null
     } else {
       if (new Date() > new Date(authenticationToken.expiresAt)) {
-        const renewedAuthenticationToken = await renew(
-          authenticationToken.refreshToken
-        )
+        const renewedAuthenticationToken = await renew(authenticationToken.refreshToken)
 
         return renewedAuthenticationToken.token
       }
@@ -109,19 +108,17 @@ export function useAuthenticationAdapter() {
     }
     requestInit.headers = headers
 
-    return await fetch(Config.ApiBaseUrl + path, requestInit).then<T>(
-      (response) => {
-        const body = response.json() as T
-        console.log({
-          body: body,
-          status: response.status,
-          url: response.url,
-          method: method,
-          headers: response.headers,
-        })
-        return body
-      }
-    )
+    return await fetch(Config.ApiHost + path, requestInit).then<T>((response) => {
+      const body = response.json() as T
+      console.log({
+        body: body,
+        status: response.status,
+        url: response.url,
+        method: method,
+        headers: response.headers,
+      })
+      return body
+    })
   }
 
   return { login, logout, getToken, loggedInUser }

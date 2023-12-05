@@ -39,8 +39,9 @@ resource appService 'Microsoft.Web/sites@2018-02-01' = {
   properties: {
     httpsOnly: true
     serverFarmId: appServicePlan.id
-
+    clientAffinityEnabled: false
     siteConfig: {
+      webSocketsEnabled: true
       virtualApplications: [
         {
           virtualPath: '/'
@@ -49,6 +50,16 @@ resource appService 'Microsoft.Web/sites@2018-02-01' = {
         {
           virtualPath: '/api'
           physicalPath: 'site\\wwwroot\\api'
+        }
+      ]
+      appSettings: [
+        {
+          name: 'ApplicationInsightsAgent_EXTENSION_VERSION'
+          value: '~2'
+        }
+        {
+          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+          value: appInsights.properties.ConnectionString
         }
       ]
     }
@@ -64,7 +75,9 @@ resource stagingSlot 'Microsoft.Web/sites/slots@2018-02-01' = {
   }
   properties: {
     httpsOnly: true
+    clientAffinityEnabled: false
     siteConfig: {
+      webSocketsEnabled: true
       virtualApplications: [
         {
           virtualPath: '/'
@@ -105,6 +118,7 @@ resource appsettings 'Microsoft.Web/sites/slots/config@2021-03-01' = {
   parent: stagingSlot
   properties: {
     APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.properties.ConnectionString
+    ApplicationInsightsAgent_EXTENSION_VERSION: '~2'
     ASPNETCORE_ENVIRONMENT: 'Production'
 
     App_Database__Port: '5432'
