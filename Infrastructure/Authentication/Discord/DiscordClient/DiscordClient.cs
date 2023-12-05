@@ -33,6 +33,8 @@ public class DiscordClient
 
     public async Task<DiscordAccessToken> GetAccessToken(string discordToken)
     {
+        var redirectUri = options.RedirectUri.ToString();
+        logger.LogError("Getting access token using code {Code} and redirect uri {RedirectUri}", discordToken, redirectUri);
         var response = await httpClient.PostAsync(
             "oauth2/token",
             new FormUrlEncodedContent(
@@ -41,7 +43,7 @@ public class DiscordClient
                     new KeyValuePair<string, string>("grant_type", "authorization_code"),
                     new KeyValuePair<string, string>("client_id", options.ClientId),
                     new KeyValuePair<string, string>("client_secret", options.ClientSecret),
-                    new KeyValuePair<string, string>("redirect_uri", options.RedirectUri.ToString()),
+                    new KeyValuePair<string, string>("redirect_uri", redirectUri),
                     new KeyValuePair<string, string>("code", discordToken),
                 }));
 
