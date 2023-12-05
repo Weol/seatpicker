@@ -10,9 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 if (builder.Environment.IsDevelopment()) builder.Configuration.AddJsonFile("appsettings.local.json");
 
-builder.Configuration
-    .AddSeatpickerKeyvault()
-    .AddEnvironmentVariables("App_");
+builder.Configuration.AddEnvironmentVariables("App_");
+builder.Configuration.AddSeatpickerKeyvault();
 
 builder.Services.AddApplicationInsightsTelemetry()
     .AddAdapters()
