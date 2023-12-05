@@ -10,8 +10,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bicep", "Bicep", "{1AE7415C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{E0DE7D98-9495-4DCC-BA01-026F6163C44F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "IntegrationTests\IntegrationTests.csproj", "{5AEFD7A0-19B2-4A04-B3D3-A8D3718FD001}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{E4B504EC-91CB-4A69-8F83-31B7581A2FDC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{1EB8CD1F-92E8-41AA-868C-32A9E2AE1C22}"
@@ -34,10 +32,6 @@ Global
 		{E0DE7D98-9495-4DCC-BA01-026F6163C44F}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{E0DE7D98-9495-4DCC-BA01-026F6163C44F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E0DE7D98-9495-4DCC-BA01-026F6163C44F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5AEFD7A0-19B2-4A04-B3D3-A8D3718FD001}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{5AEFD7A0-19B2-4A04-B3D3-A8D3718FD001}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{5AEFD7A0-19B2-4A04-B3D3-A8D3718FD001}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5AEFD7A0-19B2-4A04-B3D3-A8D3718FD001}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4B504EC-91CB-4A69-8F83-31B7581A2FDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4B504EC-91CB-4A69-8F83-31B7581A2FDC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E4B504EC-91CB-4A69-8F83-31B7581A2FDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

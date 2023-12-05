@@ -2,7 +2,7 @@ name: Deploy API and Frontend
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
 jobs:
   buildFrontend:
     runs-on: ubuntu-latest
@@ -11,8 +11,8 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-node@v3
         with:
-          node-version: '14'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: Frontend/package-lock.json
       - run: |
           cd Frontend
@@ -33,11 +33,11 @@ jobs:
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: "6.0.x"
       - name: Install dependencies
         run: dotnet restore
-      - name: Vuild API artifact
-        run: dotnet publish --configuration Release -o api
+      - name: Build API artifact
+        run: dotnet publish Infrastructure/*.csproj --configuration Release -o api
       - name: Upload API artifact
         uses: actions/upload-artifact@v3
         with:
@@ -48,10 +48,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy Infrastructure
     permissions:
-      contents: 'read'
-      id-token: 'write'
-    outputs:
-      appServiceName: ${{ steps.template.outputs.Testy }}
+      contents: "read"
+      id-token: "write"
     steps:
       - uses: actions/checkout@master
       - name: Azure Login
@@ -72,8 +70,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy application
     permissions:
-      contents: 'read'
-      id-token: 'write'
+      contents: "read"
+      id-token: "write"
     needs: [deployInfrastructure, buildApi, buildFrontend]
     steps:
       - name: Download API artifact

@@ -44,16 +44,23 @@ resource appService 'Microsoft.Web/sites@2018-02-01' = {
     siteConfig: {
       virtualApplications: [
         {
-            virtualPath: '/'
-            physicalPath: 'site\\wwwroot'
+          virtualPath: '/'
+          physicalPath: 'site\\wwwroot'
         }
         {
-            virtualPath: '/api'
-            physicalPath: 'site\\wwwroot\\api'
+          virtualPath: '/api'
+          physicalPath: 'site\\wwwroot\\api'
         }
       ]
     }
   }
+}
+
+resource stagingSlot 'Microsoft.Web/sites/slots@2018-02-01' = {
+  name: 'staging'
+  parent: appService
+  location: location
+
 }
 
 resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
@@ -72,6 +79,5 @@ resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
     App_Wolverine__ServiceBusFQDN: serviceBusEndpoint
   }
 }
-
 
 output appPrincipalId string = appService.identity.principalId
