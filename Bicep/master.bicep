@@ -31,7 +31,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
 }
 
 resource appService 'Microsoft.Web/sites@2018-02-01' = {
-  name: 'saltenlan'
+  name: 'webapp-${postfix}'
   location: location
   identity: {
     type: 'SystemAssigned'
@@ -39,6 +39,7 @@ resource appService 'Microsoft.Web/sites@2018-02-01' = {
   properties: {
     httpsOnly: true
     serverFarmId: appServicePlan.id
+
     siteConfig: {
       virtualApplications: [
         {
@@ -58,8 +59,23 @@ resource stagingSlot 'Microsoft.Web/sites/slots@2018-02-01' = {
   name: 'staging'
   parent: appService
   location: location
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     httpsOnly: true
+    siteConfig: {
+      virtualApplications: [
+        {
+          virtualPath: '/'
+          physicalPath: 'site\\wwwroot'
+        }
+        {
+          virtualPath: '/api'
+          physicalPath: 'site\\wwwroot\\api'
+        }
+      ]
+    }
   }
 }
 
@@ -80,19 +96,21 @@ module databaseModule 'database.bicep' = {
   params: {
     location: location
     postfix: postfix
+    keyvaultName: keyvaultModule.outputs.keyvaultName
   }
 }
 
-var keyvaultReferenceFormat = '@Microsoft.KeyVault(VaultName=${keyvaultModule.outputs.keyvaultUri};SecretName={0})'
-
-resource appsettings 'Microsoft.Web/sites/config@2021-03-01' = {
+resource appsettings 'Microsoft.Web/sites/slots/config@2021-03-01' = {
   name: 'appsettings'
-  parent: appService
+  parent: stagingSlot
   properties: {
     APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.properties.ConnectionString
     ASPNETCORE_ENVIRONMENT: 'Production'
 
-    App_Keyvault__Uri: format(keyvaultReferenceFormat, 'AuthenticationCertificate')
+    App_Database__Port: '5432'
+    App_Database__Host: databaseModule.outputs.host
+    App_Database__Name: databaseModule.outputs.dbName
+    App_Keyvault__Uri: keyvaultModule.outputs.keyvaultUri
   }
 }
 

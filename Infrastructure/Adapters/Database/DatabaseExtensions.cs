@@ -27,14 +27,8 @@ internal static class DatabaseExtensions
 
                 options.Connection(databaseOptions.ConnectionString);
 
-                var environment = provider.GetRequiredService<IHostEnvironment>();
-                if (environment.IsDevelopment())
-                {
-                    options.AutoCreateSchemaObjects = AutoCreate.All;
-                }
-
                 return options;
-            });
+            }).OptimizeArtifactWorkflow();
 
         return services;
     }
@@ -48,5 +42,12 @@ internal static class DatabaseExtensions
 
 internal class DatabaseOptions
 {
-    [Required] public string ConnectionString { get; set; } = null!;
+    [Required] public string Host { get; set; } = null!;
+    [Required] public string User { get; set; } = null!;
+    [Required] public string Name { get; set; } = null!;
+    [Required] public string Port { get; set; } = null!;
+    [Required] public string Password { get; set; } = null!;
+
+    public string ConnectionString =>
+        $"Server={Host};Database={Name};Port={Port};User Id={User};Password={Password};Ssl Mode=Require;Trust Server Certificate=true;";
 }

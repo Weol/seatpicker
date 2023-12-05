@@ -1,4 +1,4 @@
-$characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!#$%&()*+,-./:;<=>?@[\]^_`{|}~".ToCharArray()
+$characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!#$%&()*+,-./:<=>?@[\]^_`{|}~".ToCharArray()
 $length= (30..60 | Get-Random) 
 
 $passwordList = @()

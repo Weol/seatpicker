@@ -15,5 +15,9 @@ public static class AdapterExtensions
     private static void ConfigureDatabase(DatabaseOptions options, IConfiguration configuration)
     {
         configuration.GetSection("Database").Bind(options);
+
+        // Values from keyvault   
+        options.Password = configuration["DatabaseAdminPassword"] ?? throw new NullReferenceException();
+        options.User = configuration["DatabaseAdminUsername"] ?? throw new NullReferenceException();
     }
 }

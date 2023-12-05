@@ -3,8 +3,8 @@ param postfix string
 
 param readers array
 
-resource keyVault 'Microsoft.KeyVault/vaults@2021-10-01' = {
-  name: 'keyvault-${postfix}'
+resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
+  name: 'kv-${postfix}'
   location: location
   properties: {
     tenantId: subscription().tenantId
@@ -18,8 +18,8 @@ resource keyVault 'Microsoft.KeyVault/vaults@2021-10-01' = {
 }
 
 var readerRole = '4633458b-17de-408a-b874-0445c86b69e6'
-resource roleAssignmnets 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = [for reader in readers: {
-  scope: keyVault 
+resource roleAssignmnets 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for reader in readers: {
+  scope: keyVault
   name: guid(keyVault.id, reader, readerRole)
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', readerRole)
