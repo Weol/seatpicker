@@ -108,7 +108,7 @@ export function useAuthenticationAdapter() {
     }
     requestInit.headers = headers
 
-    return await fetch(Config.ApiHost + path, requestInit).then<T>((response) => {
+    return await fetch(Config.ApiBaseUrl + "/" + path, requestInit).then<T>((response) => {
       const body = response.json() as T
       console.log({
         body: body,

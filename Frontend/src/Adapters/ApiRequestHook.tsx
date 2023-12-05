@@ -27,7 +27,7 @@ export default function useApiRequests() {
       if (typeof body !== "undefined") requestInit.body = JSON.stringify(body)
     }
 
-    const response = await fetch("https://" + Config.ApiHost + "/api/" + path, requestInit)
+    const response = await fetch(Config.ApiBaseUrl + "/" + path, requestInit)
 
     const responseClone = response.clone()
     const text = await responseClone.text()

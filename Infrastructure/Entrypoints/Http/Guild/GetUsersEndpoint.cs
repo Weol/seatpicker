@@ -8,7 +8,7 @@ using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 
 [ApiController]
-[Route("api/guild/{guildId}")]
+[Route("guild/{guildId}")]
 [Area("guilds")]
 [Authorize(Roles = "Admin")]
 public class GetUsersEndpoint

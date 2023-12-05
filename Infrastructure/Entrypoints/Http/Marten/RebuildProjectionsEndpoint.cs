@@ -12,7 +12,7 @@ using Seatpicker.Infrastructure.Entrypoints.Utils;
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Marten;
 
 [ApiController]
-[Route("api/marten")]
+[Route("marten")]
 [Area("marten")]
 [Authorize(Roles = "Admin")]
 public class RebuildProjectionsEndpoint

@@ -5,7 +5,7 @@ using Seatpicker.Application.Features.Lans;
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 
 [ApiController]
-[Route("api/lan")]
+[Route("lan")]
 [Area("lan")]
 public class GetEndpoint
 {

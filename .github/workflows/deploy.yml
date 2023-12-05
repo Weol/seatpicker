@@ -9,6 +9,10 @@ jobs:
     name: Build frontend
     steps:
       - uses: actions/checkout@master
+      - name: Remove proxy from package.json
+        run: echo "`jq 'del(.proxy)' Frontend/package.json`" > Frontend/package.json
+      - name: Read package.json
+        run: cat Frontend/package.json
       - uses: actions/setup-node@v3
         with:
           node-version: "20"
@@ -33,7 +37,7 @@ jobs:
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: "6.0.x"
+          dotnet-version: "8.0.x"
       - name: Install dependencies
         run: dotnet restore
       - name: Build API artifact

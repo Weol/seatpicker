@@ -6,7 +6,7 @@ using Seatpicker.Domain;
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 
 [ApiController]
-[Route("api/lan/{lanId:guid}/seat")]
+[Route("lan/{lanId:guid}/seat")]
 [Area("seat")]
 public class GetEndpoint
 {
