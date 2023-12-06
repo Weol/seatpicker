@@ -1,16 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Remotion.Linq.Clauses;
-using Seatpicker.Infrastructure.Adapters.Database;
 using Seatpicker.Infrastructure.Authentication;
-using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 
 [ApiController]
 [Route("guild/{guildId}")]
 [Area("guilds")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Operator")]
 public class GetUsersEndpoint
 {
     [HttpGet("users")]

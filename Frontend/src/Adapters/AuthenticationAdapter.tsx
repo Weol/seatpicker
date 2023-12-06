@@ -29,7 +29,7 @@ export class User {
 
 export interface AuthenticationToken {
   token: string
-  expiresAt: string
+  expiresAt: number
   refreshToken: string
   userId: string
   nick: string
@@ -82,7 +82,8 @@ export function useAuthenticationAdapter() {
     if (authenticationToken == null) {
       return null
     } else {
-      if (new Date() > new Date(authenticationToken.expiresAt)) {
+      const unixNow = Math.floor(Date.now() / 1000)
+      if (unixNow > authenticationToken.expiresAt - 10) {
         const renewedAuthenticationToken = await renew(authenticationToken.refreshToken)
 
         return renewedAuthenticationToken.token

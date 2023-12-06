@@ -1,13 +1,8 @@
-using FluentValidation;
 using Marten;
-using Marten.Events.Daemon.Resiliency;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Lans;
 using Seatpicker.Application.Features.Seats;
-using Seatpicker.Infrastructure.Authentication;
-using Seatpicker.Infrastructure.Entrypoints.Http.Lan;
-using Seatpicker.Infrastructure.Entrypoints.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Marten;
 

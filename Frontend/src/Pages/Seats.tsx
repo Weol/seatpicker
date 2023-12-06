@@ -49,12 +49,23 @@ type AwaitingSelectSeat = {
   tooltip: string
 }
 
+function dsa(users: User[], seats: Seat[]) {
+  const seatMap = seats.reduce((map, seat) => {
+    if (seat.reservedBy) map.set(seat.reservedBy.id, seat)
+    return map
+  }, new Map<string, Seat>())
+
+  return users.map((user) => {
+    return { user: user, reservedSeat: seatMap.get(user.id) ?? null }
+  })
+}
+
 function SeatsWithLan(props: { activeLan: Lan }) {
   const { alertSuccess, alertLoading } = useAlerts()
   const { showDialog } = useDialogs()
   const { loggedInUser } = useAuthenticationAdapter()
   const { seats, reservedSeat } = useSeats(props.activeLan)
-  const { guildUsers: users, loadGuildUsers: loadUsers } = useGuildUsers(props.activeLan.guildId)
+  const { guildUsers, loadGuildUsers } = useGuildUsers(props.activeLan.guildId)
   const {
     makeReservation,
     makeReservationFor,
@@ -64,7 +75,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
     moveReservationFor,
   } = useReservationAdapter(props.activeLan)
   const [awaitingSelectSeat, setAwaitingSelectSeat] = useState<AwaitingSelectSeat | null>(null)
-
+  const asd = guildUsers && seats && dsa(guildUsers, seats)
   async function handleReserve(toSeat: Seat) {
     if (reservedSeat != null) {
       const fromSeat = reservedSeat
@@ -232,8 +243,8 @@ function SeatsWithLan(props: { activeLan: Lan }) {
               <SeatButton
                 key={seat.id}
                 seat={seat}
-                users={users}
-                loadUsers={loadUsers}
+                users={asd}
+                loadUsers={loadGuildUsers}
                 color={getSeatColor(seat)}
                 onSeatClick={awaitingSelectSeat ? handleSeatClick : undefined}
                 onReserve={handleReserve}
@@ -374,7 +385,7 @@ function SeatButton(props: SeatButtonProps) {
 
 type SeatMenuProps = {
   seat: Seat
-  users: User[] | null
+  users: { user: User; reservedSeat: Seat | null }[] | null
   loadUsers: () => Promise<void>
   onReserve: (seat: Seat) => void
   onRemove: (seat: Seat) => void
@@ -399,7 +410,7 @@ function SeatMenu(props: SeatMenuProps & MenuProps) {
     }
   }
 
-  const usersList = (users: User[]) => {
+  const usersList = (users: { user: User; reservedSeat: Seat | null }[]) => {
     return (
       <MenuItem onClick={() => handleMakeReservationForClick()}>
         <Autocomplete
@@ -408,12 +419,13 @@ function SeatMenu(props: SeatMenuProps & MenuProps) {
           autoHighlight
           disableClearable
           options={users}
-          getOptionLabel={(option) => option.name}
-          onChange={(e, value) => handleuserSelectedForReservation(value)}
+          getOptionDisabled={(option) => option.reservedSeat != null}
+          getOptionLabel={(option) => option.user.name}
+          onChange={(e, value) => handleuserSelectedForReservation(value.user)}
           renderOption={(props, option) => (
             <Box component="li" sx={{ "& > img": { mr: 2, flexShrink: 0 } }} {...props}>
-              <DiscordUserAvatar user={option} sx={{ marginRight: "0.5em" }} />
-              <Typography noWrap>{option.name}</Typography>
+              <DiscordUserAvatar user={option.user} sx={{ marginRight: "0.5em" }} />
+              <Typography noWrap>{option.user.name}</Typography>
             </Box>
           )}
           renderInput={(params) => <TextField {...params} label="User" />}

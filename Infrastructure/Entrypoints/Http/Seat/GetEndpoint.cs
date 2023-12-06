@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features;
 using Seatpicker.Application.Features.Seats;
-using Seatpicker.Domain;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 

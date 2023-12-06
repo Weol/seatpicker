@@ -1,5 +1,3 @@
-using Marten;
-using Oakton;
 using Seatpicker.Application;
 using Seatpicker.Infrastructure;
 using Seatpicker.Infrastructure.Adapters;
@@ -26,6 +24,7 @@ var app = builder.Build();
 app.UseSwaggerGen();
 app.UseEntrypoints();
 app.UseSeatpickerAuthentication();
+app.UseAdapters();
 
 app.Run();
 

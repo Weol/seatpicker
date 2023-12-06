@@ -19,7 +19,7 @@ public class DiscordJwtTokenCreator
         this.options = options.Value;
     }
 
-    public Task<string> CreateToken(DiscordToken discordToken, ICollection<Role> roles)
+    public Task<(string Token, DateTimeOffset ExpiresAt)> CreateToken(DiscordToken discordToken, ICollection<Role> roles)
     {
         var certificate = options.SigningCertificate;
 
@@ -47,15 +47,17 @@ public class DiscordJwtTokenCreator
         var handler = new JwtSecurityTokenHandler();
 
         var now = DateTime.UtcNow;
+        var expiresAt = now.AddSeconds(options.TokenLifetime);
+        
         var token = handler.CreateJwtSecurityToken(
             discordToken.GuildId,
             discordToken.Id,
             new ClaimsIdentity(roleClaims.Concat(defaultClaims)),
-            now.AddMilliseconds(-30),
-            now.AddSeconds(options.TokenLifetime),
+            now.AddSeconds(-1),
+            expiresAt,
             now,
             new SigningCredentials(rsaSecurityKey, SecurityAlgorithms.RsaSha256));
 
-        return Task.FromResult(handler.WriteToken(token));
+        return Task.FromResult((handler.WriteToken(token), new DateTimeOffset(expiresAt)));
     }
 }

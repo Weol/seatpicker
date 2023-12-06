@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Caching.Memory;
@@ -33,7 +34,7 @@ public class DiscordClient
 
     public async Task<DiscordAccessToken> GetAccessToken(string discordToken, string redirectUrl)
     {
-        logger.LogError("Getting access token using code {Code} and redirect uri {RedirectUri}", discordToken, redirectUrl);
+        logger.LogInformation("Getting access token using code {Code} and redirect uri {RedirectUri}", discordToken, redirectUrl);
         var response = await httpClient.PostAsync(
             "oauth2/token",
             new FormUrlEncodedContent(
@@ -72,6 +73,34 @@ public class DiscordClient
 
         var response = await httpClient.SendAsync(requestMessage);
         return await DeserializeContent<DiscordUser>(response);
+    }
+    
+    public async Task AddGuildMember(string guildId, string memberId, string accessToken)
+    {
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Put, $"guilds/{guildId}/members/{memberId}");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
+
+        var json = JsonSerializer.Serialize(new
+        {
+            access_token = accessToken
+        });
+        requestMessage.Content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var response = await httpClient.SendAsync(requestMessage);
+        if (response.StatusCode == HttpStatusCode.NoContent)
+        {
+            logger.LogInformation("User {User} is already a member of guild {Guild}", memberId, guildId);
+        } else if (response.IsSuccessStatusCode)
+        {
+            logger.LogInformation("Added user {User} as a member of guild {Guild}", memberId, guildId);
+        }
+        else
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            logger.LogError(
+                "Non-successful response code from Discord {@ResponseInfo}", 
+                new { response.StatusCode, Body = body });
+        }
     }
 
     public async Task<GuildMember?> GetGuildMember(string guildId, string memberId)

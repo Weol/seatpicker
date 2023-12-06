@@ -16,10 +16,10 @@ public class LoginEndpoint
     {
         var (token, expiresAt, refreshToken, discordUser, roles) = await discordAuthenticationService.Login(request.Token, request.GuildId, request.RedirectUrl);
 
-        return new OkObjectResult(new Response(token, request.GuildId, expiresAt, refreshToken, discordUser.Id, discordUser.Username, discordUser.Avatar, roles));
+        return new OkObjectResult(new Response(token, request.GuildId, expiresAt.ToUnixTimeSeconds(), refreshToken, discordUser.Id, discordUser.Username, discordUser.Avatar, roles));
     }
 
     public record Request(string Token, string GuildId, string RedirectUrl);
 
-    public record Response(string Token, string GuildId, DateTimeOffset ExpiresAt, string RefreshToken, string UserId, string Nick, string? Avatar, ICollection<Role> Roles);
+    public record Response(string Token, string GuildId, long ExpiresAt, string RefreshToken, string UserId, string Nick, string? Avatar, ICollection<Role> Roles);
 }

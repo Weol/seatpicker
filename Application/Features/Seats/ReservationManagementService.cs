@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using Seatpicker.Domain;
+﻿using Seatpicker.Domain;
 
 namespace Seatpicker.Application.Features.Seats;
 
@@ -17,12 +16,14 @@ public class ReservationManagementService : IReservationManagementService
     private readonly IAggregateRepository repository;
     private readonly IDocumentReader reader;
     private readonly IUserProvider userProvider;
+    private readonly IReservationNotifier notifier; 
 
-    public ReservationManagementService(IUserProvider userProvider, IDocumentReader reader, IAggregateRepository repository)
+    public ReservationManagementService(IUserProvider userProvider, IDocumentReader reader, IAggregateRepository repository, IReservationNotifier notifier)
     {
         this.userProvider = userProvider;
         this.reader = reader;
         this.repository = repository;
+        this.notifier = notifier;
     }
 
     public async Task Create(Guid lanId, Guid seatId, UserId userId, User reservedBy)
@@ -42,6 +43,8 @@ public class ReservationManagementService : IReservationManagementService
 
         transaction.Update(seatToReserve);
         transaction.Commit();
+
+        await notifier.NotifySeatReservationChanged(seatToReserve);
     }
 
     public async Task Delete(Guid lanId, Guid seatId, User removedBy)
@@ -53,6 +56,8 @@ public class ReservationManagementService : IReservationManagementService
 
         transaction.Update(seat);
         transaction.Commit();
+        
+        await notifier.NotifySeatReservationChanged(seat);
     }
 
     public async Task Move(Guid lanId, UserId userToMove, Guid fromSeatId, Guid toSeatId, User movedBy)
@@ -71,5 +76,9 @@ public class ReservationManagementService : IReservationManagementService
         transaction.Update(fromSeat);
         transaction.Update(toSeat);
         transaction.Commit();
+        
+        await Task.WhenAll(
+            notifier.NotifySeatReservationChanged(fromSeat),
+            notifier.NotifySeatReservationChanged(toSeat));
     }
 }

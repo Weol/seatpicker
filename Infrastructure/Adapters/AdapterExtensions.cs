@@ -1,4 +1,5 @@
 ﻿using Seatpicker.Infrastructure.Adapters.Database;
+using Seatpicker.Infrastructure.Adapters.SignalR;
 using Seatpicker.Infrastructure.Authentication;
 
 namespace Seatpicker.Infrastructure.Adapters;
@@ -9,9 +10,17 @@ public static class AdapterExtensions
     {
         return services
             .AddDatabase(ConfigureDatabase)
+            .AddSignalRAdapter()
             .AddUserManager();
     }
 
+    public static WebApplication UseAdapters(this WebApplication app)
+    {
+        app.UseSignalRAdapter();
+        
+        return app;
+    }
+    
     private static void ConfigureDatabase(DatabaseOptions options, IConfiguration configuration)
     {
         configuration.GetSection("Database").Bind(options);

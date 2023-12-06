@@ -1,9 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Marten;
-using Marten.Events.Daemon.Resiliency;
 using Microsoft.Extensions.Options;
 using Seatpicker.Application.Features;
-using Weasel.Core;
 
 namespace Seatpicker.Infrastructure.Adapters.Database;
 

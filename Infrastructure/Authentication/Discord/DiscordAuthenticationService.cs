@@ -41,6 +41,8 @@ public class DiscordAuthenticationService
         var accessToken = await discordClient.GetAccessToken(discordToken, redirectUrl);
         var discordUser = await discordClient.Lookup(accessToken.AccessToken);
 
+        await discordClient.AddGuildMember(guildId, discordUser.Id, accessToken.AccessToken);
+        
         return await CreateTokenRequest(accessToken, discordUser, guildId);
     }
 
@@ -49,9 +51,6 @@ public class DiscordAuthenticationService
         DiscordUser discordUser,
         string guildId)
     {
-        // Minus 10 just to make sure that the discord token expires a bit after the jwt token actually expires
-        var expiresAt = DateTimeOffset.UtcNow.AddSeconds(accessToken.ExpiresIn - 10);
-
         Role[] roles;
         if (options.Admins.Any(admin => admin == discordUser.Id))
         {
@@ -77,10 +76,9 @@ public class DiscordAuthenticationService
             discordUser.Username,
             discordUser.Avatar,
             accessToken.RefreshToken,
-            guildId,
-            expiresAt);
+            guildId);
 
-        var jwtToken = await tokenCreator.CreateToken(token, roles);
+        var (jwtToken, expiresAt) = await tokenCreator.CreateToken(token, roles);
         await userManager.Store(new User(new UserId(discordUser.Id), discordUser.Username, discordUser.Avatar), guildId);
 
         return (jwtToken, expiresAt, accessToken.RefreshToken, discordUser, roles);

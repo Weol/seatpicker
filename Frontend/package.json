@@ -6,6 +6,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
+    "@microsoft/signalr": "^8.0.0",
     "@mui/icons-material": "^5.14.16",
     "@mui/material": "^5.14.17",
     "@types/react": "^18.2.37",
@@ -14,6 +15,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.18.0",
     "react-scripts": "^5.0.1",
+    "react-use-websocket": "^3.0.0",
     "recoil": "^0.7.7",
     "universal-cookie": "^6.1.1",
     "usehooks-ts": "^2.9.1",

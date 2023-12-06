@@ -5,5 +5,4 @@ public record DiscordToken(
     string Nick,
     string? Avatar,
     string RefreshToken,
-    string? GuildId,
-    DateTimeOffset ExpiresAtUtc);
+    string? GuildId);

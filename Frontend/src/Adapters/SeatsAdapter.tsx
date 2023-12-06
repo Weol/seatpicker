@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react"
+import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr"
+import { useEffect, useRef, useState } from "react"
+import Config from "../config"
 import useApiRequests from "./ApiRequestHook"
 import { User, useAuthenticationAdapter } from "./AuthenticationAdapter"
 import { Lan } from "./LanAdapter"
@@ -24,6 +26,7 @@ export function useSeats(lan: Lan | null) {
   const { versionId } = useVersionId("Seats")
   const [seats, setSeats] = useState<Seat[] | null>(null)
   const reservedSeat = findSeatReservedBy(seats, loggedInUser)
+  const connectionRef = useRef<HubConnection | null>(null)
 
   function findSeatReservedBy(seats: Seat[] | null, loggedInUser: User | null) {
     if (seats && loggedInUser) {
@@ -40,6 +43,57 @@ export function useSeats(lan: Lan | null) {
   useEffect(() => {
     loadSeats()
   }, [lan?.id, versionId])
+
+  useEffect(() => {
+    if (connectionRef.current == null && seats) {
+      subscribeToUpdates()
+    }
+
+    if (connectionRef.current != null) {
+      connectionRef.current.on("ReservationChanged", onReservationChanged)
+    }
+
+    return unsubscribeFromUpdates
+  }, [seats])
+
+  function onReservationChanged(update: { id: string; reservedBy: User | null }) {
+    setSeats((seats) => {
+      return (
+        (seats &&
+          seats.map((seat) => {
+            return seat.id == update.id ? { ...seat, reservedBy: update.reservedBy } : seat
+          })) ??
+        []
+      )
+    })
+  }
+
+  function unsubscribeFromUpdates() {
+    if (connectionRef.current != null) {
+      connectionRef.current.stop()
+      connectionRef.current = null
+    }
+  }
+
+  function subscribeToUpdates() {
+    const connection = new HubConnectionBuilder()
+      .withUrl(Config.ApiBaseUrl + "/hubs/reservation")
+      .configureLogging(LogLevel.Information)
+      .build()
+
+    async function start() {
+      try {
+        await connection.start()
+      } catch (err) {
+        console.log(err)
+        setTimeout(start, 1000)
+      }
+    }
+
+    start()
+
+    connectionRef.current = connection
+  }
 
   async function loadSeats() {
     const response = await apiRequest("GET", `lan/${lan?.id}/seat`)
