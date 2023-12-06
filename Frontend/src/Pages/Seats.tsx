@@ -76,6 +76,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
   } = useReservationAdapter(props.activeLan)
   const [awaitingSelectSeat, setAwaitingSelectSeat] = useState<AwaitingSelectSeat | null>(null)
   const usersWithSeats = guildUsers && seats && getUsersWithSeat(guildUsers, seats)
+
   async function handleReserve(toSeat: Seat) {
     if (reservedSeat != null) {
       const fromSeat = reservedSeat

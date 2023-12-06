@@ -13,20 +13,22 @@ public interface IReservationService
 
 public class ReservationService : IReservationService
 {
-    private readonly IAggregateRepository repository;
-    private readonly IDocumentReader reader;
+    private readonly IAggregateRepository aggregateRepository;
+    private readonly IDocumentRepository documentRepository;
     private readonly IReservationNotifier notifier;
 
-    public ReservationService(IDocumentReader reader, IAggregateRepository repository, IReservationNotifier notifier)
+    public ReservationService(IAggregateRepository aggregateRepository, IReservationNotifier notifier, IDocumentRepository documentRepository)
     {
-        this.reader = reader;
-        this.repository = repository;
+        this.aggregateRepository = aggregateRepository;
         this.notifier = notifier;
+        this.documentRepository = documentRepository;
     }
 
     public async Task Create(Guid lanId, Guid seatId, User user)
     {
-        await using var transaction = repository.CreateTransaction();
+        await using var transaction = aggregateRepository.CreateTransaction();
+        await using var reader = documentRepository.CreateReader();
+
         var seatToReserve = await transaction.Aggregate<Seat>(seatId) ??
                             throw new SeatNotFoundException { SeatId = seatId };
 
@@ -44,20 +46,20 @@ public class ReservationService : IReservationService
 
     public async Task Remove(Guid lanId, Guid seatId, User user)
     {
-        await using var transaction = repository.CreateTransaction();
+        await using var transaction = aggregateRepository.CreateTransaction();
         var seat = await transaction.Aggregate<Seat>(seatId) ?? throw new SeatNotFoundException { SeatId = seatId };
 
         seat.RemoveReservation(user);
 
         transaction.Update(seat);
         transaction.Commit();
-        
+
         await notifier.NotifySeatReservationChanged(seat);
     }
 
     public async Task Move(Guid lanId, Guid fromSeatId, Guid toSeatId, User user)
     {
-        await using var transaction = repository.CreateTransaction();
+        await using var transaction = aggregateRepository.CreateTransaction();
         var fromSeat = await transaction.Aggregate<Seat>(fromSeatId) ??
                        throw new SeatNotFoundException { SeatId = fromSeatId };
 

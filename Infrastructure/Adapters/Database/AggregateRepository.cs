@@ -66,7 +66,6 @@ public class AggregateTransaction : IAggregateTransaction
         return !streamState.IsArchived;
     }
 
-
     public ValueTask DisposeAsync()
     {
         return session.DisposeAsync();

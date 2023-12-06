@@ -13,18 +13,18 @@ public interface ILanManagementService
 
 internal class LanManagementManagementService : ILanManagementService
 {
-    private readonly IAggregateRepository repository;
-    private readonly IDocumentReader reader;
+    private readonly IAggregateRepository aggregateRepository;
+    private readonly IDocumentRepository documentRepository;
 
-    public LanManagementManagementService(IAggregateRepository repository, IDocumentReader reader)
+    public LanManagementManagementService(IAggregateRepository aggregateRepository, IDocumentRepository documentRepository)
     {
-        this.repository = repository;
-        this.reader = reader;
+        this.aggregateRepository = aggregateRepository;
+        this.documentRepository = documentRepository;
     }
 
     public async Task<Guid> Create(string title, string guildId, byte[] background, User initiator)
     {
-        await using var transaction = repository.CreateTransaction();
+        await using var transaction = aggregateRepository.CreateTransaction();
         var id = Guid.NewGuid();
 
         var lan = new Lan(id, title, background, guildId, initiator);
@@ -37,7 +37,7 @@ internal class LanManagementManagementService : ILanManagementService
 
     public async Task Update(Guid id, bool? active, string? title, byte[]? background, User initiator)
     {
-        await using var transaction = repository.CreateTransaction();
+        await using var transaction = aggregateRepository.CreateTransaction();
 
         var lan = await transaction.Aggregate<Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
@@ -52,7 +52,7 @@ internal class LanManagementManagementService : ILanManagementService
 
     public async Task Delete(Guid id, User initiator)
     {
-        await using var transaction = repository.CreateTransaction();
+        await using var transaction = aggregateRepository.CreateTransaction();
 
         var lan = await transaction.Aggregate<Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
@@ -67,6 +67,8 @@ internal class LanManagementManagementService : ILanManagementService
 
     private async Task SetActive(IAggregateTransaction transaction, Lan lan, bool active, User initiator)
     {
+        await using var reader = documentRepository.CreateReader();
+
         var activeLans = reader.Query<ProjectedLan>()
             .Where(x => x.GuildId == lan.GuildId)
             .Where(x => x.Active)
@@ -77,7 +79,7 @@ internal class LanManagementManagementService : ILanManagementService
         {
             var activeLan = await transaction.Aggregate<Lan>(activeLanId)
                 ?? throw new LanNotFoundException { LanId = activeLanId };
-            
+
             activeLan.SetActive(false, initiator);
             transaction.Update(activeLan);
         }

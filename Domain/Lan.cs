@@ -83,7 +83,7 @@ public class Lan : AggregateBase
     {
         Background = evt.Background;
     }
-    
+
     public void Apply(LanActiveChanged evt)
     {
         Active = evt.Active;

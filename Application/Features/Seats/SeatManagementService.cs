@@ -56,6 +56,8 @@ public class SeatManagementService : ISeatManagementService
 
         seat.Archive(initiator);
 
+        var sr = new StreamReader(new FileStream("", FileMode.Create));
+
         transaction.Update(seat);
         transaction.Archive(seat);
 

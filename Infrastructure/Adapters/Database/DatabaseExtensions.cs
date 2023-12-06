@@ -14,8 +14,7 @@ internal static class DatabaseExtensions
         services.AddValidatedOptions(configureAction);
 
         services.AddSingleton<IAggregateRepository, AggregateRepository>()
-            .AddSingleton<IDocumentRepository, DocumentRepository>()
-            .AddScoped(CreateDocumentReader);
+            .AddSingleton<IDocumentRepository, DocumentRepository>();
 
         services.AddMarten(
             provider =>
@@ -29,12 +28,6 @@ internal static class DatabaseExtensions
             }).OptimizeArtifactWorkflow();
 
         return services;
-    }
-
-    private static IDocumentReader CreateDocumentReader(IServiceProvider provider)
-    {
-        var repository = provider.GetRequiredService<IDocumentRepository>();
-        return repository.CreateReader();
     }
 }
 

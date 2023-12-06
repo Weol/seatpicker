@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using Seatpicker.Infrastructure.Adapters.SignalR;
 using Seatpicker.Infrastructure.Entrypoints.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints;
@@ -35,7 +34,7 @@ public static class EntrypointsExtensions
         app.UseHttpsRedirection();
         app.UseRouting();
         app.MapControllers();
-        
+
         return app;
     }
 

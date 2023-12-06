@@ -12,9 +12,11 @@ public class GetEndpoint
     [HttpGet("")]
     public async Task<ActionResult<Response[]>> GetAll(
         [FromRoute] Guid lanId,
-        [FromServices] IDocumentReader documentReader,
+        [FromServices] IDocumentRepository documentRepository,
         [FromServices] IUserProvider userProvider)
     {
+        await using var documentReader = documentRepository.CreateReader();
+
         var tasks = documentReader.Query<ProjectedSeat>()
             .Where(seat => seat.LanId == lanId)
             .AsEnumerable()
@@ -44,8 +46,10 @@ public class GetEndpoint
         [FromRoute] Guid lanId,
         [FromRoute] Guid seatId,
         [FromServices] IUserProvider userProvider,
-        [FromServices] IDocumentReader documentReader)
+        [FromServices] IDocumentRepository documentRepository)
     {
+        await using var documentReader = documentRepository.CreateReader();
+
         var seat = documentReader.Query<ProjectedSeat>()
             .Where(seat => seat.LanId == lanId)
             .SingleOrDefault(seat => seat.Id == seatId);
