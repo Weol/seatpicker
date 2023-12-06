@@ -7,7 +7,6 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 [ApiController]
 [Route("guild")]
 [Area("guilds")]
-[Authorize(Roles = "Admin")]
 public class GetEndpoint
 {
     [HttpGet("")]

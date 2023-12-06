@@ -37,40 +37,57 @@ export interface AuthenticationToken {
   roles: Role[]
 }
 
+function getUserFromAuthenticationToken(token: AuthenticationToken | null) {
+  if (token == null) return null
+  if (Object.keys(token).length == 0) return null
+  return new User(token)
+}
+
 export function useAuthenticationAdapter() {
   const { activeGuildId } = useActiveGuildId()
   const [authenticationToken, setAuthenticationToken] = useLocalStorage<AuthenticationToken | null>(
     "authenticationToken",
     null
   )
-  const loggedInUser = authenticationToken == null ? null : new User(authenticationToken)
+  const loggedInUser = getUserFromAuthenticationToken(authenticationToken)
 
   const login = async (discordToken: string): Promise<User> => {
-    const authenticationToken = await makeRequest<AuthenticationToken>(
-      "POST",
-      `authentication/discord/login`,
-      { token: discordToken, guildId: activeGuildId, redirectUrl: RedirectUrl }
-    )
+    const response = await makeRequest("POST", `authentication/discord/login`, {
+      token: discordToken,
+      guildId: activeGuildId,
+      redirectUrl: RedirectUrl,
+    })
 
-    if (authenticationToken == null) {
-      throw "Authentication token is null"
+    if (response.status == 200) {
+      const authenticationToken = (await response.json()) as AuthenticationToken
+      if (authenticationToken == null) {
+        throw "Authentication token is null"
+      } else {
+        setAuthenticationToken(authenticationToken)
+        return new User(authenticationToken)
+      }
     } else {
-      setAuthenticationToken(authenticationToken)
-      return new User(authenticationToken)
+      throw response
     }
   }
 
   const renew = async (refreshToken: string): Promise<AuthenticationToken> => {
-    const authenticationToken = await makeRequest<AuthenticationToken>(
-      "POST",
-      `authentication/discord/renew`,
-      { refreshToken: refreshToken, guildId: activeGuildId }
-    )
-    if (authenticationToken == null) {
-      throw "authenticationToken is null"
+    const response = await makeRequest("POST", `authentication/discord/renew`, {
+      refreshToken: refreshToken,
+      guildId: activeGuildId,
+    })
+
+    if (response.status == 200) {
+      const authenticationToken = (await response.json()) as AuthenticationToken
+      if (authenticationToken == null) {
+        throw "authenticationToken is null"
+      } else {
+        setAuthenticationToken(authenticationToken)
+        return authenticationToken
+      }
     } else {
-      setAuthenticationToken(authenticationToken)
-      return authenticationToken
+      logout()
+      throw response
     }
   }
 
@@ -93,11 +110,11 @@ export function useAuthenticationAdapter() {
     }
   }
 
-  async function makeRequest<T>(
+  async function makeRequest(
     method: "POST" | "DELETE" | "GET" | "PUT",
     path: string,
     body: unknown
-  ): Promise<T> {
+  ): Promise<Response> {
     const requestInit: RequestInit = {
       method: method,
       redirect: "follow",
@@ -110,17 +127,7 @@ export function useAuthenticationAdapter() {
     }
     requestInit.headers = headers
 
-    return await fetch(Config.ApiBaseUrl + "/" + path, requestInit).then<T>((response) => {
-      const body = response.json() as T
-      console.log({
-        body: body,
-        status: response.status,
-        url: response.url,
-        method: method,
-        headers: response.headers,
-      })
-      return body
-    })
+    return fetch(Config.ApiBaseUrl + "/" + path, requestInit)
   }
 
   return { login, logout, getToken, loggedInUser }

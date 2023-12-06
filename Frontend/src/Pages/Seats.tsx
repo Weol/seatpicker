@@ -49,7 +49,7 @@ type AwaitingSelectSeat = {
   tooltip: string
 }
 
-function dsa(users: User[], seats: Seat[]) {
+function getUsersWithSeat(users: User[], seats: Seat[]) {
   const seatMap = seats.reduce((map, seat) => {
     if (seat.reservedBy) map.set(seat.reservedBy.id, seat)
     return map
@@ -75,7 +75,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
     moveReservationFor,
   } = useReservationAdapter(props.activeLan)
   const [awaitingSelectSeat, setAwaitingSelectSeat] = useState<AwaitingSelectSeat | null>(null)
-  const asd = guildUsers && seats && dsa(guildUsers, seats)
+  const usersWithSeats = guildUsers && seats && getUsersWithSeat(guildUsers, seats)
   async function handleReserve(toSeat: Seat) {
     if (reservedSeat != null) {
       const fromSeat = reservedSeat
@@ -243,7 +243,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
               <SeatButton
                 key={seat.id}
                 seat={seat}
-                users={asd}
+                users={usersWithSeats}
                 loadUsers={loadGuildUsers}
                 color={getSeatColor(seat)}
                 onSeatClick={awaitingSelectSeat ? handleSeatClick : undefined}

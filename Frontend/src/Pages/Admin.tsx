@@ -340,16 +340,12 @@ function LanDetails(props: {
 }
 
 function BackgroundPreviewModal(props: { background: string; open: boolean; onClose: () => void }) {
-  const base64ToBlob = (base64: string): Blob => {
-    return new Blob([atob(base64)], { type: "image/svg+xml" })
-  }
-
   return (
     <Modal title="Background preview" {...props}>
       <img
         alt="preview"
         style={{ width: "100%" }}
-        src={URL.createObjectURL(base64ToBlob(props.background))}
+        src={`data:image/svg+xml;base64,${props.background}`}
       />
     </Modal>
   )

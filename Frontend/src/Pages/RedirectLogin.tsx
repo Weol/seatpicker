@@ -1,17 +1,15 @@
-import * as React from "react"
-import Typography from "@mui/material/Typography"
-import { Link, useSearchParams } from "react-router-dom"
 import { CircularProgress, Stack } from "@mui/material"
 import Button from "@mui/material/Button"
-import {
-  User,
-  useAuthenticationAdapter,
-} from "../Adapters/AuthenticationAdapter"
+import Typography from "@mui/material/Typography"
 import { useEffect } from "react"
+import { Link, useSearchParams } from "react-router-dom"
+import { User, useAuthenticationAdapter } from "../Adapters/AuthenticationAdapter"
 import { DiscordUserAvatar } from "../Components/DiscordAvatar"
+import { useGuild } from "../Adapters/GuildAdapter"
 
 export default function RedirectLogin() {
   const { login, loggedInUser } = useAuthenticationAdapter()
+  const { a } = useGuild()
   const [searchParams] = useSearchParams()
 
   useEffect(() => {
@@ -30,7 +28,7 @@ export default function RedirectLogin() {
 
         <DiscordUserAvatar
           user={user}
-          style={{ maxWidth: "150px", borderRadius: "50%" }}
+          style={{ width: "150px", height: "150px", borderRadius: "50%" }}
         />
 
         <Button component={Link} to="/" variant="contained">
