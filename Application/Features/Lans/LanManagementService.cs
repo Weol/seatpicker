@@ -24,20 +24,20 @@ internal class LanManagementManagementService : ILanManagementService
 
     public async Task<Guid> Create(string title, string guildId, byte[] background, User initiator)
     {
-        await using var transaction = aggregateRepository.CreateTransaction();
+        using var transaction = aggregateRepository.CreateTransaction();
         var id = Guid.NewGuid();
 
         var lan = new Lan(id, title, background, guildId, initiator);
 
         transaction.Create(lan);
-        transaction.Commit();
+        await transaction.Commit();
 
         return id;
     }
 
     public async Task Update(Guid id, bool? active, string? title, byte[]? background, User initiator)
     {
-        await using var transaction = aggregateRepository.CreateTransaction();
+        using var transaction = aggregateRepository.CreateTransaction();
 
         var lan = await transaction.Aggregate<Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
@@ -52,7 +52,7 @@ internal class LanManagementManagementService : ILanManagementService
 
     public async Task Delete(Guid id, User initiator)
     {
-        await using var transaction = aggregateRepository.CreateTransaction();
+        using var transaction = aggregateRepository.CreateTransaction();
 
         var lan = await transaction.Aggregate<Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
@@ -67,7 +67,7 @@ internal class LanManagementManagementService : ILanManagementService
 
     private async Task SetActive(IAggregateTransaction transaction, Lan lan, bool active, User initiator)
     {
-        await using var reader = documentRepository.CreateReader();
+        using var reader = documentRepository.CreateReader();
 
         var activeLans = reader.Query<ProjectedLan>()
             .Where(x => x.GuildId == lan.GuildId)

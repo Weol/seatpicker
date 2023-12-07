@@ -42,7 +42,7 @@ public class DiscordAuthenticationService
         var discordUser = await discordClient.Lookup(accessToken.AccessToken);
 
         await discordClient.AddGuildMember(guildId, discordUser.Id, accessToken.AccessToken);
-        
+
         return await CreateTokenRequest(accessToken, discordUser, guildId);
     }
 
@@ -101,7 +101,7 @@ public class DiscordAuthenticationService
 
     public async Task SetRoleMapping(string guildId, IEnumerable<(string RoleId, Role Role)> mappings)
     {
-        await using var transaction = documentRepository.CreateTransaction();
+        using var transaction = documentRepository.CreateTransaction();
 
         var transformed = mappings
             .Select(mapping => new GuildRoleMappingEntry(mapping.RoleId, mapping.Role))
@@ -110,12 +110,12 @@ public class DiscordAuthenticationService
         transaction.Store(new GuildRoleMapping(
             guildId,
             transformed));
-        transaction.Commit();
+        await transaction.Commit();
     }
 
     public async IAsyncEnumerable<(string RoleId, Role Role)> GetRoleMapping(string guildId)
     {
-        await using var reader = documentRepository.CreateReader();
+        using var reader = documentRepository.CreateReader();
 
         var roleMappings = await reader.Get<GuildRoleMapping>(guildId) ??
                            new GuildRoleMapping(guildId, Array.Empty<GuildRoleMappingEntry>());

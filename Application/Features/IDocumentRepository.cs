@@ -9,7 +9,7 @@ public interface IDocumentRepository
     public IDocumentReader CreateReader();
 }
 
-public interface IDocumentReader : IAsyncDisposable, IDisposable
+public interface IDocumentReader : IDisposable
 {
     public Task<TDocument?> Get<TDocument>(string id)
         where TDocument : IDocument;
@@ -26,5 +26,5 @@ public interface IDocumentTransaction : IDocumentReader
     public void Delete<TDocument>(string id)
         where TDocument : IDocument;
 
-    public void Commit();
+    public Task Commit();
 }

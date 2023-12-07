@@ -7,7 +7,7 @@ public interface IAggregateRepository
     public IAggregateTransaction CreateTransaction();
 }
 
-public interface IAggregateTransaction : IAsyncDisposable, IDisposable
+public interface IAggregateTransaction : IDisposable
 {
     public void Update<TAggregate>(TAggregate aggregate)
         where TAggregate : AggregateBase;
@@ -24,5 +24,5 @@ public interface IAggregateTransaction : IAsyncDisposable, IDisposable
     public Task<bool> Exists<TAggregate>(Guid id)
         where TAggregate : AggregateBase;
 
-    public void Commit();
+    public Task Commit();
 }

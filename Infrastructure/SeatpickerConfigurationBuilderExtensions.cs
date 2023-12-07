@@ -16,7 +16,7 @@ public static class SeatpickerConfigurationBuilderExtensions
                 new ClientSecretCredential(section["TenantId"], section["ClientId"], section["ClientSecret"]),
                 new AzureKeyVaultConfigurationOptions
                 {
-                    ReloadInterval = TimeSpan.FromSeconds(5),
+                    ReloadInterval = TimeSpan.FromMinutes(5),
                 });
         }
         else if (section["Uri"] is not null)

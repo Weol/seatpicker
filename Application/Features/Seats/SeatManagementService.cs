@@ -23,19 +23,19 @@ public class SeatManagementService : ISeatManagementService
 
     public async Task Update(Guid lanId, Guid seatId, string? title, Bounds? bounds, User initiator)
     {
-        await using var transaction = repository.CreateTransaction();
+        using var transaction = repository.CreateTransaction();
         var seat = await transaction.Aggregate<Seat>(seatId) ?? throw new SeatNotFoundException{ SeatId = seatId };
 
         if (title is not null) seat.SetTitle(title, initiator);
         if (bounds is not null) seat.SetBounds(bounds, initiator);
 
         transaction.Update(seat);
-        transaction.Commit();
+        await transaction.Commit();
     }
 
     public async Task<Guid> Create(Guid lanId, string title, Bounds bounds, User initiator)
     {
-        await using var transaction = repository.CreateTransaction();
+        using var transaction = repository.CreateTransaction();
         var id = Guid.NewGuid();
 
         var lan = await transaction.Aggregate<Lan>(lanId)
@@ -44,23 +44,21 @@ public class SeatManagementService : ISeatManagementService
         var seat = new Seat(id, lan, title, bounds, initiator);
 
         transaction.Create(seat);
-        transaction.Commit();
+        await transaction.Commit();
 
         return id;
     }
 
     public async Task Remove(Guid lanId, Guid seatId, User initiator)
     {
-        await using var transaction = repository.CreateTransaction();
+        using var transaction = repository.CreateTransaction();
         var seat = await transaction.Aggregate<Seat>(seatId) ?? throw new SeatNotFoundException{ SeatId = seatId };
 
         seat.Archive(initiator);
 
-        var sr = new StreamReader(new FileStream("", FileMode.Create));
-
         transaction.Update(seat);
         transaction.Archive(seat);
 
-        transaction.Commit();
+        await transaction.Commit();
     }
 }

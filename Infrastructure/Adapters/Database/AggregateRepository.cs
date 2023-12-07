@@ -1,4 +1,5 @@
-﻿using Marten;
+﻿using System.Security.Cryptography.X509Certificates;
+using Marten;
 using Seatpicker.Application.Features;
 using Shared;
 
@@ -7,10 +8,12 @@ namespace Seatpicker.Infrastructure.Adapters.Database;
 public class AggregateRepository : IAggregateRepository
 {
     private readonly IDocumentStore store;
+    private readonly ILogger<AggregateRepository> logger;
 
-    public AggregateRepository(IDocumentStore store)
+    public AggregateRepository(IDocumentStore store, ILogger<AggregateRepository> logger)
     {
         this.store = store;
+        this.logger = logger;
     }
 
     public IAggregateTransaction CreateTransaction()
@@ -47,9 +50,9 @@ public class AggregateTransaction : IAggregateTransaction
         session.Events.ArchiveStream(aggregate.Id);
     }
 
-    public void Commit()
+    public Task Commit()
     {
-        session.SaveChanges();
+        return session.SaveChangesAsync();
     }
 
     public Task<TAggregate?> Aggregate<TAggregate>(Guid id)
@@ -64,11 +67,6 @@ public class AggregateTransaction : IAggregateTransaction
         var streamState = await session.Events.FetchStreamStateAsync(id);
         if (streamState is null) return false;
         return !streamState.IsArchived;
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        return session.DisposeAsync();
     }
 
     public void Dispose()

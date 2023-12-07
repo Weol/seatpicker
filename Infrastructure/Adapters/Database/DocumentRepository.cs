@@ -8,7 +8,7 @@ public class DocumentRepository : IDocumentRepository
 {
     private readonly IDocumentStore store;
 
-    public DocumentRepository(IDocumentStore store)
+    public DocumentRepository(IDocumentStore store, ILogger<DocumentRepository> logger)
     {
         this.store = store;
     }
@@ -49,9 +49,9 @@ public class DocumentTransaction : IDocumentTransaction
         session.Delete<TDocument>(id);
     }
 
-    public void Commit()
+    public Task Commit()
     {
-        session.SaveChanges();
+        return session.SaveChangesAsync();
     }
 
     public Task<TDocument?> Get<TDocument>(string id)
@@ -66,14 +66,10 @@ public class DocumentTransaction : IDocumentTransaction
         where TDocument : IDocument =>
         reader.Query<TDocument>();
 
-    public ValueTask DisposeAsync()
-    {
-        return session.DisposeAsync();
-    }
-
     public void Dispose()
     {
         session.Dispose();
+        reader.Dispose();
     }
 }
 
@@ -102,11 +98,6 @@ public class DocumentReader : IDocumentReader
         where TDocument : IDocument
     {
         return session.Query<TDocument>();
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        return session.DisposeAsync();
     }
 
     public void Dispose()

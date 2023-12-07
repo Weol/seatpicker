@@ -28,8 +28,8 @@ public class ReservationManagementService : IReservationManagementService
 
     public async Task Create(Guid lanId, Guid seatId, UserId userId, User reservedBy)
     {
-        await using var transaction = aggregateRepository.CreateTransaction();
-        await using var reader = documentRepository.CreateReader();
+        using var transaction = aggregateRepository.CreateTransaction();
+        using var reader = documentRepository.CreateReader();
 
         var userToReserveFor = await userProvider.GetById(userId) ?? throw new UserNotFoundException { UserId = userId };
 
@@ -43,27 +43,27 @@ public class ReservationManagementService : IReservationManagementService
         seatToReserve.MakeReservationFor(userToReserveFor, numReservedSeatsByUser, reservedBy);
 
         transaction.Update(seatToReserve);
-        transaction.Commit();
+        await transaction.Commit();
 
         await notifier.NotifySeatReservationChanged(seatToReserve);
     }
 
     public async Task Delete(Guid lanId, Guid seatId, User removedBy)
     {
-        await using var transaction = aggregateRepository.CreateTransaction();
+        using var transaction = aggregateRepository.CreateTransaction();
         var seat = await transaction.Aggregate<Seat>(seatId) ?? throw new SeatNotFoundException { SeatId = seatId };
 
         seat.RemoveReservationFor(removedBy);
 
         transaction.Update(seat);
-        transaction.Commit();
+        await transaction.Commit();
 
         await notifier.NotifySeatReservationChanged(seat);
     }
 
     public async Task Move(Guid lanId, UserId userToMove, Guid fromSeatId, Guid toSeatId, User movedBy)
     {
-        await using var transaction = aggregateRepository.CreateTransaction();
+        using var transaction = aggregateRepository.CreateTransaction();
         var userToMoveFor = await userProvider.GetById(userToMove) ?? throw new UserNotFoundException { UserId = userToMove };
 
         var fromSeat = await transaction.Aggregate<Seat>(fromSeatId) ??
@@ -76,7 +76,7 @@ public class ReservationManagementService : IReservationManagementService
 
         transaction.Update(fromSeat);
         transaction.Update(toSeat);
-        transaction.Commit();
+        await transaction.Commit();
 
         await Task.WhenAll(
             notifier.NotifySeatReservationChanged(fromSeat),

@@ -7,13 +7,14 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 [ApiController]
 [Route("lan")]
 [Area("lan")]
+#pragma warning disable CS1998
 public class GetEndpoint
 {
     [HttpGet("")]
     public async Task<ActionResult<Response[]>> GetAll(
         [FromServices] IDocumentRepository documentRepository)
     {
-        await using var documentReader = documentRepository.CreateReader();
+        using var documentReader = documentRepository.CreateReader();
 
         var lans = documentReader.Query<ProjectedLan>()
             .OrderByDescending(lan => lan.CreatedAt)
@@ -28,7 +29,7 @@ public class GetEndpoint
         [FromRoute] Guid id,
         [FromServices] IDocumentRepository documentRepository)
     {
-        await using var documentReader = documentRepository.CreateReader();
+        using var documentReader = documentRepository.CreateReader();
 
         var lan = documentReader.Query<ProjectedLan>()
             .SingleOrDefault(lan => lan.Id == id);
@@ -43,7 +44,7 @@ public class GetEndpoint
         [FromQuery] string guildId,
         [FromServices] IDocumentRepository documentRepository)
     {
-        await using var documentReader = documentRepository.CreateReader();
+        using var documentReader = documentRepository.CreateReader();
 
         var lan = documentReader.Query<ProjectedLan>()
             .Where(lan => lan.GuildId == guildId)

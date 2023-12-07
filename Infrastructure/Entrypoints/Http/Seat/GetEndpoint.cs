@@ -15,7 +15,7 @@ public class GetEndpoint
         [FromServices] IDocumentRepository documentRepository,
         [FromServices] IUserProvider userProvider)
     {
-        await using var documentReader = documentRepository.CreateReader();
+        using var documentReader = documentRepository.CreateReader();
 
         var tasks = documentReader.Query<ProjectedSeat>()
             .Where(seat => seat.LanId == lanId)
@@ -48,7 +48,7 @@ public class GetEndpoint
         [FromServices] IUserProvider userProvider,
         [FromServices] IDocumentRepository documentRepository)
     {
-        await using var documentReader = documentRepository.CreateReader();
+        using var documentReader = documentRepository.CreateReader();
 
         var seat = documentReader.Query<ProjectedSeat>()
             .Where(seat => seat.LanId == lanId)
