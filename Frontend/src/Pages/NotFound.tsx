@@ -1,6 +1,5 @@
-import * as React from "react";
-import Typography from "@mui/material/Typography";
-import { Stack } from "@mui/material";
+import { Stack } from "@mui/material"
+import Typography from "@mui/material/Typography"
 
 export default function NotFound() {
   return (
@@ -12,5 +11,5 @@ export default function NotFound() {
         Could not find whatever you were looking for
       </Typography>
     </Stack>
-  );
+  )
 }

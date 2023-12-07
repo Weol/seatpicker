@@ -1,5 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using Marten;
+﻿using Marten;
 using Seatpicker.Application.Features;
 using Shared;
 

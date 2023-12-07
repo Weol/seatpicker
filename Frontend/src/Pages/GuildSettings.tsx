@@ -1,54 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Cancel, CheckBox, CheckBoxOutlineBlank } from "@mui/icons-material"
-import {
-  Autocomplete,
-  Box,
-  Button,
-  Checkbox,
-  Container,
-  IconButton,
-  Stack,
-  TextField,
-} from "@mui/material"
+import { Autocomplete, Box, Button, Checkbox, IconButton, Stack, TextField } from "@mui/material"
 import Divider from "@mui/material/Divider"
 import Typography from "@mui/material/Typography"
 import { useState } from "react"
-import { Role } from "../Adapters/AuthenticationAdapter"
-import { Guild, GuildRole, useGuild, useGuildRoles } from "../Adapters/GuildAdapter"
-import DelayedCircularProgress from "../Components/DelayedCircularProgress"
+import { Role } from "../Adapters/AuthAdapter"
+import { Guild, GuildRole } from "../Adapters/Guilds/ActiveGuild"
+import { useGuildRoles } from "../Adapters/Guilds/GuildRoles"
+import { useGuild } from "../Adapters/Guilds/Guilds"
 import { useAlerts } from "../Contexts/AlertContext"
-
-export default function GuildSettings(props: { guildId: string }) {
-  const { guildRoles, setGuildRoles } = useGuildRoles(props.guildId)
-  const guild = useGuild(props.guildId)
-
-  switch (guild) {
-    case null:
-      return <Loading />
-    default:
-      return guildRoles ? (
-        <Loaded guild={guild} guildRoles={guildRoles} setGuildRoles={setGuildRoles} />
-      ) : (
-        <Loading />
-      )
-  }
-}
-
-function Loading() {
-  return (
-    <Stack width="100%" justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }}>
-      <DelayedCircularProgress />
-    </Stack>
-  )
-}
-
-function NotFound() {
-  return (
-    <Container>
-      <Typography>No guild found</Typography>
-    </Container>
-  )
-}
 
 type RoleMapping = {
   id: string
@@ -91,23 +51,34 @@ function hasUnsavedChanges(stagedMappings: RoleMapping[], savedMappings: GuildRo
   return false
 }
 
-function Loaded(props: {
-  guild: Guild
-  guildRoles: GuildRole[]
-  setGuildRoles: (guild: Guild, roleMappings: GuildRole[]) => Promise<void>
-}) {
+export default function GuildSettings(props: { guildId: string }) {
+  const guild = useGuild(props.guildId)
+
+  return guild ? <GuildSettingsWithGuild guild={guild} /> : <NotFound />
+}
+
+function NotFound() {
+  return (
+    <Stack width="100%" justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }}>
+      <Typography>Ingen server funner</Typography>
+    </Stack>
+  )
+}
+
+function GuildSettingsWithGuild(props: { guild: Guild }) {
+  const { guildRoles, updateGuildRoles } = useGuildRoles(props.guild.id)
   const { alertLoading, alertSuccess } = useAlerts()
   const [stagedMappings, setStagedMappings] = useState<RoleMapping[]>(
-    initStagedMappings(props.guildRoles)
+    initStagedMappings(guildRoles)
   )
-  const hasChanges = hasUnsavedChanges(stagedMappings, props.guildRoles)
+  const hasChanges = hasUnsavedChanges(stagedMappings, guildRoles)
   const hasErrors = hasStagedMappingsErrors(stagedMappings)
   const saveButtondEnabled = !hasErrors && hasChanges
-  const availableGuildRoles = props.guildRoles.filter(
+  const availableGuildRoles = guildRoles.filter(
     (guildRole) => !stagedMappings.find((staged) => staged.guildRole?.id == guildRole.id)
   )
   const addMappingButtonDisabled =
-    availableGuildRoles.length == 0 || stagedMappings.length >= props.guildRoles.length
+    availableGuildRoles.length == 0 || stagedMappings.length >= guildRoles.length
 
   function handleAddMappingPressed() {
     setStagedMappings([
@@ -154,9 +125,8 @@ function Loaded(props: {
       .filter((staged) => staged.guildRole)
       .map((staged) => ({ ...staged.guildRole, roles: staged.roles }) as GuildRole)
 
-    await alertLoading("Lagrer endringer...", async () => {
-      await props.setGuildRoles(props.guild, staged)
-    })
+    await updateGuildRoles(props.guild, staged)
+    await alertLoading("Lagrer endringer...", async () => {})
     alertSuccess("Endringer lagret")
   }
 
@@ -169,7 +139,7 @@ function Loaded(props: {
       key={mapping.id}
     >
       <Autocomplete
-        options={props.guildRoles}
+        options={guildRoles}
         autoHighlight
         sx={{ width: "50%" }}
         value={mapping.guildRole}

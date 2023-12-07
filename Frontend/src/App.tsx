@@ -1,5 +1,5 @@
 import Container from "@mui/material/Container"
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { ErrorBoundary } from "react-error-boundary"
 import { Route, Routes, useParams } from "react-router-dom"
 import { AlertContext, AlertModel, setupAlerts } from "./Contexts/AlertContext"
@@ -8,6 +8,7 @@ import MainAppBar from "./MainAppBar"
 import Admin from "./Pages/Admin"
 import ErrorPage from "./Pages/ErrorPage"
 import GuildSettings from "./Pages/GuildSettings"
+import LoadingPage from "./Pages/LoadingPage"
 import NotFound from "./Pages/NotFound"
 import RedirectLogin from "./Pages/RedirectLogin"
 import Seats from "./Pages/Seats"
@@ -35,15 +36,17 @@ export default function App() {
         {dialog && <Dialog dialog={dialog} />}
         <ErrorBoundary fallback={<ErrorPage />}>
           <MainAppBar />
-          <Container maxWidth="sm" sx={{ paddingTop: "1em" }}>
-            <Routes>
-              <Route path="/" element={<Seats />} />
-              <Route path="/redirect-login" element={<RedirectLogin />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/admin/guild/:guildId" element={<GuildSettingsWrapper />} />
-              <Route path="/*" element={<NotFound />} />
-            </Routes>
-          </Container>
+          <Suspense fallback={<LoadingPage />}>
+            <Container maxWidth="sm" sx={{ paddingTop: "1em" }}>
+              <Routes>
+                <Route path="/" element={<Seats />} />
+                <Route path="/redirect-login" element={<RedirectLogin />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/admin/guild/:guildId" element={<GuildSettingsWrapper />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Container>
+          </Suspense>
         </ErrorBoundary>
       </DialogContext.Provider>
     </AlertContext.Provider>

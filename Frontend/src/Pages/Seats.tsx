@@ -19,12 +19,12 @@ import {
 } from "@mui/material"
 import * as React from "react"
 import { useState } from "react"
-import { Role, User, useAuthenticationAdapter } from "../Adapters/AuthenticationAdapter"
-import { useGuildUsers } from "../Adapters/GuildAdapter"
-import { Lan, useActiveLan } from "../Adapters/LanAdapter"
+import { Role, useAuth, User } from "../Adapters/AuthAdapter"
+import { useGuildUsers } from "../Adapters/Guilds/GuildUsers"
+import { useActiveLan } from "../Adapters/Lans/ActiveLan"
+import { Lan } from "../Adapters/Lans/Lans"
 import useReservationAdapter from "../Adapters/ReservationAdapter"
 import { Seat, useSeats } from "../Adapters/SeatsAdapter"
-import DelayedCircularProgress from "../Components/DelayedCircularProgress"
 import { DiscordUserAvatar } from "../Components/DiscordAvatar"
 import { useAlerts } from "../Contexts/AlertContext"
 import { useDialogs } from "../Contexts/DialogContext"
@@ -63,9 +63,9 @@ function getUsersWithSeat(users: User[], seats: Seat[]) {
 function SeatsWithLan(props: { activeLan: Lan }) {
   const { alertSuccess, alertLoading } = useAlerts()
   const { showDialog } = useDialogs()
-  const { loggedInUser } = useAuthenticationAdapter()
+  const { loggedInUser } = useAuth()
   const { seats, reservedSeat } = useSeats(props.activeLan)
-  const { guildUsers, loadGuildUsers } = useGuildUsers(props.activeLan.guildId)
+  const guildUsers = useGuildUsers(props.activeLan.guildId)
   const {
     makeReservation,
     makeReservationFor,
@@ -240,12 +240,12 @@ function SeatsWithLan(props: { activeLan: Lan }) {
               }}
             />
 
-            {seats?.map((seat) => (
+            {seats.map((seat) => (
               <SeatButton
                 key={seat.id}
                 seat={seat}
                 users={usersWithSeats}
-                loadUsers={loadGuildUsers}
+                loadUsers={async () => {}}
                 color={getSeatColor(seat)}
                 onSeatClick={awaitingSelectSeat ? handleSeatClick : undefined}
                 onReserve={handleReserve}
@@ -255,11 +255,6 @@ function SeatsWithLan(props: { activeLan: Lan }) {
                 onMoveFor={handleMoveFor}
               />
             ))}
-            {!seats && (
-              <Stack width="100%" justifyContent="center" alignItems="center">
-                <DelayedCircularProgress />
-              </Stack>
-            )}
           </Box>
         </Box>
       </Box>
@@ -363,17 +358,19 @@ function SeatButton(props: SeatButtonProps) {
             onRemove={handleRemove}
             onRemoveFor={handleRemoveFor}
             onMoveFor={handleMoveFor}
-            open={menuOpen}
             seat={seat}
-            anchorEl={menuAnchor}
-            onClose={handleClose}
-            anchorOrigin={{
-              vertical: "top",
-              horizontal: "center",
-            }}
-            transformOrigin={{
-              vertical: "bottom",
-              horizontal: "center",
+            menuProps={{
+              anchorEl: menuAnchor,
+              onClose: handleClose,
+              open: menuOpen,
+              anchorOrigin: {
+                vertical: "top",
+                horizontal: "center",
+              },
+              transformOrigin: {
+                vertical: "bottom",
+                horizontal: "center",
+              },
             }}
           />
         )}
@@ -395,8 +392,8 @@ type SeatMenuProps = {
   onMoveFor: (fromSeat: Seat) => void
 }
 
-function SeatMenu(props: SeatMenuProps & MenuProps) {
-  const { loggedInUser } = useAuthenticationAdapter()
+function SeatMenu(props: SeatMenuProps & { menuProps: MenuProps }) {
+  const { loggedInUser } = useAuth()
   const [showUserList, setShowUserList] = useState<boolean>(false)
 
   function handleMakeReservationForClick() {
@@ -573,7 +570,7 @@ function SeatMenu(props: SeatMenuProps & MenuProps) {
   }
 
   return (
-    <Menu sx={{ width: 320 }} {...props}>
+    <Menu sx={{ width: 320 }} {...props.menuProps}>
       {getMenuComponents()}
     </Menu>
   )

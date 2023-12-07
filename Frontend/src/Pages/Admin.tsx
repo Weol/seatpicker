@@ -12,6 +12,7 @@ import {
   ListItemSecondaryAction,
   Paper,
   Stack,
+  styled,
   Switch,
   Table,
   TableBody,
@@ -19,47 +20,33 @@ import {
   TableContainer,
   TableRow,
   TextField,
-  styled,
 } from "@mui/material"
 import Divider from "@mui/material/Divider"
 import ListItemIcon from "@mui/material/ListItemIcon"
 import ListItemText from "@mui/material/ListItemText"
 import Typography from "@mui/material/Typography"
 import { useState } from "react"
-import { Guild, useGuilds } from "../Adapters/GuildAdapter"
-import { Lan, useLanAdapter, useLans } from "../Adapters/LanAdapter"
+import { useNavigate } from "react-router-dom"
+import { Guild } from "../Adapters/Guilds/ActiveGuild"
+import { useGuilds } from "../Adapters/Guilds/Guilds"
+import { Lan, useLans } from "../Adapters/Lans/Lans"
 import { GuildSettingsPath } from "../App"
-import DelayedCircularProgress from "../Components/DelayedCircularProgress"
 import DiscordGuildAvatar from "../Components/DiscordAvatar"
 import Modal from "../Components/Modal"
 import { useAlerts } from "../Contexts/AlertContext"
 
 export default function Admin() {
-  const guilds = useGuilds()
-  const lans = useLans()
-
-  return lans && guilds ? <Loaded guilds={guilds} lans={lans} /> : <Loading />
-}
-
-function Loading() {
-  return (
-    <Stack width="100%" justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }}>
-      <DelayedCircularProgress />
-    </Stack>
-  )
-}
-
-function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
   const { alertLoading, alertSuccess } = useAlerts()
-  const { updateLan, createLan } = useLanAdapter()
-  const { deleteLan, setActiveLan } = useLanAdapter()
+  const guilds = useGuilds()
+  const { lans, updateLan, createLan, deleteLan, setActiveLan } = useLans()
+
   const [selectedGuild, setSelectedGuild] = useState<Guild | null>(null)
   const [previewBackground, setPreviewBackground] = useState<string | null>(null)
   const [editingLan, setEditingLan] = useState<Lan | null>(null)
   const [selectedLan, setSelectedLan] = useState<Lan | null>(null)
   const [showCreateLan, setShowCreateLan] = useState<boolean>(false)
   const selectedGuildLans =
-    (selectedGuild && props.lans.filter((lan) => lan.guildId == selectedGuild?.id)) ?? []
+    (selectedGuild && lans.filter((lan) => lan.guildId == selectedGuild?.id)) ?? []
 
   function handleGuildSelect(guild: Guild) {
     setSelectedGuild(guild)
@@ -129,11 +116,7 @@ function Loaded(props: { guilds: Guild[]; lans: Lan[] }) {
   return (
     <Stack spacing={2} justifyContent="center" alignItems="center">
       <Typography variant="h4">Alle servere</Typography>
-      <GuildList
-        guilds={props.guilds}
-        selectedGuild={selectedGuild}
-        onGuildSelect={handleGuildSelect}
-      />
+      <GuildList guilds={guilds} selectedGuild={selectedGuild} onGuildSelect={handleGuildSelect} />
 
       {selectedGuild && <Divider orientation="horizontal" sx={{ width: "100%" }} />}
       {selectedGuild && (
@@ -191,6 +174,8 @@ function GuildList(props: {
   selectedGuild: Guild | null
   onGuildSelect: (guild: Guild) => void
 }) {
+  const navigate = useNavigate()
+
   return (
     <Paper sx={{ width: "100%" }}>
       <List component={"nav"}>
@@ -201,7 +186,7 @@ function GuildList(props: {
             key={guild.id}
           >
             <ListItemSecondaryAction>
-              <IconButton href={GuildSettingsPath(guild.id)}>
+              <IconButton onClick={() => navigate(GuildSettingsPath(guild.id))}>
                 <Edit />
               </IconButton>
             </ListItemSecondaryAction>
