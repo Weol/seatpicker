@@ -7,12 +7,10 @@ namespace Seatpicker.Infrastructure.Adapters.Database;
 public class AggregateRepository : IAggregateRepository
 {
     private readonly IDocumentStore store;
-    private readonly ILogger<AggregateRepository> logger;
 
-    public AggregateRepository(IDocumentStore store, ILogger<AggregateRepository> logger)
+    public AggregateRepository(IDocumentStore store)
     {
         this.store = store;
-        this.logger = logger;
     }
 
     public IAggregateTransaction CreateTransaction()

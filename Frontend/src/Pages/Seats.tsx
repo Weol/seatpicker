@@ -49,33 +49,13 @@ type AwaitingSelectSeat = {
   tooltip: string
 }
 
-function getUsersWithSeat(users: User[], seats: Seat[]) {
-  const seatMap = seats.reduce((map, seat) => {
-    if (seat.reservedBy) map.set(seat.reservedBy.id, seat)
-    return map
-  }, new Map<string, Seat>())
-
-  return users.map((user) => {
-    return { user: user, reservedSeat: seatMap.get(user.id) ?? null }
-  })
-}
-
 function SeatsWithLan(props: { activeLan: Lan }) {
   const { alertSuccess, alertLoading } = useAlerts()
   const { showDialog } = useDialogs()
   const { loggedInUser } = useAuth()
-  const { seats, reservedSeat } = useSeats(props.activeLan)
-  const guildUsers = useGuildUsers(props.activeLan.guildId)
-  const {
-    makeReservation,
-    makeReservationFor,
-    deleteReservation,
-    deleteReservationFor,
-    moveReservation,
-    moveReservationFor,
-  } = useReservationAdapter(props.activeLan)
+  const { reservedSeat, seats } = useSeats(props.activeLan)
+  const reservationAdapter = useReservationAdapter(props.activeLan)
   const [awaitingSelectSeat, setAwaitingSelectSeat] = useState<AwaitingSelectSeat | null>(null)
-  const usersWithSeats = guildUsers && seats && getUsersWithSeat(guildUsers, seats)
 
   async function handleReserve(toSeat: Seat) {
     if (reservedSeat != null) {
@@ -92,7 +72,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
         const toSeat = result.metadata
 
         await alertLoading("Flytter reservasjon...", async () => {
-          await moveReservation(fromSeat, toSeat)
+          await reservationAdapter.moveReservation(fromSeat, toSeat)
         })
 
         alertSuccess(
@@ -101,7 +81,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
       }
     } else {
       await alertLoading("Reserverer...", async () => {
-        await makeReservation(toSeat)
+        await reservationAdapter.makeReservation(toSeat)
       })
 
       alertSuccess("Du har reservert plass " + toSeat.title)
@@ -119,7 +99,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
 
     if (result.positive) {
       await alertLoading("Sletter reservasjon...", async () => {
-        await deleteReservation(result.metadata)
+        await reservationAdapter.deleteReservation(result.metadata)
       })
 
       alertSuccess("Du har slettet din reservasjon")
@@ -138,7 +118,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
 
       if (result.positive) {
         await alertLoading("Fjerner reservasjon...", async () => {
-          await deleteReservationFor(result.metadata)
+          await reservationAdapter.deleteReservationFor(result.metadata)
         })
 
         alertSuccess(`Du har fjernet ${seat.reservedBy.name} sin reservasjon`)
@@ -148,7 +128,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
 
   async function handleReserveFor(seat: Seat, user: User) {
     await alertLoading(`Reserverer plass ${seat.title} for ${user.name} ...`, async () => {
-      await makeReservationFor(seat, user)
+      await reservationAdapter.makeReservationFor(seat, user)
     })
     alertSuccess(`Plass ${seat.title} ble reservert for ${user.name}`)
   }
@@ -166,7 +146,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
       const toSeat = result.metadata
 
       await alertLoading("Flytter reservasjon...", async () => {
-        await moveReservationFor(fromSeat, toSeat)
+        await reservationAdapter.moveReservationFor(fromSeat, toSeat)
       })
 
       alertSuccess(
@@ -194,6 +174,10 @@ function SeatsWithLan(props: { activeLan: Lan }) {
 
   function handleCancelMoveFor() {
     setAwaitingSelectSeat(null)
+  }
+
+  function getUserDisabledForReservation(user: User) {
+    return Boolean(seats.find((seat) => seat.reservedBy?.id == user.id))
   }
 
   const getSeatColor = (seat: Seat): string => {
@@ -244,8 +228,8 @@ function SeatsWithLan(props: { activeLan: Lan }) {
               <SeatButton
                 key={seat.id}
                 seat={seat}
-                users={usersWithSeats}
-                loadUsers={async () => {}}
+                guildId={props.activeLan.guildId}
+                getUserDisabled={getUserDisabledForReservation}
                 color={getSeatColor(seat)}
                 onSeatClick={awaitingSelectSeat ? handleSeatClick : undefined}
                 onReserve={handleReserve}
@@ -381,10 +365,37 @@ function SeatButton(props: SeatButtonProps) {
   return renderSeat(props.seat)
 }
 
+function GuildUsersAutoComplete(props: {
+  guildId: string
+  onUserSelected: (user: User | null) => void
+  getOptionDisabled?: (user: User) => boolean
+}) {
+  const guildUsers = useGuildUsers(props.guildId)
+  return (
+    <Autocomplete
+      sx={{ width: "100%" }}
+      size="small"
+      autoHighlight
+      disableClearable
+      options={guildUsers}
+      getOptionDisabled={props.getOptionDisabled}
+      getOptionLabel={(option) => option.name}
+      onChange={(e, value) => props.onUserSelected(value)}
+      renderOption={(props, option) => (
+        <Box component="li" sx={{ "& > img": { mr: 2, flexShrink: 0 } }} {...props}>
+          <DiscordUserAvatar user={option} sx={{ marginRight: "0.5em" }} />
+          <Typography noWrap>{option.name}</Typography>
+        </Box>
+      )}
+      renderInput={(params) => <TextField {...params} label="User" />}
+    />
+  )
+}
+
 type SeatMenuProps = {
   seat: Seat
-  users: { user: User; reservedSeat: Seat | null }[] | null
-  loadUsers: () => Promise<void>
+  guildId: string
+  getUserDisabled: (user: User) => boolean
   onReserve: (seat: Seat) => void
   onRemove: (seat: Seat) => void
   onReserveFor: (seat: Seat, user: User) => void
@@ -397,7 +408,6 @@ function SeatMenu(props: SeatMenuProps & { menuProps: MenuProps }) {
   const [showUserList, setShowUserList] = useState<boolean>(false)
 
   function handleMakeReservationForClick() {
-    props.loadUsers()
     setShowUserList(true)
   }
 
@@ -408,25 +418,13 @@ function SeatMenu(props: SeatMenuProps & { menuProps: MenuProps }) {
     }
   }
 
-  const usersList = (users: { user: User; reservedSeat: Seat | null }[]) => {
+  const usersList = () => {
     return (
-      <MenuItem onClick={() => handleMakeReservationForClick()}>
-        <Autocomplete
-          sx={{ width: "100%" }}
-          size="small"
-          autoHighlight
-          disableClearable
-          options={users}
-          getOptionDisabled={(option) => option.reservedSeat != null}
-          getOptionLabel={(option) => option.user.name}
-          onChange={(e, value) => handleuserSelectedForReservation(value.user)}
-          renderOption={(props, option) => (
-            <Box component="li" sx={{ "& > img": { mr: 2, flexShrink: 0 } }} {...props}>
-              <DiscordUserAvatar user={option.user} sx={{ marginRight: "0.5em" }} />
-              <Typography noWrap>{option.user.name}</Typography>
-            </Box>
-          )}
-          renderInput={(params) => <TextField {...params} label="User" />}
+      <MenuItem>
+        <GuildUsersAutoComplete
+          guildId={props.guildId}
+          onUserSelected={handleuserSelectedForReservation}
+          getOptionDisabled={props.getUserDisabled}
         />
       </MenuItem>
     )
@@ -551,8 +549,8 @@ function SeatMenu(props: SeatMenuProps & { menuProps: MenuProps }) {
       if (loggedInUser.isInRole(Role.OPERATOR)) {
         if (props.seat.reservedBy != null) {
           components.push(header("ADMIN"), removeReservationFor(), moveReservationFor())
-        } else if (showUserList && props.users) {
-          components.push(header("ADMIN"), usersList(props.users))
+        } else if (showUserList) {
+          components.push(header("ADMIN"), usersList())
         } else {
           components.push(header("ADMIN"), makeReservationFor())
         }

@@ -47,7 +47,7 @@ internal class LanManagementManagementService : ILanManagementService
         if (active is not null) await SetActive(transaction, lan, active.Value, initiator);
 
         transaction.Update(lan);
-        transaction.Commit();
+        await transaction.Commit();
     }
 
     public async Task Delete(Guid id, User initiator)
@@ -62,7 +62,7 @@ internal class LanManagementManagementService : ILanManagementService
         transaction.Update(lan);
         transaction.Archive(lan);
 
-        transaction.Commit();
+        await transaction.Commit();
     }
 
     private async Task SetActive(IAggregateTransaction transaction, Lan lan, bool active, User initiator)
