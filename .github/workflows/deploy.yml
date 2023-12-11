@@ -54,6 +54,10 @@ jobs:
     permissions:
       contents: "read"
       id-token: "write"
+    outputs:
+      appServiceName: ${{ steps.template.outputs.appServiceName }}
+      stagingSlotName: ${{ steps.template.outputs.stagingSlotName }}
+      appInsConnectionString: ${{ steps.template.outputs.appInsConnectionString }}
     steps:
       - uses: actions/checkout@master
       - name: Azure Login
@@ -87,7 +91,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: frontend
-          path: ./
+          path: ./g
       - name: Azure Login
         uses: Azure/login@v1.4.6
         with:

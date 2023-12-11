@@ -129,3 +129,5 @@ resource appsettings 'Microsoft.Web/sites/slots/config@2021-03-01' = {
 }
 
 output appServiceName string = appService.name
+output stagingSlotName string = stagingSlot.name
+output appInsConnectionString string = appInsights.properties.ConnectionString

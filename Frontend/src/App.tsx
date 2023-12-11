@@ -1,12 +1,10 @@
 import Container from "@mui/material/Container"
 import { Suspense, useState } from "react"
-import { ErrorBoundary } from "react-error-boundary"
 import { Route, Routes, useParams } from "react-router-dom"
 import { AlertContext, AlertModel, setupAlerts } from "./Contexts/AlertContext"
 import { DialogContext, DialogModel, setupDialogs } from "./Contexts/DialogContext"
 import MainAppBar from "./MainAppBar"
 import Admin from "./Pages/Admin"
-import ErrorPage from "./Pages/ErrorPage"
 import GuildSettings from "./Pages/GuildSettings"
 import LoadingPage from "./Pages/LoadingPage"
 import NotFound from "./Pages/NotFound"
@@ -34,20 +32,18 @@ export default function App() {
       <DialogContext.Provider value={dialogActions}>
         {alert && <Alert alert={alert} />}
         {dialog && <Dialog dialog={dialog} />}
-        <ErrorBoundary fallback={<ErrorPage />}>
-          <MainAppBar />
-          <Suspense fallback={<LoadingPage />}>
-            <Container maxWidth="sm" sx={{ paddingTop: "1em" }}>
-              <Routes>
-                <Route path="/" element={<Seats />} />
-                <Route path="/redirect-login" element={<RedirectLogin />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/admin/guild/:guildId" element={<GuildSettingsWrapper />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Container>
-          </Suspense>
-        </ErrorBoundary>
+        <MainAppBar />
+        <Suspense fallback={<LoadingPage />}>
+          <Container maxWidth="sm" sx={{ paddingTop: "1em" }}>
+            <Routes>
+              <Route path="/" element={<Seats />} />
+              <Route path="/redirect-login" element={<RedirectLogin />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/admin/guild/:guildId" element={<GuildSettingsWrapper />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Container>
+        </Suspense>
       </DialogContext.Provider>
     </AlertContext.Provider>
   )
