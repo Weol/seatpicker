@@ -41,6 +41,7 @@ resource appService 'Microsoft.Web/sites@2018-02-01' = {
     serverFarmId: appServicePlan.id
     clientAffinityEnabled: false
     siteConfig: {
+      alwaysOn: true
       webSocketsEnabled: true
       virtualApplications: [
         {
@@ -77,6 +78,7 @@ resource stagingSlot 'Microsoft.Web/sites/slots@2018-02-01' = {
     httpsOnly: true
     clientAffinityEnabled: false
     siteConfig: {
+      alwaysOn: true
       webSocketsEnabled: true
       virtualApplications: [
         {
