@@ -30,41 +30,8 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   }
 }
 
-resource appService 'Microsoft.Web/sites@2018-02-01' = {
+resource appService 'Microsoft.Web/sites@2018-02-01' existing = {
   name: 'webapp-${postfix}'
-  location: location
-  identity: {
-    type: 'SystemAssigned'
-  }
-  properties: {
-    httpsOnly: true
-    serverFarmId: appServicePlan.id
-    clientAffinityEnabled: false
-    siteConfig: {
-      alwaysOn: true
-      webSocketsEnabled: true
-      virtualApplications: [
-        {
-          virtualPath: '/'
-          physicalPath: 'site\\wwwroot'
-        }
-        {
-          virtualPath: '/api'
-          physicalPath: 'site\\wwwroot\\api'
-        }
-      ]
-      appSettings: [
-        {
-          name: 'ApplicationInsightsAgent_EXTENSION_VERSION'
-          value: '~2'
-        }
-        {
-          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: appInsights.properties.ConnectionString
-        }
-      ]
-    }
-  }
 }
 
 resource stagingSlot 'Microsoft.Web/sites/slots@2018-02-01' = {
@@ -80,6 +47,11 @@ resource stagingSlot 'Microsoft.Web/sites/slots@2018-02-01' = {
     siteConfig: {
       alwaysOn: true
       webSocketsEnabled: true
+      cors: {
+        allowedOrigins: [
+          'https://norwayeast.livediagnostics.monitor.azure.com'
+        ]
+      }
       virtualApplications: [
         {
           virtualPath: '/'
