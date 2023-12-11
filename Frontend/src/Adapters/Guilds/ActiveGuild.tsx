@@ -17,7 +17,7 @@ export interface GuildRole {
 
 export const activeGuildIdAtom = atom<string>({
   key: "activeGuildId",
-  default: "654016371260260412",
+  default: "817425364656586762",
   effects: [synchronizeWithLocalStorage("activeGuildId")],
 })
 
