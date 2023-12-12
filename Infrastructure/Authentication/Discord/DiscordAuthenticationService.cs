@@ -96,12 +96,12 @@ public class DiscordAuthenticationService
             return (Enum.GetValues<Role>(), guildMember?.Nick ?? discordUser.Username, guildMember?.Avatar ?? discordUser.Avatar);
         }
 
-        if (guildMember == null) return (new[] { Role.User }, discordUser.Username + ">AAA", discordUser.Avatar);
+        if (guildMember == null) return (new[] { Role.User }, discordUser.Username, discordUser.Avatar);
         
         var roleMappings = await GetRoleMapping(guildId).ToArrayAsync();
         var roles = GetGuildMemberRoles(roleMappings, guildMember).Distinct().ToArray();
         
-        return (roles, guildMember.Nick ?? discord user.Username, guildMember.Avatar ?? discord user.Avatar);
+        return (roles, guildMember.Nick ?? discordUser.Username, guildMember.Avatar ?? discordUser.Avatar);
     }
 
     private static IEnumerable<Role> GetGuildMemberRoles((string RoleId, Role Role)[] roleMapping, GuildMember guildMember)
