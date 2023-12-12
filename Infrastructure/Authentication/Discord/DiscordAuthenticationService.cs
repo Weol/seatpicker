@@ -101,7 +101,7 @@ public class DiscordAuthenticationService
         var roleMappings = await GetRoleMapping(guildId).ToArrayAsync();
         var roles = GetGuildMemberRoles(roleMappings, guildMember).Distinct().ToArray();
         
-        return (roles, guildMember.Nick, guildMember.Avatar);
+        return (roles, guildMember.Nick ?? discord user.Username, guildMember.Avatar ?? discord user.Avatar);
     }
 
     private static IEnumerable<Role> GetGuildMemberRoles((string RoleId, Role Role)[] roleMapping, GuildMember guildMember)
