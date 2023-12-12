@@ -36,8 +36,10 @@ public class DiscordAuthenticationService
             var guildMember = await discordClient.GetGuildMember(guildId, user.Id);
             if (guildMember is not null)
             {
-                await userManager.Store(new User(user.Id, guildMember.Nick, guildMember.Avatar), guildId);
+                await userManager.Store(new User(user.Id, guildMember.Nick, guildMember.Avatar ?? guildMember.DiscordUser.Avatar), guildId);
             }
+
+            await Task.Delay(500); // To make sure we dont hit the discord rate limiter
         }
     }
     

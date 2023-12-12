@@ -239,7 +239,7 @@ public class GuildMember
 
     [JsonPropertyName("nick")] public string Nick { get; set; } = null!;
 
-    [JsonPropertyName("avatar")] public string Avatar { get; set; } = null!;
+    [JsonPropertyName("avatar")] public string? Avatar { get; set; } = null!;
 
     [JsonPropertyName("roles")] public IEnumerable<string> Roles { get; set; } = null!;
 }

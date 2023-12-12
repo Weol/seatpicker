@@ -1,6 +1,7 @@
 import { atom, useRecoilState } from "recoil"
 import { Role } from "../AuthAdapter"
 import { synchronizeWithLocalStorage } from "../Utils"
+import Config from "../../config"
 
 export interface Guild {
   id: string
@@ -15,9 +16,10 @@ export interface GuildRole {
   roles: Role[]
 }
 
+const defaultGuildId = Config.IsLocalhost ? "654016371260260412" : "817425364656586762"
 export const activeGuildIdAtom = atom<string>({
   key: "activeGuildId",
-  default: "817425364656586762",
+  default: defaultGuildId,
   effects: [synchronizeWithLocalStorage("activeGuildId")],
 })
 

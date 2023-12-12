@@ -12,7 +12,7 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Marten;
 [Authorize(Roles = "Admin")]
 public class RebuildProjectionsEndpoint
 {
-    [HttpPost]
+    [HttpPost("reloadprojections")]
     [ProducesResponseType(200)]
     public async Task<ActionResult> Rebuild(
         [FromServices] IDocumentStore documentStore)

@@ -1,4 +1,5 @@
 type Config = {
+  IsLocalhost: boolean
   ApiHost: string
   ApiBaseUrl: string
   Protocol: string
@@ -13,6 +14,7 @@ const apiBaseUrl = host.includes("localhost")
   : `${protocol}://${host}/api`
 
 const config: Config = {
+  IsLocalhost: host.includes("localhost"),
   ApiHost: host,
   ApiBaseUrl: apiBaseUrl,
   Protocol: protocol,

@@ -78,12 +78,17 @@ module keyvaultModule 'keyvault.bicep' = {
   }
 }
 
+resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
+  name: 'kv-${postfix}'
+}
+
 module databaseModule 'database.bicep' = {
   name: 'database'
   params: {
     location: location
     postfix: postfix
     keyvaultName: keyvaultModule.outputs.keyvaultName
+    adminPassword: keyVault.getSecret('DatabaseAdminPassword')
   }
 }
 
