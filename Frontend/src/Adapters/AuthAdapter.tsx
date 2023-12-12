@@ -14,10 +14,10 @@ export type AuthenticationToken = {
 }
 
 export class AuthAdapter {
-  private static GetTokenFromLocalStorage() {
+  private static GetTokenFromLocalStorage(): AuthenticationToken | null {
     const token = localStorage.getItem("authenticationToken")
     if (token) {
-      return JSON.parse(token)
+      return JSON.parse(token) as AuthenticationToken
     }
     return null
   }
@@ -33,7 +33,6 @@ export class AuthAdapter {
     const token = AuthAdapter.GetTokenFromLocalStorage()
 
     if (token == null) return null
-    if (Object.keys(token).length == 0) return null
     return new User(token)
   }
 
@@ -87,8 +86,8 @@ export class AuthAdapter {
       return null
     } else {
       const unixNow = Math.floor(Date.now() / 1000)
-      if (unixNow > authenticationToken.expiresAt - 10) {
-        const renewedAuthenticationToken = await AuthAdapter.Renew(authenticationToken.refreshToken)
+      if (unixNow > Number(authenticationToken.expiresAt) - 10) {
+        const renewedAuthenticationToken = await AuthAdapter.Renew(authenticationToken)
 
         return renewedAuthenticationToken.token
       }

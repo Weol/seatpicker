@@ -19,7 +19,7 @@ import {
 } from "@mui/material"
 import * as React from "react"
 import { useState } from "react"
-import { Role, useAuth, User } from "../Adapters/AuthAdapter"
+import { Role, User, useAuth } from "../Adapters/AuthAdapter"
 import { useGuildUsers } from "../Adapters/Guilds/GuildUsers"
 import { useActiveLan } from "../Adapters/Lans/ActiveLan"
 import { Lan } from "../Adapters/Lans/Lans"

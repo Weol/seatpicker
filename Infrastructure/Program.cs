@@ -12,7 +12,7 @@ builder.Configuration.AddEnvironmentVariables("App_");
 builder.Configuration.AddSeatpickerKeyvault();
 
 builder.Services.AddApplicationInsightsTelemetry()
-    .AddLogging()
+    .AddLogging(options => options.SetMinimumLevel(LogLevel.Information))
     .AddAdapters()
     .AddSeatpickerAuthentication()
     .ConfigureJsonSerialization()
