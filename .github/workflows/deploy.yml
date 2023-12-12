@@ -48,39 +48,13 @@ jobs:
           name: api
           path: api
 
-  deployInfrastructure:
-    runs-on: ubuntu-latest
-    name: Deploy Infrastructure
-    permissions:
-      contents: "read"
-      id-token: "write"
-    outputs:
-      appServiceName: ${{ steps.template.outputs.appServiceName }}
-      stagingSlotName: ${{ steps.template.outputs.stagingSlotName }}
-      appInsConnectionString: ${{ steps.template.outputs.appInsConnectionString }}
-    steps:
-      - uses: actions/checkout@master
-      - name: Azure Login
-        uses: Azure/login@v1.4.6
-        with:
-          client-id: ${{ secrets.CLIENT_ID }}
-          tenant-id: ${{ secrets.TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION }}
-      - name: Run template deployment
-        id: template
-        uses: azure/arm-deploy@v1.0.9
-        with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
-          resourceGroupName: ${{ secrets.RESOURCE_GROUP }}
-          template: ./Bicep/master.bicep
-
   deployApp:
     runs-on: ubuntu-latest
     name: Deploy application
     permissions:
       contents: "read"
       id-token: "write"
-    needs: [deployInfrastructure, buildApi, buildFrontend]
+    needs: [buildApi, buildFrontend]
     steps:
       - name: Download API artifact
         uses: actions/download-artifact@v2

@@ -237,7 +237,7 @@ public class GuildMember
 {
     [JsonPropertyName("user")] public DiscordUser DiscordUser { get; set; } = null!;
 
-    [JsonPropertyName("nick")] public string Nick { get; set; } = null!;
+    [JsonPropertyName("nick")] public string? Nick { get; set; } = null!;
 
     [JsonPropertyName("avatar")] public string? Avatar { get; set; } = null!;
 

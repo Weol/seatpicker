@@ -31,7 +31,7 @@ public class ReservationManagementService : IReservationManagementService
         using var transaction = aggregateRepository.CreateTransaction();
         using var reader = documentRepository.CreateReader();
 
-        var userToReserveFor = await userProvider.GetById(userId) ?? throw new UserNotFoundException { UserId = userId };
+        var userToReserveFor = await userProvider.GetById(userId, true) ?? throw new UserNotFoundException { UserId = userId };
 
         var seatToReserve = await transaction.Aggregate<Seat>(seatId) ??
                             throw new SeatNotFoundException { SeatId = seatId };

@@ -15,7 +15,7 @@ public class UserManager : IUserProvider
         this.documentRepository = documentRepository;
     }
 
-    public async Task<User?> GetById(UserId userId)
+    public async Task<User?> GetById(UserId userId, bool doGuildQuery = true)
     {
         using var reader = documentRepository.CreateReader();
         var userDocument = await reader.Get<UserDocument>(userId);
