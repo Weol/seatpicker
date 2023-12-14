@@ -1,20 +1,20 @@
 variable "azure_tenant_id" {
-  type = string
+  type      = string
   sensitive = true
 }
 
 variable "azure_subscription_id" {
-  type = string
+  type      = string
   sensitive = true
 }
 
 variable "azure_client_id" {
-  type = string
+  type      = string
   sensitive = true
 }
 
 variable "azure_client_secret" {
-  type = string
+  type      = string
   sensitive = true
 }
 
@@ -39,12 +39,12 @@ provider "azurerm" {
   features {}
 
   subscription_id = var.azure_subscription_id
-  tenant_id = var.azure_tenant_id
-  client_id = var.azure_client_id
-  client_secret = var.azure_client_secret
+  tenant_id       = var.azure_tenant_id
+  client_id       = var.azure_client_id
+  client_secret   = var.azure_client_secret
 }
 
 resource "azurerm_resource_group" "resourceGroup" {
   name     = "testy"
-  location = "East Norway"
+  location = "Norway East"
 }

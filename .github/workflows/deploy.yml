@@ -61,20 +61,47 @@ jobs:
       CONFIG_DIRECTORY: "./"
     steps:
       - uses: actions/checkout@master
-      - name: Azure Login
-        uses: Azure/login@v1.4.6
-        with:
-          client-id: ${{ secrets.CLIENT_ID }}
-          tenant-id: ${{ secrets.TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION }}
-      - name: Run template deployment
-        id: template
-        uses: azure/arm-deploy@v1.0.9
-        with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
-          resourceGroupName: ${{ secrets.RESOURCE_GROUP }}
-          template: ./Bicep/master.bicep
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Plan
+        id: tf-plan
+        run: |
+          export exitcode=0
+          terraform plan -detailed-exitcode -no-color -out tfplan || export exitcode=$?
 
+          echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
+
+          if [ $exitcode -eq 1 ]; then
+            echo Terraform Plan Failed!
+            exit 1
+          else 
+            exit 0
+          fi
+      - name: Create String Output
+        id: tf-plan-string
+        run: |
+          TERRAFORM_PLAN=$(terraform show -no-color tfplan)
+
+          delimiter="$(openssl rand -hex 8)"
+          echo "summary<<${delimiter}" >> $GITHUB_OUTPUT
+          echo "## Terraform Plan Output" >> $GITHUB_OUTPUT
+          echo "<details><summary>Click to expand</summary>" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo '```terraform' >> $GITHUB_OUTPUT
+          echo "$TERRAFORM_PLAN" >> $GITHUB_OUTPUT
+          echo '```' >> $GITHUB_OUTPUT
+          echo "</details>" >> $GITHUB_OUTPUT
+          echo "${delimiter}" >> $GITHUB_OUTPUT
+      - name: Terraform Apply
+        if: steps.tf-plan.outputs.tfplanExitCode == 2
+        run: |
+          terraform apply -auto-approve tfplan \
+            -var="azure_tenant_id=${{ secrets.TENANT_ID }}" \
+            -var="azure_subscription_id=${{ secrets.AZURE_SUBSCRIPTION }}" \
+            -var="azure_client_id=${{ secrets.CLIENT_ID }}" \
+            -var="azure_client_secret=${{ secrets.CLIENT_SECRET }}" \
 
   deployApp:
     runs-on: ubuntu-latest
