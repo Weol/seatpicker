@@ -2,7 +2,7 @@ name: Deploy API and Frontend
 
 on:
   push:
-    branches: ["master"]
+    branches: ["terraform"]
 jobs:
   buildFrontend:
     runs-on: ubuntu-latest
@@ -54,21 +54,28 @@ jobs:
     permissions:
       contents: "read"
       id-token: "write"
-    env:
-      TF_CLOUD_ORGANIZATION: "Saltenlan"
-      TF_API_TOKEN: "${{ secrets.TERRAFORM_TOKEN }}"
-      TF_WORKSPACE: "saltenlan"
-      CONFIG_DIRECTORY: "./"
     steps:
       - uses: actions/checkout@master
+        with:
+          path: seatpicker
+      - name: Copy Bicep folder
+        run: cp -a seatpicker/Bicep/. ./
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
+      - name: Setup credentials
+        run: |
+          echo "credentials \"app.terraform.io\" {" > .terraformrc
+          echo "  token = \"${{ secrets.TERRAFORM_TOKEN }}\"" >> .terraformrc
+          echo "}" >> .terraformrc
+      - run: ls -al
+      - run: cat .terraformrc
       - name: Terraform Init
         run: terraform init
       - name: Terraform Plan
         id: tf-plan
         run: |
           export exitcode=0
+
           terraform plan -detailed-exitcode -no-color -out tfplan || export exitcode=$?
 
           echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
@@ -101,7 +108,7 @@ jobs:
             -var="azure_tenant_id=${{ secrets.TENANT_ID }}" \
             -var="azure_subscription_id=${{ secrets.AZURE_SUBSCRIPTION }}" \
             -var="azure_client_id=${{ secrets.CLIENT_ID }}" \
-            -var="azure_client_secret=${{ secrets.CLIENT_SECRET }}" \
+            -var="azure_client_secret=${{ secrets.CLIENT_SECRET }}"
 
   deployApp:
     runs-on: ubuntu-latest
@@ -109,7 +116,7 @@ jobs:
     permissions:
       contents: "read"
       id-token: "write"
-    needs: [buildApi, buildFrontend]
+    needs: [deployInfrastructure, buildApi, buildFrontend]
     steps:
       - name: Download API artifact
         uses: actions/download-artifact@v2
@@ -132,3 +139,4 @@ jobs:
         with:
           app-name: webapp-raeugww74vfps
           package: ./
+          slot: staging
