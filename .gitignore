@@ -3,6 +3,7 @@
 
 # Local settings
 appsettings.local.json
+Infrastructure/Internal
 
 # User-specific files
 *.suo
