@@ -7,7 +7,7 @@ public static class SignalRExtensions
     public static IServiceCollection AddSignalRAdapter(this IServiceCollection services)
     {
         services.AddSignalR();
-        services.AddSingleton<IReservationNotifier, ReservationNotifier>();
+        services.AddScoped<IReservationNotifier, ReservationNotifier>();
 
         return services;
     }

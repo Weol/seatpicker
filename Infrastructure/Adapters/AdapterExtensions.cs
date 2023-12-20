@@ -17,16 +17,23 @@ public static class AdapterExtensions
     public static WebApplication UseAdapters(this WebApplication app)
     {
         app.UseSignalRAdapter();
-        
+
         return app;
     }
-    
+
     private static void ConfigureDatabase(DatabaseOptions options, IConfiguration configuration)
     {
-        configuration.GetSection("Database").Bind(options);
+        var section = configuration.GetSection("Database");
+
+        var host = section.GetValue<string>("Host");
+        var name = section.GetValue<string>("Name");
+        var port = section.GetValue<string>("Port");
 
         // Values from keyvault   
-        options.Password = configuration["DatabaseAdminPassword"] ?? throw new NullReferenceException();
-        options.User = configuration["DatabaseAdminUsername"] ?? throw new NullReferenceException();
+        var password = configuration["DatabaseAdminPassword"] ?? throw new NullReferenceException();
+        var user = configuration["DatabaseAdminUsername"] ?? throw new NullReferenceException();
+
+        options.ConnectionString =
+            $"Server={host};Database={name};Port={port};User Id={user};Password={password};Ssl Mode=Require;Trust Server Certificate=true;";
     }
 }

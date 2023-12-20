@@ -26,8 +26,7 @@ export default function useReservationAdapter(lan: Lan | null) {
 
   const moveReservationFor = async (fromSeat: Seat, toSeat: Seat) => {
     await ApiRequest("PUT", `lan/${lan?.id}/seat/${fromSeat.id}/reservationmanagement`, {
-      toSeatId: toSeat.id,
-      userId: fromSeat.reservedBy?.id,
+      toSeatId: toSeat.id
     })
   }
 

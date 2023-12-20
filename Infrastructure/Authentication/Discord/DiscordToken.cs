@@ -5,4 +5,5 @@ public record DiscordToken(
     string Nick,
     string? Avatar,
     string RefreshToken,
+    Role[] Roles,
     string? GuildId);

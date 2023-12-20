@@ -6,11 +6,10 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 
 [ApiController]
 [Route("lan")]
-[Area("lan")]
 #pragma warning disable CS1998
 public class GetEndpoint
 {
-    [HttpGet("")]
+    [HttpGet]
     public async Task<ActionResult<Response[]>> GetAll(
         [FromServices] IDocumentRepository documentRepository)
     {

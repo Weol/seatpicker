@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="Rules for WpfApplication1" Description="Code analysis rules for WpfApplication1.csproj." ToolsVersion="14.0">
+    <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
+        <Rule Id="xUnit1041" Action="None" /> 
+    </Rules>
+</RuleSet>

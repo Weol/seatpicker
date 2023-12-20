@@ -124,16 +124,13 @@ public class Seat : AggregateBase
         Apply(evt);
     }
 
-    public void MoveReservationFor(User user, Seat fromSeat, User movedBy)
+    public void MoveReservationFor(Seat fromSeat, User movedBy)
     {
-        if (ReservedBy is not null) throw new SeatReservationConflictException(this, ReservedBy, user.Id);
+        if (ReservedBy is not null) throw new SeatReservationConflictException(this, ReservedBy, movedBy.Id);
 
         if (fromSeat.ReservedBy is null) throw new SeatReservationNotFoundException { Seat = fromSeat };
 
-        if (fromSeat.ReservedBy.Value != user.Id)
-            throw new SeatReservationConflictException(this, fromSeat.ReservedBy, user.Id);
-
-        var evt = new SeatReservationMovedFor(Id, user.Id, fromSeat.Id, Id, movedBy.Id);
+        var evt = new SeatReservationMovedFor(Id, fromSeat.ReservedBy, fromSeat.Id, Id, movedBy.Id);
 
         fromSeat.Raise(evt);
         fromSeat.Apply(evt);

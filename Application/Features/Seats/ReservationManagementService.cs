@@ -4,7 +4,7 @@ namespace Seatpicker.Application.Features.Seats;
 
 public interface IReservationManagementService
 {
-    public Task Move(Guid lanId, UserId userToMove, Guid fromSeatId, Guid toSeatId, User initiator);
+    public Task Move(Guid lanId, Guid fromSeatId, Guid toSeatId, User initiator);
 
     public Task Create(Guid lanId, Guid seatId, UserId userId, User reservedBy);
 
@@ -61,18 +61,17 @@ public class ReservationManagementService : IReservationManagementService
         await notifier.NotifySeatReservationChanged(seat);
     }
 
-    public async Task Move(Guid lanId, UserId userToMove, Guid fromSeatId, Guid toSeatId, User movedBy)
+    public async Task Move(Guid lanId, Guid fromSeatId, Guid toSeatId, User movedBy)
     {
         using var transaction = aggregateRepository.CreateTransaction();
-        var userToMoveFor = await userProvider.GetById(userToMove) ?? throw new UserNotFoundException { UserId = userToMove };
-
+        
         var fromSeat = await transaction.Aggregate<Seat>(fromSeatId) ??
                        throw new SeatNotFoundException { SeatId = fromSeatId };
 
         var toSeat = await transaction.Aggregate<Seat>(toSeatId) ??
                      throw new SeatNotFoundException { SeatId = toSeatId };
 
-        toSeat.MoveReservationFor(userToMoveFor, fromSeat, movedBy);
+        toSeat.MoveReservationFor(fromSeat, movedBy);
 
         transaction.Update(fromSeat);
         transaction.Update(toSeat);

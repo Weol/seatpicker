@@ -5,16 +5,16 @@ using Seatpicker.Infrastructure.Entrypoints.Utils;
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Authentication.Discord;
 
 [ApiController]
-[Route("authentication/discord")]
-[Area("discord")]
 [Authorize]
+[Route("authentication/discord")]
 public class TestEndpoint
 {
     [HttpGet("test")]
     public async Task<ActionResult<Response>> Test(
-        [FromServices] LoggedInUserAccessor loggedInUserAccessor,
-        [FromServices] HttpContext httpContext)
+        [FromServices] ILoggedInUserAccessor loggedInUserAccessor,
+        [FromServices] IHttpContextAccessor httpContextAccessor)
     {
+        var httpContext = httpContextAccessor.HttpContext ?? throw new NullReferenceException();
         var roles = httpContext.User.Identities.SelectMany(
                 identity => identity.Claims.Where(claim => claim.Type == identity.RoleClaimType)
                     .Select(claim => claim.Value))

@@ -1,28 +1,27 @@
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
 using Seatpicker.Infrastructure.Authentication;
-using Seatpicker.Infrastructure.Authentication.Discord;
 using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 
 [ApiController]
 [Route("guild/{guildId}")]
-[Area("guilds")]
 [Authorize(Roles = "Admin")]
 public class GetRolesEndpoint
 {
     [HttpGet("roles")]
     public async Task<ActionResult<Response[]>> GetRoles(
         [FromRoute] string guildId,
-        [FromServices] DiscordAuthenticationService discordAuthenticationService,
+        [FromServices] GuildRoleMappingRepository guildRoleRepository,
         [FromServices] DiscordClient discordClient)
     {
         try
         {
             var guildRolesTask = discordClient.GetGuildRoles(guildId);
-            var mappingsTask = discordAuthenticationService.GetRoleMapping(guildId).ToArrayAsync();
+            var mappingsTask = guildRoleRepository.GetRoleMapping(guildId).ToArrayAsync();
 
             var guildRoles = await guildRolesTask;
             var mappings = await mappingsTask;

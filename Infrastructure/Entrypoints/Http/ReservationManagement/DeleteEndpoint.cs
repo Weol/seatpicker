@@ -7,11 +7,10 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement;
 
 [ApiController]
 [Route("lan/{lanId:Guid}/seat/{seatId:guid}/reservationmanagement")]
-[Area("reservationmanagement")]
 [Authorize(Roles = "Operator")]
 public class DeleteEndpoint
 {
-    [HttpDelete("")]
+    [HttpDelete]
     public async Task<IActionResult> Delete(
         [FromRoute] Guid lanId,
         [FromRoute] Guid seatId,

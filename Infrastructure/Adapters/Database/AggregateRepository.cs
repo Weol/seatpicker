@@ -1,4 +1,5 @@
-﻿using Marten;
+﻿using System.Diagnostics;
+using Marten;
 using Seatpicker.Application.Features;
 using Shared;
 
@@ -7,15 +8,17 @@ namespace Seatpicker.Infrastructure.Adapters.Database;
 public class AggregateRepository : IAggregateRepository
 {
     private readonly IDocumentStore store;
+    private readonly ITenantProvider tenantProvider;
 
-    public AggregateRepository(IDocumentStore store)
+    public AggregateRepository(IDocumentStore store, ITenantProvider tenantProvider)
     {
         this.store = store;
+        this.tenantProvider = tenantProvider;
     }
 
     public IAggregateTransaction CreateTransaction()
     {
-        var session = store.LightweightSession();
+        var session = store.LightweightSession(tenantProvider.GetTenant());
         return new AggregateTransaction(session);
     }
 }

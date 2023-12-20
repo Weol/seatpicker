@@ -8,7 +8,6 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Marten;
 
 [ApiController]
 [Route("marten")]
-[Area("marten")]
 [Authorize(Roles = "Admin")]
 public class RebuildProjectionsEndpoint
 {

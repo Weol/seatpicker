@@ -1,7 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using JasperFx.CodeGeneration;
 using Marten;
 using Microsoft.Extensions.Options;
 using Seatpicker.Application.Features;
+using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
+using Weasel.Core;
 
 namespace Seatpicker.Infrastructure.Adapters.Database;
 
@@ -14,18 +16,22 @@ internal static class DatabaseExtensions
         services.AddValidatedOptions(configureAction);
 
         services.AddSingleton<IAggregateRepository, AggregateRepository>()
-            .AddSingleton<IDocumentRepository, DocumentRepository>();
+            .AddSingleton<IDocumentRepository, DocumentRepository>()
+            .AddSingleton<ITenantProvider, TenantProvider>()
+            .AddSingleton<GuildRoleMappingRepository>();
 
         services.AddMarten(
-            provider =>
-            {
-                var options = new StoreOptions();
-                var databaseOptions = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
+                provider =>
+                {
+                    var options = new StoreOptions();
+                    var databaseOptions = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
 
-                options.Connection(databaseOptions.ConnectionString);
+                    options.Connection(databaseOptions.ConnectionString);
 
-                return options;
-            }).OptimizeArtifactWorkflow();
+                    return options;
+                })
+            .OptimizeArtifactWorkflow()
+            .ApplyAllDatabaseChangesOnStartup();
 
         return services;
     }
@@ -33,12 +39,5 @@ internal static class DatabaseExtensions
 
 internal class DatabaseOptions
 {
-    [Required] public string Host { get; set; } = null!;
-    [Required] public string User { get; set; } = null!;
-    [Required] public string Name { get; set; } = null!;
-    [Required] public string Port { get; set; } = null!;
-    [Required] public string Password { get; set; } = null!;
-
-    public string ConnectionString =>
-        $"Server={Host};Database={Name};Port={Port};User Id={User};Password={Password};Ssl Mode=Require;Trust Server Certificate=true;";
+    public string ConnectionString { get; set; } = null!;
 }

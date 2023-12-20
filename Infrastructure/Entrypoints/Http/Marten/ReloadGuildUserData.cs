@@ -1,15 +1,11 @@
-using Marten;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Seatpicker.Application.Features.Lans;
-using Seatpicker.Application.Features.Seats;
 using Seatpicker.Infrastructure.Authentication.Discord;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Marten;
 
 [ApiController]
 [Route("marten")]
-[Area("marten")]
 [Authorize(Roles = "Admin")]
 public class ReloadGuildUserData
 {

@@ -16,7 +16,7 @@ public static class DiscordAuthenticationExtensions
 
         return services
             .AddDiscordClient(configureClientAction)
-            .AddScoped<DiscordAuthenticationService>()
-            .AddScoped<DiscordJwtTokenCreator>();
+            .AddSingleton<DiscordAuthenticationService>()
+            .AddSingleton<DiscordJwtTokenCreator>();
     }
 }

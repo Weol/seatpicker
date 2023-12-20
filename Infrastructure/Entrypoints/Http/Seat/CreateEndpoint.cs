@@ -8,7 +8,6 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 
 [ApiController]
 [Route("lan/{lanId:Guid}/seat")]
-[Area("seat")]
 [Authorize(Roles = "Operator")]
 public class CreateEndpoint
 {

@@ -6,7 +6,6 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 
 [ApiController]
 [Route("guild/{guildId}")]
-[Area("guilds")]
 [Authorize(Roles = "Operator")]
 public class GetUsersEndpoint
 {

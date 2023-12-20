@@ -45,6 +45,7 @@ public static class UserManagerExtensions
 {
     public static IServiceCollection AddUserManager(this IServiceCollection services)
     {
-        return services.AddPortMapping<IUserProvider, UserManager>();
+        return services
+            .AddPortMapping<IUserProvider, UserManager>();
     }
 }

@@ -1,24 +1,23 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
 using Seatpicker.Infrastructure.Authentication;
-using Seatpicker.Infrastructure.Authentication.Discord;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 
 [ApiController]
 [Route("guild/{guildId}")]
-[Area("guilds")]
 [Authorize(Roles = "Admin")]
 public class UpdateRolesEndpoint
 {
     [HttpPut("roles")]
     public async Task<IActionResult> Set(
-        [FromServices] DiscordAuthenticationService discordAuthenticationService,
+        [FromServices] GuildRoleMappingRepository guildRoleRepository,
         [FromBody] IEnumerable<Request> request,
         [FromRoute] string guildId)
     {
-        await discordAuthenticationService.SetRoleMapping(
+        await guildRoleRepository.SaveRoleMapping(
             guildId,
             request.SelectMany(guildRole => guildRole.Roles.Select(role => (guildRole.Id, role))));
         

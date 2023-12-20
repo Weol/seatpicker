@@ -5,10 +5,9 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 
 [ApiController]
 [Route("guild")]
-[Area("guilds")]
-public class GetEndpoint
+public class GetGuilds
 {
-    [HttpGet("")]
+    [HttpGet]
     public async Task<ActionResult<Response[]>> GetAll(
         [FromServices] DiscordClient discordClient)
     {

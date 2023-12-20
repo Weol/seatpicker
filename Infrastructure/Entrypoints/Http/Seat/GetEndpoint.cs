@@ -6,10 +6,9 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 
 [ApiController]
 [Route("lan/{lanId:guid}/seat")]
-[Area("seat")]
 public class GetEndpoint
 {
-    [HttpGet("")]
+    [HttpGet]
     public async Task<ActionResult<Response[]>> GetAll(
         [FromRoute] Guid lanId,
         [FromServices] IDocumentRepository documentRepository,

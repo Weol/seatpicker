@@ -8,11 +8,10 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Reservation;
 
 [ApiController]
 [Route("lan/{lanId:Guid}/seat/{seatId:guid}/reservation")]
-[Area("reservation")]
 [Authorize]
 public class MoveEndpoint
 {
-    [HttpPut("")]
+    [HttpPut]
     public async Task<IActionResult> Move(
         [FromRoute] Guid lanId,
         [FromRoute] Guid seatId,

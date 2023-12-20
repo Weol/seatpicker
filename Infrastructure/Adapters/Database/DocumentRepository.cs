@@ -1,4 +1,5 @@
-﻿using Marten;
+﻿using System.Diagnostics;
+using Marten;
 using Seatpicker.Application.Features;
 using Shared;
 
@@ -7,21 +8,23 @@ namespace Seatpicker.Infrastructure.Adapters.Database;
 public class DocumentRepository : IDocumentRepository
 {
     private readonly IDocumentStore store;
+    private readonly ITenantProvider tenantProvider;
 
-    public DocumentRepository(IDocumentStore store, ILogger<DocumentRepository> logger)
+    public DocumentRepository(IDocumentStore store, ITenantProvider tenantProvider)
     {
         this.store = store;
+        this.tenantProvider = tenantProvider;
     }
 
     public IDocumentTransaction CreateTransaction()
     {
-        var session = store.LightweightSession();
+        var session = store.LightweightSession(tenantProvider.GetTenant());
         return new DocumentTransaction(session);
     }
 
     public IDocumentReader CreateReader()
     {
-        var session = store.QuerySession();
+        var session = store.QuerySession(tenantProvider.GetTenant());
         return new DocumentReader(session);
     }
 }
