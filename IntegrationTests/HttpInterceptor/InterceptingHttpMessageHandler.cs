@@ -1,9 +1,6 @@
-using System.Net.Http.Json;
-using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Seatpicker.IntegrationTests.HttpInterceptor;
 
-namespace Seatpicker.IntegrationTests;
+namespace Seatpicker.IntegrationTests.HttpInterceptor;
 
 public class InterceptingHttpMessageHandler : HttpMessageHandler
 {

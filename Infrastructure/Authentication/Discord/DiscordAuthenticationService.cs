@@ -74,13 +74,15 @@ public class DiscordAuthenticationService
     {
         var (roles, username, avatar) = await GetUserInfo(discordUser, guildId);
 
+        var isSuperadmin = roles.Any(role => role == Role.Superadmin);
+        
         var token = new DiscordToken(
             discordUser.Id,
             username,
             avatar,
             accessToken.RefreshToken,
             roles,
-            guildId);
+            isSuperadmin ? null : guildId);
 
         var (jwtToken, expiresAt) = await tokenCreator.CreateToken(token, roles);
         await userManager.Store(new User(new UserId(discordUser.Id), username, avatar), guildId);
@@ -93,7 +95,7 @@ public class DiscordAuthenticationService
     {
         var guildMember = await discordClient.GetGuildMember(guildId, discordUser.Id);
 
-        if (options.Admins.Any(admin => admin == discordUser.Id))
+        if (options.Superadmins.Any(admin => admin == discordUser.Id))
         {
             return (Enum.GetValues<Role>(), guildMember?.Nick ?? discordUser.Username,
                 guildMember?.Avatar ?? discordUser.Avatar);

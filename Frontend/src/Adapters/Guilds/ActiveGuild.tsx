@@ -19,8 +19,7 @@ export interface GuildRole {
 const defaultGuildId = Config.IsLocalhost ? "654016371260260412" : "817425364656586762"
 export const activeGuildIdAtom = atom<string>({
   key: "activeGuildId",
-  default: defaultGuildId,
-  effects: [synchronizeWithLocalStorage("activeGuildId")],
+  effects: [synchronizeWithLocalStorage("activeGuildId", defaultGuildId)],
 })
 
 export function useActiveGuildId() {

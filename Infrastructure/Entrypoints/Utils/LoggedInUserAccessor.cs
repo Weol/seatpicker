@@ -21,14 +21,25 @@ public class LoggedInUserAccessor : ILoggedInUserAccessor
     }
 
     private HttpContext HttpContext =>
-        httpContextAccessor.HttpContext ?? throw new Exception("HttpContext is null");
+        httpContextAccessor.HttpContext ?? throw new HttpContextIsNullException();
 
     public async Task<User> Get()
     {
         var id  = HttpContext.User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
 
         return await userProvider.GetById(new UserId(id)) ??
-               throw new NullReferenceException($"Cannot find user with id {id}");
+               throw new UserNotFoundException($"Cannot find user with id {id}");
+    }
+    
+    public class HttpContextIsNullException : Exception
+    {
+    }
+    
+    public class UserNotFoundException : Exception
+    {
+        public UserNotFoundException(string message) : base(message)
+        {
+        }
     }
 }
 

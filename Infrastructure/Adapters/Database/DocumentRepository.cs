@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Marten;
+﻿using Marten;
 using Seatpicker.Application.Features;
 using Shared;
 
@@ -9,22 +8,28 @@ public class DocumentRepository : IDocumentRepository
 {
     private readonly IDocumentStore store;
     private readonly ITenantProvider tenantProvider;
+    private readonly ILogger<DocumentRepository> logger;
 
-    public DocumentRepository(IDocumentStore store, ITenantProvider tenantProvider)
+    public DocumentRepository(IDocumentStore store, ITenantProvider tenantProvider, ILogger<DocumentRepository> logger)
     {
         this.store = store;
         this.tenantProvider = tenantProvider;
+        this.logger = logger;
     }
 
-    public IDocumentTransaction CreateTransaction()
+    public IDocumentTransaction CreateTransaction(string? tenant = null)
     {
-        var session = store.LightweightSession(tenantProvider.GetTenant());
+        tenant ??= tenantProvider.GetTenant();
+        
+        logger.LogInformation("Creating document transaction for tenant {TenantId}", tenant);
+        
+        var session = store.LightweightSession(tenant);
         return new DocumentTransaction(session);
     }
 
-    public IDocumentReader CreateReader()
+    public IDocumentReader CreateReader(string? tenant = null)
     {
-        var session = store.QuerySession(tenantProvider.GetTenant());
+        var session = store.QuerySession(tenant ?? tenantProvider.GetTenant());
         return new DocumentReader(session);
     }
 }

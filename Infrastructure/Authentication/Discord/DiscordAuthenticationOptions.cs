@@ -18,5 +18,5 @@ public class DiscordAuthenticationOptions
     public int TokenLifetime { get; set; }
 
     [Required]
-    public string[] Admins { get; set; } = null!;
+    public string[] Superadmins { get; set; } = null!;
 }

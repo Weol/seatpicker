@@ -43,16 +43,16 @@ public class Update_lan : IntegrationTestBase
     public async Task succeeds_when_valid(UpdateEndpoint.Request request)
     {
         // Arrange
-        var client = GetClient(Role.Admin);
+        var client = GetClient(GuildId, Role.Admin);
 
         var existingLan = LanGenerator.Create(GuildId, request.Id);
-        await SetupAggregates(existingLan);
+        await SetupAggregates(GuildId, existingLan);
 
         //Act
         var response = await MakeRequest(client, existingLan.Id, request);
 
         //Assert
-        var committedAggregates = GetCommittedDocuments<ProjectedLan>();
+        var committedAggregates = GetCommittedDocuments<ProjectedLan>(GuildId);
 
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
@@ -85,10 +85,10 @@ public class Update_lan : IntegrationTestBase
     public async Task fails_when_invalid(UpdateEndpoint.Request request)
     {
         // Arrange
-        var client = GetClient(Role.Admin);
+        var client = GetClient(GuildId, Role.Admin);
 
         var existingLan = LanGenerator.Create(GuildId);
-        await SetupAggregates(existingLan);
+        await SetupAggregates(GuildId, existingLan);
 
         //Act
         var response = await MakeRequest(client, existingLan.Id, request);
@@ -101,10 +101,10 @@ public class Update_lan : IntegrationTestBase
     public async Task fails_when_model_id_does_not_match_path_id()
     {
         // Arrange
-        var client = GetClient(Role.Admin);
+        var client = GetClient(GuildId, Role.Admin);
 
         var existingLan = LanGenerator.Create(GuildId);
-        await SetupAggregates(existingLan);
+        await SetupAggregates(GuildId, existingLan);
 
         //Act
         var response = await MakeRequest(client, existingLan.Id, Generator.UpdateLanRequest());
@@ -117,7 +117,7 @@ public class Update_lan : IntegrationTestBase
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
         // Arrange
-        var client = GetClient();
+        var client = GetClient(GuildId);
 
         //Act
         var response = await MakeRequest(client, Guid.NewGuid(), Generator.UpdateLanRequest());

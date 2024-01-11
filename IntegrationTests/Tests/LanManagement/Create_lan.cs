@@ -26,7 +26,7 @@ public class Create_lan : IntegrationTestBase
     public async Task succeeds_when_lan_is_valid()
     {
         // Arrange
-        var client = GetClient(Role.Admin);
+        var client = GetClient(GuildId, Role.Admin);
 
         var request = Generator.CreateLanRequest(GuildId);
 
@@ -34,7 +34,7 @@ public class Create_lan : IntegrationTestBase
         var response = await MakeRequest(client, request);
 
         //Assert
-        var committedProjections = GetCommittedDocuments<ProjectedLan>();
+        var committedProjections = GetCommittedDocuments<ProjectedLan>(GuildId);
 
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
@@ -51,7 +51,7 @@ public class Create_lan : IntegrationTestBase
     public async Task fails_when_background_is_not_svg()
     {
         // Arrange
-        var client = GetClient(Role.Admin);
+        var client = GetClient(GuildId, Role.Admin);
 
         var request = Generator.CreateLanRequest(GuildId) with { Background = new byte[] { 1, 2, 3, 4, 5, 6 } };
 
@@ -66,7 +66,7 @@ public class Create_lan : IntegrationTestBase
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
         // Arrange
-        var client = GetClient();
+        var client = GetClient(GuildId);
 
         //Act
         var response = await MakeRequest(client, Generator.CreateLanRequest(GuildId));

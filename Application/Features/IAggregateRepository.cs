@@ -4,7 +4,7 @@ namespace Seatpicker.Application.Features;
 
 public interface IAggregateRepository
 {
-    public IAggregateTransaction CreateTransaction();
+    public IAggregateTransaction CreateTransaction(string? tenant = null);
 }
 
 public interface IAggregateTransaction : IDisposable

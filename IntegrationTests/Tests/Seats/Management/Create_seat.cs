@@ -27,10 +27,10 @@ public class Create_seat : IntegrationTestBase
     public async Task succeeds_when_creating_new_seat()
     {
         // Arrange
-        var client = GetClient(Role.Operator);
+        var client = GetClient(GuildId, Role.Operator);
 
         var lan = LanGenerator.Create(GuildId);
-        await SetupAggregates(lan);
+        await SetupAggregates(GuildId, lan);
 
         var model = Generator.CreateSeatRequest();
 
@@ -42,7 +42,7 @@ public class Create_seat : IntegrationTestBase
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                var committedSeat = GetCommittedDocuments<ProjectedSeat>().Should().ContainSingle().Subject;
+                var committedSeat = GetCommittedDocuments<ProjectedSeat>(GuildId).Should().ContainSingle().Subject;
                 committedSeat.Title.Should().Be(model.Title);
                 committedSeat.Bounds.Should().BeEquivalentTo(model.Bounds);
             });
@@ -62,7 +62,7 @@ public class Create_seat : IntegrationTestBase
     public async Task fails_when_seat_request_model_is_invalid(CreateEndpoint.Request request)
     {
         // Arrange
-        var client = GetClient(Role.Operator);
+        var client = GetClient(GuildId, Role.Operator);
 
         //Act
         var response = await MakeRequest(client, Guid.NewGuid(), request);
@@ -75,7 +75,7 @@ public class Create_seat : IntegrationTestBase
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
         // Arrange
-        var client = GetClient();
+        var client = GetClient(GuildId);
 
         //Act
         var response = await MakeRequest(client, Guid.NewGuid(), Generator.CreateSeatRequest());

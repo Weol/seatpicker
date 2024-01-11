@@ -1,3 +1,6 @@
+using Seatpicker.Infrastructure.Authentication;
+using Seatpicker.Infrastructure.Entrypoints.Utils;
+
 namespace Seatpicker.Infrastructure.Adapters.Database;
 
 public interface ITenantProvider
@@ -17,9 +20,17 @@ public class TenantProvider : ITenantProvider
     public string GetTenant()
     {
         var context = httpContextAccessor.HttpContext;
-        if (context is null) throw new NullReferenceException();
+        if (context is null) throw new HttpContextIsNullException();
 
-        var header = context.Request.Headers["Seatpicker-Tenant"];
-        return header[0] ?? throw new NullReferenceException();
+        var feature = context.Features.Get<TenantIdFeature>();
+        return feature?.TenantId ?? throw new TenantIdMissingException();
+    }
+
+    public class HttpContextIsNullException : Exception
+    {
+    }
+
+    public class TenantIdMissingException : Exception
+    {
     }
 }

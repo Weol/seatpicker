@@ -28,14 +28,14 @@ public class Move_reservation : IntegrationTestBase
     public async Task succeeds_when_seat_is_reserved_and_target_seat_is_not_reserved()
     {
         // Arrange
-        var client = GetClient(Role.Operator);
+        var client = GetClient(GuildId, Role.Operator);
 
         var lan = LanGenerator.Create(GuildId);
-        var reservedBy = await CreateUser();
+        var reservedBy = await CreateUser(GuildId);
         var fromSeat = SeatGenerator.Create(lan, reservedBy: reservedBy);
         var toSeat = SeatGenerator.Create(lan);
 
-        await SetupAggregates(lan, fromSeat, toSeat);
+        await SetupAggregates(GuildId, lan, fromSeat, toSeat);
 
         //Act
         var response = await MakeRequest(client, lan.Id, fromSeat.Id, toSeat.Id);
@@ -45,12 +45,12 @@ public class Move_reservation : IntegrationTestBase
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                var committedFromSeat = GetCommittedDocuments<ProjectedSeat>()
+                var committedFromSeat = GetCommittedDocuments<ProjectedSeat>(GuildId)
                     .Should()
                     .ContainSingle(seat => seat.Id == fromSeat.Id)
                     .Subject;
 
-                var committedToSeat = GetCommittedDocuments<ProjectedSeat>()
+                var committedToSeat = GetCommittedDocuments<ProjectedSeat>(GuildId)
                     .Should()
                     .ContainSingle(seat => seat.Id == toSeat.Id)
                     .Subject;
@@ -66,13 +66,13 @@ public class Move_reservation : IntegrationTestBase
     public async Task fails_when_seat_is_not_reserved()
     {
         // Arrange
-        var client = GetClient(Role.Operator);
+        var client = GetClient(GuildId, Role.Operator);
 
         var lan = LanGenerator.Create(GuildId);
         var fromSeat = SeatGenerator.Create(lan);
         var toSeat = SeatGenerator.Create(lan);
 
-        await SetupAggregates(lan, fromSeat, toSeat);
+        await SetupAggregates(GuildId, lan, fromSeat, toSeat);
 
         //Act
         var response = await MakeRequest(client, lan.Id, fromSeat.Id, toSeat.Id);
@@ -82,12 +82,12 @@ public class Move_reservation : IntegrationTestBase
             () => response.StatusCode.Should().Be(HttpStatusCode.NotFound),
             () =>
             {
-                var committedFromSeat = GetCommittedDocuments<ProjectedSeat>()
+                var committedFromSeat = GetCommittedDocuments<ProjectedSeat>(GuildId)
                     .Should()
                     .ContainSingle(seat => seat.Id == fromSeat.Id)
                     .Subject;
 
-                var committedToSeat = GetCommittedDocuments<ProjectedSeat>()
+                var committedToSeat = GetCommittedDocuments<ProjectedSeat>(GuildId)
                     .Should()
                     .ContainSingle(seat => seat.Id == toSeat.Id)
                     .Subject;
@@ -101,13 +101,13 @@ public class Move_reservation : IntegrationTestBase
     public async Task fails_when_target_seat_is_reserved()
     {
         // Arrange
-        var client = GetClient(Role.Operator);
+        var client = GetClient(GuildId, Role.Operator);
         var lan = LanGenerator.Create(GuildId);
-        var fromSeat = SeatGenerator.Create(lan, reservedBy: await CreateUser());
-        var reservedBy = await CreateUser();
+        var fromSeat = SeatGenerator.Create(lan, reservedBy: await CreateUser(GuildId));
+        var reservedBy = await CreateUser(GuildId);
         var toSeat = SeatGenerator.Create(lan, reservedBy: reservedBy);
 
-        await SetupAggregates(lan, fromSeat, toSeat);
+        await SetupAggregates(GuildId, lan, fromSeat, toSeat);
 
         //Act
         var response = await MakeRequest(client, lan.Id, fromSeat.Id, toSeat.Id);
@@ -117,12 +117,12 @@ public class Move_reservation : IntegrationTestBase
             () => response.StatusCode.Should().Be(HttpStatusCode.Conflict),
             () =>
             {
-                var committedFromSeat = GetCommittedDocuments<ProjectedSeat>()
+                var committedFromSeat = GetCommittedDocuments<ProjectedSeat>(GuildId)
                     .Should()
                     .ContainSingle(seat => seat.Id == fromSeat.Id)
                     .Subject;
 
-                var committedToSeat = GetCommittedDocuments<ProjectedSeat>()
+                var committedToSeat = GetCommittedDocuments<ProjectedSeat>(GuildId)
                     .Should()
                     .ContainSingle(seat => seat.Id == toSeat.Id)
                     .Subject;
@@ -136,15 +136,15 @@ public class Move_reservation : IntegrationTestBase
     public async Task fails_when_seat_and_target_seat_is_reserved()
     {
         // Arrange
-        var client = GetClient(Role.Operator);
+        var client = GetClient(GuildId, Role.Operator);
 
         var lan = LanGenerator.Create(GuildId);
-        var reservedByFrom = await CreateUser();
+        var reservedByFrom = await CreateUser(GuildId);
         var fromSeat = SeatGenerator.Create(lan, reservedBy: reservedByFrom);
-        var reservedByTo = await CreateUser();
+        var reservedByTo = await CreateUser(GuildId);
         var toSeat = SeatGenerator.Create(lan, reservedBy: reservedByTo);
 
-        await SetupAggregates(lan, fromSeat, toSeat);
+        await SetupAggregates(GuildId, lan, fromSeat, toSeat);
 
         //Act
         var response = await MakeRequest(client, lan.Id, fromSeat.Id, toSeat.Id);
@@ -154,12 +154,12 @@ public class Move_reservation : IntegrationTestBase
             () => response.StatusCode.Should().Be(HttpStatusCode.Conflict),
             () =>
             {
-                var committedFromSeat = GetCommittedDocuments<ProjectedSeat>()
+                var committedFromSeat = GetCommittedDocuments<ProjectedSeat>(GuildId)
                     .Should()
                     .ContainSingle(seat => seat.Id == fromSeat.Id)
                     .Subject;
 
-                var committedToSeat = GetCommittedDocuments<ProjectedSeat>()
+                var committedToSeat = GetCommittedDocuments<ProjectedSeat>(GuildId)
                     .Should()
                     .ContainSingle(seat => seat.Id == toSeat.Id)
                     .Subject;
@@ -173,7 +173,7 @@ public class Move_reservation : IntegrationTestBase
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
         // Arrange
-        var client = GetClient();
+        var client = GetClient(GuildId);
 
         //Act
         var response = await MakeRequest(client, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());

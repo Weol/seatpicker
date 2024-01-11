@@ -5,7 +5,6 @@ using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
 using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 using Seatpicker.IntegrationTests.HttpInterceptor.Discord;
-using Seatpicker.IntegrationTests.Tests.Authentication;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -25,12 +24,12 @@ public class Roles : IntegrationTestBase
     public async Task getting_role_mapping_succeeds()
     {
         // Arrange
-        var client = GetClient(Role.Admin);
+        var client = GetClient(GuildId, Role.Admin);
         var guildRoleId = "1238712";
 
         var roleMapping =
             new GuildRoleMapping(GuildId, new[] { new GuildRoleMappingEntry(guildRoleId, Role.Operator) });
-        await SetupDocuments(roleMapping);
+        await SetupDocuments(GuildId, roleMapping);
         
         AddHttpInterceptor(new GuildRolesInterceptor(guildRoleId));
 
@@ -53,7 +52,7 @@ public class Roles : IntegrationTestBase
     public async Task setting_role_mapping_succeeds()
     {
         // Arrange
-        var client = GetClient(Role.Admin);
+        var client = GetClient(GuildId, Role.Admin);
         var guildRoleId1 = "1238712";
         var guildRoleId2 = "1238712233";
 
@@ -71,7 +70,7 @@ public class Roles : IntegrationTestBase
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var roleMappings = GetCommittedDocuments<GuildRoleMapping>();
+        var roleMappings = GetCommittedDocuments<GuildRoleMapping>(GuildId);
 
         Assert.Multiple(
             () => roleMappings.Should().HaveCount(1),

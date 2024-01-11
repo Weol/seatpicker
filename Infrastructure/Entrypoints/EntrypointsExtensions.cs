@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Entrypoints.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints;
@@ -32,8 +33,8 @@ public static class EntrypointsExtensions
     public static WebApplication UseEntrypoints(this WebApplication app)
     {
         app.UseHttpsRedirection();
-        app.UseRouting();
         app.MapControllers();
+        app.UseMiddleware<TenantAuthorizationMiddleware>();
 
         return app;
     }

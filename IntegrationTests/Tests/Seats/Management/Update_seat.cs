@@ -41,12 +41,12 @@ public class Update_seat : IntegrationTestBase
     public async Task succeeds_when_valid(UpdateEndpoint.Request request)
     {
         // Arrange
-        var client = GetClient(Role.Operator);
+        var client = GetClient(GuildId, Role.Operator);
 
         var lan = LanGenerator.Create(GuildId);
         var existingSeat = SeatGenerator.Create(lan);
 
-        await SetupAggregates(existingSeat);
+        await SetupAggregates(GuildId, existingSeat);
 
         //Act
         var response = await MakeRequest(client, lan.Id, existingSeat.Id, request);
@@ -56,7 +56,7 @@ public class Update_seat : IntegrationTestBase
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                var seat = GetCommittedDocuments<ProjectedSeat>().Should().ContainSingle().Subject;
+                var seat = GetCommittedDocuments<ProjectedSeat>(GuildId).Should().ContainSingle().Subject;
                 Assert.Multiple(
                     () =>
                     {
@@ -73,10 +73,10 @@ public class Update_seat : IntegrationTestBase
     public async Task fails_when_seat_does_not_exists()
     {
         // Arrange
-        var client = GetClient(Role.Operator);
+        var client = GetClient(GuildId, Role.Operator);
 
         var lan = LanGenerator.Create(GuildId);
-        await SetupAggregates(lan);
+        await SetupAggregates(GuildId, lan);
 
         //Act
         var response = await MakeRequest(client, lan.Id, Guid.NewGuid(), Generator.UpdateSeatRequest());
@@ -99,7 +99,7 @@ public class Update_seat : IntegrationTestBase
     public async Task fails_when_seat_request_model_is_invalid(UpdateEndpoint.Request request)
     {
         // Arrange
-        var client = GetClient(Role.Operator);
+        var client = GetClient(GuildId, Role.Operator);
 
         //Act
         var response = await MakeRequest(client, Guid.NewGuid(), Guid.NewGuid(), request);
@@ -112,7 +112,7 @@ public class Update_seat : IntegrationTestBase
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
         // Arrange
-        var client = GetClient();
+        var client = GetClient(GuildId);
 
         //Act
         var response = await MakeRequest(client, Guid.NewGuid(), Guid.NewGuid(), Generator.UpdateSeatRequest());

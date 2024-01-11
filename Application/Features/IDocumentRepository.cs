@@ -4,9 +4,9 @@ namespace Seatpicker.Application.Features;
 
 public interface IDocumentRepository
 {
-    public IDocumentTransaction CreateTransaction();
+    public IDocumentTransaction CreateTransaction(string? tenant = null);
 
-    public IDocumentReader CreateReader();
+    public IDocumentReader CreateReader(string? tenant = null);
 }
 
 public interface IDocumentReader : IDisposable

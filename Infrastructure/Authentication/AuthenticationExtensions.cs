@@ -18,7 +18,7 @@ public static class AuthenticationExtensions
             .AddUserManager()
             .AddAuthorization()
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer();
+            .AddJwtBearer();
 
         services
             .AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)

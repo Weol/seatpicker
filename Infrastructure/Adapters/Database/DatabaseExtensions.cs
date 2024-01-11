@@ -1,9 +1,8 @@
-﻿using JasperFx.CodeGeneration;
-using Marten;
+﻿using Marten;
+using Marten.Storage;
 using Microsoft.Extensions.Options;
 using Seatpicker.Application.Features;
 using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
-using Weasel.Core;
 
 namespace Seatpicker.Infrastructure.Adapters.Database;
 
@@ -27,6 +26,9 @@ internal static class DatabaseExtensions
                     var databaseOptions = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
 
                     options.Connection(databaseOptions.ConnectionString);
+                    options.Policies.AllDocumentsAreMultiTenanted();
+                    options.Events.TenancyStyle = TenancyStyle.Conjoined;
+                    options.Advanced.DefaultTenantUsageEnabled = false;
 
                     return options;
                 })

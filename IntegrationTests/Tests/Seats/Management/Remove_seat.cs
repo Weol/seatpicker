@@ -24,28 +24,28 @@ public class Remove_seat : IntegrationTestBase
     public async Task succeeds_when_seat_exists()
     {
         // Arrange
-        var client = GetClient(Role.Operator);
+        var client = GetClient(GuildId, Role.Operator);
 
         var lan = LanGenerator.Create(GuildId);
         var seat = SeatGenerator.Create(lan);
-        await SetupAggregates(seat);
+        await SetupAggregates(GuildId, seat);
 
         //Act
         var response = await MakeRequest(client, lan.Id, seat.Id);
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        GetCommittedDocuments<ProjectedSeat>().Should().BeEmpty();
+        GetCommittedDocuments<ProjectedSeat>(GuildId).Should().BeEmpty();
     }
 
     [Fact]
     public async Task fails_when_seat_does_not_exists()
     {
         // Arrange
-        var client = GetClient(Role.Operator);
+        var client = GetClient(GuildId, Role.Operator);
 
         var lan = LanGenerator.Create(GuildId);
-        await SetupAggregates(lan);
+        await SetupAggregates(GuildId, lan);
 
         //Act
         var response = await MakeRequest(client, lan.Id, Guid.NewGuid());
@@ -58,7 +58,7 @@ public class Remove_seat : IntegrationTestBase
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
         // Arrange
-        var client = GetClient();
+        var client = GetClient(GuildId);
 
         //Act
         var response = await MakeRequest(client, Guid.NewGuid(), Guid.NewGuid());

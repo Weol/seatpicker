@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using FluentAssertions;
 using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
 using Seatpicker.Infrastructure.Authentication;
@@ -28,11 +27,22 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
 
     protected abstract Task<HttpResponseMessage> MakeRequest(HttpClient client);
 
+    private static async Task<TestEndpoint.Response> TestAuthentication(HttpClient client, string token)
+    {
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var response = await client.GetAsync("authentication/discord/test");
+        var Response = await response.Content.ReadAsJsonAsync<TestEndpoint.Response>();
+
+        if (Response is null) throw new NullReferenceException();
+
+        return Response;
+    }
+    
     [Fact]
     public async Task succeeds_and_jwt_is_returned()
     {
         // Arrange
-        var client = GetAnonymousClient();
+        var client = GetAnonymousClient(GuildId);
 
         AddHttpInterceptor(new AccessTokenInterceptor());
         AddHttpInterceptor(new RefreshTokenInterceptor());
@@ -65,13 +75,13 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
     public async Task succeeds_and_jwt_has_roles_according_to_mapping(Role[] roles)
     {
         // Arrange
-        var client = GetAnonymousClient();
+        var client = GetAnonymousClient(GuildId);
         var guildRoleId = "999999";
 
         var roleMapping = new GuildRoleMapping(GuildId,
             roles.Select(role =>
                 new GuildRoleMappingEntry(guildRoleId, role)).ToArray());
-        await SetupDocuments(roleMapping);
+        await SetupDocuments(GuildId, roleMapping);
 
         AddHttpInterceptor(new AccessTokenInterceptor());
         AddHttpInterceptor(new RefreshTokenInterceptor());
@@ -104,7 +114,7 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
     public async Task returns_guild_nickname_and_avatar_when_available(string? guildUsername, string? guildAvatar)
     {
         // Arrange
-        var client = GetAnonymousClient();
+        var client = GetAnonymousClient(GuildId);
         var discordUser = new DiscordUser("123", "Tore Tang", "98765");
         var guildRoleId = "999999";
 
@@ -132,7 +142,7 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
     public async Task succeeds_when_user_is_not_member_of_guild()
     {
         // Arrange
-        var client = GetAnonymousClient();
+        var client = GetAnonymousClient(GuildId);
         var discordUser = new DiscordUser("123", "Tore Tang", "4123");
 
         AddHttpInterceptor(new AccessTokenInterceptor());
@@ -159,7 +169,7 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
     public async Task succeeds_when_user_has_no_avatar()
     {
         // Arrange
-        var client = GetAnonymousClient();
+        var client = GetAnonymousClient(GuildId);
         var discordUser = new DiscordUser("123", "Tore Tang", null);
 
         AddHttpInterceptor(new AccessTokenInterceptor());
@@ -180,16 +190,5 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
             () => body!.UserId.Should().Be(discordUser.Id),
             () => body!.Nick.Should().Be(discordUser.Username),
             () => body!.Avatar.Should().BeNull());
-    }
-
-    private static async Task<TestEndpoint.Response> TestAuthentication(HttpClient client, string token)
-    {
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        var response = await client.GetAsync("authentication/discord/test");
-        var Response = await response.Content.ReadAsJsonAsync<TestEndpoint.Response>();
-
-        if (Response is null) throw new NullReferenceException();
-
-        return Response;
     }
 }

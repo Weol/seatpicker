@@ -24,13 +24,13 @@ public class Remove_reservation : IntegrationTestBase
     public async Task succeeds_when_seat_is_reserved_by_logged_in_user()
     {
         // Arrange
-        var identity = await CreateIdentity(Role.Operator);
-        var client = GetClient(identity);
+        var identity = await CreateIdentity(GuildId, Role.Operator);
+        var client = GetClient(GuildId, identity);
 
         var lan = LanGenerator.Create(GuildId);
         var seat = SeatGenerator.Create(lan, reservedBy: identity.User);
 
-        await SetupAggregates(lan, seat);
+        await SetupAggregates(GuildId, lan, seat);
 
         //Act
         var response = await MakeRequest(client, lan.Id, seat.Id);
@@ -40,7 +40,7 @@ public class Remove_reservation : IntegrationTestBase
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                var committedSeat = GetCommittedDocuments<ProjectedSeat>().Should().ContainSingle().Subject;
+                var committedSeat = GetCommittedDocuments<ProjectedSeat>(GuildId).Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().BeNull();
             });
     }
@@ -49,13 +49,13 @@ public class Remove_reservation : IntegrationTestBase
     public async Task succeeds_when_seat_is_reserved_by_a_different_user()
     {
         // Arrange
-        var client = GetClient(Role.Operator);
+        var client = GetClient(GuildId, Role.Operator);
 
-        var user = await CreateUser();
+        var user = await CreateUser(GuildId);
         var lan = LanGenerator.Create(GuildId);
         var seat = SeatGenerator.Create(lan, reservedBy: user);
 
-        await SetupAggregates(lan, seat);
+        await SetupAggregates(GuildId, lan, seat);
 
         //Act
         var response = await MakeRequest(client, lan.Id, seat.Id);
@@ -65,7 +65,7 @@ public class Remove_reservation : IntegrationTestBase
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                var committedSeat = GetCommittedDocuments<ProjectedSeat>().Should().ContainSingle().Subject;
+                var committedSeat = GetCommittedDocuments<ProjectedSeat>(GuildId).Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().BeNull();
             });
     }
@@ -74,13 +74,13 @@ public class Remove_reservation : IntegrationTestBase
     public async Task succeeds_when_seat_is_not_reserved()
     {
         // Arrange
-        var client = GetClient(Role.Operator);
+        var client = GetClient(GuildId, Role.Operator);
 
-        var user = await CreateUser();
+        var user = await CreateUser(GuildId);
         var lan = LanGenerator.Create(GuildId);
         var seat = SeatGenerator.Create(lan, reservedBy: user);
 
-        await SetupAggregates(seat);
+        await SetupAggregates(GuildId, seat);
 
         //Act
         var response = await MakeRequest(client, lan.Id, seat.Id);
@@ -93,7 +93,7 @@ public class Remove_reservation : IntegrationTestBase
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
         // Arrange
-        var client = GetClient();
+        var client = GetClient(GuildId);
 
         //Act
         var response = await MakeRequest(client, Guid.NewGuid(), Guid.NewGuid());
@@ -106,7 +106,7 @@ public class Remove_reservation : IntegrationTestBase
     public async Task fails_when_seat_does_not_exist()
     {
         // Arrange
-        var client = GetClient(Role.Operator);
+        var client = GetClient(GuildId, Role.Operator);
 
         //Act
         var response = await MakeRequest(client, Guid.NewGuid(), Guid.NewGuid());

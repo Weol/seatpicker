@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 using NSubstitute;
 using Seatpicker.Infrastructure.Adapters.Database;
+using Seatpicker.IntegrationTests.HttpInterceptor;
 
 namespace Seatpicker.IntegrationTests;
 
@@ -34,10 +35,6 @@ public class TestWebApplicationFactory : WebApplicationFactory<Infrastructure.Pr
             }))
             .ConfigureServices(services =>
             {
-
-                services.RemoveAll<ITenantProvider>();
-                services.AddSingleton(Substitute.For<ITenantProvider>());
-                
                 // Add intercepting http message handler
                 var interceptingHandler = new InterceptingHttpMessageHandler();
                 services.AddSingleton(interceptingHandler);

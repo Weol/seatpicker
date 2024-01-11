@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Marten;
+﻿using Marten;
 using Seatpicker.Application.Features;
 using Shared;
 
@@ -16,9 +15,9 @@ public class AggregateRepository : IAggregateRepository
         this.tenantProvider = tenantProvider;
     }
 
-    public IAggregateTransaction CreateTransaction()
+    public IAggregateTransaction CreateTransaction(string? tenant = null)
     {
-        var session = store.LightweightSession(tenantProvider.GetTenant());
+        var session = store.LightweightSession(tenant ?? tenantProvider.GetTenant());
         return new AggregateTransaction(session);
     }
 }

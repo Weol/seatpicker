@@ -1,6 +1,5 @@
 using System.Net;
 using FluentAssertions;
-using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 using Xunit;
 using Xunit.Abstractions;
@@ -24,10 +23,10 @@ public class Get_lan : IntegrationTestBase
     public async Task returns_lan_when_lan_exists()
     {
         // Arrange
-        var client = GetClient();
+        var client = GetClient(GuildId);
 
         var existingLan = LanGenerator.Create(GuildId);
-        await SetupAggregates(existingLan);
+        await SetupAggregates(GuildId, existingLan);
 
         //Act
         var response = await MakeRequest(client, existingLan.Id);
@@ -50,7 +49,7 @@ public class Get_lan : IntegrationTestBase
     public async Task returns_nothing_when_lan_does_not_exist()
     {
         // Arrange
-        var client = GetClient();
+        var client = GetClient(GuildId);
 
         //Act
         var response = await MakeRequest(client, Guid.NewGuid());

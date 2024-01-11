@@ -1,8 +1,6 @@
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using FluentAssertions;
-using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
 using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 using Seatpicker.Infrastructure.Entrypoints.Http.Authentication.Discord;
@@ -39,7 +37,7 @@ public class Login : LoginAndRenewBase
     public async Task persists_user_with_guild_avatar_and_guild_nick_if_available(string? guildUsername, string? guildAvatar)
     {
         // Arrange
-        var client = GetAnonymousClient();
+        var client = GetAnonymousClient(GuildId);
         var discordUser = new DiscordUser("123", "Tore Tang", null);
 
         AddHttpInterceptor(new AccessTokenInterceptor());
@@ -49,14 +47,13 @@ public class Login : LoginAndRenewBase
 
         //Act
         var response = await MakeRequest(client);
-        var body
-            = await response.Content.ReadAsJsonAsync<TokenResponse>();
+        var body = await response.Content.ReadAsJsonAsync<TokenResponse>();
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         body.Should().NotBeNull();
 
-        var userDocuments = GetCommittedDocuments<UserManager.UserDocument>();
+        var userDocuments = GetCommittedDocuments<UserManager.UserDocument>(GuildId);
         var userDocument = userDocuments.Should().ContainSingle(doc => doc.Id == discordUser.Id).Subject;
         Assert.Multiple(() => userDocument.GuildId.Should().Be(GuildId),
             () => userDocument.Name.Should().Be(guildUsername ?? discordUser.Username),
@@ -67,7 +64,7 @@ public class Login : LoginAndRenewBase
     public async Task persists_user_when_user_is_not_member_of_guild()
     {
         // Arrange
-        var client = GetAnonymousClient();
+        var client = GetAnonymousClient(GuildId);
         var discordUser = new DiscordUser("123", "Tore Tang", null);
 
         AddHttpInterceptor(new AccessTokenInterceptor());
@@ -77,14 +74,13 @@ public class Login : LoginAndRenewBase
 
         //Act
         var response = await MakeRequest(client);
-        var body
-            = await response.Content.ReadAsJsonAsync<TokenResponse>();
+        var body = await response.Content.ReadAsJsonAsync<TokenResponse>();
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         body.Should().NotBeNull();
 
-        var userDocuments = GetCommittedDocuments<UserManager.UserDocument>();
+        var userDocuments = GetCommittedDocuments<UserManager.UserDocument>(GuildId);
         var userDocument = userDocuments.Should().ContainSingle(doc => doc.Id == discordUser.Id).Subject;
         Assert.Multiple(() => userDocument.GuildId.Should().Be(GuildId),
             () => userDocument.Name.Should().Be(discordUser.Username),
