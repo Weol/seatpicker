@@ -25,11 +25,25 @@ public static class AdapterExtensions
     {
         var section = configuration.GetSection("Database");
 
+        var connectionString = section.GetValue<string>("ConnectionString");
+        if (connectionString != null)
+        {
+            options.ConnectionString = connectionString;
+            return;
+        }
+
+        var environmentVariable = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING", EnvironmentVariableTarget.User);
+        if (environmentVariable != null)
+        {
+            options.ConnectionString = environmentVariable;
+            return;
+        }
+
         var host = section.GetValue<string>("Host");
         var name = section.GetValue<string>("Name");
         var port = section.GetValue<string>("Port");
 
-        // Values from keyvault   
+        // Values from keyvault
         var password = configuration["DatabaseAdminPassword"] ?? throw new NullReferenceException();
         var user = configuration["DatabaseAdminUsername"] ?? throw new NullReferenceException();
 
