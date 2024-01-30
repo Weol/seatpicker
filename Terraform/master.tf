@@ -3,22 +3,7 @@ variable "azure_tenant_id" {
   sensitive = true
 }
 
-variable "azure_subscription_id" {
-  type      = string
-  sensitive = true
-}
-resource "random_string" "random" {
-  length           = 16
-  special          = true
-  override_special = "/@£$"
-}
-
 variable "azure_client_id" {
-  type      = string
-  sensitive = true
-}
-
-variable "azure_client_secret" {
   type      = string
   sensitive = true
 }
@@ -27,25 +12,19 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=3.0.0"
+      version = ">=3.7.0"
     }
   }
-  cloud {
-    organization = "Saltenlan"
-    workspaces {
-      name = "saltenlan"
-    }
+  backend "azurerm" {
+    resource_group_name  = "terraform-backend"
+    storage_account_name = "seatpickerterraformstate"
+    container_name       = "tfstate"
+    key                  = "terraform.tfstate"
   }
 }
 
 provider "azurerm" {
-  skip_provider_registration = true
   features {}
-
-  subscription_id = var.azure_subscription_id
-  tenant_id       = var.azure_tenant_id
-  client_id       = var.azure_client_id
-  client_secret   = var.azure_client_secret
 }
 
 resource "azurerm_resource_group" "resourceGroup" {
@@ -53,17 +32,17 @@ resource "azurerm_resource_group" "resourceGroup" {
   location = "Norway East"
 }
 
-locals {
-  rgName   = azurerm_resource_group.resourceGroup.name
-  location = azurerm_resource_group.resourceGroup.location
-  postfix  = random_string.random.result
-}
-
 resource "random_string" "random" {
   length  = 8
   special = false
   upper   = false
   keepers = [locals.rgName]
+}
+
+locals {
+  rgName   = azurerm_resource_group.resourceGroup.name
+  location = azurerm_resource_group.resourceGroup.location
+  postfix  = random_string.random.result
 }
 
 resource "azurerm_log_analytics_workspace" "logAnalytics" {
@@ -142,10 +121,6 @@ resource "azurerm_windows_web_app_slot" "stagingSlot" {
 
   identity {
     type = "SystemAssigned"
-  }
-
-  app_settings = {
-    ""
   }
 }
 
@@ -234,7 +209,7 @@ resource "azurerm_key_vault_secret" "databasePasswordSecret" {
   depends_on   = [azurerm_role_assignment.keyvaultSecretOfficers]
 }
 
-resource "azurerm_key_vault_secret" "databasePasswordSecret" {
+resource "azurerm_key_vault_secret" "databasePasswordUsername" {
   name         = "DatabaseAdminUsername"
   value        = azurerm_postgresql_server.postgres.administrator_login
   key_vault_id = azurerm_key_vault.keyvault.id
