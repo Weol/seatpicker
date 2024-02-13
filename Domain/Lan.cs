@@ -97,12 +97,12 @@ public class Lan : AggregateBase
 /**
  * Events
  */
-public record LanCreated(Guid Id, string Title, byte[] Background, string GuildId, UserId Initiator);
+public record LanCreated(Guid Id, string Title, byte[] Background, string GuildId, UserId Initiator) : IEvent;
 
-public record LanTitleChanged(string Title, UserId Initiator);
+public record LanTitleChanged(string Title, UserId Initiator) : IEvent;
 
-public record LanBackgroundChanged(byte[] Background, UserId Initiator);
+public record LanBackgroundChanged(byte[] Background, UserId Initiator) : IEvent;
 
-public record LanActiveChanged(bool Active, UserId Initiator);
+public record LanActiveChanged(bool Active, UserId Initiator) : IEvent;
 
-public record LanArchived(UserId Initiator);
+public record LanArchived(UserId Initiator) : IEvent;

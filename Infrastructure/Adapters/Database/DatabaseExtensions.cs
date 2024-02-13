@@ -1,11 +1,10 @@
-﻿using JasperFx.CodeGeneration;
+﻿using System.Reflection;
 using Marten;
 using Marten.Storage;
 using Microsoft.Extensions.Options;
 using Seatpicker.Application.Features;
 using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
 using Shared;
-using Weasel.Core;
 
 namespace Seatpicker.Infrastructure.Adapters.Database;
 
@@ -25,40 +24,60 @@ internal static class DatabaseExtensions
         services.AddMarten(
             provider =>
             {
-                var options = new StoreOptions();
                 var databaseOptions = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
 
-                if (databaseOptions.SchemaName is not null) options.DatabaseSchemaName = databaseOptions.SchemaName;
-
-                options.Connection(databaseOptions.ConnectionString);
-                options.Policies.AllDocumentsAreMultiTenanted();
-                options.Events.TenancyStyle = TenancyStyle.Conjoined;
-                options.Advanced.DefaultTenantUsageEnabled = false;
-                
-                options.AutoCreateSchemaObjects = AutoCreate.None;
-                options.GeneratedCodeMode = TypeLoadMode.Dynamic;
-
-                RegisterAllDocuments(options, provider.GetRequiredService<ILogger<IDocument>>());
-
-                return options;
+                var options = new StoreOptions();
+                return ConfigureMarten(options, databaseOptions.ConnectionString);
             })
-            .ApplyAllDatabaseChangesOnStartup()
+            .OptimizeArtifactWorkflow()
             .InitializeWith();
 
         return services;
     }
 
-    internal static void RegisterAllDocuments(StoreOptions options, ILogger<IDocument> logger)
+    internal static StoreOptions ConfigureMarten(StoreOptions options, string connectionString)
+    {
+
+        options.Connection(connectionString);
+        options.Policies.AllDocumentsAreMultiTenanted();
+        options.Events.TenancyStyle = TenancyStyle.Conjoined;
+        options.Advanced.DefaultTenantUsageEnabled = false;
+
+        RegisterAllDocuments(options);
+        RegisterAllEvents(options);
+
+        return options;
+    }
+
+    private static void RegisterAllDocuments(StoreOptions options)
     {
         var type = typeof(IDocument);
-        var documents = AppDomain.CurrentDomain.GetAssemblies()
+        var assembly = typeof(DatabaseExtensions).Assembly;
+        var documents = assembly.GetReferencedAssemblies()
+            .Select(Assembly.Load)
+            .Append(assembly)
             .SelectMany(s => s.GetTypes())
-            .Where(p => p.FullName.StartsWith("Seatpicker.Application"));
-        
+            .Where(p => type.IsAssignableFrom(p) && !p.IsInterface);
+
         foreach (var document in documents)
         {
-            logger.LogInformation("Registering document type {DocumentType}", document.FullName);
             options.RegisterDocumentType(document);
+        }
+    }
+
+    private static void RegisterAllEvents(StoreOptions options)
+    {
+        var type = typeof(IEvent);
+        var assembly = typeof(DatabaseExtensions).Assembly;
+        var events = assembly.GetReferencedAssemblies()
+            .Select(Assembly.Load)
+            .Append(assembly)
+            .SelectMany(s => s.GetTypes())
+            .Where(p => type.IsAssignableFrom(p) && !p.IsInterface);
+
+        foreach (var evt in events)
+        {
+            options.Events.AddEventType(evt);
         }
     }
 }

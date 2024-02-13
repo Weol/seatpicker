@@ -23,7 +23,7 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
     {
     }
 
-    protected DiscordUser DiscordUser { get; } = new DiscordUser("123", "Tore Tang", "321");
+    protected DiscordUser DiscordUser { get; } = new ("123", "Tore Tang", "321");
 
     protected abstract Task<HttpResponseMessage> MakeRequest(HttpClient client);
 
@@ -37,7 +37,7 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
 
         return Response;
     }
-    
+
     [Fact]
     public async Task succeeds_and_jwt_is_returned()
     {
@@ -164,7 +164,7 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
             () => body!.Nick.Should().Be(discordUser.Username),
             () => body!.Avatar.Should().Be(discordUser.Avatar));
     }
-    
+
     [Fact]
     public async Task succeeds_when_user_has_no_avatar()
     {

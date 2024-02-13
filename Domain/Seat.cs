@@ -225,25 +225,25 @@ public class Bounds
 /**
  * Events
  */
-public record SeatCreated(Guid Id, Guid LanId, string Title, Bounds Bounds, UserId CreatedBy);
+public record SeatCreated(Guid Id, Guid LanId, string Title, Bounds Bounds, UserId CreatedBy) : IEvent;
 
-public record SeatTitleChanged(Guid LanId, string Title, UserId ChangedBy);
+public record SeatTitleChanged(Guid LanId, string Title, UserId ChangedBy) : IEvent;
 
-public record SeatBoundsChanged(Guid LanId, Bounds Bounds, UserId ChangedBy);
+public record SeatBoundsChanged(Guid LanId, Bounds Bounds, UserId ChangedBy) : IEvent;
 
-public record SeatReservationMade(Guid LanId, UserId UserId);
+public record SeatReservationMade(Guid LanId, UserId UserId) : IEvent;
 
-public record SeatReservationRemoved(Guid LanId, UserId UserId);
+public record SeatReservationRemoved(Guid LanId, UserId UserId) : IEvent;
 
-public record SeatReservationMoved(Guid LanId, UserId UserId, Guid FromSeatId, Guid ToSeatId);
+public record SeatReservationMoved(Guid LanId, UserId UserId, Guid FromSeatId, Guid ToSeatId) : IEvent;
 
-public record SeatReservationMadeFor(Guid LanId, UserId UserId, UserId MadeBy);
+public record SeatReservationMadeFor(Guid LanId, UserId UserId, UserId MadeBy) : IEvent;
 
-public record SeatReservationRemovedFor(Guid LanId, UserId UserId, UserId RemovedBy);
+public record SeatReservationRemovedFor(Guid LanId, UserId UserId, UserId RemovedBy) : IEvent;
 
-public record SeatReservationMovedFor(Guid LanId, UserId UserId, Guid FromSeatId, Guid ToSeatId, UserId MovedBy);
+public record SeatReservationMovedFor(Guid LanId, UserId UserId, Guid FromSeatId, Guid ToSeatId, UserId MovedBy) : IEvent;
 
-public record SeatArchived(Guid LanId, UserId ArchivedBy);
+public record SeatArchived(Guid LanId, UserId ArchivedBy) : IEvent;
 
 /**
  * Exceptions

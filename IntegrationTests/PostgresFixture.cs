@@ -1,4 +1,5 @@
 using Marten;
+using Marten.Storage;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Seatpicker.Infrastructure.Adapters.Database;
@@ -9,28 +10,26 @@ using Xunit;
 using Xunit.Extensions.AssemblyFixture;
 
 [assembly: TestFramework(AssemblyFixtureFramework.TypeName, AssemblyFixtureFramework.AssemblyName)]
+
 namespace Seatpicker.IntegrationTests;
 
 public class PostgresFixture : IAsyncLifetime
 {
     private PostgreSqlContainer? container;
 
-    public PostgreSqlContainer Container => container ?? throw new NullReferenceException(); 
+    public PostgreSqlContainer Container => container ?? throw new NullReferenceException();
 
     public async Task InitializeAsync()
     {
-        var postgres = new PostgreSqlBuilder()
-            .Build();
+        var postgres = new PostgreSqlBuilder().Build();
 
         await postgres.StartAsync();
 
-        using var store = DocumentStore.For(options =>
-        {
-            options.ApplicationAssembly = typeof(Program).Assembly;
-            options.Connection(postgres.GetConnectionString);
-            
-            DatabaseExtensions.RegisterAllDocuments(options, new NullLogger<IDocument>());
-        });
+        using var store = DocumentStore.For(
+            options =>
+            {
+                DatabaseExtensions.ConfigureMarten(options, postgres.GetConnectionString());
+            });
 
         await store.Storage.ApplyAllConfiguredChangesToDatabaseAsync(AutoCreate.All);
 
