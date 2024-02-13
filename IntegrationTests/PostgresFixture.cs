@@ -1,4 +1,8 @@
 using Marten;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Seatpicker.Infrastructure.Adapters.Database;
+using Shared;
 using Testcontainers.PostgreSql;
 using Weasel.Core;
 using Xunit;
@@ -24,6 +28,8 @@ public class PostgresFixture : IAsyncLifetime
         {
             options.ApplicationAssembly = typeof(Program).Assembly;
             options.Connection(postgres.GetConnectionString);
+            
+            DatabaseExtensions.RegisterAllDocuments(options, new NullLogger<IDocument>());
         });
 
         await store.Storage.ApplyAllConfiguredChangesToDatabaseAsync(AutoCreate.All);

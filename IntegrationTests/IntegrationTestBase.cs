@@ -14,10 +14,11 @@ using Seatpicker.IntegrationTests.HttpInterceptor;
 using Shared;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Extensions.AssemblyFixture;
 
 namespace Seatpicker.IntegrationTests;
 
-public abstract class IntegrationTestBase : IClassFixture<PostgresFixture>, IClassFixture<TestWebApplicationFactory>
+public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>, IClassFixture<TestWebApplicationFactory>
 {
     private readonly WebApplicationFactory<Infrastructure.Program> factory;
     private readonly ITestOutputHelper testOutputHelper;
@@ -93,6 +94,7 @@ public abstract class IntegrationTestBase : IClassFixture<PostgresFixture>, ICla
     protected async Task SetupDocuments<TDocument>(string tenant, params TDocument[] documents)
         where TDocument : IDocument
     {
+        testOutputHelper.WriteLine("BEGIN SETUPDOCUMENTS: " + documents.Length);
         var repository = factory.Services.GetRequiredService<IDocumentRepository>();
         using var documentTransaction = repository.CreateTransaction(tenant);
         foreach (var document in documents)
@@ -100,7 +102,9 @@ public abstract class IntegrationTestBase : IClassFixture<PostgresFixture>, ICla
             documentTransaction.Store(document);
         }
 
+        testOutputHelper.WriteLine("COMMITING...");
         await documentTransaction.Commit();
+        testOutputHelper.WriteLine("END SETUPDOCUMENTS");
     }
 
     protected IEnumerable<TDocument> GetCommittedDocuments<TDocument>(string tenant)

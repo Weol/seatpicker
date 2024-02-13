@@ -1,5 +1,7 @@
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using JasperFx.Core;
+using Marten;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +11,10 @@ using Microsoft.Extensions.Http;
 using NSubstitute;
 using Seatpicker.Infrastructure.Adapters.Database;
 using Seatpicker.IntegrationTests.HttpInterceptor;
+using Testcontainers.PostgreSql;
+using Xunit;
+using Xunit.Abstractions;
+using Xunit.Extensions.AssemblyFixture;
 
 namespace Seatpicker.IntegrationTests;
 
@@ -21,7 +27,8 @@ public class TestWebApplicationFactory : WebApplicationFactory<Infrastructure.Pr
             .ConfigureAppConfiguration(b => b.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["Logging:LogLevel:Default"] = "Information",
-                ["Logging:LogLevel:Marten"] = "Warning",
+                ["Logging:LogLevel:Seatpicker"] = "Debug",
+                ["Logging:LogLevel:Marten"] = "Information",
                 
                 // Values from key vault
                 ["DiscordClientId"] = "9124761923842139",

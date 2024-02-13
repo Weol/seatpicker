@@ -4,6 +4,7 @@ using Weasel.Core;
 
 var container = new PostgreSqlBuilder().Build();
 
+const string environmentVariableName = "POSTGRES_CONNECTION_STRING";
 try
 {
     await container.StartAsync();
@@ -19,11 +20,12 @@ try
 
     var connectionString = container.GetConnectionString();
 
-    Environment.SetEnvironmentVariable("POSTGRES_CONNECTION_STRING", connectionString, EnvironmentVariableTarget.User);
-
+    Environment.SetEnvironmentVariable(environmentVariableName, connectionString, EnvironmentVariableTarget.User);
+    Console.WriteLine("Setting environment variable " +  environmentVariableName + ": " + connectionString);
+        
     await Task.Delay(TimeSpan.FromDays(1));
 }
 finally
 {
-    Environment.SetEnvironmentVariable("POSTGRES_CONNECTION_STRING", null, EnvironmentVariableTarget.User);
+    Environment.SetEnvironmentVariable(environmentVariableName, null, EnvironmentVariableTarget.User);
 }
