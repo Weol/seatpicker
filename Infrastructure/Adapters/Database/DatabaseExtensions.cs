@@ -1,10 +1,12 @@
 ﻿using System.Reflection;
+using JasperFx.CodeGeneration;
 using Marten;
 using Marten.Storage;
 using Microsoft.Extensions.Options;
 using Seatpicker.Application.Features;
 using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
 using Shared;
+using Weasel.Core;
 
 namespace Seatpicker.Infrastructure.Adapters.Database;
 
@@ -29,7 +31,6 @@ internal static class DatabaseExtensions
                 var options = new StoreOptions();
                 return ConfigureMarten(options, databaseOptions.ConnectionString);
             })
-            .OptimizeArtifactWorkflow()
             .InitializeWith();
 
         return services;
@@ -37,7 +38,6 @@ internal static class DatabaseExtensions
 
     internal static StoreOptions ConfigureMarten(StoreOptions options, string connectionString)
     {
-
         options.Connection(connectionString);
         options.Policies.AllDocumentsAreMultiTenanted();
         options.Events.TenancyStyle = TenancyStyle.Conjoined;
@@ -45,6 +45,10 @@ internal static class DatabaseExtensions
 
         RegisterAllDocuments(options);
         RegisterAllEvents(options);
+        
+        options.AutoCreateSchemaObjects = AutoCreate.None;
+        options.GeneratedCodeMode = TypeLoadMode.Dynamic;
+        options.SourceCodeWritingEnabled = false;
 
         return options;
     }

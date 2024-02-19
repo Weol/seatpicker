@@ -7,7 +7,7 @@ using Seatpicker.Infrastructure.Entrypoints.Utils;
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 
 [ApiController]
-[Route("lan/{lanId:Guid}/seat")]
+[Route("guild/{guildId}/lan/{lanId:Guid}/seat")]
 [Authorize(Roles = "Operator")]
 public class CreateEndpoint
 {

@@ -25,9 +25,9 @@ internal class LanManagementManagementService : ILanManagementService
     public async Task<Guid> Create(string title, string guildId, byte[] background, User initiator)
     {
         using var transaction = aggregateRepository.CreateTransaction();
+        
         var id = Guid.NewGuid();
-
-        var lan = new Lan(id, title, background, guildId, initiator);
+        var lan = new Lan(id, guildId, title, background, initiator);
 
         transaction.Create(lan);
         await transaction.Commit();
@@ -98,4 +98,11 @@ public class LanNotFoundException : ApplicationException
     public required Guid LanId { get; init; }
 
     protected override string ErrorMessage => $"Lan with id {LanId} was not found";
+}
+
+public class GuildNotFoundException : ApplicationException
+{
+    public required string GuildId { get; init; }
+
+    protected override string ErrorMessage => $"Guild with id {GuildId} was not found";
 }

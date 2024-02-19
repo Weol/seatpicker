@@ -4,6 +4,7 @@ using FluentAssertions;
 using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
 using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Entrypoints.Http.Guild;
+using Seatpicker.Infrastructure.Entrypoints.Http.Guild.Discord;
 using Seatpicker.IntegrationTests.HttpInterceptor.Discord;
 using Xunit;
 using Xunit.Abstractions;
@@ -35,7 +36,7 @@ public class Roles : IntegrationTestBase
 
         //Act
         var response = await client.GetAsync($"guild/{GuildId}/roles");
-        var body = await response.Content.ReadAsJsonAsync<IEnumerable<GetRolesEndpoint.Response>>();
+        var body = await response.Content.ReadAsJsonAsync<IEnumerable<GetRoleMapping.Response>>();
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using Seatpicker.Infrastructure.Adapters.Discord;
 using Seatpicker.Infrastructure.Authentication.Discord;
-using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 
 namespace Seatpicker.Infrastructure.Authentication;
 
@@ -16,7 +16,8 @@ public static class AuthenticationExtensions
         this IServiceCollection services)
     {
         services
-            .AddDiscordLogin(ConfigureDiscordAuthentication, ConfigureDiscordClient)
+            .AddSingleton<JwtTokenCreator>()
+            .AddDiscordAuthentication(ConfigureDiscordAuthentication)
             .AddUserManager()
             .AddAuthorization()
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -24,10 +25,10 @@ public static class AuthenticationExtensions
 
         services
             .AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
-            .PostConfigure<IOptions<DiscordAuthenticationOptions>>(ConfigureJwtBearerOptions);
+            .PostConfigure<IOptions<AuthenticationOptions>>(ConfigureJwtBearerOptions);
 
-        services.AddOptions<DiscordAuthenticationOptions>()
-            .PostConfigure<ILogger<DiscordAuthenticationOptions>>(ConfigureDevelopmentCertificate);
+        services.AddOptions<AuthenticationOptions>()
+            .PostConfigure<ILogger<AuthenticationOptions>>(ConfigureDevelopmentCertificate);
 
         return services;
     }
@@ -41,7 +42,7 @@ public static class AuthenticationExtensions
 
     private static void ConfigureJwtBearerOptions(
         JwtBearerOptions options,
-        IOptions<DiscordAuthenticationOptions> discordOptions)
+        IOptions<AuthenticationOptions> discordOptions)
     {
         var securityKey = new X509SecurityKey(discordOptions.Value.SigningCertificate);
 
@@ -53,16 +54,16 @@ public static class AuthenticationExtensions
     }
 
     private static void ConfigureDiscordAuthentication(
-        DiscordAuthenticationOptions options,
+        AuthenticationOptions options,
         IConfiguration configuration)
     {
-        configuration.GetSection("DiscordAuthentication").Bind(options);
+        configuration.GetSection("Authentication").Bind(options);
 
         // Configuration values from key vault
         options.Base64SigningCertificate = configuration["SigningCertificate"];
     }
 
-    private static void ConfigureDevelopmentCertificate(DiscordAuthenticationOptions options, ILogger<DiscordAuthenticationOptions> logger)
+    private static void ConfigureDevelopmentCertificate(AuthenticationOptions options, ILogger<AuthenticationOptions> logger)
     {
         if (options.Base64SigningCertificate is null)
         {
@@ -73,15 +74,5 @@ public static class AuthenticationExtensions
             var certificate = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(5));
             options.Base64SigningCertificate = Convert.ToBase64String(certificate.Export(X509ContentType.Pfx, ""));
         }
-    }
-
-    private static void ConfigureDiscordClient(DiscordClientOptions options, IConfiguration configuration)
-    {
-        configuration.GetSection("Discord").Bind(options);
-
-        // Configuration values from key vault
-        options.ClientId = configuration["DiscordClientId"] ?? throw new NullReferenceException();
-        options.ClientSecret = configuration["DiscordClientSecret"] ?? throw new NullReferenceException();
-        options.BotToken = configuration["DiscordBotToken"] ?? throw new NullReferenceException();
     }
 }

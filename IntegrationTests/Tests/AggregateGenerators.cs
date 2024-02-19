@@ -38,9 +38,9 @@ public static class LanGenerator
     {
         return new Lan(
             id ?? Guid.NewGuid(),
+            guildId,
             title ?? "Test title",
             background ?? CreateValidBackround(),
-            guildId,
             initiator ?? new User(new UserId("124"), "asd", null));
     }
 }

@@ -3,17 +3,18 @@ using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Seatpicker.Domain;
 
-namespace Seatpicker.Infrastructure.Authentication.Discord;
+namespace Seatpicker.Infrastructure.Authentication;
 
-public class DiscordJwtTokenCreator
+public class JwtTokenCreator
 {
-    private readonly ILogger<DiscordJwtTokenCreator> logger;
-    private readonly DiscordAuthenticationOptions options;
+    private readonly ILogger<JwtTokenCreator> logger;
+    private readonly AuthenticationOptions options;
 
-    public DiscordJwtTokenCreator(
-        ILogger<DiscordJwtTokenCreator> logger,
-        IOptions<DiscordAuthenticationOptions> options)
+    public JwtTokenCreator(
+        ILogger<JwtTokenCreator> logger,
+        IOptions<AuthenticationOptions> options)
     {
         this.logger = logger;
         this.options = options.Value;
@@ -36,10 +37,9 @@ public class DiscordJwtTokenCreator
             new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new (JwtRegisteredClaimNames.Name, discordToken.Nick),
             new (JwtRegisteredClaimNames.Sub, discordToken.Id),
-            new ("refresh_token", discordToken.RefreshToken),
+            new ("guild_id", discordToken.GuildId),
         };
 
-        if (discordToken.GuildId is not null) defaultClaims.Add(new Claim("tenant_id", discordToken.GuildId));
         if (discordToken.Avatar is not null) defaultClaims.Add(new Claim("avatar", discordToken.Avatar));
 
         var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role.ToString()));

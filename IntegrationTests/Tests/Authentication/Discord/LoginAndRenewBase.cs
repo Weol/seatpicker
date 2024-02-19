@@ -3,13 +3,12 @@ using System.Net.Http.Headers;
 using FluentAssertions;
 using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
 using Seatpicker.Infrastructure.Authentication;
-using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 using Seatpicker.Infrastructure.Entrypoints.Http.Authentication.Discord;
 using Seatpicker.IntegrationTests.HttpInterceptor.Discord;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Seatpicker.IntegrationTests.Tests.Authentication;
+namespace Seatpicker.IntegrationTests.Tests.Authentication.Discord;
 
 // ReSharper disable once InconsistentNaming
 public abstract class LoginAndRenewBase : IntegrationTestBase
@@ -23,31 +22,31 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
     {
     }
 
-    protected DiscordUser DiscordUser { get; } = new ("123", "Tore Tang", "321");
-
     protected abstract Task<HttpResponseMessage> MakeRequest(HttpClient client);
 
     private static async Task<TestEndpoint.Response> TestAuthentication(HttpClient client, string token)
     {
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         var response = await client.GetAsync("authentication/discord/test");
-        var Response = await response.Content.ReadAsJsonAsync<TestEndpoint.Response>();
+        var body = await response.Content.ReadAsJsonAsync<TestEndpoint.Response>();
 
-        if (Response is null) throw new NullReferenceException();
+        if (body is null) throw new NullReferenceException();
 
-        return Response;
+        return body;
     }
 
     [Fact]
     public async Task succeeds_and_jwt_is_returned()
     {
         // Arrange
+        var guild = SetupGuild();
         var client = GetAnonymousClient(GuildId);
+        var discordUser = Generator.GenerateDiscordUser();
 
         AddHttpInterceptor(new AccessTokenInterceptor());
         AddHttpInterceptor(new RefreshTokenInterceptor());
-        AddHttpInterceptor(new LookupInterceptor(DiscordUser));
-        AddHttpInterceptor(new GuildMemberInterceptor(DiscordUser));
+        AddHttpInterceptor(new LookupInterceptor(discordUser));
+        AddHttpInterceptor(new GuildMemberInterceptor(discordUser));
 
         //Act
         var response = await MakeRequest(client);
@@ -61,8 +60,8 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
         testResponse.Should().NotBeNull();
 
         Assert.Multiple(
-            () => testResponse.Id.Should().Be(DiscordUser.Id),
-            () => testResponse.Name.Should().Be(DiscordUser.Username),
+            () => testResponse.Id.Should().Be(discordUser.Id),
+            () => testResponse.Name.Should().Be(discordUser.Username),
             () => testResponse.Roles.Should().Contain(Role.User.ToString()));
     }
 
@@ -76,6 +75,7 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
     {
         // Arrange
         var client = GetAnonymousClient(GuildId);
+        var discordUser = Generator.GenerateDiscordUser();
         var guildRoleId = "999999";
 
         var roleMapping = new GuildRoleMapping(GuildId,
@@ -85,8 +85,8 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
 
         AddHttpInterceptor(new AccessTokenInterceptor());
         AddHttpInterceptor(new RefreshTokenInterceptor());
-        AddHttpInterceptor(new LookupInterceptor(DiscordUser));
-        AddHttpInterceptor(new GuildMemberInterceptor(DiscordUser, guildRoleId));
+        AddHttpInterceptor(new LookupInterceptor(discordUser, accessTokenInterceptor));
+        AddHttpInterceptor(new GuildMemberInterceptor(discordUser, guildRoleId));
 
         //Act
         var response = await MakeRequest(client);
@@ -101,8 +101,8 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
 
         var expectedRoles = roles.Append(Role.User).Distinct();
         Assert.Multiple(
-            () => testResponse.Id.Should().Be(DiscordUser.Id),
-            () => testResponse.Name.Should().Be(DiscordUser.Username),
+            () => testResponse.Id.Should().Be(discordUser.Id),
+            () => testResponse.Name.Should().Be(discordUser.Username),
             () => testResponse.Roles.Should().BeEquivalentTo(expectedRoles.Select(role => role.ToString())));
     }
 
@@ -115,7 +115,7 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
     {
         // Arrange
         var client = GetAnonymousClient(GuildId);
-        var discordUser = new DiscordUser("123", "Tore Tang", "98765");
+        var discordUser = Generator.GenerateDiscordUser();
         var guildRoleId = "999999";
 
         AddHttpInterceptor(new AccessTokenInterceptor());
@@ -143,7 +143,7 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
     {
         // Arrange
         var client = GetAnonymousClient(GuildId);
-        var discordUser = new DiscordUser("123", "Tore Tang", "4123");
+        var discordUser = Generator.GenerateDiscordUser();
 
         AddHttpInterceptor(new AccessTokenInterceptor());
         AddHttpInterceptor(new RefreshTokenInterceptor());
@@ -170,9 +170,9 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
     {
         // Arrange
         var client = GetAnonymousClient(GuildId);
-        var discordUser = new DiscordUser("123", "Tore Tang", null);
+        var discordUser = Generator.GenerateDiscordUser();
 
-        AddHttpInterceptor(new AccessTokenInterceptor());
+        AddHttpInterceptor(new RefreshTokenInterceptor());
         AddHttpInterceptor(new RefreshTokenInterceptor());
         AddHttpInterceptor(new LookupInterceptor(discordUser));
         AddHttpInterceptor(new GuildMemberInterceptor(discordUser));

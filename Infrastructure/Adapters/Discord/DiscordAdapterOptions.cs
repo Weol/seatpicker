@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
+namespace Seatpicker.Infrastructure.Adapters.Discord;
 
-public class DiscordClientOptions
+public class DiscordAdapterOptions
 {
     [Required]
     public string ClientId { get; set; } = null!;

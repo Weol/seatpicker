@@ -6,11 +6,11 @@ using Seatpicker.Infrastructure.Entrypoints.Utils;
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 
 [ApiController]
-[Route("lan/{lanId:guid}/seat")]
+[Route("guild/{guildId}/lan/{lanId:Guid}/seat")]
 [Authorize(Roles = "Operator")]
 public class DeleteEndpoint
 {
-    [HttpDelete("{seatId:guid}")]
+    [HttpDelete("{seatId:Guid}")]
     public async Task<IActionResult> Delete(
         [FromRoute] Guid lanId,
         [FromRoute] Guid seatId,

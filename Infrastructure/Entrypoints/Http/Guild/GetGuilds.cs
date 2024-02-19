@@ -1,33 +1,29 @@
 using Microsoft.AspNetCore.Mvc;
-using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
+using Seatpicker.Infrastructure.Adapters.Discord;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 
-[ApiController]
-[Route("guild")]
-public class GetGuilds
+public static class GetGuilds
 {
-    [HttpGet]
-    public async Task<ActionResult<Response[]>> GetAll(
-        [FromServices] DiscordClient discordClient)
+    public static async Task<IResult> GetAll(
+        [FromServices] DiscordAdapter discordAdapter)
     {
-        var guilds = (await discordClient.GetGuilds())
+        var guilds = (await discordAdapter.GetGuilds())
             .Select(guild => new Response(guild.Id, guild.Name, guild.Icon));
 
-        return new OkObjectResult(guilds);
+        return TypedResults.Ok(guilds);
     }
 
-    [HttpGet("{guildId}")]
-    public async Task<ActionResult<Response[]>> Get(
-        [FromServices] DiscordClient discordClient,
+    public static async Task<IResult> Get(
+        [FromServices] DiscordAdapter discordAdapter,
         [FromRoute] string guildId)
     {
-        var guild = (await discordClient.GetGuilds())
+        var guild = (await discordAdapter.GetGuilds())
             .FirstOrDefault(guild => guild.Id == guildId);
 
-        if (guild is null) return new NotFoundResult();
+        if (guild is null) return TypedResults.NotFound();
 
-        return new OkObjectResult(new Response(guild.Id, guild.Name, guild.Icon));
+        return TypedResults.Ok(new Response(guild.Id, guild.Name, guild.Icon));
     }
 
     public record Response(string Id, string Name, string? Icon);

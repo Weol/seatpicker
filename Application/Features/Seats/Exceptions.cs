@@ -11,7 +11,7 @@ public class SeatNotFoundException : ApplicationException
 
 public class UserNotFoundException : ApplicationException
 {
-    public required UserId UserId { get; init; }
+    public required string UserId { get; init; }
 
     protected override string ErrorMessage => $"User with id {UserId} not found";
 }

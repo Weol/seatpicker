@@ -1,26 +1,21 @@
 using System.Net;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
-using Seatpicker.Infrastructure.Authentication;
-using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
+using Seatpicker.Infrastructure.Adapters.Discord;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Http.Guild;
+namespace Seatpicker.Infrastructure.Entrypoints.Http.Guild.Discord;
 
-[ApiController]
-[Route("guild/{guildId}")]
-[Authorize(Roles = "Admin")]
-public class GetRolesEndpoint
+public static class GetRoleMapping
 {
-    [HttpGet("roles")]
-    public async Task<ActionResult<Response[]>> GetRoles(
+    public static async Task<IResult> Get(
         [FromRoute] string guildId,
         [FromServices] GuildRoleMappingRepository guildRoleRepository,
-        [FromServices] DiscordClient discordClient)
+        [FromServices] DiscordAdapter discordAdapter)
     {
         try
         {
-            var guildRolesTask = discordClient.GetGuildRoles(guildId);
+            var guildRolesTask = discordAdapter.GetGuildRoles(guildId);
             var mappingsTask = guildRoleRepository.GetRoleMapping(guildId).ToArrayAsync();
 
             var guildRoles = await guildRolesTask;
@@ -35,11 +30,11 @@ public class GetRolesEndpoint
                         .Where(mapping => mapping.RoleId == guildRole.Id)
                         .Select(mapping => mapping.Role)));
 
-            return new OkObjectResult(responses);
+            return TypedResults.Ok(responses);
         }
         catch (DiscordException e) when (e.StatusCode == HttpStatusCode.NotFound)
         {
-            return new NotFoundResult();
+            return TypedResults.NotFound();
         }
     }
 

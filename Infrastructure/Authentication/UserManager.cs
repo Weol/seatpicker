@@ -15,30 +15,29 @@ public class UserManager : IUserProvider
         this.documentRepository = documentRepository;
     }
 
-    public async Task<User?> GetById(UserId userId, bool doGuildQuery = true)
+    public async Task<User?> GetById(string userId)
     {
         using var reader = documentRepository.CreateReader();
         var userDocument = await reader.Get<UserDocument>(userId);
 
-        return userDocument is null ? null : new User(new UserId(userDocument.Id), userDocument.Name, userDocument.Avatar);
+        return userDocument is null ? null : new User(userDocument.Id, userDocument.Name, userDocument.Avatar, userDocument.Roles);
     }
 
-    public async Task<IEnumerable<User>> GetAllInGuild(string guildId)
+    public async Task<IEnumerable<User>> GetAll()
     {
         using var reader = documentRepository.CreateReader();
         return reader.Query<UserDocument>()
-            .Where(user => user.GuildId == guildId)
-            .Select(document => new User(new UserId(document.Id), document.Name, document.Avatar));
+            .Select(document => new User(document.Id, document.Name, document.Avatar, document.Roles));
     }
 
-    public async Task Store(User user, string guildId)
+    public async Task Store(User user)
     {
         using var transaction = documentRepository.CreateTransaction();
-        transaction.Store(new UserDocument(user.Id, guildId, user.Name, user.Avatar));
+        transaction.Store(new UserDocument(user.Id, user.Name, user.Avatar, user.Roles));
         await transaction.Commit();
     }
 
-    public record UserDocument(string Id, string GuildId, string Name, string? Avatar) : IDocument;
+    public record UserDocument(string Id, string Name, string? Avatar, IEnumerable<Role> Roles) : IDocument;
 }
 
 public static class UserManagerExtensions

@@ -65,7 +65,7 @@ public class SeatProjection : SingleStreamProjection<ProjectedSeat>
 
 public class ProjectedSeat : IDocument
 {
-    public ProjectedSeat(Guid id, Guid lanId, string title, Bounds bounds, UserId? reservedBy)
+    public ProjectedSeat(Guid id, Guid lanId, string title, Bounds bounds, string? reservedBy)
     {
         Id = id;
         LanId = lanId;
@@ -78,5 +78,5 @@ public class ProjectedSeat : IDocument
     public Guid LanId { get; set; }
     public string Title { get; set; }
     public Bounds Bounds { get; set; }
-    public UserId? ReservedBy { get; set; }
+    public string? ReservedBy { get; set; }
 }

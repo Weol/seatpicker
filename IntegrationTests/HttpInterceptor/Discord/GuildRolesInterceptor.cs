@@ -6,12 +6,14 @@ namespace Seatpicker.IntegrationTests.HttpInterceptor.Discord;
 
 public class GuildRolesInterceptor : IInterceptor
 {
+    private readonly string guildId;
     private readonly IEnumerable<string> roles;
 
     public string EveryoneId { get; }
 
-    public GuildRolesInterceptor(params string[] roles)
+    public GuildRolesInterceptor(string guildId, params string[] roles)
     {
+        this.guildId = guildId;
         this.roles = roles;
 
         do
@@ -22,7 +24,7 @@ public class GuildRolesInterceptor : IInterceptor
 
     public bool Match(string uri, HttpHeaders headers, HttpRequestMessage request)
     {
-        return uri.EndsWith("roles");
+        return uri.EndsWith($"{guildId}/roles");
     }
 
     public (object Response, HttpStatusCode Code) Response(HttpRequestMessage requestMessage)

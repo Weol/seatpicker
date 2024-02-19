@@ -1,4 +1,5 @@
 using Seatpicker.Application.Features;
+using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Authentication;
 using Shared;
 
@@ -13,7 +14,7 @@ public class GuildRoleMappingRepository
         this.documentRepository = documentRepository;
     }
 
-    public async Task SaveRoleMapping(string guildId, IEnumerable<(string RoleId, Role Role)> mappings)
+    public async Task SaveRoleMapping(string guildId, IEnumerable<(string RoleId, Domain.Role Role)> mappings)
     {
         using var transaction = documentRepository.CreateTransaction();
 

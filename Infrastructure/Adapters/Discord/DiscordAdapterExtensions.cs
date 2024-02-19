@@ -1,22 +1,22 @@
 ﻿using Microsoft.Extensions.Options;
 
-namespace Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
+namespace Seatpicker.Infrastructure.Adapters.Discord;
 
-internal static class DiscordHttpClientExtensions
+internal static class DiscordAdapterExtensions
 {
-    internal static IServiceCollection AddDiscordClient(this IServiceCollection services,
-        Action<DiscordClientOptions, IConfiguration> configureAction)
+    internal static IServiceCollection AddDiscordAdapter(this IServiceCollection services,
+        Action<DiscordAdapterOptions, IConfiguration> configureAction)
     {
-        services.AddOptions<DiscordClientOptions>()
+        services.AddOptions<DiscordAdapterOptions>()
             .Configure(configureAction)
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
         services
             .AddMemoryCache()
-            .AddHttpClient<DiscordClient>((provider, client) =>
+            .AddHttpClient<DiscordAdapter>((provider, client) =>
         {
-            var options = provider.GetRequiredService<IOptions<DiscordClientOptions>>();
+            var options = provider.GetRequiredService<IOptions<DiscordAdapterOptions>>();
             var baseUrl = options.Value.Uri;
             var version = options.Value.Version;
 

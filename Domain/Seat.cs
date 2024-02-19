@@ -17,7 +17,7 @@ public class Seat : AggregateBase
 
     public Bounds Bounds { get; private set; }
 
-    public UserId? ReservedBy { get; private set; }
+    public string? ReservedBy { get; private set; }
 
     public Seat(Guid id, Lan lan, string title, Bounds bounds, User initiator)
     {
@@ -225,25 +225,25 @@ public class Bounds
 /**
  * Events
  */
-public record SeatCreated(Guid Id, Guid LanId, string Title, Bounds Bounds, UserId CreatedBy) : IEvent;
+public record SeatCreated(Guid Id, Guid LanId, string Title, Bounds Bounds, string CreatedBy) : IEvent;
 
-public record SeatTitleChanged(Guid LanId, string Title, UserId ChangedBy) : IEvent;
+public record SeatTitleChanged(Guid LanId, string Title, string ChangedBy) : IEvent;
 
-public record SeatBoundsChanged(Guid LanId, Bounds Bounds, UserId ChangedBy) : IEvent;
+public record SeatBoundsChanged(Guid LanId, Bounds Bounds, string ChangedBy) : IEvent;
 
-public record SeatReservationMade(Guid LanId, UserId UserId) : IEvent;
+public record SeatReservationMade(Guid LanId, string UserId) : IEvent;
 
-public record SeatReservationRemoved(Guid LanId, UserId UserId) : IEvent;
+public record SeatReservationRemoved(Guid LanId, string UserId) : IEvent;
 
-public record SeatReservationMoved(Guid LanId, UserId UserId, Guid FromSeatId, Guid ToSeatId) : IEvent;
+public record SeatReservationMoved(Guid LanId, string UserId, Guid FromSeatId, Guid ToSeatId) : IEvent;
 
-public record SeatReservationMadeFor(Guid LanId, UserId UserId, UserId MadeBy) : IEvent;
+public record SeatReservationMadeFor(Guid LanId, string UserId, string MadeBy) : IEvent;
 
-public record SeatReservationRemovedFor(Guid LanId, UserId UserId, UserId RemovedBy) : IEvent;
+public record SeatReservationRemovedFor(Guid LanId, string UserId, string RemovedBy) : IEvent;
 
-public record SeatReservationMovedFor(Guid LanId, UserId UserId, Guid FromSeatId, Guid ToSeatId, UserId MovedBy) : IEvent;
+public record SeatReservationMovedFor(Guid LanId, string UserId, Guid FromSeatId, Guid ToSeatId, string MovedBy) : IEvent;
 
-public record SeatArchived(Guid LanId, UserId ArchivedBy) : IEvent;
+public record SeatArchived(Guid LanId, string ArchivedBy) : IEvent;
 
 /**
  * Exceptions
@@ -251,11 +251,11 @@ public record SeatArchived(Guid LanId, UserId ArchivedBy) : IEvent;
 public class SeatReservationConflictException : DomainException
 {
     public required Seat Seat { get; init; }
-    public required UserId ReservedUser { get; init; }
-    public required UserId AttemptedUser { get; init; }
+    public required string ReservedUser { get; init; }
+    public required string AttemptedUser { get; init; }
 
     [SetsRequiredMembers]
-    public SeatReservationConflictException(Seat seat, UserId reservedUser, UserId attemptedUser)
+    public SeatReservationConflictException(Seat seat, string reservedUser, string attemptedUser)
     {
         ReservedUser = reservedUser;
         AttemptedUser = attemptedUser;

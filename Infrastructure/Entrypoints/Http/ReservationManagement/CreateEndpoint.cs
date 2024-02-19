@@ -8,7 +8,7 @@ using Seatpicker.Infrastructure.Entrypoints.Utils;
 namespace Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement;
 
 [ApiController]
-[Route("lan/{lanId:Guid}/seat/{seatId:guid}/reservationmanagement")]
+[Route("guild/{guildId}/lan/{lanId:Guid}/seat/{seatId:Guid}/reservationmanagement")]
 [Authorize(Roles = "Operator")]
 public class CreateEndpoint
 {

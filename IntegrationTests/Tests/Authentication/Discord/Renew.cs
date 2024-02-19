@@ -2,7 +2,7 @@ using System.Net.Http.Json;
 using Seatpicker.Infrastructure.Entrypoints.Http.Authentication.Discord;
 using Xunit.Abstractions;
 
-namespace Seatpicker.IntegrationTests.Tests.Authentication;
+namespace Seatpicker.IntegrationTests.Tests.Authentication.Discord;
 
 // ReSharper disable once InconsistentNaming
 public class Renew : LoginAndRenewBase 

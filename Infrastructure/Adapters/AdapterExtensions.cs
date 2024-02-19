@@ -1,6 +1,8 @@
 ﻿using Seatpicker.Infrastructure.Adapters.Database;
+using Seatpicker.Infrastructure.Adapters.Discord;
 using Seatpicker.Infrastructure.Adapters.SignalR;
 using Seatpicker.Infrastructure.Authentication;
+using Seatpicker.Infrastructure.Authentication.Discord;
 
 namespace Seatpicker.Infrastructure.Adapters;
 
@@ -11,6 +13,7 @@ public static class AdapterExtensions
         return services
             .AddDatabase(ConfigureDatabase)
             .AddSignalRAdapter()
+            .AddDiscordAdapter(ConfigureDiscordAdapter)
             .AddUserManager();
     }
 
@@ -49,5 +52,15 @@ public static class AdapterExtensions
 
         options.ConnectionString =
             $"Server={host};Database={name};Port={port};User Id={user};Password={password};Ssl Mode=Require;Trust Server Certificate=true;";
+    }
+    
+    private static void ConfigureDiscordAdapter(DiscordAdapterOptions options, IConfiguration configuration)
+    {
+        configuration.GetSection("Discord").Bind(options);
+
+        // Configuration values from key vault
+        options.ClientId = configuration["DiscordClientId"] ?? throw new NullReferenceException();
+        options.ClientSecret = configuration["DiscordClientSecret"] ?? throw new NullReferenceException();
+        options.BotToken = configuration["DiscordBotToken"] ?? throw new NullReferenceException();
     }
 }

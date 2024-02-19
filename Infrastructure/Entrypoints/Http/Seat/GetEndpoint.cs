@@ -5,7 +5,7 @@ using Seatpicker.Application.Features.Seats;
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 
 [ApiController]
-[Route("lan/{lanId:guid}/seat")]
+[Route("guild/{guildId}/lan/{lanId:Guid}/seat")]
 public class GetEndpoint
 {
     [HttpGet]
@@ -40,7 +40,7 @@ public class GetEndpoint
         return new OkObjectResult(seats);
     }
 
-    [HttpGet("{seatId:guid}")]
+    [HttpGet("{seatId:Guid}")]
     public async Task<ActionResult<Response>> Get(
         [FromRoute] Guid lanId,
         [FromRoute] Guid seatId,

@@ -18,7 +18,7 @@ using Xunit.Extensions.AssemblyFixture;
 
 namespace Seatpicker.IntegrationTests;
 
-public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>, IClassFixture<TestWebApplicationFactory>
+public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>, IAssemblyFixture<TestWebApplicationFactory>
 {
     private readonly WebApplicationFactory<Infrastructure.Program> factory;
     private readonly ITestOutputHelper testOutputHelper;
@@ -29,60 +29,45 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>, I
         PostgresFixture databaseFixture,
         ITestOutputHelper testOutputHelper)
     {
-        this.factory = factory
-            .WithWebHostBuilder(
-                builder =>
-                {
-                    builder.ConfigureServices(
-                        services =>
-                        {
-                            services.PostConfigure<DatabaseOptions>(options =>
-                            {
-                                options.ConnectionString = databaseFixture.Container.GetConnectionString();
-                            });
-
-                            services.AddLogging(
-                                loggingBuilder =>
-                                {
-                                    loggingBuilder.ClearProviders();
-                                    loggingBuilder.AddDebug();
-                                    loggingBuilder.AddProvider(new XUnitLoggerProvider(testOutputHelper));
-                                });
-                        });
-                });
+        this.factory = factory;
 
         this.testOutputHelper = testOutputHelper;
     }
 
-    protected HttpClient GetClient(string tenant, TestIdentity identity)
+    protected HttpClient GetClient(string guildId, TestIdentity identity)
     {
-        var client = GetAnonymousClient(tenant);
+        var client = GetAnonymousClient(guildId);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", identity.Token);
 
         return client;
     }
 
-    protected HttpClient GetClient(string tenant, params Role[] roles)
+    protected HttpClient GetClient(string guildId, params Role[] roles)
     {
-        var identity = CreateIdentity(tenant, roles)
+        var identity = CreateIdentity(guildId, roles)
             .GetAwaiter()
             .GetResult();
 
-        return GetClient(tenant, identity);
+        return GetClient(guildId, identity);
     }
 
-    protected HttpClient GetAnonymousClient(string tenant)
+    protected HttpClient GetAnonymousClient(string guildId)
     {
         var client = factory.CreateDefaultClient(factory.ClientOptions.BaseAddress,
             new HttpResponseLoggerHandler(testOutputHelper));
-        client.DefaultRequestHeaders.Add(TenantAuthorizationMiddleware.TenantHeaderName, tenant);
+        client.DefaultRequestHeaders.Add(TenantAuthorizationMiddleware.TenantHeaderName, guildId);
         return client;
     }
 
-    protected async Task SetupAggregates(string tenant, params AggregateBase[] aggregates)
+    protected async Task SetupGuild(string? guildId = null)
+    {
+        
+    }
+    
+    protected async Task SetupAggregates(string guildId, params AggregateBase[] aggregates)
     {
         var repository = factory.Services.GetRequiredService<IAggregateRepository>();
-        using var aggregateTransaction = repository.CreateTransaction(tenant);
+        using var aggregateTransaction = repository.CreateTransaction(guildId);
         foreach (var aggregate in aggregates)
         {
             aggregateTransaction.Create(aggregate);
@@ -91,20 +76,23 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>, I
         await aggregateTransaction.Commit();
     }
 
-    protected async Task SetupDocuments<TDocument>(string tenant, params TDocument[] documents)
+    protected Task SetupDocuments<TDocument>(string guildId, params TDocument[] documents)
         where TDocument : IDocument
     {
-        testOutputHelper.WriteLine("BEGIN SETUPDOCUMENTS: " + documents.Length);
         var repository = factory.Services.GetRequiredService<IDocumentRepository>();
-        using var documentTransaction = repository.CreateTransaction(tenant);
+        using var documentTransaction = repository.CreateTransaction(guildId);
         foreach (var document in documents)
         {
             documentTransaction.Store(document);
         }
 
-        testOutputHelper.WriteLine("COMMITING...");
-        await documentTransaction.Commit();
-        testOutputHelper.WriteLine("END SETUPDOCUMENTS");
+        // We cant allow more than one test to run commit at a time otherwise there is a deadlock on macOS
+        lock (factory)
+        {
+            documentTransaction.Commit().GetAwaiter().GetResult();
+        }
+
+        return Task.CompletedTask;
     }
 
     protected IEnumerable<TDocument> GetCommittedDocuments<TDocument>(string tenant)
@@ -151,7 +139,7 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>, I
         return identity;
     }
 
-    protected void AddHttpInterceptor<TInterceptor>(TInterceptor interceptor)
+    protected internal void AddHttpInterceptor<TInterceptor>(TInterceptor interceptor)
         where TInterceptor : IInterceptor
     {
         var interceptingHttpHandler = factory.Services.GetRequiredService<InterceptingHttpMessageHandler>();

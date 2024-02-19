@@ -6,7 +6,7 @@ using Seatpicker.Infrastructure.Entrypoints.Utils;
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Reservation;
 
 [ApiController]
-[Route("lan/{lanId:Guid}/seat/{seatId:guid}/reservation")]
+[Route("guild/{guildId}/lan/{lanId:Guid}/seat/{seatId:Guid}/reservation")]
 [Authorize]
 public class DeleteEndpoint
 {

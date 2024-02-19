@@ -2,27 +2,27 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
+// ReSharper disable NotAccessedPositionalProperty.Global
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
-namespace Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
+namespace Seatpicker.Infrastructure.Adapters.Discord;
 
-public class DiscordClient
+public class DiscordAdapter
 {
     private readonly HttpClient httpClient;
     private readonly JsonSerializerOptions jsonSerializerOptions;
-    private readonly DiscordClientOptions options;
-    private readonly ILogger<DiscordClient> logger;
+    private readonly DiscordAdapterOptions options;
+    private readonly ILogger<DiscordAdapter> logger;
     private readonly IMemoryCache memoryCache;
 
-    public DiscordClient(
+    public DiscordAdapter(
         HttpClient httpClient,
-        IOptions<DiscordClientOptions> options,
+        IOptions<DiscordAdapterOptions> options,
         JsonSerializerOptions jsonSerializerOptions,
-        ILogger<DiscordClient> logger,
+        ILogger<DiscordAdapter> logger,
         IMemoryCache memoryCache)
     {
         this.httpClient = httpClient;
@@ -34,7 +34,9 @@ public class DiscordClient
 
     public async Task<DiscordAccessToken> GetAccessToken(string discordToken, string redirectUrl)
     {
-        logger.LogInformation("Getting access token using code {Code} and redirect uri {RedirectUri}", discordToken, redirectUrl);
+        logger.LogInformation("Getting access token using code {Code} and redirect uri {RedirectUri}",
+            discordToken,
+            redirectUrl);
         var response = await httpClient.PostAsync(
             "oauth2/token",
             new FormUrlEncodedContent(
@@ -74,7 +76,7 @@ public class DiscordClient
         var response = await httpClient.SendAsync(requestMessage);
         return await DeserializeContent<DiscordUser>(response);
     }
-    
+
     public async Task AddGuildMember(string guildId, string memberId, string accessToken)
     {
         using var requestMessage = new HttpRequestMessage(HttpMethod.Put, $"guilds/{guildId}/members/{memberId}");
@@ -90,7 +92,8 @@ public class DiscordClient
         if (response.StatusCode == HttpStatusCode.NoContent)
         {
             logger.LogInformation("User {User} is already a member of guild {Guild}", memberId, guildId);
-        } else if (response.IsSuccessStatusCode)
+        }
+        else if (response.IsSuccessStatusCode)
         {
             logger.LogInformation("Added user {User} as a member of guild {Guild}", memberId, guildId);
         }
@@ -98,12 +101,12 @@ public class DiscordClient
         {
             var body = await response.Content.ReadAsStringAsync();
             logger.LogError(
-                "Non-successful response code from Discord {@ResponseInfo}", 
+                "Non-successful response code from Discord {@ResponseInfo}",
                 new { response.StatusCode, Body = body });
         }
     }
 
-    public async Task<GuildMember?> GetGuildMember(string guildId, string memberId)
+    public async Task<DiscordGuildMember?> GetGuildMember(string guildId, string memberId)
     {
         using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"guilds/{guildId}/members/{memberId}");
 
@@ -112,7 +115,7 @@ public class DiscordClient
         var response = await httpClient.SendAsync(requestMessage);
         try
         {
-            return await DeserializeContent<GuildMember>(response);
+            return await DeserializeContent<DiscordGuildMember>(response);
         }
         catch (DiscordException e) when (e.StatusCode == HttpStatusCode.NotFound)
         {
@@ -121,30 +124,32 @@ public class DiscordClient
         }
     }
 
-    public async Task<IEnumerable<GuildRole>> GetGuildRoles(string guildId)
+    public async Task<IEnumerable<DiscordGuildRole>> GetGuildRoles(string guildId)
     {
-        return await MakeCachedRequest($"guild_roles_{guildId}", async () =>
-        {
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"guilds/{guildId}/roles");
+        return await MakeCachedRequest($"guild_roles_{guildId}",
+            async () =>
+            {
+                using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"guilds/{guildId}/roles");
 
-            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
 
-            var response = await httpClient.SendAsync(requestMessage);
-            return await DeserializeContent<GuildRole[]>(response);
-        });
+                var response = await httpClient.SendAsync(requestMessage);
+                return await DeserializeContent<DiscordGuildRole[]>(response);
+            });
     }
 
-    public async Task<IEnumerable<Guild>> GetGuilds()
+    public async Task<IEnumerable<DiscordGuild>> GetGuilds()
     {
-        return await MakeCachedRequest("get_bot_guilds", async () =>
-        {
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "users/@me/guilds");
+        return await MakeCachedRequest("get_bot_guilds",
+            async () =>
+            {
+                using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "users/@me/guilds");
 
-            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
 
-            var response = await httpClient.SendAsync(requestMessage);
-            return await DeserializeContent<IEnumerable<Guild>>(response);
-        });
+                var response = await httpClient.SendAsync(requestMessage);
+                return await DeserializeContent<IEnumerable<DiscordGuild>>(response);
+            });
     }
 
     private async Task<TResponse> MakeCachedRequest<TResponse>(string cacheKey,
@@ -178,7 +183,7 @@ public class DiscordClient
                 body);
 
             return JsonSerializer.Deserialize<TModel>(body, jsonSerializerOptions) ??
-                throw new NullReferenceException($"Could not deserialize Discord response to {nameof(TModel)}");
+                throw new JsonException($"Could not deserialize Discord response to {nameof(TModel)}");
         }
 
         logger.LogError(
@@ -216,61 +221,10 @@ public class DiscordClient
     }
 }
 
-public record DiscordRateLimit(string? Limit, string? Remaining, string? Reset, string? ResetAfter, string? Bucket,
+public record DiscordRateLimit(string? Limit,
+    string? Remaining,
+    string? Reset,
+    string? ResetAfter,
+    string? Bucket,
     string? Global,
     string? Scope);
-
-public class DiscordAccessToken
-{
-    [JsonPropertyName("access_token")] public string AccessToken { get; set; } = null!;
-
-    [JsonPropertyName("expires_in")] public int ExpiresIn { get; set; }
-
-    [JsonPropertyName("refresh_token")] public string RefreshToken { get; set; } = null!;
-
-    [JsonPropertyName("scopes")] public IEnumerable<string> Scopes { get; set; } = null!;
-
-    [JsonPropertyName("token_type")] public string TokenType { get; set; } = null!;
-}
-
-public class GuildMember
-{
-    [JsonPropertyName("user")] public DiscordUser DiscordUser { get; set; } = null!;
-
-    [JsonPropertyName("nick")] public string? Nick { get; set; } = null!;
-
-    [JsonPropertyName("avatar")] public string? Avatar { get; set; } = null!;
-
-    [JsonPropertyName("roles")] public IEnumerable<string> Roles { get; set; } = null!;
-}
-
-public class GuildRole
-{
-    [JsonPropertyName("id")] public string Id { get; set; } = null!;
-
-    [JsonPropertyName("name")] public string Name { get; set; } = null!;
-
-    [JsonPropertyName("color")] public int Color { get; set; }
-
-    [JsonPropertyName("icon")] public string? Icon { get; set; } = null!;
-}
-
-public class Guild
-{
-    [JsonPropertyName("id")] public string Id { get; set; } = null!;
-
-    [JsonPropertyName("name")] public string Name { get; set; } = null!;
-
-    [JsonPropertyName("icon")] public string? Icon { get; set; } = null!;
-}
-
-internal class DiscordException : Exception
-{
-    public required HttpStatusCode StatusCode { get; init; }
-
-    public required string Body { get; init; }
-
-    public DiscordException(string message) : base(message)
-    {
-    }
-}

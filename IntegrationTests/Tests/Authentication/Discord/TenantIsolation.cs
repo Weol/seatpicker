@@ -4,7 +4,7 @@ using Seatpicker.Infrastructure.Entrypoints.Utils;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Seatpicker.IntegrationTests.Tests.Authentication;
+namespace Seatpicker.IntegrationTests.Tests.Authentication.Discord;
 
 public class TenantIsolation : IntegrationTestBase
 {

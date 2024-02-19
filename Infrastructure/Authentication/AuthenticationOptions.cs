@@ -2,9 +2,9 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 
-namespace Seatpicker.Infrastructure.Authentication.Discord;
+namespace Seatpicker.Infrastructure.Authentication;
 
-public class DiscordAuthenticationOptions
+public class AuthenticationOptions
 {
     [Required] public string? Base64SigningCertificate { get; set; } = null!;
 

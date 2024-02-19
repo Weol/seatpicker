@@ -10,7 +10,7 @@ namespace Seatpicker.Domain;
 #pragma warning disable CS8618 // Disable warning about uninitialized properties
 public class Lan : AggregateBase
 {
-    public Lan(Guid lanId, string title, byte[] background, string guildId, User initiator)
+    public Lan(Guid lanId, string guildId, string title, byte[] background, User initiator)
     {
         if (title.Length <= 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
 
@@ -97,12 +97,12 @@ public class Lan : AggregateBase
 /**
  * Events
  */
-public record LanCreated(Guid Id, string Title, byte[] Background, string GuildId, UserId Initiator) : IEvent;
+public record LanCreated(Guid Id, string Title, byte[] Background, string GuildId, string CreatedBy) : IEvent;
 
-public record LanTitleChanged(string Title, UserId Initiator) : IEvent;
+public record LanTitleChanged(string Title, string ChangedBy) : IEvent;
 
-public record LanBackgroundChanged(byte[] Background, UserId Initiator) : IEvent;
+public record LanBackgroundChanged(byte[] Background, string ChangedBy) : IEvent;
 
-public record LanActiveChanged(bool Active, UserId Initiator) : IEvent;
+public record LanActiveChanged(bool Active, string ChangedBy) : IEvent;
 
-public record LanArchived(UserId Initiator) : IEvent;
+public record LanArchived(string ArchivedBy) : IEvent;

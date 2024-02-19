@@ -33,8 +33,7 @@ public static class EntrypointsExtensions
     public static WebApplication UseEntrypoints(this WebApplication app)
     {
         app.UseHttpsRedirection();
-        app.MapControllers();
-        app.UseMiddleware<TenantAuthorizationMiddleware>();
+        app.MapGet()
 
         return app;
     }

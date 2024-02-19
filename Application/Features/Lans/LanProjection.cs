@@ -1,6 +1,5 @@
 ﻿using Marten.Events;
 using Marten.Events.Aggregation;
-using Microsoft.CodeAnalysis;
 using Seatpicker.Domain;
 using Shared;
 

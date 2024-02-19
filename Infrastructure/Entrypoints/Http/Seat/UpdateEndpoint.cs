@@ -7,12 +7,13 @@ using Seatpicker.Infrastructure.Entrypoints.Utils;
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 
 [ApiController]
-[Route("lan/{lanId:guid}/seat")]
+[Route("guild/{guildId}/lan/{lanId:Guid}/seat")]
 [Authorize(Roles = "Operator")]
 public class UpdateEndpoint
 {
-    [HttpPut("{seatId:guid}")]
+    [HttpPut("{seatId:Guid}")]
     public async Task<IActionResult> Update(
+        [FromRoute] Guid guildId,
         [FromRoute] Guid lanId,
         [FromRoute] Guid seatId,
         [FromBody] Request request,

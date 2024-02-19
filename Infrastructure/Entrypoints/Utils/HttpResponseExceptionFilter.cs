@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
+using Seatpicker.Infrastructure.Adapters.Discord;
 using Seatpicker.Infrastructure.Entrypoints.Http;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Utils;

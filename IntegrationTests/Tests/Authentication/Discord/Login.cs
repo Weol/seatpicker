@@ -2,13 +2,12 @@ using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
 using Seatpicker.Infrastructure.Authentication;
-using Seatpicker.Infrastructure.Authentication.Discord.DiscordClient;
 using Seatpicker.Infrastructure.Entrypoints.Http.Authentication.Discord;
 using Seatpicker.IntegrationTests.HttpInterceptor.Discord;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Seatpicker.IntegrationTests.Tests.Authentication;
+namespace Seatpicker.IntegrationTests.Tests.Authentication.Discord;
 
 // ReSharper disable once InconsistentNaming
 public class Login : LoginAndRenewBase
@@ -38,9 +37,9 @@ public class Login : LoginAndRenewBase
     {
         // Arrange
         var client = GetAnonymousClient(GuildId);
-        var discordUser = new DiscordUser("123", "Tore Tang", null);
+        var discordUser = Generator.GenerateDiscordUser();
 
-        AddHttpInterceptor(new AccessTokenInterceptor());
+        AddHttpInterceptor(new RefreshTokenInterceptor());
         AddHttpInterceptor(new RefreshTokenInterceptor());
         AddHttpInterceptor(new LookupInterceptor(discordUser));
         AddHttpInterceptor(new GuildMemberInterceptor(discordUser, guildUsername, guildAvatar));
@@ -65,7 +64,7 @@ public class Login : LoginAndRenewBase
     {
         // Arrange
         var client = GetAnonymousClient(GuildId);
-        var discordUser = new DiscordUser("123", "Tore Tang", null);
+        var discordUser = Generator.GenerateDiscordUser();
 
         AddHttpInterceptor(new AccessTokenInterceptor());
         AddHttpInterceptor(new RefreshTokenInterceptor());
