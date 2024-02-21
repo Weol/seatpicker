@@ -33,7 +33,7 @@ public class GetAll_lan : IntegrationTestBase
 
         //Act
         var response = await MakeRequest(client);
-        var body = await response.Content.ReadAsJsonAsync<GetEndpoint.Response[]>();
+        var body = await response.Content.ReadAsJsonAsync<GetLan.Response[]>();
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -60,7 +60,7 @@ public class GetAll_lan : IntegrationTestBase
 
         //Act
         var response = await MakeRequest(client);
-        var body = await response.Content.ReadAsJsonAsync<GetEndpoint.Response[]>();
+        var body = await response.Content.ReadAsJsonAsync<GetLan.Response[]>();
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -80,7 +80,7 @@ public class GetAll_lan : IntegrationTestBase
             //Act
             var client = GetClient(tenant, Role.Admin);
             var response = await MakeRequest(client);
-            var body = await response.Content.ReadAsJsonAsync<GetEndpoint.Response[]>();
+            var body = await response.Content.ReadAsJsonAsync<GetLan.Response[]>();
 
             //Assert
             body.Should().NotBeNull();

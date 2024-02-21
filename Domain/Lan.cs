@@ -14,7 +14,7 @@ public class Lan : AggregateBase
     {
         if (title.Length <= 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
 
-        var evt = new LanCreated(lanId, title, background, guildId, initiator.Id);
+        var evt = new LanCreated(lanId, guildId, title, background, initiator.Id);
 
         Raise(evt);
         Apply(evt);
@@ -97,7 +97,7 @@ public class Lan : AggregateBase
 /**
  * Events
  */
-public record LanCreated(Guid Id, string Title, byte[] Background, string GuildId, string CreatedBy) : IEvent;
+public record LanCreated(Guid Id, string GuildId, string Title, byte[] Background, string CreatedBy) : IEvent;
 
 public record LanTitleChanged(string Title, string ChangedBy) : IEvent;
 

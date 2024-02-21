@@ -1,3 +1,4 @@
+using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Authentication;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Utils;

@@ -3,23 +3,19 @@ using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Seats;
 using Seatpicker.Infrastructure.Entrypoints.Utils;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
+namespace Seatpicker.Infrastructure.Entrypoints.Http.Reservation;
 
-[ApiController]
-[Route("guild/{guildId}/lan/{lanId:Guid}/seat")]
-[Authorize(Roles = "Operator")]
-public class DeleteEndpoint
+public static class CreateReservation
 {
-    [HttpDelete("{seatId:Guid}")]
-    public async Task<IActionResult> Delete(
+    public static async Task<IActionResult> Create(
         [FromRoute] Guid lanId,
         [FromRoute] Guid seatId,
         [FromServices] ILoggedInUserAccessor loggedInUserAccessor,
-        [FromServices] ISeatManagementService seatManagementService)
+        [FromServices] IReservationService reservationService)
     {
         var user = await loggedInUserAccessor.Get();
 
-        await seatManagementService.Remove(lanId, seatId, user);
+        await reservationService.Create(lanId, seatId, user);
 
         return new OkResult();
     }

@@ -2,17 +2,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Seats;
+using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Entrypoints.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement;
 
-[ApiController]
-[Route("guild/{guildId}/lan/{lanId:Guid}/seat/{seatId:Guid}/reservationmanagement")]
-[Authorize(Roles = "Operator")]
-public class MoveEndpoint
+public static class CreateReservationFor
 {
-    [HttpPut]
-    public async Task<IActionResult> Move(
+    public static async Task<IActionResult> Create(
         [FromRoute] Guid lanId,
         [FromRoute] Guid seatId,
         [FromBody] Request request,
@@ -21,18 +18,19 @@ public class MoveEndpoint
     {
         var user = await loggedInUserAccessor.Get();
 
-        await reservationManagementService.Move(lanId, seatId, request.ToSeatId, user);
+        await reservationManagementService.Create(lanId, seatId, request.UserId, user);
 
         return new OkResult();
     }
 
-    public record Request(Guid ToSeatId);
+    public record Request(string UserId);
 
     public class Validator : AbstractValidator<Request>
     {
         public Validator()
         {
-            RuleFor(x => x.ToSeatId).NotEmpty();
+            RuleFor(x => x.UserId)
+                .NotEmpty();
         }
     }
 }

@@ -5,13 +5,9 @@ using Seatpicker.Infrastructure.Entrypoints.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 
-[ApiController]
-[Route("guild/{guildId}/lan")]
-[Authorize(Roles = "Admin")]
-public class DeleteEndpoint
+public static class DeleteLan
 {
-    [HttpDelete("{id:Guid}")]
-    public async Task<IActionResult> Delete(
+    public static async Task<IActionResult> Delete(
         [FromRoute] Guid id,
         ILoggedInUserAccessor loggedInUserAccessor,
         ILanManagementService lanManagementService)

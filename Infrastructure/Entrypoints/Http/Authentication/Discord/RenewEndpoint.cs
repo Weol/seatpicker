@@ -3,12 +3,9 @@ using Seatpicker.Infrastructure.Authentication.Discord;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Authentication.Discord;
 
-[ApiController]
-[Route("authentication/discord")]
-public class RenewEndpoint
+public static class RenewEndpoint
 {
-    [HttpPost("renew")]
-    public async Task<ActionResult<TokenResponse>> Renew(
+    public static async Task<ActionResult<TokenResponse>> Renew(
         [FromServices] DiscordAuthenticationService discordAuthenticationService,
         [FromBody] Request request)
     {

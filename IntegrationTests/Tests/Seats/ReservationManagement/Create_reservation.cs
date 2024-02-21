@@ -21,7 +21,7 @@ public class Create_reservation : IntegrationTestBase
 
     private async Task<HttpResponseMessage> MakeRequest(HttpClient client, Guid lanId, Guid seatId, string userId) => await client.PostAsJsonAsync(
             $"lan/{lanId}/seat/{seatId}/reservationmanagement",
-            new CreateEndpoint.Request(userId));
+            new CreateReservationFor.Request(userId));
     
     [Fact]
     public async Task succeeds_when_reserving_existing_available_seat()

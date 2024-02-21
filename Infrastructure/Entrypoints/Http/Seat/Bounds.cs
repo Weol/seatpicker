@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Http;
+namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 
 public record Bounds(double X, double Y, double Width, double Height)
 {

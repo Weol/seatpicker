@@ -22,7 +22,7 @@ public class Move_reservation : IntegrationTestBase
     private Task<HttpResponseMessage> MakeRequest(HttpClient client, Guid lanId, Guid fromSeatId, Guid toSeatId) =>
         client.PutAsJsonAsync(
             $"lan/{lanId}/seat/{fromSeatId}/reservationmanagement",
-            new MoveEndpoint.Request(toSeatId));
+            new MoveReservationFor.Request(toSeatId));
 
     [Fact]
     public async Task succeeds_when_seat_is_reserved_and_target_seat_is_not_reserved()

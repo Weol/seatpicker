@@ -21,7 +21,7 @@ public class Update_lan : IntegrationTestBase
 
 
     private async Task<HttpResponseMessage>
-        MakeRequest(HttpClient client, Guid lanId, UpdateEndpoint.Request request) =>
+        MakeRequest(HttpClient client, Guid lanId, UpdateLan.Request request) =>
         await client.PutAsJsonAsync($"lan/{lanId}", request);
 
     public static IEnumerable<object[]> ValidUpdateRequests = new[]
@@ -40,7 +40,7 @@ public class Update_lan : IntegrationTestBase
 
     [Theory]
     [MemberData(nameof(ValidUpdateRequests))]
-    public async Task succeeds_when_valid(UpdateEndpoint.Request request)
+    public async Task succeeds_when_valid(UpdateLan.Request request)
     {
         // Arrange
         var client = GetClient(GuildId, Role.Admin);
@@ -82,7 +82,7 @@ public class Update_lan : IntegrationTestBase
 
     [Theory]
     [MemberData(nameof(InvalidUpdateRequests))]
-    public async Task fails_when_invalid(UpdateEndpoint.Request request)
+    public async Task fails_when_invalid(UpdateLan.Request request)
     {
         // Arrange
         var client = GetClient(GuildId, Role.Admin);

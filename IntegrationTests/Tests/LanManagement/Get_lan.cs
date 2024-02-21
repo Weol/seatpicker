@@ -30,7 +30,7 @@ public class Get_lan : IntegrationTestBase
 
         //Act
         var response = await MakeRequest(client, existingLan.Id);
-        var body = await response.Content.ReadAsJsonAsync<GetEndpoint.Response>();
+        var body = await response.Content.ReadAsJsonAsync<GetLan.Response>();
 
         //Assert
         Assert.Multiple(

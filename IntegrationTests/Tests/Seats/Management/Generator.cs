@@ -5,17 +5,17 @@ namespace Seatpicker.IntegrationTests.Tests.Seats.Management;
 
 public static class Generator
 {
-    public static CreateEndpoint.Request CreateSeatRequest()
+    public static CreateSeat.Request CreateSeatRequest()
     {
-        return new CreateEndpoint.Request(
+        return new CreateSeat.Request(
             Title: new Faker().Hacker.Verb(),
-            Bounds:new Infrastructure.Entrypoints.Http.Bounds(0, 0, 1, 1));
+            Bounds:new Bounds(0, 0, 1, 1));
     }
 
-    public static UpdateEndpoint.Request UpdateSeatRequest()
+    public static UpdateSeat.Request UpdateSeatRequest()
     {
-        return new UpdateEndpoint.Request(
+        return new UpdateSeat.Request(
             Title: new Faker().Hacker.Verb(),
-            new Infrastructure.Entrypoints.Http.Bounds(0, 0, 1, 1));
+            new Bounds(0, 0, 1, 1));
     }
 }

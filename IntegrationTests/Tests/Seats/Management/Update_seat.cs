@@ -20,7 +20,7 @@ public class Update_seat : IntegrationTestBase
     }
 
     private async Task<HttpResponseMessage> MakeRequest(HttpClient client, Guid lanId, Guid seatId,
-        UpdateEndpoint.Request request) =>
+        UpdateSeat.Request request) =>
         await client.PutAsJsonAsync($"lan/{lanId}/seat/{seatId}", request);
 
     public static IEnumerable<object[]> ValidUpdateRequests = new[]
@@ -38,7 +38,7 @@ public class Update_seat : IntegrationTestBase
 
     [Theory]
     [MemberData(nameof(ValidUpdateRequests))]
-    public async Task succeeds_when_valid(UpdateEndpoint.Request request)
+    public async Task succeeds_when_valid(UpdateSeat.Request request)
     {
         // Arrange
         var client = GetClient(GuildId, Role.Operator);
@@ -89,14 +89,14 @@ public class Update_seat : IntegrationTestBase
     {
         new object[] { Generator.UpdateSeatRequest() with { Title = "" } },
         new object[]
-            { Generator.UpdateSeatRequest() with { Bounds = new Infrastructure.Entrypoints.Http.Bounds(0, 0, -1, 1) } },
+            { Generator.UpdateSeatRequest() with { Bounds = new Bounds(0, 0, -1, 1) } },
         new object[]
-            { Generator.UpdateSeatRequest() with { Bounds = new Infrastructure.Entrypoints.Http.Bounds(0, 0, 1, -1) } },
+            { Generator.UpdateSeatRequest() with { Bounds = new Bounds(0, 0, 1, -1) } },
     };
 
     [Theory]
     [MemberData(nameof(InvalidUpdateRequests))]
-    public async Task fails_when_seat_request_model_is_invalid(UpdateEndpoint.Request request)
+    public async Task fails_when_seat_request_model_is_invalid(UpdateSeat.Request request)
     {
         // Arrange
         var client = GetClient(GuildId, Role.Operator);

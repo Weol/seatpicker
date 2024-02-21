@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using FluentAssertions;
 using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
 using Seatpicker.Infrastructure.Authentication;
+using Seatpicker.Infrastructure.Entrypoints.Http.Authentication;
 using Seatpicker.Infrastructure.Entrypoints.Http.Authentication.Discord;
 using Seatpicker.IntegrationTests.HttpInterceptor.Discord;
 using Xunit;

@@ -6,14 +6,9 @@ using Seatpicker.Application.Features.Seats;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Marten;
 
-[ApiController]
-[Route("marten")]
-[Authorize(Roles = "Admin")]
-public class RebuildProjectionsEndpoint
+public static class RebuildProjections
 {
-    [HttpPost("reloadprojections")]
-    [ProducesResponseType(200)]
-    public async Task<ActionResult> Rebuild(
+    public static async Task<ActionResult> Rebuild(
         [FromServices] IDocumentStore documentStore)
     {
         using var daemon = await documentStore.BuildProjectionDaemonAsync();

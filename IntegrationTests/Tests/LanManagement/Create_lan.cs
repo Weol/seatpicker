@@ -19,7 +19,7 @@ public class Create_lan : IntegrationTestBase
     {
     }
 
-    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, CreateEndpoint.Request request) =>
+    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, CreateLan.Request request) =>
         await client.PostAsJsonAsync("lan", request);
 
     [Fact]

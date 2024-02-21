@@ -6,26 +6,22 @@ using Seatpicker.Infrastructure.Entrypoints.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 
-[ApiController]
-[Route("guild/{guildId}/lan")]
-[Authorize(Roles = "Admin")]
-public class CreateEndpoint
+public static class CreateLan
 {
-    [HttpPost]
-    [ProducesResponseType(200)]
-    public async Task<ActionResult<Response>> Create(
+    public static async Task<ActionResult<Response>> Create(
         [FromBody] Request request,
+        [FromQuery] string guildId,
         ILoggedInUserAccessor loggedInUserAccessor,
         ILanManagementService lanManagementService)
     {
         var user = await loggedInUserAccessor.Get();
 
-        var lanId = await lanManagementService.Create(request.Title, request.GuildId, request.Background, user);
+        var lanId = await lanManagementService.Create(guildId, request.Title, request.Background, user);
 
         return new OkObjectResult(new Response(lanId));
     }
 
-    public record Request(string GuildId, string Title, byte[] Background);
+    public record Request(string Title, byte[] Background);
 
     public record Response(Guid Id);
 
@@ -34,9 +30,6 @@ public class CreateEndpoint
         public Validator()
         {
             RuleFor(x => x.Title)
-                .NotEmpty();
-            
-            RuleFor(x => x.GuildId)
                 .NotEmpty();
 
             RuleFor(x => x.Background)

@@ -2,15 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Infrastructure.Entrypoints.Utils;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Http.Authentication.Discord;
+namespace Seatpicker.Infrastructure.Entrypoints.Http.Authentication;
 
-[ApiController]
-[Authorize]
-[Route("authentication/discord")]
-public class TestEndpoint
+public static class TestEndpoint
 {
-    [HttpGet("test")]
-    public async Task<ActionResult<Response>> Test(
+    public static async Task<ActionResult<Response>> Test(
         [FromServices] ILoggedInUserAccessor loggedInUserAccessor,
         [FromServices] IHttpContextAccessor httpContextAccessor)
     {

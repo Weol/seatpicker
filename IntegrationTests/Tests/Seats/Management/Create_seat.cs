@@ -20,7 +20,7 @@ public class Create_seat : IntegrationTestBase
     }
 
     private async Task<HttpResponseMessage>
-        MakeRequest(HttpClient client, Guid lanId, CreateEndpoint.Request request) =>
+        MakeRequest(HttpClient client, Guid lanId, CreateSeat.Request request) =>
         await client.PostAsJsonAsync($"lan/{lanId}/seat", request);
 
     [Fact]
@@ -52,14 +52,14 @@ public class Create_seat : IntegrationTestBase
     {
         new object[] { Generator.CreateSeatRequest() with { Title = "" } },
         new object[]
-            { Generator.CreateSeatRequest() with { Bounds = new Infrastructure.Entrypoints.Http.Bounds(0, 0, -1, 1) } },
+            { Generator.CreateSeatRequest() with { Bounds = new Bounds(0, 0, -1, 1) } },
         new object[]
-            { Generator.CreateSeatRequest() with { Bounds = new Infrastructure.Entrypoints.Http.Bounds(0, 0, 1, -1) } },
+            { Generator.CreateSeatRequest() with { Bounds = new Bounds(0, 0, 1, -1) } },
     };
 
     [Theory]
     [MemberData(nameof(InvalidUpdateRequests))]
-    public async Task fails_when_seat_request_model_is_invalid(CreateEndpoint.Request request)
+    public async Task fails_when_seat_request_model_is_invalid(CreateSeat.Request request)
     {
         // Arrange
         var client = GetClient(GuildId, Role.Operator);

@@ -4,7 +4,7 @@ namespace Seatpicker.Application.Features.Lans;
 
 public interface ILanManagementService
 {
-    public Task<Guid> Create(string title, string guildId, byte[] background, User initiator);
+    public Task<Guid> Create(string guildId, string title, byte[] background, User initiator);
 
     public Task Update(Guid id, bool? active, string? title, byte[]? background, User initiator);
 
@@ -22,10 +22,10 @@ internal class LanManagementManagementService : ILanManagementService
         this.documentRepository = documentRepository;
     }
 
-    public async Task<Guid> Create(string title, string guildId, byte[] background, User initiator)
+    public async Task<Guid> Create(string guildId, string title, byte[] background, User initiator)
     {
         using var transaction = aggregateRepository.CreateTransaction();
-        
+
         var id = Guid.NewGuid();
         var lan = new Lan(id, guildId, title, background, initiator);
 

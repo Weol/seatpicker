@@ -27,14 +27,14 @@ public class LoggedInUserAccessor : ILoggedInUserAccessor
     {
         var id  = HttpContext.User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
 
-        return await userProvider.GetById(new UserId(id)) ??
+        return await userProvider.GetById(id) ??
                throw new UserNotFoundException($"Cannot find user with id {id}");
     }
-    
+
     public class HttpContextIsNullException : Exception
     {
     }
-    
+
     public class UserNotFoundException : Exception
     {
         public UserNotFoundException(string message) : base(message)

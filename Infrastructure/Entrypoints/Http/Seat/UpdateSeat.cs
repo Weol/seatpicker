@@ -6,38 +6,36 @@ using Seatpicker.Infrastructure.Entrypoints.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 
-[ApiController]
-[Route("guild/{guildId}/lan/{lanId:Guid}/seat")]
-[Authorize(Roles = "Operator")]
-public class CreateEndpoint
+public static class UpdateSeat
 {
-    [HttpPost]
-    public async Task<ActionResult<Response>> Create(
+    public static async Task<IActionResult> Update(
+        [FromRoute] Guid guildId,
         [FromRoute] Guid lanId,
+        [FromRoute] Guid seatId,
         [FromBody] Request request,
         [FromServices] ILoggedInUserAccessor loggedInUserAccessor,
         [FromServices] ISeatManagementService seatManagementService)
     {
         var user = await loggedInUserAccessor.Get();
 
-        var id = await seatManagementService.Create(lanId, request.Title, request.Bounds.ToDomainBounds(), user);
+        await seatManagementService.Update(lanId, seatId, request.Title, request.Bounds?.ToDomainBounds(), user);
 
-        return new OkObjectResult(new Response(id));
+        return new OkResult();
     }
 
-    public record Request(string Title, Bounds Bounds);
-
-    public record Response(Guid Id);
+    public record Request(string? Title, Bounds? Bounds);
 
     public class Validator : AbstractValidator<Request>
     {
         public Validator()
         {
-            RuleFor(x => x.Title).NotEmpty();
+            RuleFor(x => x.Title)
+                .NotEmpty()
+                .When(x => x.Title is not null);
 
-            RuleFor(x => x.Title).NotEmpty();
-
-            RuleFor(x => x.Bounds).SetValidator(new BoundsValidator());
+            RuleFor(x => x.Bounds)
+                .SetValidator(new BoundsValidator()!)
+                .When(x => x.Bounds is not null);
         }
     }
 }

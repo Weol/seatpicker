@@ -5,13 +5,9 @@ using Seatpicker.Infrastructure.Entrypoints.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Reservation;
 
-[ApiController]
-[Route("guild/{guildId}/lan/{lanId:Guid}/seat/{seatId:Guid}/reservation")]
-[Authorize]
-public class DeleteEndpoint
+public static class DeleteReservation
 {
-    [HttpDelete]
-    public async Task<IActionResult> Delete(
+    public static async Task<IActionResult> Delete(
         [FromRoute] Guid lanId,
         [FromRoute] Guid seatId,
         [FromServices] ILoggedInUserAccessor loggedInUserAccessor,

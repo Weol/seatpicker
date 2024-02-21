@@ -3,12 +3,9 @@ using Seatpicker.Infrastructure.Authentication.Discord;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Authentication.Discord;
 
-[ApiController]
-[Route("authentication/discord")]
-public class LoginEndpoint
+public static class LoginEndpoint
 {
-    [HttpPost("login")]
-    public async Task<ActionResult<TokenResponse>> Login(
+    public static async Task<ActionResult<TokenResponse>> Login(
         [FromServices] DiscordAuthenticationService discordAuthenticationService,
         [FromBody] Request request)
     {

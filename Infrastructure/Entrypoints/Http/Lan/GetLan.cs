@@ -4,13 +4,10 @@ using Seatpicker.Application.Features.Lans;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 
-[ApiController]
-[Route("guild/{guildId}/lan")]
 #pragma warning disable CS1998
-public class GetEndpoint
+public static class GetLan
 {
-    [HttpGet]
-    public async Task<ActionResult<Response[]>> GetAll(
+    public static async Task<ActionResult<Response[]>> GetAll(
         [FromServices] IDocumentRepository documentRepository)
     {
         using var documentReader = documentRepository.CreateReader();
@@ -23,8 +20,7 @@ public class GetEndpoint
         return new OkObjectResult(lans);
     }
 
-    [HttpGet("{id:Guid}")]
-    public async Task<ActionResult<Response>> Get(
+    public static async Task<ActionResult<Response>> Get(
         [FromRoute] Guid id,
         [FromServices] IDocumentRepository documentRepository)
     {
@@ -38,8 +34,7 @@ public class GetEndpoint
         return new OkObjectResult(new Response(lan));
     }
 
-    [HttpGet("active")]
-    public async Task<ActionResult<Response>> GetActiveLan(
+    public static async Task<ActionResult<Response>> GetActiveLan(
         [FromQuery] string guildId,
         [FromServices] IDocumentRepository documentRepository)
     {
