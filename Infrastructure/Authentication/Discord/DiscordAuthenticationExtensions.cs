@@ -1,6 +1,4 @@
-﻿using Seatpicker.Infrastructure.Adapters.Discord;
-
-namespace Seatpicker.Infrastructure.Authentication.Discord;
+﻿namespace Seatpicker.Infrastructure.Authentication.Discord;
 
 public static class DiscordAuthenticationExtensions
 {

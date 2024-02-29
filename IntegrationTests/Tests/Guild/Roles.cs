@@ -1,11 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
+using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
-using Seatpicker.Infrastructure.Authentication;
-using Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 using Seatpicker.Infrastructure.Entrypoints.Http.Guild.Discord;
-using Seatpicker.IntegrationTests.HttpInterceptor.Discord;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -25,17 +23,16 @@ public class Roles : IntegrationTestBase
     public async Task getting_role_mapping_succeeds()
     {
         // Arrange
-        var client = GetClient(GuildId, Role.Admin);
+		var guildId = CreateGuild();
+        var client = GetClient(guildId, Role.Admin);
         var guildRoleId = "1238712";
 
         var roleMapping =
-            new GuildRoleMapping(GuildId, new[] { new GuildRoleMappingEntry(guildRoleId, Role.Operator) });
-        await SetupDocuments(GuildId, roleMapping);
+            new GuildRoleMapping(guildId, new[] { new GuildRoleMappingEntry(guildRoleId, Role.Operator) });
+        await SetupDocuments(guildId, roleMapping);
         
-        AddHttpInterceptor(new GuildRolesInterceptor(guildRoleId));
-
         //Act
-        var response = await client.GetAsync($"guild/{GuildId}/roles");
+        var response = await client.GetAsync($"guild/{guildId}/roles");
         var body = await response.Content.ReadAsJsonAsync<IEnumerable<GetRoleMapping.Response>>();
 
         // Assert
@@ -53,11 +50,12 @@ public class Roles : IntegrationTestBase
     public async Task setting_role_mapping_succeeds()
     {
         // Arrange
-        var client = GetClient(GuildId, Role.Admin);
+		var guildId = CreateGuild();
+        var client = GetClient(guildId, Role.Admin);
         var guildRoleId1 = "1238712";
         var guildRoleId2 = "1238712233";
 
-        var request = new UpdateRolesEndpoint.Request[]
+        var request = new PutRoleMapping.Request[]
         {
             new(guildRoleId1, new[] { Role.Operator }),
             new(guildRoleId2, new[] { Role.Operator, Role.Admin }),
@@ -65,19 +63,19 @@ public class Roles : IntegrationTestBase
 
         //Act
         var response = await client.PutAsync(
-            $"guild/{GuildId}/roles",
+            $"guild/{guildId}/roles",
             JsonContent.Create(request));
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var roleMappings = GetCommittedDocuments<GuildRoleMapping>(GuildId);
+        var roleMappings = GetCommittedDocuments<GuildRoleMapping>(guildId);
 
         Assert.Multiple(
             () => roleMappings.Should().HaveCount(1),
             () =>
             {
-                var mapping = roleMappings.Should().ContainSingle(mapping => mapping.GuildId == GuildId).Subject;
+                var mapping = roleMappings.Should().ContainSingle(mapping => mapping.GuildId == guildId).Subject;
                 Assert.Multiple(
                     () => mapping.Mappings.Should().HaveCount(3),
                     () => mapping.Mappings.Should().ContainSingle(entry =>

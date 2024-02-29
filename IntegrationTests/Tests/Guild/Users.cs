@@ -1,10 +1,11 @@
 using System.Net;
 using Bogus;
 using FluentAssertions;
+using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Authentication;
-using Seatpicker.Infrastructure.Entrypoints.Http;
 using Xunit;
 using Xunit.Abstractions;
+using User = Seatpicker.Infrastructure.Entrypoints.Http.User;
 
 namespace Seatpicker.IntegrationTests.Tests.Guild;
 
@@ -24,19 +25,20 @@ public class Users : IntegrationTestBase
     public async Task getting_users_returns_all_users_who_have_logged_in()
     {
         // Arrange
-        var client = GetClient(GuildId, Role.Operator);
+		var guildId = CreateGuild();
+        var client = GetClient(guildId, Role.Operator);
 
         var users = Enumerable.Range(0, 5)
             .Select(i => new UserManager.UserDocument(i.ToString(),
-                GuildId,
                 new Faker().Name.FirstName(),
-                new Faker().Random.Int(1).ToString()))
+                new Faker().Random.Int(1).ToString(),
+                Array.Empty<Role>()))
             .ToArray();
 
-        await SetupDocuments(GuildId, users);
+        await SetupDocuments(guildId, users);
 
         //Act
-        var response = await client.GetAsync($"guild/{GuildId}/users");
+        var response = await client.GetAsync($"guild/{guildId}/users");
         var body = await response.Content.ReadAsJsonAsync<User[]>();
 
         // Assert

@@ -32,7 +32,7 @@ public class DiscordAdapter
         this.memoryCache = memoryCache;
     }
 
-    public async Task<DiscordAccessToken> GetAccessToken(string discordToken, string redirectUrl)
+    public virtual async Task<DiscordAccessToken> GetAccessToken(string discordToken, string redirectUrl)
     {
         logger.LogInformation("Getting access token using code {Code} and redirect uri {RedirectUri}",
             discordToken,
@@ -52,7 +52,7 @@ public class DiscordAdapter
         return await DeserializeContent<DiscordAccessToken>(response);
     }
 
-    public async Task<DiscordAccessToken> RefreshAccessToken(string refreshToken)
+    public virtual async Task<DiscordAccessToken> RefreshAccessToken(string refreshToken)
     {
         var response = await httpClient.PostAsync(
             "oauth2/token",
@@ -68,7 +68,7 @@ public class DiscordAdapter
         return await DeserializeContent<DiscordAccessToken>(response);
     }
 
-    public async Task<DiscordUser> Lookup(string accessToken)
+    public virtual async Task<DiscordUser> Lookup(string accessToken)
     {
         using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "users/@me");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
@@ -77,7 +77,7 @@ public class DiscordAdapter
         return await DeserializeContent<DiscordUser>(response);
     }
 
-    public async Task AddGuildMember(string guildId, string memberId, string accessToken)
+    public virtual async Task AddGuildMember(string guildId, string memberId, string accessToken)
     {
         using var requestMessage = new HttpRequestMessage(HttpMethod.Put, $"guilds/{guildId}/members/{memberId}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
@@ -106,7 +106,7 @@ public class DiscordAdapter
         }
     }
 
-    public async Task<DiscordGuildMember?> GetGuildMember(string guildId, string memberId)
+    public virtual async Task<DiscordGuildMember?> GetGuildMember(string guildId, string memberId)
     {
         using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"guilds/{guildId}/members/{memberId}");
 
@@ -124,7 +124,7 @@ public class DiscordAdapter
         }
     }
 
-    public async Task<IEnumerable<DiscordGuildRole>> GetGuildRoles(string guildId)
+    public virtual async Task<IEnumerable<DiscordGuildRole>> GetGuildRoles(string guildId)
     {
         return await MakeCachedRequest($"guild_roles_{guildId}",
             async () =>
@@ -138,7 +138,7 @@ public class DiscordAdapter
             });
     }
 
-    public async Task<IEnumerable<DiscordGuild>> GetGuilds()
+    public virtual async Task<IEnumerable<DiscordGuild>> GetGuilds()
     {
         return await MakeCachedRequest("get_bot_guilds",
             async () =>

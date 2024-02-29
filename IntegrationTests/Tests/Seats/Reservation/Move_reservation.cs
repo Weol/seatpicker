@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
 using Seatpicker.Application.Features.Seats;
-using Seatpicker.Infrastructure.Authentication;
+using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Entrypoints.Http.Reservation;
 using Xunit;
 using Xunit.Abstractions;
@@ -19,38 +19,39 @@ public class Move_reservation : IntegrationTestBase
     {
     }
 
-    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, Guid lanId, Guid seatId, Guid toSeatId) =>
+    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, Guid lanId, Guid seatId, Guid toSeatId) =>
         await client.PutAsJsonAsync(
-            $"lan/{lanId}/seat/{seatId}/reservation",
+            $"guild/{guildId}/lan/{lanId}/seat/{seatId}/reservation",
             new MoveReservation.Request(toSeatId));
 
     [Fact]
     public async Task succeeds_when_seat_is_reserved_by_user_and_other_seat_is_not_reserved()
     {
         // Arrange
-        var identity = await CreateIdentity(GuildId, Role.User);
-        var client = GetClient(GuildId, identity);
+		var guildId = CreateGuild();
+        var identity = await CreateIdentity(guildId, Role.User);
+        var client = GetClient(identity);
 
-        var lan = LanGenerator.Create(GuildId);
+        var lan = LanGenerator.Create(guildId);
         var fromSeat = SeatGenerator.Create(lan, reservedBy: identity.User);
         var toSeat = SeatGenerator.Create(lan);
 
-        await SetupAggregates(GuildId, fromSeat, toSeat);
+        await SetupAggregates(guildId, fromSeat, toSeat);
 
         //Act
-        var response = await MakeRequest(client, lan.Id, fromSeat.Id, toSeat.Id);
+        var response = await MakeRequest(client, guildId, lan.Id, fromSeat.Id, toSeat.Id);
 
         //Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                var committedFromSeat = GetCommittedDocuments<ProjectedSeat>(GuildId)
+                var committedFromSeat = GetCommittedDocuments<ProjectedSeat>(guildId)
                     .Should()
                     .ContainSingle(seat => seat.Id == fromSeat.Id)
                     .Subject;
 
-                var committedToSeat = GetCommittedDocuments<ProjectedSeat>(GuildId)
+                var committedToSeat = GetCommittedDocuments<ProjectedSeat>(guildId)
                     .Should()
                     .ContainSingle(seat => seat.Id == toSeat.Id)
                     .Subject;
@@ -66,29 +67,30 @@ public class Move_reservation : IntegrationTestBase
     public async Task fails_when_seat_is_reserved_by_another_user()
     {
         // Arrange
-        var client = GetClient(GuildId);
+		var guildId = CreateGuild();
+        var client = GetClient(guildId);
 
-        var alreadyReservedBy = await CreateUser(GuildId);
-        var lan = LanGenerator.Create(GuildId);
+        var alreadyReservedBy = await CreateUser(guildId);
+        var lan = LanGenerator.Create(guildId);
         var fromSeat = SeatGenerator.Create(lan, reservedBy: alreadyReservedBy);
         var toSeat = SeatGenerator.Create(lan);
 
-        await SetupAggregates(GuildId, fromSeat, toSeat);
+        await SetupAggregates(guildId, fromSeat, toSeat);
 
         //Act
-        var response = await MakeRequest(client, lan.Id, fromSeat.Id, toSeat.Id);
+        var response = await MakeRequest(client, guildId, lan.Id, fromSeat.Id, toSeat.Id);
 
         //Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.Conflict),
             () =>
             {
-                var committedFromSeat = GetCommittedDocuments<ProjectedSeat>(GuildId)
+                var committedFromSeat = GetCommittedDocuments<ProjectedSeat>(guildId)
                     .Should()
                     .ContainSingle(seat => seat.Id == fromSeat.Id)
                     .Subject;
 
-                var committedToSeat = GetCommittedDocuments<ProjectedSeat>(GuildId)
+                var committedToSeat = GetCommittedDocuments<ProjectedSeat>(guildId)
                     .Should()
                     .ContainSingle(seat => seat.Id == toSeat.Id)
                     .Subject;

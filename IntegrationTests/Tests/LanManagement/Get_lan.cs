@@ -16,20 +16,21 @@ public class Get_lan : IntegrationTestBase
     {
     }
 
-    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, Guid lanId) =>
-        await client.GetAsync($"lan/{lanId}");
+    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, Guid lanId) =>
+        await client.GetAsync($"guild/{guildId}/lan/{lanId}");
 
     [Fact]
     public async Task returns_lan_when_lan_exists()
     {
         // Arrange
-        var client = GetClient(GuildId);
+		var guildId = CreateGuild();
+        var client = GetClient(guildId);
 
-        var existingLan = LanGenerator.Create(GuildId);
-        await SetupAggregates(GuildId, existingLan);
+        var existingLan = LanGenerator.Create(guildId);
+        await SetupAggregates(guildId, existingLan);
 
         //Act
-        var response = await MakeRequest(client, existingLan.Id);
+        var response = await MakeRequest(client, guildId, existingLan.Id);
         var body = await response.Content.ReadAsJsonAsync<GetLan.Response>();
 
         //Assert
@@ -49,10 +50,11 @@ public class Get_lan : IntegrationTestBase
     public async Task returns_nothing_when_lan_does_not_exist()
     {
         // Arrange
-        var client = GetClient(GuildId);
+		var guildId = CreateGuild();
+        var client = GetClient(guildId);
 
         //Act
-        var response = await MakeRequest(client, Guid.NewGuid());
+        var response = await MakeRequest(client, guildId, Guid.NewGuid());
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);

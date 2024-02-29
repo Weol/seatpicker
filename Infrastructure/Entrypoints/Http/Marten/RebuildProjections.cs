@@ -8,7 +8,7 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Marten;
 
 public static class RebuildProjections
 {
-    public static async Task<ActionResult> Rebuild(
+    public static async Task<IResult> Rebuild(
         [FromServices] IDocumentStore documentStore)
     {
         using var daemon = await documentStore.BuildProjectionDaemonAsync();
@@ -20,6 +20,6 @@ public static class RebuildProjections
 
         await daemon.StopAll();
 
-        return new OkResult();
+        return TypedResults.Ok();
     }
 }

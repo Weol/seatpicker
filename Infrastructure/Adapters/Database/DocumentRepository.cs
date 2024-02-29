@@ -7,29 +7,33 @@ namespace Seatpicker.Infrastructure.Adapters.Database;
 public class DocumentRepository : IDocumentRepository
 {
     private readonly IDocumentStore store;
-    private readonly ITenantProvider tenantProvider;
     private readonly ILogger<DocumentRepository> logger;
+    private readonly GuildIdProvider guildIdProvider;
 
-    public DocumentRepository(IDocumentStore store, ITenantProvider tenantProvider, ILogger<DocumentRepository> logger)
+    public DocumentRepository(IDocumentStore store, GuildIdProvider guildIdProvider, ILogger<DocumentRepository> logger)
     {
         this.store = store;
-        this.tenantProvider = tenantProvider;
+        this.guildIdProvider = guildIdProvider;
         this.logger = logger;
     }
 
-    public IDocumentTransaction CreateTransaction(string? tenant = null)
+    public IDocumentTransaction CreateTransaction(string? guildId = null)
     {
-        tenant ??= tenantProvider.GetTenant();
+        guildId ??= guildIdProvider.GetGuildId();
         
-        logger.LogInformation("Creating document transaction for tenant {TenantId}", tenant);
+        logger.LogInformation("Creating document transaction for tenant {TenantId}", guildId);
         
-        var session = store.LightweightSession(tenant);
+        var session = store.LightweightSession(guildId);
         return new DocumentTransaction(session);
     }
 
-    public IDocumentReader CreateReader(string? tenant = null)
+    public IDocumentReader CreateReader(string? guildId = null)
     {
-        var session = store.QuerySession(tenant ?? tenantProvider.GetTenant());
+        guildId ??= guildIdProvider.GetGuildId();
+        
+        logger.LogInformation("Creating document transaction for tenant {TenantId}", guildId);
+        
+        var session = store.QuerySession(guildId);
         return new DocumentReader(session);
     }
 }

@@ -2,15 +2,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Lans;
-using Seatpicker.Infrastructure.Entrypoints.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 
 public static class CreateLan
 {
-    public static async Task<ActionResult<Response>> Create(
+    public static async Task<IResult> Create(
         [FromBody] Request request,
-        [FromQuery] string guildId,
+        [FromRoute] string guildId,
         ILoggedInUserAccessor loggedInUserAccessor,
         ILanManagementService lanManagementService)
     {
@@ -18,7 +17,7 @@ public static class CreateLan
 
         var lanId = await lanManagementService.Create(guildId, request.Title, request.Background, user);
 
-        return new OkObjectResult(new Response(lanId));
+        return TypedResults.Ok(new Response(lanId));
     }
 
     public record Request(string Title, byte[] Background);

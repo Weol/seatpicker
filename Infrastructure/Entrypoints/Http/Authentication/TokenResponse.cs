@@ -1,7 +1,6 @@
 using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Authentication;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Http.Authentication.Discord;
+namespace Seatpicker.Infrastructure.Entrypoints.Http.Authentication;
 
 public record TokenResponse(string Token,
     string? GuildId,

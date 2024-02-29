@@ -4,7 +4,7 @@ using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Discord;
 using Seatpicker.Infrastructure.Entrypoints.Http;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Utils;
+namespace Seatpicker.Infrastructure.Entrypoints.Filters;
 
 public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
 {

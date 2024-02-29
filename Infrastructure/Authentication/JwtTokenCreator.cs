@@ -9,6 +9,8 @@ namespace Seatpicker.Infrastructure.Authentication;
 
 public class JwtTokenCreator
 {
+    public const string GuildIdClaimName = "guild_id";
+    
     private readonly ILogger<JwtTokenCreator> logger;
     private readonly AuthenticationOptions options;
 
@@ -37,7 +39,7 @@ public class JwtTokenCreator
             new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new (JwtRegisteredClaimNames.Name, discordToken.Nick),
             new (JwtRegisteredClaimNames.Sub, discordToken.Id),
-            new ("guild_id", discordToken.GuildId),
+            new (GuildIdClaimName, discordToken.GuildId),
         };
 
         if (discordToken.Avatar is not null) defaultClaims.Add(new Claim("avatar", discordToken.Avatar));

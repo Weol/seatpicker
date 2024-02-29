@@ -18,7 +18,7 @@ public static class SeatGenerator
             lan,
             title ?? "Test title",
             bounds ?? new Bounds(0, 0, 1, 1),
-            initiator ?? new User(new UserId("124"), "asd", null));
+            initiator ?? new User("124", "asd", null, Array.Empty<Role>()));
 
         if (reservedBy is not null) seat.MakeReservation(reservedBy, 0);
 
@@ -41,6 +41,6 @@ public static class LanGenerator
             guildId,
             title ?? "Test title",
             background ?? CreateValidBackround(),
-            initiator ?? new User(new UserId("124"), "asd", null));
+            initiator ?? new User("124", "asd", null, Array.Empty<Role>()));
     }
 }

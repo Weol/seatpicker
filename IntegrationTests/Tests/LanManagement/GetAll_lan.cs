@@ -1,6 +1,6 @@
 using System.Net;
 using FluentAssertions;
-using Seatpicker.Infrastructure.Authentication;
+using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 using Xunit;
 using Xunit.Abstractions;
@@ -26,10 +26,11 @@ public class GetAll_lan : IntegrationTestBase
     public async Task returns_all_lans_that_exist_for_tenant()
     {
         // Arrange
-        var client = GetClient(GuildId);
+		var guildId = CreateGuild();
+        var client = GetClient(guildId);
 
-        var existingLan = new[] { LanGenerator.Create(GuildId), LanGenerator.Create(GuildId) };
-        await SetupAggregates(GuildId, existingLan[0], existingLan[1]);
+        var existingLan = new[] { LanGenerator.Create(guildId), LanGenerator.Create(guildId) };
+        await SetupAggregates(guildId, existingLan[0], existingLan[1]);
 
         //Act
         var response = await MakeRequest(client);
@@ -56,7 +57,8 @@ public class GetAll_lan : IntegrationTestBase
     public async Task returns_empty_array_when_no_lans_exist()
     {
         // Arrange
-        var client = GetClient(GuildId);
+		var guildId = CreateGuild();
+        var client = GetClient(guildId);
 
         //Act
         var response = await MakeRequest(client);
@@ -72,6 +74,7 @@ public class GetAll_lan : IntegrationTestBase
     public async Task returns_only_lan_that_belong_to_correct_tenant()
     {
         // Arrange
+		var guildId = CreateGuild();
         foreach (var tenant in new[] { "123", "321" })
         {
             var lans = new[] { LanGenerator.Create(tenant), LanGenerator.Create(tenant) };

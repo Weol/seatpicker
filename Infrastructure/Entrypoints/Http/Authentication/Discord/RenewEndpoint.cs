@@ -1,18 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Seatpicker.Infrastructure.Adapters.Database;
 using Seatpicker.Infrastructure.Authentication.Discord;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Authentication.Discord;
 
 public static class RenewEndpoint
 {
-    public static async Task<ActionResult<TokenResponse>> Renew(
+    public static async Task<IResult> Renew(
         [FromServices] DiscordAuthenticationService discordAuthenticationService,
+        [FromServices] GuildIdProvider guildIdProvider,
         [FromBody] Request request)
     {
+        guildIdProvider.SetGuildId(request.GuildId);
+        
         var (jwtToken, expiresAt, discordToken)
             = await discordAuthenticationService.Renew(request.RefreshToken, request.GuildId);
 
-        return new OkObjectResult(new TokenResponse(jwtToken,
+        return TypedResults.Ok(new TokenResponse(jwtToken,
             request.GuildId,
             expiresAt.ToUnixTimeSeconds(),
             discordToken.RefreshToken,

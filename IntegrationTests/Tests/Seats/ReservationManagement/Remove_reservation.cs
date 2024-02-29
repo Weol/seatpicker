@@ -1,7 +1,7 @@
 using System.Net;
 using FluentAssertions;
 using Seatpicker.Application.Features.Seats;
-using Seatpicker.Infrastructure.Authentication;
+using Seatpicker.Domain;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -17,30 +17,31 @@ public class Remove_reservation : IntegrationTestBase
     {
     }
 
-    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, Guid lanId, Guid seatId) 
-        => await client.DeleteAsync($"lan/{lanId}/seat/{seatId}/reservationmanagement");
+    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, Guid lanId, Guid seatId) 
+        => await client.DeleteAsync($"guild/{guildId}/lan/{lanId}/seat/{seatId}/reservationmanagement");
     
     [Fact]
     public async Task succeeds_when_seat_is_reserved_by_logged_in_user()
     {
         // Arrange
-        var identity = await CreateIdentity(GuildId, Role.Operator);
-        var client = GetClient(GuildId, identity);
+        var guildId = CreateGuild();
+        var identity = await CreateIdentity(guildId, Role.Operator);
+        var client = GetClient(identity);
 
-        var lan = LanGenerator.Create(GuildId);
+        var lan = LanGenerator.Create(guildId);
         var seat = SeatGenerator.Create(lan, reservedBy: identity.User);
 
-        await SetupAggregates(GuildId, lan, seat);
+        await SetupAggregates(guildId, lan, seat);
 
         //Act
-        var response = await MakeRequest(client, lan.Id, seat.Id);
+        var response = await MakeRequest(client, guildId, lan.Id, seat.Id);
 
         //Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                var committedSeat = GetCommittedDocuments<ProjectedSeat>(GuildId).Should().ContainSingle().Subject;
+                var committedSeat = GetCommittedDocuments<ProjectedSeat>(guildId).Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().BeNull();
             });
     }
@@ -49,23 +50,24 @@ public class Remove_reservation : IntegrationTestBase
     public async Task succeeds_when_seat_is_reserved_by_a_different_user()
     {
         // Arrange
-        var client = GetClient(GuildId, Role.Operator);
+		var guildId = CreateGuild();
+        var client = GetClient(guildId, Role.Operator);
 
-        var user = await CreateUser(GuildId);
-        var lan = LanGenerator.Create(GuildId);
+        var user = await CreateUser(guildId);
+        var lan = LanGenerator.Create(guildId);
         var seat = SeatGenerator.Create(lan, reservedBy: user);
 
-        await SetupAggregates(GuildId, lan, seat);
+        await SetupAggregates(guildId, lan, seat);
 
         //Act
-        var response = await MakeRequest(client, lan.Id, seat.Id);
+        var response = await MakeRequest(client, guildId, lan.Id, seat.Id);
 
         //Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                var committedSeat = GetCommittedDocuments<ProjectedSeat>(GuildId).Should().ContainSingle().Subject;
+                var committedSeat = GetCommittedDocuments<ProjectedSeat>(guildId).Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().BeNull();
             });
     }
@@ -74,16 +76,17 @@ public class Remove_reservation : IntegrationTestBase
     public async Task succeeds_when_seat_is_not_reserved()
     {
         // Arrange
-        var client = GetClient(GuildId, Role.Operator);
+		var guildId = CreateGuild();
+        var client = GetClient(guildId, Role.Operator);
 
-        var user = await CreateUser(GuildId);
-        var lan = LanGenerator.Create(GuildId);
+        var user = await CreateUser(guildId);
+        var lan = LanGenerator.Create(guildId);
         var seat = SeatGenerator.Create(lan, reservedBy: user);
 
-        await SetupAggregates(GuildId, seat);
+        await SetupAggregates(guildId, seat);
 
         //Act
-        var response = await MakeRequest(client, lan.Id, seat.Id);
+        var response = await MakeRequest(client, guildId, lan.Id, seat.Id);
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -93,10 +96,11 @@ public class Remove_reservation : IntegrationTestBase
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
         // Arrange
-        var client = GetClient(GuildId);
+		var guildId = CreateGuild();
+        var client = GetClient(guildId);
 
         //Act
-        var response = await MakeRequest(client, Guid.NewGuid(), Guid.NewGuid());
+        var response = await MakeRequest(client, guildId, Guid.NewGuid(), Guid.NewGuid());
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -106,10 +110,11 @@ public class Remove_reservation : IntegrationTestBase
     public async Task fails_when_seat_does_not_exist()
     {
         // Arrange
-        var client = GetClient(GuildId, Role.Operator);
+		var guildId = CreateGuild();
+        var client = GetClient(guildId, Role.Operator);
 
         //Act
-        var response = await MakeRequest(client, Guid.NewGuid(), Guid.NewGuid());
+        var response = await MakeRequest(client, guildId, Guid.NewGuid(), Guid.NewGuid());
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);

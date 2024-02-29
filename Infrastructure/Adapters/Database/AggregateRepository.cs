@@ -7,17 +7,17 @@ namespace Seatpicker.Infrastructure.Adapters.Database;
 public class AggregateRepository : IAggregateRepository
 {
     private readonly IDocumentStore store;
-    private readonly ITenantProvider tenantProvider;
+    private readonly GuildIdProvider guildIdProvider;
 
-    public AggregateRepository(IDocumentStore store, ITenantProvider tenantProvider)
+    public AggregateRepository(IDocumentStore store, GuildIdProvider guildIdProvider)
     {
         this.store = store;
-        this.tenantProvider = tenantProvider;
+        this.guildIdProvider = guildIdProvider;
     }
 
-    public IAggregateTransaction CreateTransaction(string? tenant = null)
+    public IAggregateTransaction CreateTransaction(string? guildId = null)
     {
-        var session = store.LightweightSession(tenant ?? tenantProvider.GetTenant());
+        var session = store.LightweightSession(guildId ?? guildIdProvider.GetGuildId());
         return new AggregateTransaction(session);
     }
 }

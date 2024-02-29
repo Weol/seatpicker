@@ -1,11 +1,12 @@
 using System.Net;
 using System.Net.Http.Headers;
+using Bogus;
 using FluentAssertions;
+using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
 using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Entrypoints.Http.Authentication;
-using Seatpicker.Infrastructure.Entrypoints.Http.Authentication.Discord;
-using Seatpicker.IntegrationTests.HttpInterceptor.Discord;
+using Seatpicker.IntegrationTests.TestAdapters;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -23,7 +24,10 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
     {
     }
 
-    protected abstract Task<HttpResponseMessage> MakeRequest(HttpClient client);
+    protected string DiscordToken { get; set; } = null!;
+    protected string RefreshToken { get; set; } = null!;
+
+    protected abstract Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId);
 
     private static async Task<TestEndpoint.Response> TestAuthentication(HttpClient client, string token)
     {
@@ -36,21 +40,28 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
         return body;
     }
 
+    public string SetupGuild(params string[] guildRoleIds)
+    {
+        var guildId = new Faker().Random.Int(1).ToString();
+        
+        var adapter = GetService<TestDiscordAdapter>();
+        adapter.AddGuild(guildId, guildRoleIds);
+
+        return guildId;
+    }
+    
     [Fact]
-    public async Task succeeds_and_jwt_is_returned()
+    public async Task succeeds_when_member_of_guild_and_jwt_is_returned()
     {
         // Arrange
-        var guild = SetupGuild();
-        var client = GetAnonymousClient(GuildId);
+        var guildId = SetupGuild();
+        var client = GetAnonymousClient();
         var discordUser = Generator.GenerateDiscordUser();
 
-        AddHttpInterceptor(new AccessTokenInterceptor());
-        AddHttpInterceptor(new RefreshTokenInterceptor());
-        AddHttpInterceptor(new LookupInterceptor(discordUser));
-        AddHttpInterceptor(new GuildMemberInterceptor(discordUser));
+        (DiscordToken, RefreshToken) = GetService<TestDiscordAdapter>().AddUser(discordUser, guildId);
 
         //Act
-        var response = await MakeRequest(client);
+        var response = await MakeRequest(client, guildId);
         var body = await response.Content.ReadAsJsonAsync<TokenResponse>();
 
         // Assert
@@ -75,22 +86,20 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
     public async Task succeeds_and_jwt_has_roles_according_to_mapping(Role[] roles)
     {
         // Arrange
-        var client = GetAnonymousClient(GuildId);
-        var discordUser = Generator.GenerateDiscordUser();
         var guildRoleId = "999999";
+        var guildId = SetupGuild(guildRoleId);
+        var client = GetAnonymousClient();
+        var discordUser = Generator.GenerateDiscordUser();
 
-        var roleMapping = new GuildRoleMapping(GuildId,
+        var roleMapping = new GuildRoleMapping(guildId,
             roles.Select(role =>
                 new GuildRoleMappingEntry(guildRoleId, role)).ToArray());
-        await SetupDocuments(GuildId, roleMapping);
-
-        AddHttpInterceptor(new AccessTokenInterceptor());
-        AddHttpInterceptor(new RefreshTokenInterceptor());
-        AddHttpInterceptor(new LookupInterceptor(discordUser, accessTokenInterceptor));
-        AddHttpInterceptor(new GuildMemberInterceptor(discordUser, guildRoleId));
+        await SetupDocuments(guildId, roleMapping);
+        
+        (DiscordToken, RefreshToken) = GetService<TestDiscordAdapter>().AddUser(discordUser, guildId, null, null, guildRoleId);
 
         //Act
-        var response = await MakeRequest(client);
+        var response = await MakeRequest(client, guildId);
         var body = await response.Content.ReadAsJsonAsync<TokenResponse>();
 
         // Assert
@@ -110,22 +119,19 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
     [Theory]
     [InlineData("Tore XD Tang", "1231289378")]
     [InlineData(null, "1231289378")]
-    [InlineData("Tore XD Tant", null)]
+    [InlineData("Tore XD Tang", null)]
     [InlineData(null, null)]
     public async Task returns_guild_nickname_and_avatar_when_available(string? guildUsername, string? guildAvatar)
     {
         // Arrange
-        var client = GetAnonymousClient(GuildId);
+        var guildId = SetupGuild();
+        var client = GetAnonymousClient();
         var discordUser = Generator.GenerateDiscordUser();
-        var guildRoleId = "999999";
 
-        AddHttpInterceptor(new AccessTokenInterceptor());
-        AddHttpInterceptor(new RefreshTokenInterceptor());
-        AddHttpInterceptor(new LookupInterceptor(discordUser));
-        AddHttpInterceptor(new GuildMemberInterceptor(discordUser, guildUsername, guildAvatar, guildRoleId));
-
+        (DiscordToken, RefreshToken) = GetService<TestDiscordAdapter>().AddUser(discordUser, guildId, guildUsername, guildAvatar);
+       
         //Act
-        var response = await MakeRequest(client);
+        var response = await MakeRequest(client, guildId);
         var body
             = await response.Content.ReadAsJsonAsync<TokenResponse>();
 
@@ -140,46 +146,45 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
     }
 
     [Fact]
-    public async Task succeeds_when_user_is_not_member_of_guild()
+    public async Task succeeds_when_not_member_of_guild_and_jwt_is_returned()
     {
         // Arrange
-        var client = GetAnonymousClient(GuildId);
+        var guildId = SetupGuild();
+        var client = GetAnonymousClient();
         var discordUser = Generator.GenerateDiscordUser();
 
-        AddHttpInterceptor(new AccessTokenInterceptor());
-        AddHttpInterceptor(new RefreshTokenInterceptor());
-        AddHttpInterceptor(new LookupInterceptor(discordUser));
-        AddHttpInterceptor(new GuildMemberInterceptor(discordUser, false));
-
+        (DiscordToken, RefreshToken) = GetService<TestDiscordAdapter>().AddUser(discordUser);
+        
         //Act
-        var response = await MakeRequest(client);
+        var response = await MakeRequest(client, guildId);
         var body
             = await response.Content.ReadAsJsonAsync<TokenResponse>();
 
         // Assert
+        var testResponse = await TestAuthentication(client, body!.Token);
+        testResponse.Should().NotBeNull();
+
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         body.Should().NotBeNull();
 
         Assert.Multiple(
-            () => body!.UserId.Should().Be(discordUser.Id),
-            () => body!.Nick.Should().Be(discordUser.Username),
-            () => body!.Avatar.Should().Be(discordUser.Avatar));
+            () => testResponse.Id.Should().Be(discordUser.Id),
+            () => testResponse.Name.Should().Be(discordUser.Username),
+            () => testResponse.Roles.Should().Contain(Role.User.ToString()));
     }
 
     [Fact]
     public async Task succeeds_when_user_has_no_avatar()
     {
         // Arrange
-        var client = GetAnonymousClient(GuildId);
+        var guildId = SetupGuild();
+        var client = GetAnonymousClient();
         var discordUser = Generator.GenerateDiscordUser();
 
-        AddHttpInterceptor(new RefreshTokenInterceptor());
-        AddHttpInterceptor(new RefreshTokenInterceptor());
-        AddHttpInterceptor(new LookupInterceptor(discordUser));
-        AddHttpInterceptor(new GuildMemberInterceptor(discordUser));
+        (DiscordToken, RefreshToken) = GetService<TestDiscordAdapter>().AddUser(discordUser, guildId);
 
         //Act
-        var response = await MakeRequest(client);
+        var response = await MakeRequest(client, guildId);
         var body
             = await response.Content.ReadAsJsonAsync<TokenResponse>();
 
@@ -191,5 +196,58 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
             () => body!.UserId.Should().Be(discordUser.Id),
             () => body!.Nick.Should().Be(discordUser.Username),
             () => body!.Avatar.Should().BeNull());
+    }
+    
+    [Theory]
+    [InlineData("Tore XD Tang", "1231289378")]
+    [InlineData(null, "1231289378")]
+    [InlineData("Tore XD Tant", null)]
+    [InlineData(null, null)]
+    public async Task persists_user_with_guild_avatar_and_guild_nick_if_available(string? guildUsername, string? guildAvatar)
+    {
+        // Arrange
+        var guildId = SetupGuild();
+        var client = GetAnonymousClient();
+        var discordUser = Generator.GenerateDiscordUser();
+
+        (DiscordToken, RefreshToken) = GetService<TestDiscordAdapter>().AddUser(discordUser, guildId, guildUsername, guildAvatar);
+
+        //Act
+        var response = await MakeRequest(client, guildId);
+        var body = await response.Content.ReadAsJsonAsync<TokenResponse>();
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        body.Should().NotBeNull();
+
+        var userDocuments = GetCommittedDocuments<UserManager.UserDocument>(guildId);
+        var userDocument = userDocuments.Should().ContainSingle(doc => doc.Id == discordUser.Id).Subject;
+        
+        Assert.Multiple(() => userDocument.Name.Should().Be(guildUsername ?? discordUser.Username),
+            () => userDocument.Avatar.Should().Be(guildAvatar ?? discordUser.Avatar));
+    }
+    
+    [Fact]
+    public async Task persists_user_when_user_is_not_member_of_guild()
+    {
+        // Arrange
+        var guildId = SetupGuild();
+        var client = GetAnonymousClient();
+        var discordUser = Generator.GenerateDiscordUser();
+
+        (DiscordToken, RefreshToken) = GetService<TestDiscordAdapter>().AddUser(discordUser);
+
+        //Act
+        var response = await MakeRequest(client, guildId);
+        var body = await response.Content.ReadAsJsonAsync<TokenResponse>();
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        body.Should().NotBeNull();
+
+        var userDocuments = GetCommittedDocuments<UserManager.UserDocument>(guildId);
+        var userDocument = userDocuments.Should().ContainSingle(doc => doc.Id == discordUser.Id).Subject;
+        Assert.Multiple(() => userDocument.Name.Should().Be(discordUser.Username),
+            () => userDocument.Avatar.Should().Be(discordUser.Avatar));
     }
 }

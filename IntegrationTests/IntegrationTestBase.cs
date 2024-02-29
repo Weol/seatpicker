@@ -2,17 +2,12 @@ using System.Net.Http.Headers;
 using Bogus;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Seatpicker.Application.Features;
 using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Adapters.Database;
+using Seatpicker.Infrastructure.Adapters.Discord;
 using Seatpicker.Infrastructure.Authentication;
-using Seatpicker.Infrastructure.Authentication.Discord;
-using Seatpicker.Infrastructure.Entrypoints.Utils;
-using Seatpicker.IntegrationTests.HttpInterceptor;
+using Seatpicker.IntegrationTests.TestAdapters;
 using Shared;
-using Xunit;
 using Xunit.Abstractions;
 using Xunit.Extensions.AssemblyFixture;
 
@@ -22,21 +17,24 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>, I
 {
     private readonly WebApplicationFactory<Infrastructure.Program> factory;
     private readonly ITestOutputHelper testOutputHelper;
-
-    protected string GuildId { get; } = new Faker().Random.Int(1).ToString();
+    private readonly string testIdentifier;
 
     protected IntegrationTestBase(TestWebApplicationFactory factory,
         PostgresFixture databaseFixture,
         ITestOutputHelper testOutputHelper)
     {
         this.factory = factory;
-
         this.testOutputHelper = testOutputHelper;
     }
 
-    protected HttpClient GetClient(string guildId, TestIdentity identity)
+    protected T GetService<T>() where T : notnull
     {
-        var client = GetAnonymousClient(guildId);
+        return factory.Services.GetRequiredService<T>();
+    }
+    
+    protected HttpClient GetClient(TestIdentity identity)
+    {
+        var client = GetAnonymousClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", identity.Token);
 
         return client;
@@ -48,22 +46,16 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>, I
             .GetAwaiter()
             .GetResult();
 
-        return GetClient(guildId, identity);
+        return GetClient(identity);
     }
 
-    protected HttpClient GetAnonymousClient(string guildId)
+    protected HttpClient GetAnonymousClient()
     {
         var client = factory.CreateDefaultClient(factory.ClientOptions.BaseAddress,
             new HttpResponseLoggerHandler(testOutputHelper));
-        client.DefaultRequestHeaders.Add(TenantAuthorizationMiddleware.TenantHeaderName, guildId);
         return client;
     }
 
-    protected async Task SetupGuild(string? guildId = null)
-    {
-        
-    }
-    
     protected async Task SetupAggregates(string guildId, params AggregateBase[] aggregates)
     {
         var repository = factory.Services.GetRequiredService<IAggregateRepository>();
@@ -103,26 +95,26 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>, I
         return reader.Query<TDocument>().AsEnumerable();
     }
 
-    protected async Task<User> CreateUser(string tenant)
+    protected async Task<User> CreateUser(string guildId)
     {
         var userDocument = new UserManager.UserDocument(
             Guid.NewGuid().ToString(),
-            GuildId,
+            guildId,
             new Faker().Name.FirstName(),
-            null);
+            Array.Empty<Role>());
 
-        await SetupDocuments(tenant, userDocument);
+        await SetupDocuments(guildId, userDocument);
 
-        return new User(userDocument.Id, userDocument.Name, userDocument.Avatar);
+        return new User(userDocument.Id, userDocument.Name, userDocument.Avatar, Array.Empty<Role>());
     }
 
-    protected async Task<TestIdentity> CreateIdentity(string tenant, params Role[] roles)
+    protected async Task<TestIdentity> CreateIdentity(string guildId, params Role[] roles)
     {
         if (roles.Length == 0) roles = new[] { Role.User };
 
-        var jwtTokenCreator = factory.Services.GetRequiredService<DiscordJwtTokenCreator>();
+        var jwtTokenCreator = factory.Services.GetRequiredService<JwtTokenCreator>();
 
-        var user = await CreateUser(tenant);
+        var user = await CreateUser(guildId);
 
         var discordToken = new DiscordToken(
             Id: user.Id,
@@ -130,21 +122,20 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>, I
             RefreshToken: "8ioq3",
             Avatar: user.Avatar,
             Roles: roles,
-            GuildId: tenant
+            GuildId: guildId,
+            Provider: AuthenticationProvider.Discord
         );
 
         var (token, _) = await jwtTokenCreator.CreateToken(discordToken, roles);
 
-        var identity = new TestIdentity(user, roles, token, GuildId);
+        var identity = new TestIdentity(user, roles, token, guildId);
         return identity;
     }
 
-    protected internal void AddHttpInterceptor<TInterceptor>(TInterceptor interceptor)
-        where TInterceptor : IInterceptor
+    protected string CreateGuild()
     {
-        var interceptingHttpHandler = factory.Services.GetRequiredService<InterceptingHttpMessageHandler>();
-        interceptingHttpHandler.Interceptors.Add(interceptor);
+        return new Faker().Random.Int(1).ToString();
     }
 
-    public record TestIdentity(User User, Role[] Roles, string Token, string GuildId);
+    public record TestIdentity(User User, Role[] Roles, string Token, string guildId);
 }

@@ -1,9 +1,5 @@
 using Marten;
-using Marten.Storage;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Seatpicker.Infrastructure.Adapters.Database;
-using Shared;
 using Testcontainers.PostgreSql;
 using Weasel.Core;
 using Xunit;

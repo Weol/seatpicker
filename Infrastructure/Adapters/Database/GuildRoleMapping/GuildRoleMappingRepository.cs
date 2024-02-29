@@ -1,6 +1,5 @@
 using Seatpicker.Application.Features;
 using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Authentication;
 using Shared;
 
 namespace Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;

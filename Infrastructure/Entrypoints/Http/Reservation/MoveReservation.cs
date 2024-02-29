@@ -2,13 +2,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Seats;
-using Seatpicker.Infrastructure.Entrypoints.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Reservation;
 
 public static class MoveReservation
 {
-    public static async Task<IActionResult> Move(
+    public static async Task<IResult> Move(
         [FromRoute] Guid lanId,
         [FromRoute] Guid seatId,
         [FromBody] Request request,
@@ -19,7 +18,7 @@ public static class MoveReservation
 
         await reservationService.Move(lanId, seatId, request.ToSeatId, user);
 
-        return new OkResult();
+        return TypedResults.Ok();
     }
 
     public record Request(Guid ToSeatId);

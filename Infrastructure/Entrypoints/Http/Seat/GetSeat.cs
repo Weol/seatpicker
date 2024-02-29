@@ -6,7 +6,7 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 
 public static class GetSeat
 {
-    public static async Task<ActionResult<Response[]>> GetAll(
+    public static async Task<IResult> GetAll(
         [FromRoute] Guid lanId,
         [FromServices] IDocumentRepository documentRepository,
         [FromServices] IUserProvider userProvider)
@@ -34,10 +34,10 @@ public static class GetSeat
 
         var seats = await Task.WhenAll(tasks);
 
-        return new OkObjectResult(seats);
+        return TypedResults.Ok(seats);
     }
 
-    public static async Task<ActionResult<Response>> Get(
+    public static async Task<IResult> Get(
         [FromRoute] Guid lanId,
         [FromRoute] Guid seatId,
         [FromServices] IUserProvider userProvider,
@@ -49,7 +49,7 @@ public static class GetSeat
             .Where(seat => seat.LanId == lanId)
             .SingleOrDefault(seat => seat.Id == seatId);
 
-        if (seat is null) return new NotFoundResult();
+        if (seat is null) return TypedResults.NotFound();
 
         User? reservedBy = null;
         if (seat.ReservedBy is not null)
@@ -61,7 +61,7 @@ public static class GetSeat
             }
         }
 
-        return new OkObjectResult(new Response(seat.Id, seat.Title, Bounds.FromDomainBounds(seat.Bounds), reservedBy));
+        return TypedResults.Ok(new Response(seat.Id, seat.Title, Bounds.FromDomainBounds(seat.Bounds), reservedBy));
     }
 
     public record Response(Guid Id, string Title, Bounds Bounds, User? ReservedBy);

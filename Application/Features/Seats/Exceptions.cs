@@ -1,6 +1,4 @@
-﻿using Seatpicker.Domain;
-
-namespace Seatpicker.Application.Features.Seats;
+﻿namespace Seatpicker.Application.Features.Seats;
 
 public class SeatNotFoundException : ApplicationException
 {

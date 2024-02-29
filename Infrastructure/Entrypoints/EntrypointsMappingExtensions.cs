@@ -1,4 +1,5 @@
 using Seatpicker.Domain;
+using Seatpicker.Infrastructure.Entrypoints.Filters;
 using Seatpicker.Infrastructure.Entrypoints.Http.Authentication;
 using Seatpicker.Infrastructure.Entrypoints.Http.Authentication.Discord;
 using Seatpicker.Infrastructure.Entrypoints.Http.Guild;
@@ -20,11 +21,15 @@ public static class EntrypointsMappingExtensions
 
     public static void MapEntrypoints(this IEndpointRouteBuilder builder)
     {
-        builder.MapGroup("guild").MapGuildEndpoints();
+        builder.MapGroup("guild")
+            .MapGuildEndpoints()
+            .MapDiscordGuildEndpoints();
 
-        builder.MapGroup("authentication").MapAuthenticationEndpoints();
+        builder.MapGroup("authentication")
+            .MapAuthenticationEndpoints();
 
-        builder.MapGroup("marten").MapMartenEndpoints();
+        builder.MapGroup("marten")
+            .MapMartenEndpoints();
 
         builder.MapMartenEndpoints();
     }
@@ -44,43 +49,56 @@ public static class EntrypointsMappingExtensions
         discordGroup.MapPost("renew", RenewEndpoint.Renew);
     }
 
-    private static void MapGuildEndpoints(this RouteGroupBuilder builder)
+    private static void MapDiscordGuildEndpoints(this RouteGroupBuilder builder)
+    {
+        var discordGroup = builder.MapGroup("discord/{guildId}")
+            .RequireRole(Role.Admin)
+            .AddEndpointFilter<GuildIdAuthorizationFilter>();
+        
+        discordGroup.MapGet("roles", GetRoleMapping.Get);
+        discordGroup.MapPut("roles", PutRoleMapping.Put);
+    }
+    
+    private static RouteGroupBuilder MapGuildEndpoints(this RouteGroupBuilder builder)
     {
         builder.MapGet("/", GetGuilds.GetAll);
 
-        var guildGroup = builder.MapGroup("{guildId}");
+        var guildGroup = builder.MapGroup("{guildId}")
+            .AddEndpointFilter<GuildIdAuthorizationFilter>();
+            
         guildGroup.MapGet("/", GetGuilds.Get);
 
-        guildGroup.MapGroup("lan").MapLanEndpoints();
+        guildGroup.MapGroup("lan")
+            .MapLanEndpoints();
+        
         guildGroup.MapGet("users", GetUsers.Get)
             .RequireRole(Role.Admin);
 
-        // Discord guild endpoints
-        guildGroup.MapGet("roles", GetRoleMapping.Get);
-        guildGroup.MapPut("roles", PutRoleMapping.Put);
+        return builder;
     }
 
     private static void MapLanEndpoints(this RouteGroupBuilder builder)
     {
         builder.MapGet("/", GetLan.GetAll);
-        builder.MapPost("/", CreateLan.Create);
         builder.MapGet("active", GetLan.GetActiveLan);
+        builder.MapPost("/", CreateLan.Create).RequireRole(Role.Admin);
 
-        var lanGroup = builder.MapGroup("{lanId:Guid}");
+        var lanGroup = builder.MapGroup("{lanId:Guid}").RequireRole(Role.Admin);
         lanGroup.MapGet("/", GetLan.Get);
         lanGroup.MapPut("/", UpdateLan.Update);
         lanGroup.MapDelete("/", DeleteLan.Delete);
 
-        builder.MapGroup("seat").MapSeatEndpoints();
+        lanGroup.MapGroup("seat")
+            .MapSeatEndpoints();
     }
 
     private static void MapSeatEndpoints(this RouteGroupBuilder builder)
     {
         builder.MapGet("/", GetSeat.GetAll);
+        builder.MapPost("/", CreateSeat.Create).RequireRole(Role.Operator);
 
-        var seatGroup = builder.MapGroup("{seatId:Guid}");
+        var seatGroup = builder.MapGroup("{seatId:Guid}").RequireRole(Role.Operator);
         seatGroup.MapGet("/", GetSeat.Get);
-        seatGroup.MapPost("/", CreateLan.Create);
         seatGroup.MapPut("/", UpdateSeat.Update);
         seatGroup.MapDelete("/", DeleteSeat.Delete);
 
@@ -100,6 +118,7 @@ public static class EntrypointsMappingExtensions
 
     private static void MapReservationManagementEndpoints(this RouteGroupBuilder builder)
     {
+        builder.RequireRole(Role.Operator);
         builder.MapPost("/", CreateReservationFor.Create);
         builder.MapPut("/", MoveReservationFor.Move);
         builder.MapDelete("/", DeleteReservationFor.Delete);

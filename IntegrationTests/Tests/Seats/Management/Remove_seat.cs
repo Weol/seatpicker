@@ -1,7 +1,7 @@
 using System.Net;
 using FluentAssertions;
 using Seatpicker.Application.Features.Seats;
-using Seatpicker.Infrastructure.Authentication;
+using Seatpicker.Domain;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -17,38 +17,40 @@ public class Remove_seat : IntegrationTestBase
     {
     }
 
-    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, Guid lanId, Guid seatId) =>
-        await client.DeleteAsync($"lan/{lanId}/seat/{seatId}");
+    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, Guid lanId, Guid seatId) =>
+        await client.DeleteAsync($"guild/{guildId}/lan/{lanId}/seat/{seatId}");
 
     [Fact]
     public async Task succeeds_when_seat_exists()
     {
         // Arrange
-        var client = GetClient(GuildId, Role.Operator);
+		var guildId = CreateGuild();
+        var client = GetClient(guildId, Role.Operator);
 
-        var lan = LanGenerator.Create(GuildId);
+        var lan = LanGenerator.Create(guildId);
         var seat = SeatGenerator.Create(lan);
-        await SetupAggregates(GuildId, seat);
+        await SetupAggregates(guildId, seat);
 
         //Act
-        var response = await MakeRequest(client, lan.Id, seat.Id);
+        var response = await MakeRequest(client, guildId, lan.Id, seat.Id);
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        GetCommittedDocuments<ProjectedSeat>(GuildId).Should().BeEmpty();
+        GetCommittedDocuments<ProjectedSeat>(guildId).Should().BeEmpty();
     }
 
     [Fact]
     public async Task fails_when_seat_does_not_exists()
     {
         // Arrange
-        var client = GetClient(GuildId, Role.Operator);
+		var guildId = CreateGuild();
+        var client = GetClient(guildId, Role.Operator);
 
-        var lan = LanGenerator.Create(GuildId);
-        await SetupAggregates(GuildId, lan);
+        var lan = LanGenerator.Create(guildId);
+        await SetupAggregates(guildId, lan);
 
         //Act
-        var response = await MakeRequest(client, lan.Id, Guid.NewGuid());
+        var response = await MakeRequest(client, guildId, lan.Id, Guid.NewGuid());
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -58,10 +60,11 @@ public class Remove_seat : IntegrationTestBase
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
         // Arrange
-        var client = GetClient(GuildId);
+		var guildId = CreateGuild();
+        var client = GetClient(guildId);
 
         //Act
-        var response = await MakeRequest(client, Guid.NewGuid(), Guid.NewGuid());
+        var response = await MakeRequest(client, guildId, Guid.NewGuid(), Guid.NewGuid());
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);

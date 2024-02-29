@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using JasperFx.Core;
 using Marten;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -8,15 +7,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
-using Npgsql.PostgresTypes;
 using NSubstitute;
 using Seatpicker.Infrastructure.Adapters.Database;
-using Seatpicker.IntegrationTests.HttpInterceptor;
+using Seatpicker.Infrastructure.Adapters.Discord;
+using Seatpicker.IntegrationTests.TestAdapters;
 using Testcontainers.PostgreSql;
 using Weasel.Core;
-using Xunit;
-using Xunit.Abstractions;
-using Xunit.Extensions.AssemblyFixture;
 
 namespace Seatpicker.IntegrationTests;
 
@@ -62,11 +58,9 @@ public class TestWebApplicationFactory : WebApplicationFactory<Infrastructure.Pr
             .ConfigureServices(services =>
             {
                 // Add intercepting http message handler
-                var interceptingHandler = new InterceptingHttpMessageHandler();
-                services.AddSingleton(interceptingHandler);
-                services.ConfigureAll<HttpClientFactoryOptions>(
-                    options => options.HttpMessageHandlerBuilderActions.Add(
-                        handlerBuilder => handlerBuilder.PrimaryHandler = interceptingHandler));
+                services.RemoveAll<DiscordAdapter>();
+                services.AddSingleton<TestDiscordAdapter>();
+                services.AddSingleton<DiscordAdapter>(provider => provider.GetRequiredService<TestDiscordAdapter>());
             });
     }
 

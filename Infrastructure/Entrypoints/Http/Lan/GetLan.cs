@@ -1,13 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features;
 using Seatpicker.Application.Features.Lans;
+using Seatpicker.Infrastructure.Adapters.SignalR;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 
 #pragma warning disable CS1998
 public static class GetLan
 {
-    public static async Task<ActionResult<Response[]>> GetAll(
+    public static async Task<IResult> GetAll(
         [FromServices] IDocumentRepository documentRepository)
     {
         using var documentReader = documentRepository.CreateReader();
@@ -17,25 +19,25 @@ public static class GetLan
             .AsEnumerable()
             .Select(lan => new Response(lan));
 
-        return new OkObjectResult(lans);
+        return TypedResults.Ok(lans);
     }
 
-    public static async Task<ActionResult<Response>> Get(
-        [FromRoute] Guid id,
+    public static async Task<IResult> Get(
+        [FromRoute] Guid lanId,
         [FromServices] IDocumentRepository documentRepository)
     {
         using var documentReader = documentRepository.CreateReader();
 
         var lan = documentReader.Query<ProjectedLan>()
-            .SingleOrDefault(lan => lan.Id == id);
+            .SingleOrDefault(lan => lan.Id == lanId);
 
-        if (lan is null) return new NotFoundResult();
+        if (lan is null) return TypedResults.NotFound();
 
-        return new OkObjectResult(new Response(lan));
+        return TypedResults.Ok(new Response(lan));
     }
 
-    public static async Task<ActionResult<Response>> GetActiveLan(
-        [FromQuery] string guildId,
+    public static async Task<IResult> GetActiveLan(
+        [FromRoute] string guildId,
         [FromServices] IDocumentRepository documentRepository)
     {
         using var documentReader = documentRepository.CreateReader();
@@ -44,9 +46,9 @@ public static class GetLan
             .Where(lan => lan.GuildId == guildId)
             .SingleOrDefault(lan => lan.Active);
 
-        if (lan is null) return new NotFoundResult();
+        if (lan is null) return TypedResults.NotFound();
 
-        return new OkObjectResult(new Response(lan));
+        return TypedResults.Ok(new Response(lan));
     }
 
     public record Response(Guid Id,

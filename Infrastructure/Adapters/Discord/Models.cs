@@ -18,10 +18,6 @@ public class DiscordAccessToken
     [JsonPropertyName("expires_in")] public int ExpiresIn { get; set; }
 
     [JsonPropertyName("refresh_token")] public string RefreshToken { get; set; } = null!;
-
-    [JsonPropertyName("scopes")] public IEnumerable<string> Scopes { get; set; } = null!;
-
-    [JsonPropertyName("token_type")] public string TokenType { get; set; } = null!;
 }
 
 public class DiscordGuildMember

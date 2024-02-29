@@ -2,7 +2,6 @@
 using Seatpicker.Infrastructure.Adapters.Discord;
 using Seatpicker.Infrastructure.Adapters.SignalR;
 using Seatpicker.Infrastructure.Authentication;
-using Seatpicker.Infrastructure.Authentication.Discord;
 
 namespace Seatpicker.Infrastructure.Adapters;
 

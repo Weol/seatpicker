@@ -20,7 +20,7 @@ internal static class DatabaseExtensions
 
         services.AddSingleton<IAggregateRepository, AggregateRepository>()
             .AddSingleton<IDocumentRepository, DocumentRepository>()
-            .AddSingleton<ITenantProvider, TenantProvider>()
+            .AddSingleton<GuildIdProvider>()
             .AddSingleton<GuildRoleMappingRepository>();
 
         services.AddMarten(

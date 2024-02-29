@@ -2,13 +2,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Seats;
-using Seatpicker.Infrastructure.Entrypoints.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 
 public static class UpdateSeat
 {
-    public static async Task<IActionResult> Update(
+    public static async Task<IResult> Update(
         [FromRoute] Guid guildId,
         [FromRoute] Guid lanId,
         [FromRoute] Guid seatId,
@@ -20,7 +19,7 @@ public static class UpdateSeat
 
         await seatManagementService.Update(lanId, seatId, request.Title, request.Bounds?.ToDomainBounds(), user);
 
-        return new OkResult();
+        return TypedResults.Ok();
     }
 
     public record Request(string? Title, Bounds? Bounds);

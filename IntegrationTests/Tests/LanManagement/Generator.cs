@@ -8,7 +8,6 @@ public static class Generator
     public static CreateLan.Request CreateLanRequest(string guildId)
     {
         return new CreateLan.Request(
-            guildId,
             new Faker().Hacker.Noun(),
             LanGenerator.CreateValidBackround());
     }

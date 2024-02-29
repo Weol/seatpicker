@@ -2,7 +2,7 @@
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace Seatpicker.Infrastructure.Entrypoints.Utils;
+namespace Seatpicker.Infrastructure.Entrypoints.Filters;
 
 public class FluentValidationFilter : IAsyncActionFilter, IOrderedFilter
 {

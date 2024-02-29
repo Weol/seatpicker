@@ -1,14 +1,12 @@
 ﻿using FluentValidation;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Seats;
-using Seatpicker.Infrastructure.Entrypoints.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 
 public static class CreateSeat
 {
-    public static async Task<ActionResult<Response>> Create(
+    public static async Task<IResult> Create(
         [FromRoute] Guid lanId,
         [FromBody] Request request,
         [FromServices] ILoggedInUserAccessor loggedInUserAccessor,
@@ -18,7 +16,7 @@ public static class CreateSeat
 
         var id = await seatManagementService.Create(lanId, request.Title, request.Bounds.ToDomainBounds(), user);
 
-        return new OkObjectResult(new Response(id));
+        return TypedResults.Ok(new Response(id));
     }
 
     public record Request(string Title, Bounds Bounds);

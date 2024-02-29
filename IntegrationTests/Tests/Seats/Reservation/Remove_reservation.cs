@@ -16,30 +16,31 @@ public class Remove_reservation : IntegrationTestBase
     {
     }
 
-    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, Guid lanId, Guid seatId) =>
-        await client.DeleteAsync($"lan/{lanId}/seat/{seatId}/reservation");
+    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, Guid lanId, Guid seatId) =>
+        await client.DeleteAsync($"guild/{guildId}/lan/{lanId}/seat/{seatId}/reservation");
 
     [Fact]
     public async Task succeeds_when_seat_is_reserved_by_user()
     {
         // Arrange
-        var identity = await CreateIdentity(GuildId);
-        var client = GetClient(GuildId, identity);
+		var guildId = CreateGuild();
+        var identity = await CreateIdentity(guildId);
+        var client = GetClient(identity);
 
-        var lan = LanGenerator.Create(GuildId);
+        var lan = LanGenerator.Create(guildId);
         var seat = SeatGenerator.Create(lan, reservedBy: identity.User);
 
-        await SetupAggregates(GuildId, lan, seat);
+        await SetupAggregates(guildId, lan, seat);
 
         //Act
-        var response = await MakeRequest(client, lan.Id, seat.Id);
+        var response = await MakeRequest(client, guildId, lan.Id, seat.Id);
 
         //Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                var committedSeat = GetCommittedDocuments<ProjectedSeat>(GuildId).Should().ContainSingle().Subject;
+                var committedSeat = GetCommittedDocuments<ProjectedSeat>(guildId).Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().BeNull();
             });
     }
@@ -48,16 +49,17 @@ public class Remove_reservation : IntegrationTestBase
     public async Task succeeds_when_seat_is_not_reserved()
     {
         // Arrange
-        var identity = await CreateIdentity(GuildId);
-        var client = GetClient(GuildId, identity);
+		var guildId = CreateGuild();
+        var identity = await CreateIdentity(guildId);
+        var client = GetClient(identity);
 
-        var lan = LanGenerator.Create(GuildId);
+        var lan = LanGenerator.Create(guildId);
         var seat = SeatGenerator.Create(lan);
 
-        await SetupAggregates(GuildId, seat);
+        await SetupAggregates(guildId, seat);
 
         //Act
-        var response = await MakeRequest(client, lan.Id, seat.Id);
+        var response = await MakeRequest(client, guildId, lan.Id, seat.Id);
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -67,24 +69,25 @@ public class Remove_reservation : IntegrationTestBase
     public async Task fails_when_seat_is_reserved_by_different_user()
     {
         // Arrange
-        var identity = await CreateIdentity(GuildId);
-        var client = GetClient(GuildId, identity);
+		var guildId = CreateGuild();
+        var identity = await CreateIdentity(guildId);
+        var client = GetClient(identity);
 
-        var alreadyReservedBy = await CreateUser(GuildId);
-        var lan = LanGenerator.Create(GuildId);
+        var alreadyReservedBy = await CreateUser(guildId);
+        var lan = LanGenerator.Create(guildId);
         var seat = SeatGenerator.Create(lan, reservedBy: alreadyReservedBy);
 
-        await SetupAggregates(GuildId, seat);
+        await SetupAggregates(guildId, seat);
 
         //Act
-        var response = await MakeRequest(client, lan.Id, seat.Id);
+        var response = await MakeRequest(client, guildId, lan.Id, seat.Id);
 
         //Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.Conflict),
             () =>
             {
-                var committedSeat = GetCommittedDocuments<ProjectedSeat>(GuildId).Should().ContainSingle().Subject;
+                var committedSeat = GetCommittedDocuments<ProjectedSeat>(guildId).Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().NotBeNull();
                 committedSeat.ReservedBy!.Should().Be(alreadyReservedBy.Id);
             });
@@ -94,8 +97,9 @@ public class Remove_reservation : IntegrationTestBase
     public async Task fails_when_seat_does_not_exist()
     {
         // Arrange
-        var identity = await CreateIdentity(GuildId);
-        var client = GetClient(GuildId, identity);
+		var guildId = CreateGuild();
+        var identity = await CreateIdentity(guildId);
+        var client = GetClient(identity);
 
         //Act
         var response = await client.DeleteAsync($"reservation/{Guid.NewGuid()}");

@@ -7,8 +7,11 @@ public class Generator
 {
     public static DiscordUser GenerateDiscordUser()
     {
-        return new DiscordUser(new Faker().Random.Int(1).ToString(),
-            new Faker().Name.FirstName(),
-            new Faker().Random.Int(1).ToString());
+        return new DiscordUser
+        {
+            Id = new Faker().Random.Int(1).ToString(),
+            Username = new Faker().Name.FirstName(),
+            Avatar = new Faker().Random.Int(1).ToString(),
+        };
     }
 }

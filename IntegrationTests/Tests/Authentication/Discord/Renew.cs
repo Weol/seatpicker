@@ -15,10 +15,10 @@ public class Renew : LoginAndRenewBase
     {
     }
 
-    protected override Task<HttpResponseMessage> MakeRequest(HttpClient client)
+    protected override Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId)
     {
         return client.PostAsync(
             "authentication/discord/renew",
-            JsonContent.Create(new RenewEndpoint.Request("refresh token", GuildId)));
+            JsonContent.Create(new RenewEndpoint.Request(RefreshToken, guildId)));
     }
 }

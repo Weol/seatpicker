@@ -2,19 +2,18 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Lans;
-using Seatpicker.Infrastructure.Entrypoints.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 
 public static class UpdateLan
 {
-    public static async Task<IActionResult> Update(
-        [FromRoute] Guid id,
+    public static async Task<IResult> Update(
+        [FromRoute] Guid lanId,
         [FromBody] Request request,
         ILoggedInUserAccessor loggedInUserAccessor,
         ILanManagementService lanManagementService)
     {
-        if (id != request.Id) throw new BadRequestException("Route parameter id does not match the request model id");
+        if (lanId != request.Id) throw new BadRequestException("Route parameter id does not match the request model id");
 
         if (request.Active is null && request.Title is null && request.Background is null)
             throw new BadRequestException("At least one property besides id must be set");
@@ -23,7 +22,7 @@ public static class UpdateLan
 
         await lanManagementService.Update(request.Id, request.Active, request.Title, request.Background, user);
 
-        return new OkResult();
+        return TypedResults.Ok();
     }
 
     public record Request(Guid Id, bool? Active, string? Title, byte[]? Background);

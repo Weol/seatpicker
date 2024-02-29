@@ -9,7 +9,7 @@ public static class Generator
     {
         return new CreateSeat.Request(
             Title: new Faker().Hacker.Verb(),
-            Bounds:new Bounds(0, 0, 1, 1));
+            Bounds: new Bounds(0, 0, 1, 1));
     }
 
     public static UpdateSeat.Request UpdateSeatRequest()

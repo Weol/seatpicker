@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Seatpicker.Infrastructure.Entrypoints.Utils;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Authentication;
 
 public static class TestEndpoint
 {
-    public static async Task<ActionResult<Response>> Test(
+    public static async Task<IResult> Test(
         [FromServices] ILoggedInUserAccessor loggedInUserAccessor,
         [FromServices] IHttpContextAccessor httpContextAccessor)
     {
@@ -18,7 +17,7 @@ public static class TestEndpoint
 
         var loggedInUser = await loggedInUserAccessor.Get();
 
-        return new OkObjectResult(new Response(loggedInUser.Id, loggedInUser.Name, roles));
+        return TypedResults.Ok(new Response(loggedInUser.Id, loggedInUser.Name, roles));
     }
 
     public record Response(string? Id, string? Name, string[] Roles);
