@@ -19,8 +19,8 @@ public class GetAll_lan : IntegrationTestBase
     {
     }
 
-    private async Task<HttpResponseMessage> MakeRequest(HttpClient client) =>
-        await client.GetAsync("lan");
+    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId) =>
+        await client.GetAsync($"guild/{guildId}/lan");
 
     [Fact]
     public async Task returns_all_lans_that_exist_for_tenant()
@@ -33,7 +33,7 @@ public class GetAll_lan : IntegrationTestBase
         await SetupAggregates(guildId, existingLan[0], existingLan[1]);
 
         //Act
-        var response = await MakeRequest(client);
+        var response = await MakeRequest(client, guildId);
         var body = await response.Content.ReadAsJsonAsync<GetLan.Response[]>();
 
         //Assert
@@ -61,7 +61,7 @@ public class GetAll_lan : IntegrationTestBase
         var client = GetClient(guildId);
 
         //Act
-        var response = await MakeRequest(client);
+        var response = await MakeRequest(client, guildId);
         var body = await response.Content.ReadAsJsonAsync<GetLan.Response[]>();
 
         //Assert
@@ -82,7 +82,7 @@ public class GetAll_lan : IntegrationTestBase
 
             //Act
             var client = GetClient(tenant, Role.Admin);
-            var response = await MakeRequest(client);
+            var response = await MakeRequest(client, guildId);
             var body = await response.Content.ReadAsJsonAsync<GetLan.Response[]>();
 
             //Assert

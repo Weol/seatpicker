@@ -1,9 +1,5 @@
-using System.Net;
 using System.Net.Http.Json;
-using FluentAssertions;
-using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Entrypoints.Http.Authentication.Discord;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Seatpicker.IntegrationTests.Tests.Authentication.Discord;

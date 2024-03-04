@@ -6,8 +6,8 @@ public class GuildIdAuthorizationFilter : IEndpointFilter
 {
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
-        var guildId = context.GetArgument<string>(0);
-
+        if (context.HttpContext.GetRouteValue("guildId") is not string guildId) throw new GuildIdMissingException();
+        
         if (context.HttpContext.User.Identity?.IsAuthenticated == true)
         {
             var claimGuildId = context.HttpContext.User.Claims
@@ -23,6 +23,11 @@ public class GuildIdAuthorizationFilter : IEndpointFilter
         context.HttpContext.Features.Set(new GuildIdFeature(guildId));
         
         return await next(context);
+    }
+
+    public class GuildIdMissingException : Exception
+    {
+        
     }
 }
 

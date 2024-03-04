@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features;
 using Seatpicker.Application.Features.Lans;
-using Seatpicker.Infrastructure.Adapters.SignalR;
+using Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 
@@ -17,12 +16,13 @@ public static class GetLan
         var lans = documentReader.Query<ProjectedLan>()
             .OrderByDescending(lan => lan.CreatedAt)
             .AsEnumerable()
-            .Select(lan => new Response(lan));
+            .Select(lan => Response.FromProjectedLan(lan));
 
         return TypedResults.Ok(lans);
     }
 
     public static async Task<IResult> Get(
+        [FromRoute] string guildId,
         [FromRoute] Guid lanId,
         [FromServices] IDocumentRepository documentRepository)
     {
@@ -33,7 +33,7 @@ public static class GetLan
 
         if (lan is null) return TypedResults.NotFound();
 
-        return TypedResults.Ok(new Response(lan));
+        return TypedResults.Ok(Response.FromProjectedLan(lan));
     }
 
     public static async Task<IResult> GetActiveLan(
@@ -48,10 +48,11 @@ public static class GetLan
 
         if (lan is null) return TypedResults.NotFound();
 
-        return TypedResults.Ok(new Response(lan));
+        return TypedResults.Ok(Response.FromProjectedLan(lan));
     }
 
-    public record Response(Guid Id,
+    public record Response(
+        Guid Id,
         string GuildId,
         bool Active,
         string Title,
@@ -59,15 +60,13 @@ public static class GetLan
         DateTimeOffset CreatedAt,
         DateTimeOffset UpdatedAt)
     {
-        public Response(ProjectedLan lan) : this(
+        public static Response FromProjectedLan(ProjectedLan lan) => new Response(
             lan.Id,
             lan.GuildId,
             lan.Active,
             lan.Title,
             lan.Background,
             lan.CreatedAt,
-            lan.UpdatedAt)
-        {
-        }
+            lan.UpdatedAt);
     }
 }

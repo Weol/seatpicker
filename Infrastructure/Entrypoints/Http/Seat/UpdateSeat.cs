@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Seats;
 
@@ -8,7 +7,7 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 public static class UpdateSeat
 {
     public static async Task<IResult> Update(
-        [FromRoute] Guid guildId,
+        [FromRoute] string guildId,
         [FromRoute] Guid lanId,
         [FromRoute] Guid seatId,
         [FromBody] Request request,

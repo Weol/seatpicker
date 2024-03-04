@@ -1,13 +1,9 @@
 using System.Net;
 using System.Text.Json;
 using Bogus;
-using Discord.Rest;
-using JasperFx.Core;
-using Marten.Linq.SoftDeletes;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
 using Seatpicker.Infrastructure.Adapters.Discord;
 
 namespace Seatpicker.IntegrationTests.TestAdapters;
@@ -17,7 +13,7 @@ public class TestDiscordAdapter : DiscordAdapter
     private readonly ISet<TestUser> users = new HashSet<TestUser>();
     private readonly ISet<TestGuild> guilds = new HashSet<TestGuild>();
 
-    public TestDiscordAdapter(HttpClient httpClient, IOptions<DiscordAdapterOptions> options, JsonSerializerOptions jsonSerializerOptions, ILogger<Infrastructure.Adapters.Discord.DiscordAdapter> logger, IMemoryCache memoryCache) : base(httpClient, options, jsonSerializerOptions, logger, memoryCache)
+    public TestDiscordAdapter(HttpClient httpClient, IOptions<DiscordAdapterOptions> options, JsonSerializerOptions jsonSerializerOptions, ILogger<DiscordAdapter> logger, IMemoryCache memoryCache) : base(httpClient, options, jsonSerializerOptions, logger, memoryCache)
     {
     }
     

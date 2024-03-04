@@ -1,13 +1,10 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
-using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Filters;
 
-public class FluentValidationFilter : IAsyncActionFilter, IOrderedFilter
+public class FluentValidationFilter : IEndpointFilter
 {
-    public int Order => int.MaxValue - 10;
-
     private readonly IServiceProvider provider;
 
     public FluentValidationFilter(IServiceProvider provider)
@@ -15,9 +12,9 @@ public class FluentValidationFilter : IAsyncActionFilter, IOrderedFilter
         this.provider = provider;
     }
 
-    public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+    public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
-        foreach (var (_, value) in context.ActionArguments)
+        foreach (var value in context.Arguments)
         {
             if (value is null) continue;
 
@@ -25,14 +22,23 @@ public class FluentValidationFilter : IAsyncActionFilter, IOrderedFilter
 
             if (service is not IValidator validator) continue;
 
-            var validationResult = await validator.ValidateAsync(new ValidationContext<object>(value), context.HttpContext.RequestAborted);
-            if (!validationResult.IsValid)
-            {
-                throw new ModelValidationException(validationResult.Errors);
-            }
+            var validationResult = await validator.ValidateAsync(new ValidationContext<object>(value),
+                context.HttpContext.RequestAborted);
+            
+            if (validationResult.IsValid) continue;
+            
+            var errors = validationResult.Errors.Select(x =>
+                new
+                {
+                    x.PropertyName,
+                    x.ErrorMessage,
+                    x.AttemptedValue,
+                });
+
+            return Results.BadRequest(errors);
         }
 
-        await next();
+        return await next(context);
     }
 
     public class ModelValidationException : Exception

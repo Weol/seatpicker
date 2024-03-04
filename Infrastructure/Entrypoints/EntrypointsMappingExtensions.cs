@@ -19,19 +19,22 @@ public static class EntrypointsMappingExtensions
         return builder.RequireAuthorization(b => b.RequireRole(role.ToString()));
     }
 
-    public static void MapEntrypoints(this IEndpointRouteBuilder builder)
+    public static void MapEntrypoints(this IEndpointRouteBuilder builder, Action<RouteGroupBuilder> rootRouteBuilder)
     {
-        builder.MapGroup("guild")
+        var rootBuilder = builder.MapGroup("");
+        rootRouteBuilder(rootBuilder);
+        
+        rootBuilder.MapGroup("guild")
             .MapGuildEndpoints()
             .MapDiscordGuildEndpoints();
 
-        builder.MapGroup("authentication")
+        rootBuilder.MapGroup("authentication")
             .MapAuthenticationEndpoints();
 
-        builder.MapGroup("marten")
+        rootBuilder.MapGroup("marten")
             .MapMartenEndpoints();
 
-        builder.MapMartenEndpoints();
+        rootBuilder.MapMartenEndpoints();
     }
 
     private static void MapMartenEndpoints(this IEndpointRouteBuilder builder)
@@ -83,10 +86,10 @@ public static class EntrypointsMappingExtensions
         builder.MapGet("active", GetLan.GetActiveLan);
         builder.MapPost("/", CreateLan.Create).RequireRole(Role.Admin);
 
-        var lanGroup = builder.MapGroup("{lanId:Guid}").RequireRole(Role.Admin);
-        lanGroup.MapGet("/", GetLan.Get);
-        lanGroup.MapPut("/", UpdateLan.Update);
-        lanGroup.MapDelete("/", DeleteLan.Delete);
+        var lanGroup = builder.MapGroup("{lanId:Guid}");
+        lanGroup.MapGet("/", GetLan.Get).RequireRole(Role.Admin);
+        lanGroup.MapPut("/", UpdateLan.Update).RequireRole(Role.Admin);
+        lanGroup.MapDelete("/", DeleteLan.Delete).RequireRole(Role.Admin);
 
         lanGroup.MapGroup("seat")
             .MapSeatEndpoints();
@@ -97,10 +100,10 @@ public static class EntrypointsMappingExtensions
         builder.MapGet("/", GetSeat.GetAll);
         builder.MapPost("/", CreateSeat.Create).RequireRole(Role.Operator);
 
-        var seatGroup = builder.MapGroup("{seatId:Guid}").RequireRole(Role.Operator);
-        seatGroup.MapGet("/", GetSeat.Get);
-        seatGroup.MapPut("/", UpdateSeat.Update);
-        seatGroup.MapDelete("/", DeleteSeat.Delete);
+        var seatGroup = builder.MapGroup("{seatId:Guid}");
+        seatGroup.MapGet("/", GetSeat.Get).RequireRole(Role.Operator);
+        seatGroup.MapPut("/", UpdateSeat.Update).RequireRole(Role.Operator);
+        seatGroup.MapDelete("/", DeleteSeat.Delete).RequireRole(Role.Operator);
 
         seatGroup.MapGroup("reservation")
             .MapReservationEndpoints();

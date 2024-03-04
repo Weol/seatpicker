@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Seats;
 
@@ -8,6 +7,7 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Reservation;
 public static class MoveReservation
 {
     public static async Task<IResult> Move(
+        [FromRoute] string guildId,
         [FromRoute] Guid lanId,
         [FromRoute] Guid seatId,
         [FromBody] Request request,

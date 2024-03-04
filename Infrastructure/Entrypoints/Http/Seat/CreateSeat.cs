@@ -7,6 +7,7 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 public static class CreateSeat
 {
     public static async Task<IResult> Create(
+        [FromRoute] string guildId,
         [FromRoute] Guid lanId,
         [FromBody] Request request,
         [FromServices] ILoggedInUserAccessor loggedInUserAccessor,
@@ -27,8 +28,6 @@ public static class CreateSeat
     {
         public Validator()
         {
-            RuleFor(x => x.Title).NotEmpty();
-
             RuleFor(x => x.Title).NotEmpty();
 
             RuleFor(x => x.Bounds).SetValidator(new BoundsValidator());

@@ -1,14 +1,13 @@
 ﻿using FluentValidation;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Seats;
-using Seatpicker.Domain;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement;
 
 public static class CreateReservationFor
 {
     public static async Task<IResult> Create(
+        [FromRoute] string guildId,
         [FromRoute] Guid lanId,
         [FromRoute] Guid seatId,
         [FromBody] Request request,

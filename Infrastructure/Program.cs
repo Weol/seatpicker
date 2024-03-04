@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using Seatpicker.Application;
 using Seatpicker.Infrastructure;
 using Seatpicker.Infrastructure.Adapters;

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Seats;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Reservation;
@@ -7,6 +6,7 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Reservation;
 public static class CreateReservation
 {
     public static async Task<IResult> Create(
+        [FromRoute] string guildId,
         [FromRoute] Guid lanId,
         [FromRoute] Guid seatId,
         [FromServices] ILoggedInUserAccessor loggedInUserAccessor,

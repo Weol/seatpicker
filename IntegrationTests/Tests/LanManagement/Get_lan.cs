@@ -1,5 +1,6 @@
 using System.Net;
 using FluentAssertions;
+using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 using Xunit;
 using Xunit.Abstractions;
@@ -24,7 +25,7 @@ public class Get_lan : IntegrationTestBase
     {
         // Arrange
 		var guildId = CreateGuild();
-        var client = GetClient(guildId);
+        var client = GetClient(guildId, Role.Admin);
 
         var existingLan = LanGenerator.Create(guildId);
         await SetupAggregates(guildId, existingLan);
@@ -51,7 +52,7 @@ public class Get_lan : IntegrationTestBase
     {
         // Arrange
 		var guildId = CreateGuild();
-        var client = GetClient(guildId);
+        var client = GetClient(guildId, Role.Admin);
 
         //Act
         var response = await MakeRequest(client, guildId, Guid.NewGuid());

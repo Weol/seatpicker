@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Lans;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Lan;
@@ -7,6 +6,7 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 public static class DeleteLan
 {
     public static async Task<IResult> Delete(
+        [FromRoute] string guildId,
         [FromRoute] Guid lanId,
         ILoggedInUserAccessor loggedInUserAccessor,
         ILanManagementService lanManagementService)

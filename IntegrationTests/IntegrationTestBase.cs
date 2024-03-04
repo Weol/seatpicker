@@ -2,36 +2,56 @@ using System.Net.Http.Headers;
 using Bogus;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Seatpicker.Application.Features;
 using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Adapters.Discord;
+using Seatpicker.Infrastructure.Adapters.Database;
 using Seatpicker.Infrastructure.Authentication;
-using Seatpicker.IntegrationTests.TestAdapters;
 using Shared;
 using Xunit.Abstractions;
 using Xunit.Extensions.AssemblyFixture;
 
 namespace Seatpicker.IntegrationTests;
 
-public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>, IAssemblyFixture<TestWebApplicationFactory>
+public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
+    IAssemblyFixture<TestWebApplicationFactory>
 {
     private readonly WebApplicationFactory<Infrastructure.Program> factory;
     private readonly ITestOutputHelper testOutputHelper;
-    private readonly string testIdentifier;
 
     protected IntegrationTestBase(TestWebApplicationFactory factory,
         PostgresFixture databaseFixture,
         ITestOutputHelper testOutputHelper)
     {
-        this.factory = factory;
         this.testOutputHelper = testOutputHelper;
+        this.factory = factory
+            .WithWebHostBuilder(
+                builder =>
+                {
+                    builder.ConfigureServices(
+                        services =>
+                        {
+                            services.PostConfigure<DatabaseOptions>(options =>
+                            {
+                                options.ConnectionString = databaseFixture.Container.GetConnectionString();
+                            });
+
+                            services.AddLogging(
+                                loggingBuilder =>
+                                {
+                                    loggingBuilder.ClearProviders();
+                                    loggingBuilder.AddDebug();
+                                    loggingBuilder.AddProvider(new XUnitLoggerProvider(testOutputHelper));
+                                });
+                        });
+                });
     }
 
     protected T GetService<T>() where T : notnull
     {
         return factory.Services.GetRequiredService<T>();
     }
-    
+
     protected HttpClient GetClient(TestIdentity identity)
     {
         var client = GetAnonymousClient();
@@ -137,5 +157,5 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>, I
         return new Faker().Random.Int(1).ToString();
     }
 
-    public record TestIdentity(User User, Role[] Roles, string Token, string guildId);
+    public record TestIdentity(User User, Role[] Roles, string Token, string GuildId);
 }

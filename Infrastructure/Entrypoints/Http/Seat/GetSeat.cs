@@ -7,6 +7,7 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 public static class GetSeat
 {
     public static async Task<IResult> GetAll(
+        [FromRoute] string guildId,
         [FromRoute] Guid lanId,
         [FromServices] IDocumentRepository documentRepository,
         [FromServices] IUserProvider userProvider)
@@ -38,6 +39,7 @@ public static class GetSeat
     }
 
     public static async Task<IResult> Get(
+        [FromRoute] string guildId,
         [FromRoute] Guid lanId,
         [FromRoute] Guid seatId,
         [FromServices] IUserProvider userProvider,

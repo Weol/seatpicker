@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Lans;
 
@@ -8,6 +7,7 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 public static class UpdateLan
 {
     public static async Task<IResult> Update(
+        [FromRoute] string guildId,
         [FromRoute] Guid lanId,
         [FromBody] Request request,
         ILoggedInUserAccessor loggedInUserAccessor,

@@ -20,7 +20,7 @@ public class Create_lan : IntegrationTestBase
     }
 
     private async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, CreateLan.Request request) =>
-        await client.PostAsJsonAsync("lan", request);
+        await client.PostAsJsonAsync($"guild/{guildId}/lan", request);
 
     [Fact]
     public async Task succeeds_when_lan_is_valid()

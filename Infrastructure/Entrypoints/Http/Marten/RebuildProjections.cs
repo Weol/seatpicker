@@ -1,5 +1,4 @@
 using Marten;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Lans;
 using Seatpicker.Application.Features.Seats;

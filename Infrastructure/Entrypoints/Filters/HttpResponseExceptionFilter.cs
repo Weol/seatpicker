@@ -1,15 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Adapters.Discord;
+﻿using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Entrypoints.Http;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Filters;
 
-public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
+public class HttpResponseExceptionFilter : IEndpointFilter
 {
-    public int Order => int.MaxValue - 10;
-
     private readonly ILogger<HttpResponseExceptionFilter> logger;
 
     public HttpResponseExceptionFilter(ILogger<HttpResponseExceptionFilter> logger)
@@ -17,63 +12,39 @@ public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
         this.logger = logger;
     }
 
-    public void OnActionExecuting(ActionExecutingContext context)
+    public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
-    }
 
-    public void OnActionExecuted(ActionExecutedContext context)
-    {
-        if (context.Exception is null) return;
-
-        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
-        logger.LogError(context.Exception, context.Exception.Message);
-
-        var result = HandleException(context.Exception);
-        if (result is not null)
+        try
         {
-            context.Result = result;
-            context.ExceptionHandled = true;
+            return await next(context);
         }
-    }
-
-    private ObjectResult? HandleException(Exception exception)
-    {
-        if (exception is DomainException domainException)
+        catch (DomainException domainException)
         {
+            // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
+            logger.LogError(domainException, "{Message}", domainException.Message);
+            
             return HandleDomainOrApplicationException(domainException);
         }
-
-        if (exception is Application.ApplicationException applicationException)
+        catch (Application.ApplicationException applicationException)
         {
+            // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
+            logger.LogError(applicationException, "{Message}", applicationException.Message);
+            
             return HandleDomainOrApplicationException(applicationException);
         }
-
-        if (exception is DiscordException)
+        catch (BadRequestException badRequestException)
         {
-            return HandleDiscordException();
-        }
-
-        if (exception is FluentValidationFilter.ModelValidationException modelValidationException)
-        {
-            return HandleModelValidationException(modelValidationException);
-        }
-
-        if (exception is BadRequestException badRequestException)
-        {
+            // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
+            logger.LogError(badRequestException, "{Message}", badRequestException.Message);
+            
             return HandleBadRequestException(badRequestException);
         }
-
-        return null;
     }
 
-    private ObjectResult HandleDomainOrApplicationException(Exception e)
+    private static IResult HandleDomainOrApplicationException(Exception e)
     {
         var exceptionName = e.GetType().Name;
-
-        var statusCode = 422;
-        if (exceptionName.Contains("NotFound")) statusCode = 404;
-        if (exceptionName.Contains("Already")) statusCode = 409;
-        if (exceptionName.Contains("Conflict")) statusCode = 409;
 
         var props = e.GetType()
             .GetProperties()
@@ -88,38 +59,27 @@ public class HttpResponseExceptionFilter : IActionFilter, IOrderedFilter
             if (value is not null) response[name] = value;
         }
 
-        return new ObjectResult(response)
+        var statusCode = 422;
+        if (exceptionName.Contains("NotFound")) statusCode = 404;
+        if (exceptionName.Contains("Already")) statusCode = 409;
+        if (exceptionName.Contains("Conflict")) statusCode = 409;
+
+        return statusCode switch
         {
-            StatusCode = statusCode,
+            422 => Results.UnprocessableEntity(response),
+            404 => Results.NotFound(response),
+            409 => Results.Conflict(response),
+            
+            // ReSharper disable once UnreachableSwitchArmDueToIntegerAnalysis
+            _ => Results.Problem()
         };
     }
 
-    private ObjectResult HandleBadRequestException(BadRequestException badRequestException)
+    private static IResult HandleBadRequestException(BadRequestException badRequestException)
     {
-        return new BadRequestObjectResult(new
+        return Results.BadRequest(new
         {
             badRequestException.Message,
         });
-    }
-
-    private static ObjectResult HandleModelValidationException(FluentValidationFilter.ModelValidationException e)
-    {
-        var errors = e.ValidationResultErrors.Select(x =>
-            new
-            {
-                x.PropertyName,
-                x.ErrorMessage,
-                x.AttemptedValue,
-            });
-
-        return new BadRequestObjectResult(errors);
-    }
-
-    private static ObjectResult HandleDiscordException()
-    {
-        return new ObjectResult("Discord API responded with non-successful status")
-        {
-            StatusCode = 500,
-        };
     }
 }
