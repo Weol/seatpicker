@@ -36,21 +36,6 @@ public static class GetLan
         return TypedResults.Ok(Response.FromProjectedLan(lan));
     }
 
-    public static async Task<IResult> GetActiveLan(
-        [FromRoute] string guildId,
-        [FromServices] IDocumentRepository documentRepository)
-    {
-        using var documentReader = documentRepository.CreateReader();
-
-        var lan = documentReader.Query<ProjectedLan>()
-            .Where(lan => lan.GuildId == guildId)
-            .SingleOrDefault(lan => lan.Active);
-
-        if (lan is null) return TypedResults.NotFound();
-
-        return TypedResults.Ok(Response.FromProjectedLan(lan));
-    }
-
     public record Response(
         Guid Id,
         string GuildId,

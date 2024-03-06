@@ -4,11 +4,11 @@ namespace Seatpicker.Infrastructure.Adapters.Discord;
 
 public class DiscordUser
 {
-    [JsonPropertyName("id")] public string Id { get; set; } = null!;
+    [JsonPropertyName("id")] public string Id { get; set; }
 
     [JsonPropertyName("username")] public string Username { get; set; }
 
-    [JsonPropertyName("avatar")] public string? Avatar { get; set; } = null!;
+    [JsonPropertyName("avatar")] public string? Avatar { get; set; }
 }
 
 public class DiscordAccessToken
@@ -24,9 +24,9 @@ public class DiscordGuildMember
 {
     [JsonPropertyName("user")] public DiscordUser DiscordUser { get; set; } = null!;
 
-    [JsonPropertyName("nick")] public string? Nick { get; set; } = null!;
+    [JsonPropertyName("nick")] public string? Nick { get; set; }
 
-    [JsonPropertyName("avatar")] public string? Avatar { get; set; } = null!;
+    [JsonPropertyName("avatar")] public string? Avatar { get; set; }
 
     [JsonPropertyName("roles")] public IEnumerable<string> Roles { get; set; } = null!;
 }

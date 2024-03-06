@@ -1,6 +1,7 @@
 ﻿using Marten;
 using Marten.Events.Projections;
 using Microsoft.Extensions.DependencyInjection;
+using Seatpicker.Application.Features.Seats;
 
 namespace Seatpicker.Application.Features.Lans;
 

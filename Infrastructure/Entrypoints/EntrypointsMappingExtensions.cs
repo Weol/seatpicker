@@ -44,8 +44,9 @@ public static class EntrypointsMappingExtensions
 
     private static void MapAuthenticationEndpoints(this RouteGroupBuilder builder)
     {
-        builder.MapPost("test", TestEndpoint.Test)
-            .RequireAuthorization();
+        builder.MapGet("test/{guildId}", TestEndpoint.Test)
+            .RequireAuthorization()
+            .AddEndpointFilter<GuildIdAuthorizationFilter>();
 
         var discordGroup = builder.MapGroup("discord");
         discordGroup.MapPost("login", LoginEndpoint.Login);
@@ -66,6 +67,12 @@ public static class EntrypointsMappingExtensions
     {
         builder.MapGet("/", GetGuilds.GetAll);
 
+        builder.MapGet("hosts", GetHostMapping.GetALl)
+            .RequireRole(Role.Superadmin);
+        
+        builder.MapPut("hosts", PutRoleMapping.Put)
+            .RequireRole(Role.Superadmin);
+
         var guildGroup = builder.MapGroup("{guildId}")
             .AddEndpointFilter<GuildIdAuthorizationFilter>();
             
@@ -75,7 +82,7 @@ public static class EntrypointsMappingExtensions
             .MapLanEndpoints();
         
         guildGroup.MapGet("users", GetUsers.Get)
-            .RequireRole(Role.Admin);
+            .RequireRole(Role.Operator);
 
         return builder;
     }
@@ -83,7 +90,6 @@ public static class EntrypointsMappingExtensions
     private static void MapLanEndpoints(this RouteGroupBuilder builder)
     {
         builder.MapGet("/", GetLan.GetAll);
-        builder.MapGet("active", GetLan.GetActiveLan);
         builder.MapPost("/", CreateLan.Create).RequireRole(Role.Admin);
 
         var lanGroup = builder.MapGroup("{lanId:Guid}");

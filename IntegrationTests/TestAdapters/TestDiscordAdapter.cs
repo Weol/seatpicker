@@ -27,9 +27,9 @@ public class TestDiscordAdapter : DiscordAdapter
 
         var roles = guildRoleIds == null
             ? Array.Empty<DiscordGuildRole>()
-            : guildRoleIds.Select(role => new DiscordGuildRole
+            : guildRoleIds.Select(roleId => new DiscordGuildRole
             {
-                Id = new Faker().Random.Int(1).ToString(),
+                Id = roleId,
                 Color = new Faker().Random.Int(10000, 99999),
                 Name = new Faker().Random.Word()
             });
@@ -74,6 +74,7 @@ public class TestDiscordAdapter : DiscordAdapter
             new Faker().Random.AlphaNumeric(15),
             null
         );
+        users.Add(user);
 
         return (user.DiscordToken, user.RefreshToken);
     }
@@ -118,9 +119,9 @@ public class TestDiscordAdapter : DiscordAdapter
 
         return Task.FromResult(new DiscordAccessToken
         {
-            AccessToken = matchingUser.AccessToken,
+            AccessToken = newUser.AccessToken,
             ExpiresIn = 24000,
-            RefreshToken = matchingUser.RefreshToken
+            RefreshToken = newUser.RefreshToken
         });
     }
 

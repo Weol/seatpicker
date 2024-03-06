@@ -25,7 +25,6 @@ public static class EntrypointsExtensions
     public static WebApplication UseEntrypoints(this WebApplication app)
     {
         app.UseHttpsRedirection();
-        app.UseDeveloperExceptionPage();
         app.MapEntrypoints(builder =>
         {
             builder.AddEndpointFilter<FluentValidationFilter>();

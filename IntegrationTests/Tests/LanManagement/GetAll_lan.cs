@@ -26,7 +26,7 @@ public class GetAll_lan : IntegrationTestBase
     public async Task returns_all_lans_that_exist_for_tenant()
     {
         // Arrange
-		var guildId = CreateGuild();
+        var guildId = CreateGuild();
         var client = GetClient(guildId);
 
         var existingLan = new[] { LanGenerator.Create(guildId), LanGenerator.Create(guildId) };
@@ -57,7 +57,7 @@ public class GetAll_lan : IntegrationTestBase
     public async Task returns_empty_array_when_no_lans_exist()
     {
         // Arrange
-		var guildId = CreateGuild();
+        var guildId = CreateGuild();
         var client = GetClient(guildId);
 
         //Act
@@ -71,23 +71,33 @@ public class GetAll_lan : IntegrationTestBase
     }
 
     [Fact]
-    public async Task returns_only_lan_that_belong_to_correct_tenant()
+    public async Task returns_only_lan_that_belong_to_correct_guild()
     {
         // Arrange
-		var guildId = CreateGuild();
-        foreach (var tenant in new[] { "123", "321" })
+        var guilds = new[]
         {
-            var lans = new[] { LanGenerator.Create(tenant), LanGenerator.Create(tenant) };
-            await SetupAggregates(tenant, lans[0], lans[1]);
-
+            (Id: "123", Lans: new List<Lan>()),
+            (Id: "321", Lans: new List<Lan>()),
+            (Id: "111", Lans: new List<Lan>()),
+        };
+        
+        foreach (var (id, lans) in guilds)
+        {
+            var generatedLans = new[] { LanGenerator.Create(id), LanGenerator.Create(id)};
+            await SetupAggregates(id, generatedLans[0], generatedLans[1]);
+            lans.AddRange(generatedLans);
+        }
+        
+        foreach (var (guildId, lans) in guilds)
+        {
             //Act
-            var client = GetClient(tenant, Role.Admin);
+            var client = GetClient(guildId, Role.Admin);
             var response = await MakeRequest(client, guildId);
             var body = await response.Content.ReadAsJsonAsync<GetLan.Response[]>();
 
             //Assert
             body.Should().NotBeNull();
-            body.Should().HaveCount(2);
+            body.Should().HaveCount(lans.Count);
 
             foreach (var lan in lans)
             {

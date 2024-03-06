@@ -4,35 +4,65 @@ using FluentAssertions;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
 using Seatpicker.Infrastructure.Entrypoints.Http.Guild.Discord;
+using Seatpicker.IntegrationTests.TestAdapters;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Seatpicker.IntegrationTests.Tests.Guild;
 
 // ReSharper disable once InconsistentNaming
-public class Roles : IntegrationTestBase
+public class Role_mapping : IntegrationTestBase
 {
-    public Roles(TestWebApplicationFactory factory, PostgresFixture databaseFixture, ITestOutputHelper testOutputHelper) : base(
+    public Role_mapping(TestWebApplicationFactory factory,
+        PostgresFixture databaseFixture,
+        ITestOutputHelper testOutputHelper) : base(
         factory,
         databaseFixture,
         testOutputHelper)
     {
     }
 
+    
+    [Fact]
+    public async Task getting_role_mapping_succeeds_when_guild_has_no_mappings()
+    {
+        // Arrange
+        var guildId = CreateGuild();
+        var client = GetClient(guildId, Role.Admin);
+        var guildRoleId = "1238712";
+
+        GetService<TestDiscordAdapter>().AddGuild(guildId, new [] { guildRoleId });
+
+        //Act
+        var response = await client.GetAsync($"guild/discord/{guildId}/roles");
+        var body = await response.Content.ReadAsJsonAsync<IEnumerable<GetRoleMapping.Response>>();
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        Assert.Multiple(
+            () =>
+            {
+                var mapping = body.Should().ContainSingle(role => role.Id == guildRoleId).Subject;
+                mapping.Roles.Should().HaveCount(0);
+            });
+    }
+    
     [Fact]
     public async Task getting_role_mapping_succeeds()
     {
         // Arrange
-		var guildId = CreateGuild();
+        var guildId = CreateGuild();
         var client = GetClient(guildId, Role.Admin);
         var guildRoleId = "1238712";
 
-        var roleMapping =
-            new GuildRoleMapping(guildId, new[] { new GuildRoleMappingEntry(guildRoleId, Role.Operator) });
+        var roleMapping
+            = new GuildRoleMapping(guildId, new[] { new GuildRoleMappingEntry(guildRoleId, Role.Operator) });
         await SetupDocuments(guildId, roleMapping);
-        
+        GetService<TestDiscordAdapter>().AddGuild(guildId, new [] { guildRoleId });
+
         //Act
-        var response = await client.GetAsync($"guild/{guildId}/roles");
+        var response = await client.GetAsync($"guild/discord/{guildId}/roles");
         var body = await response.Content.ReadAsJsonAsync<IEnumerable<GetRoleMapping.Response>>();
 
         // Assert
@@ -50,7 +80,7 @@ public class Roles : IntegrationTestBase
     public async Task setting_role_mapping_succeeds()
     {
         // Arrange
-		var guildId = CreateGuild();
+        var guildId = CreateGuild();
         var client = GetClient(guildId, Role.Admin);
         var guildRoleId1 = "1238712";
         var guildRoleId2 = "1238712233";
@@ -63,7 +93,7 @@ public class Roles : IntegrationTestBase
 
         //Act
         var response = await client.PutAsync(
-            $"guild/{guildId}/roles",
+            $"guild/discord/{guildId}/roles",
             JsonContent.Create(request));
 
         // Assert

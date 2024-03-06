@@ -17,29 +17,28 @@ public class TenantIsolation : IntegrationTestBase
     }
 
     [Fact]
-    public async Task request_denied_when_there_is_mismatch_between_jwt_guild_and_tenant_header()
+    public async Task request_denied_when_there_is_mismatch_between_jwt_guild_and_guildId_in_route()
     {
         // Arrange
 		var guildId = CreateGuild(); 
         var client = GetClient("321");
 
         // Act
-        var request = new HttpRequestMessage(HttpMethod.Get, "authentication/test");
-        var response = await client.SendAsync(request);
+        var response = await client.GetAsync($"authentication/test/{guildId}");
         
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
     
     [Fact]
-    public async Task request_succeeds_when_jwt_guild_and_tenant_header_are_the_same()
+    public async Task request_succeeds_when_jwt_guild_and_guildId_in_route_are_the_same()
     {
         // Arrange
 		var guildId = CreateGuild(); 
         var client = GetClient(guildId);
 
         // Act
-        var response = await client.GetAsync("authentication/test");
+        var response = await client.GetAsync($"authentication/test/{guildId}");
         
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

@@ -4,6 +4,7 @@ using Marten;
 using Marten.Storage;
 using Microsoft.Extensions.Options;
 using Seatpicker.Application.Features;
+using Seatpicker.Infrastructure.Adapters.Database.GuildHostMapping;
 using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
 using Shared;
 using Weasel.Core;
@@ -21,7 +22,8 @@ internal static class DatabaseExtensions
         services.AddSingleton<IAggregateRepository, AggregateRepository>()
             .AddSingleton<IDocumentRepository, DocumentRepository>()
             .AddSingleton<GuildIdProvider>()
-            .AddSingleton<GuildRoleMappingRepository>();
+            .AddGuildRoleMappingRepository()
+            .AddGuildHostMappingRepository();
 
         services.AddMarten(
             provider =>

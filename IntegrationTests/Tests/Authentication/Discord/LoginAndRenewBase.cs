@@ -29,10 +29,10 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
 
     protected abstract Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId);
 
-    private static async Task<TestEndpoint.Response> TestAuthentication(HttpClient client, string token)
+    private static async Task<TestEndpoint.Response> TestAuthentication(HttpClient client, string guildId, string token)
     {
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        var response = await client.GetAsync("authentication/discord/test");
+        var response = await client.GetAsync($"authentication/test/{guildId}");
         var body = await response.Content.ReadAsJsonAsync<TestEndpoint.Response>();
 
         if (body is null) throw new NullReferenceException();
@@ -68,13 +68,13 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         response.Should().NotBeNull();
 
-        var testResponse = await TestAuthentication(client, body!.Token);
+        var testResponse = await TestAuthentication(client, guildId, body!.Token);
         testResponse.Should().NotBeNull();
 
         Assert.Multiple(
             () => testResponse.Id.Should().Be(discordUser.Id),
             () => testResponse.Name.Should().Be(discordUser.Username),
-            () => testResponse.Roles.Should().Contain(Role.User.ToString()));
+            () => testResponse.Roles.Should().Contain(Role.User));
     }
 
     [Theory]
@@ -106,14 +106,14 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         body.Should().NotBeNull();
 
-        var testResponse = await TestAuthentication(client, body!.Token);
+        var testResponse = await TestAuthentication(client, guildId, body!.Token);
         testResponse.Should().NotBeNull();
 
         var expectedRoles = roles.Append(Role.User).Distinct();
         Assert.Multiple(
             () => testResponse.Id.Should().Be(discordUser.Id),
             () => testResponse.Name.Should().Be(discordUser.Username),
-            () => testResponse.Roles.Should().BeEquivalentTo(expectedRoles.Select(role => role.ToString())));
+            () => testResponse.Roles.Should().BeEquivalentTo(expectedRoles));
     }
 
     [Theory]
@@ -161,7 +161,7 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
             = await response.Content.ReadAsJsonAsync<TokenResponse>();
 
         // Assert
-        var testResponse = await TestAuthentication(client, body!.Token);
+        var testResponse = await TestAuthentication(client, guildId, body!.Token);
         testResponse.Should().NotBeNull();
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -170,7 +170,7 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
         Assert.Multiple(
             () => testResponse.Id.Should().Be(discordUser.Id),
             () => testResponse.Name.Should().Be(discordUser.Username),
-            () => testResponse.Roles.Should().Contain(Role.User.ToString()));
+            () => testResponse.Roles.Should().Contain(Role.User));
     }
 
     [Fact]
@@ -180,6 +180,7 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
         var guildId = SetupGuild();
         var client = GetAnonymousClient();
         var discordUser = Generator.GenerateDiscordUser();
+        discordUser.Avatar = null;
 
         (DiscordToken, RefreshToken) = GetService<TestDiscordAdapter>().AddUser(discordUser, guildId);
 
