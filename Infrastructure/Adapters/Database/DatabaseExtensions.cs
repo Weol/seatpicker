@@ -21,6 +21,7 @@ internal static class DatabaseExtensions
 
         services.AddSingleton<IAggregateRepository, AggregateRepository>()
             .AddSingleton<IDocumentRepository, DocumentRepository>()
+            .AddSingleton<TenantlessDocumentRepository>()
             .AddSingleton<GuildIdProvider>()
             .AddGuildRoleMappingRepository()
             .AddGuildHostMappingRepository();
@@ -43,11 +44,10 @@ internal static class DatabaseExtensions
         options.Connection(connectionString);
         options.Policies.AllDocumentsAreMultiTenanted();
         options.Events.TenancyStyle = TenancyStyle.Conjoined;
-        options.Advanced.DefaultTenantUsageEnabled = false;
 
         RegisterAllDocuments(options);
         RegisterAllEvents(options);
-        
+
         options.AutoCreateSchemaObjects = AutoCreate.None;
         options.GeneratedCodeMode = TypeLoadMode.Dynamic;
         options.SourceCodeWritingEnabled = false;
@@ -68,6 +68,10 @@ internal static class DatabaseExtensions
         foreach (var document in documents)
         {
             options.RegisterDocumentType(document);
+            if (document is ITenantlessDocument)
+            {
+                options.Schema.
+            }
         }
     }
 

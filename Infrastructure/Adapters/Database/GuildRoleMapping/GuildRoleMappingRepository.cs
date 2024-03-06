@@ -13,7 +13,7 @@ public class GuildRoleMappingRepository
         this.documentRepository = documentRepository;
     }
 
-    public async Task SaveRoleMapping(string guildId, IEnumerable<(string RoleId, Domain.Role Role)> mappings)
+    public async Task SaveRoleMapping(string guildId, IEnumerable<(string RoleId, Role Role)> mappings)
     {
         using var transaction = documentRepository.CreateTransaction();
 

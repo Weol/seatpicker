@@ -6,14 +6,16 @@ using System.Linq;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 
-public static class PutHostNameMapping
+public static class PutHostMapping
 {
     public static async Task<IResult> Put(
         [FromServices] GuildHostMappingRepository guildHostMappingRepository,
-        [FromBody] Request request)
+        [FromBody] IEnumerable<Request> request)
     {
-        await guildHostMappingRepository.Save(request.GuildId, request.Hostnames); 
-        
+        var mappings = request.Select(x => (x.GuildId, x.Hostnames));
+
+        await guildHostMappingRepository.Save(mappings);
+
         return TypedResults.Ok();
     }
 

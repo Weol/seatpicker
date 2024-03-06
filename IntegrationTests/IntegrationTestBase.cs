@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using Bogus;
+using Marten;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -91,7 +92,16 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
     protected Task SetupDocuments<TDocument>(string guildId, params TDocument[] documents)
         where TDocument : IDocument
     {
-        var repository = factory.Services.GetRequiredService<IDocumentRepository>();
+        IDocumentRepository repository;
+        if (documents is ITenantlessDocument[])
+        {
+            repository = factory.Services.GetRequiredService<TenantlessDocumentRepository>();
+        }
+        else
+        {
+            repository = factory.Services.GetRequiredService<IDocumentRepository>();
+        }
+
         using var documentTransaction = repository.CreateTransaction(guildId);
         foreach (var document in documents)
         {

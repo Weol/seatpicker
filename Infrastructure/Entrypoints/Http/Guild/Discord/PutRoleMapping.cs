@@ -5,17 +5,17 @@ using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Guild.Discord;
 
-public static class PutRoleMapping 
+public static class PutRoleMapping
 {
     public static async Task<IResult> Put(
-        [FromServices] GuildRoleMappingRepository guildRoleRepository,
+        [FromRoute] string guildId,
         [FromBody] IEnumerable<Request> request,
-        [FromRoute] string guildId)
+        [FromServices] GuildRoleMappingRepository guildRoleRepository)
     {
         await guildRoleRepository.SaveRoleMapping(
             guildId,
             request.SelectMany(guildRole => guildRole.Roles.Select(role => (guildRole.Id, role))));
-        
+
         return TypedResults.Ok();
     }
 

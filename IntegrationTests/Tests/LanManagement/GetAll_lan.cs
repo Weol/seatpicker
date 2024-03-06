@@ -76,18 +76,18 @@ public class GetAll_lan : IntegrationTestBase
         // Arrange
         var guilds = new[]
         {
-            (Id: "123", Lans: new List<Lan>()),
-            (Id: "321", Lans: new List<Lan>()),
-            (Id: "111", Lans: new List<Lan>()),
+            (Id: CreateGuild(), Lans: new List<Lan>()),
+            (Id: CreateGuild(), Lans: new List<Lan>()),
+            (Id: CreateGuild(), Lans: new List<Lan>()),
         };
-        
+
         foreach (var (id, lans) in guilds)
         {
             var generatedLans = new[] { LanGenerator.Create(id), LanGenerator.Create(id)};
             await SetupAggregates(id, generatedLans[0], generatedLans[1]);
             lans.AddRange(generatedLans);
         }
-        
+
         foreach (var (guildId, lans) in guilds)
         {
             //Act

@@ -20,9 +20,9 @@ public class DocumentRepository : IDocumentRepository
     public IDocumentTransaction CreateTransaction(string? guildId = null)
     {
         guildId ??= guildIdProvider.GetGuildId();
-        
+
         logger.LogInformation("Creating document transaction for tenant {TenantId}", guildId);
-        
+
         var session = store.LightweightSession(guildId);
         return new DocumentTransaction(session);
     }
@@ -30,29 +30,29 @@ public class DocumentRepository : IDocumentRepository
     public IDocumentReader CreateReader(string? guildId = null)
     {
         guildId ??= guildIdProvider.GetGuildId();
-        
+
         logger.LogInformation("Creating document reader for tenant {TenantId}", guildId);
-        
+
         var session = store.QuerySession(guildId);
         return new DocumentReader(session);
     }
 }
 
-public class TenantlessDocumentRepository
+public class TenantlessDocumentRepository : IDocumentRepository
 {
     private readonly IDocumentStore store;
     private readonly ILogger<DocumentRepository> logger;
 
     public TenantlessDocumentRepository(IDocumentStore store, ILogger<DocumentRepository> logger)
-    { 
+    {
         this.store = store;
         this.logger = logger;
     }
-    
+
     public IDocumentTransaction CreateTransaction(string? guildId = null)
     {
         logger.LogInformation("Creating tenantless document transaction");
-        
+
         var session = store.LightweightSession();
         return new DocumentTransaction(session);
     }
@@ -60,7 +60,7 @@ public class TenantlessDocumentRepository
     public IDocumentReader CreateReader(string? guildId = null)
     {
         logger.LogInformation("Creating tenantless document reader");
-        
+
         var session = store.QuerySession();
         return new DocumentReader(session);
     }
