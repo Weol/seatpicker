@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using Bogus;
 using Marten;
+using Marten.Storage;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -24,6 +25,9 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
         PostgresFixture databaseFixture,
         ITestOutputHelper testOutputHelper)
     {
+        testOutputHelper.WriteLine(
+            $"Using Postgres fixture with connection string: {databaseFixture.Container.GetConnectionString()}");
+
         this.testOutputHelper = testOutputHelper;
         this.factory = factory
             .WithWebHostBuilder(
@@ -92,36 +96,40 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
     protected Task SetupDocuments<TDocument>(string guildId, params TDocument[] documents)
         where TDocument : IDocument
     {
-        IDocumentRepository repository;
-        if (documents is ITenantlessDocument[])
-        {
-            repository = factory.Services.GetRequiredService<TenantlessDocumentRepository>();
-        }
-        else
-        {
-            repository = factory.Services.GetRequiredService<IDocumentRepository>();
-        }
+        var store = factory.Services.GetRequiredService<IDocumentStore>();
 
-        using var documentTransaction = repository.CreateTransaction(guildId);
+        var tenant = documents is IGlobalDocument[] ? Tenancy.DefaultTenantId : guildId;
+
+        using var session = store.LightweightSession(tenant);
         foreach (var document in documents)
         {
-            documentTransaction.Store(document);
+            session.Store(document);
         }
 
         // We cant allow more than one test to run commit at a time otherwise there is a deadlock on macOS
         lock (factory)
         {
-            documentTransaction.Commit().GetAwaiter().GetResult();
+            session.SaveChanges();
         }
 
         return Task.CompletedTask;
     }
 
-    protected IEnumerable<TDocument> GetCommittedDocuments<TDocument>(string tenant)
+    protected async Task ClearDocumentsByType<TDocument>()
         where TDocument : IDocument
     {
+        var store = factory.Services.GetRequiredService<IDocumentStore>();
+
+        await store.Advanced.Clean.DeleteDocumentsByTypeAsync(typeof(TDocument));
+    }
+
+    protected IEnumerable<TDocument> GetCommittedDocuments<TDocument>(string? guildId = null)
+        where TDocument : IDocument
+    {
+        guildId ??= Tenancy.DefaultTenantId;
+
         var repository = factory.Services.GetRequiredService<IDocumentRepository>();
-        using var reader = repository.CreateReader(tenant);
+        using var reader = repository.CreateReader(guildId);
         return reader.Query<TDocument>().AsEnumerable();
     }
 

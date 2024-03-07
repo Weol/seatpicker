@@ -67,6 +67,8 @@ public static class EntrypointsMappingExtensions
     {
         builder.MapGet("/", GetGuilds.GetAll);
 
+        builder.MapGet("/discover", DiscoverGuild.Get);
+
         builder.MapGet("hosts", GetHostMapping.GetALl)
             .RequireRole(Role.Superadmin);
 

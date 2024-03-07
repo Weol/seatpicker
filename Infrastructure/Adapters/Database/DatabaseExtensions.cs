@@ -21,19 +21,19 @@ internal static class DatabaseExtensions
 
         services.AddSingleton<IAggregateRepository, AggregateRepository>()
             .AddSingleton<IDocumentRepository, DocumentRepository>()
-            .AddSingleton<TenantlessDocumentRepository>()
+            .AddSingleton<GlobalDocumentRepository>()
             .AddSingleton<GuildIdProvider>()
             .AddGuildRoleMappingRepository()
             .AddGuildHostMappingRepository();
 
         services.AddMarten(
-            provider =>
-            {
-                var databaseOptions = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
+                provider =>
+                {
+                    var databaseOptions = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
 
-                var options = new StoreOptions();
-                return ConfigureMarten(options, databaseOptions.ConnectionString);
-            })
+                    var options = new StoreOptions();
+                    return ConfigureMarten(options, databaseOptions.ConnectionString);
+                })
             .InitializeWith();
 
         return services;
@@ -68,11 +68,9 @@ internal static class DatabaseExtensions
         foreach (var document in documents)
         {
             options.RegisterDocumentType(document);
-            if (document is ITenantlessDocument)
-            {
-                options.Schema.
-            }
         }
+
+        options.Schema.For<GuildHostMapping.GuildHostMapping>().SingleTenanted();
     }
 
     private static void RegisterAllEvents(StoreOptions options)

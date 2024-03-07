@@ -1,4 +1,6 @@
-﻿using Marten;
+﻿using System.Linq.Expressions;
+using Marten;
+using Marten.Storage;
 using Seatpicker.Application.Features;
 using Shared;
 
@@ -38,30 +40,32 @@ public class DocumentRepository : IDocumentRepository
     }
 }
 
-public class TenantlessDocumentRepository : IDocumentRepository
+public class GlobalDocumentRepository
 {
+    private const string DefaultTenant = "*DEFAULT*";
+    
     private readonly IDocumentStore store;
     private readonly ILogger<DocumentRepository> logger;
 
-    public TenantlessDocumentRepository(IDocumentStore store, ILogger<DocumentRepository> logger)
+    public GlobalDocumentRepository(IDocumentStore store, ILogger<DocumentRepository> logger)
     {
         this.store = store;
         this.logger = logger;
     }
 
-    public IDocumentTransaction CreateTransaction(string? guildId = null)
+    public IDocumentTransaction CreateTransaction()
     {
-        logger.LogInformation("Creating tenantless document transaction");
+        logger.LogInformation("Creating document transaction for default tenant");
 
-        var session = store.LightweightSession();
+        var session = store.LightweightSession(Tenancy.DefaultTenantId);
         return new DocumentTransaction(session);
     }
 
-    public IDocumentReader CreateReader(string? guildId = null)
+    public IDocumentReader CreateReader()
     {
-        logger.LogInformation("Creating tenantless document reader");
+        logger.LogInformation("Creating document reader for default tenant");
 
-        var session = store.QuerySession();
+        var session = store.QuerySession(Tenancy.DefaultTenantId);
         return new DocumentReader(session);
     }
 }
@@ -87,6 +91,12 @@ public class DocumentTransaction : IDocumentTransaction
         where TDocument : IDocument
     {
         session.Delete<TDocument>(id);
+    }
+    
+    public void DeleteWhere<TDocument>(Expression<Func<TDocument,bool>> where)
+        where TDocument : IDocument
+    {
+        session.DeleteWhere(where);
     }
 
     public Task Commit()

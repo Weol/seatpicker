@@ -4,6 +4,6 @@ public interface IDocument
 {
 }
 
-public interface ITenantlessDocument : IDocument
+public interface IGlobalDocument : IDocument
 {
 }

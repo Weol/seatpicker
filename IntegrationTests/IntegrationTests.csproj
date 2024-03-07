@@ -28,6 +28,10 @@
       <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Tests\Frontend\" />
+    </ItemGroup>
+
 
     <PropertyGroup>
         <CodeAnalysisRuleSet>analysers.ruleset</CodeAnalysisRuleSet>

@@ -1,4 +1,5 @@
-﻿using Shared;
+﻿using System.Linq.Expressions;
+using Shared;
 
 namespace Seatpicker.Application.Features;
 
@@ -24,6 +25,9 @@ public interface IDocumentTransaction : IDocumentReader
         where TDocument : IDocument;
 
     public void Delete<TDocument>(string id)
+        where TDocument : IDocument;
+
+    public void DeleteWhere<TDocument>(Expression<Func<TDocument, bool>> where)
         where TDocument : IDocument;
 
     public Task Commit();

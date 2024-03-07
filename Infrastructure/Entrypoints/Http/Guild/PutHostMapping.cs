@@ -12,11 +12,20 @@ public static class PutHostMapping
         [FromServices] GuildHostMappingRepository guildHostMappingRepository,
         [FromBody] IEnumerable<Request> request)
     {
-        var mappings = request.Select(x => (x.GuildId, x.Hostnames));
+        var mappings = request.Select(x => (x.GuildId, x.Hostnames))
+            .ToArray();
 
-        await guildHostMappingRepository.Save(mappings);
+        try
+        {
+            await guildHostMappingRepository.Save(mappings);
+        }
+        catch (GuildHostMappingRepository.DuplicateHostsException e)
+        {
+            var duplicates = string.Join(", ", e.DuplicateHosts);
+            return Results.UnprocessableEntity($"A host can only be mapped once, duplicate hosts: {duplicates}");
+        }
 
-        return TypedResults.Ok();
+        return Results.Ok();
     }
 
     public record Request(string GuildId, string[] Hostnames);

@@ -7,16 +7,34 @@ namespace Seatpicker.Infrastructure.Adapters.Database.GuildHostMapping;
 
 public class GuildHostMappingRepository
 {
-    private readonly TenantlessDocumentRepository documentRepository;
+    private readonly GlobalDocumentRepository documentRepository;
 
-    public GuildHostMappingRepository(TenantlessDocumentRepository documentRepository)
+    public GuildHostMappingRepository(GlobalDocumentRepository documentRepository)
     {
         this.documentRepository = documentRepository;
     }
 
-    public async Task Save(IEnumerable<(string GuildId, string[] Hostnames)> mappings)
+    public async Task Save(ICollection<(string GuildId, string[] Hostnames)> mappings)
     {
         using var transaction = documentRepository.CreateTransaction();
+        
+        var duplicateHosts = mappings
+            .SelectMany(mapping => mapping.Hostnames)
+            .GroupBy(host => host)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToArray();
+
+        if (duplicateHosts.Length > 0)
+        {
+            throw new DuplicateHostsException
+            {
+                DuplicateHosts = duplicateHosts
+            }; 
+        }
+        
+        // Yes, we delete ALL of the mappings
+        transaction.DeleteWhere<GuildHostMapping>(mapping => true);
 
         foreach (var (guildId, hostnames) in mappings)
         {
@@ -34,22 +52,31 @@ public class GuildHostMappingRepository
         using var reader = documentRepository.CreateReader();
 
         var mappings = reader.Query<GuildHostMapping>()
-            .GroupBy(mapping => mapping.GuildId, mapping => mapping.Hostname)
-            .ToAsyncEnumerable();
+            .ToAsyncEnumerable()
+            .GroupBy(mapping => mapping.GuildId, mapping => mapping.Hostname);
 
         await foreach (var grouping in mappings)
         {
-            yield return (grouping.Key, grouping);
+            yield return (grouping.Key, await grouping.ToArrayAsync());
         }
     }
 
-    public class HostnamesAlreadyMappedException : Exception
+    public async Task<string?> GetGuildIdByHost(string host)
     {
-        public IEnumerable<string> Hostnames { get; init; }
+        using var reader = documentRepository.CreateReader();
+
+        var mapping = await reader.Get<GuildHostMapping>(host);
+
+        return mapping?.GuildId;
+    }
+
+    public class DuplicateHostsException : Exception
+    {
+        public IEnumerable<string> DuplicateHosts { get; init; }
     }
 }
 
-public record GuildHostMapping(string Hostname, string GuildId) : ITenantlessDocument
+public record GuildHostMapping(string Hostname, string GuildId) : IGlobalDocument
 {
     public string Id => Hostname;
 }
