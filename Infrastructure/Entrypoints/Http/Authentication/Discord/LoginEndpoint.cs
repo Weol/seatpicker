@@ -11,8 +11,6 @@ public static class LoginEndpoint
         [FromServices] GuildIdProvider guildIdProvider,
         [FromBody] Request request)
     {
-        guildIdProvider.SetGuildId(request.GuildId);
-        
         var (jwtToken, expiresAt, discordToken)
             = await discordAuthenticationService.Login(request.Token, request.GuildId, request.RedirectUrl);
 
@@ -26,5 +24,5 @@ public static class LoginEndpoint
             discordToken.Roles));
     }
 
-    public record Request(string Token, string GuildId, string RedirectUrl);
+    public record Request(string Token, string? GuildId, string RedirectUrl);
 }

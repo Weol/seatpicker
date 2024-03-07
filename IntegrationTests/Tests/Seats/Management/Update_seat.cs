@@ -44,8 +44,8 @@ public class Update_seat : IntegrationTestBase
 		var guildId = CreateGuild();
         var client = GetClient(guildId, Role.Operator);
 
-        var lan = LanGenerator.Create(guildId);
-        var existingSeat = SeatGenerator.Create(lan);
+        var lan = LanGenerator.Create(guildId, CreateUser(guildId));
+        var existingSeat = SeatGenerator.Create(lan, CreateUser(lan.GuildId));
 
         await SetupAggregates(guildId, existingSeat);
 
@@ -77,7 +77,7 @@ public class Update_seat : IntegrationTestBase
 		var guildId = CreateGuild();
         var client = GetClient(guildId, Role.Operator);
 
-        var lan = LanGenerator.Create(guildId);
+        var lan = LanGenerator.Create(guildId, CreateUser(guildId));
         await SetupAggregates(guildId, lan);
 
         //Act

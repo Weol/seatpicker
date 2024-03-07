@@ -27,8 +27,8 @@ public class Remove_seat : IntegrationTestBase
 		var guildId = CreateGuild();
         var client = GetClient(guildId, Role.Operator);
 
-        var lan = LanGenerator.Create(guildId);
-        var seat = SeatGenerator.Create(lan);
+        var lan = LanGenerator.Create(guildId, CreateUser(guildId));
+        var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId));
         await SetupAggregates(guildId, seat);
 
         //Act
@@ -46,7 +46,7 @@ public class Remove_seat : IntegrationTestBase
 		var guildId = CreateGuild();
         var client = GetClient(guildId, Role.Operator);
 
-        var lan = LanGenerator.Create(guildId);
+        var lan = LanGenerator.Create(guildId, CreateUser(guildId));
         await SetupAggregates(guildId, lan);
 
         //Act

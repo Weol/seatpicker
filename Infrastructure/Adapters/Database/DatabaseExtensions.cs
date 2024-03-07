@@ -20,13 +20,12 @@ internal static class DatabaseExtensions
         services.AddValidatedOptions(configureAction);
 
         services.AddSingleton<IAggregateRepository, AggregateRepository>()
-            .AddSingleton<IDocumentRepository, DocumentRepository>()
-            .AddSingleton<GlobalDocumentRepository>()
+            .AddPortMapping<IDocumentRepository, DocumentRepository>()
             .AddSingleton<GuildIdProvider>()
             .AddGuildRoleMappingRepository()
             .AddGuildHostMappingRepository();
 
-        services.AddMarten(
+        var configuration = services.AddMarten(
                 provider =>
                 {
                     var databaseOptions = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
@@ -34,8 +33,10 @@ internal static class DatabaseExtensions
                     var options = new StoreOptions();
                     return ConfigureMarten(options, databaseOptions.ConnectionString);
                 })
-            .InitializeWith();
+            .InitializeWith()
+            .OptimizeArtifactWorkflow();
 
+        
         return services;
     }
 

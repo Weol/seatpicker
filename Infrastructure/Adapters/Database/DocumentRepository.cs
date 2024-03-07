@@ -38,22 +38,8 @@ public class DocumentRepository : IDocumentRepository
         var session = store.QuerySession(guildId);
         return new DocumentReader(session);
     }
-}
-
-public class GlobalDocumentRepository
-{
-    private const string DefaultTenant = "*DEFAULT*";
     
-    private readonly IDocumentStore store;
-    private readonly ILogger<DocumentRepository> logger;
-
-    public GlobalDocumentRepository(IDocumentStore store, ILogger<DocumentRepository> logger)
-    {
-        this.store = store;
-        this.logger = logger;
-    }
-
-    public IDocumentTransaction CreateTransaction()
+    public IDocumentTransaction CreateGlobalTransaction()
     {
         logger.LogInformation("Creating document transaction for default tenant");
 
@@ -61,7 +47,7 @@ public class GlobalDocumentRepository
         return new DocumentTransaction(session);
     }
 
-    public IDocumentReader CreateReader()
+    public IDocumentReader CreateGlobalReader()
     {
         logger.LogInformation("Creating document reader for default tenant");
 

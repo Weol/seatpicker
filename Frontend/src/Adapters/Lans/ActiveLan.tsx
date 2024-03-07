@@ -7,6 +7,8 @@ export const activeLanSelector = selector<Lan | null>({
   key: "activeLan",
   get: async ({ get }) => {
     const activeGuildId = get(activeGuildIdAtom)
+
+    if (activeGuildId == null) return null
     const response = await ApiRequest("GET", `lan/active?guildId=${activeGuildId}`)
 
     if (response.status == 404) return null

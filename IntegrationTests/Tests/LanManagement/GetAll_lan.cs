@@ -29,7 +29,7 @@ public class GetAll_lan : IntegrationTestBase
         var guildId = CreateGuild();
         var client = GetClient(guildId);
 
-        var existingLan = new[] { LanGenerator.Create(guildId), LanGenerator.Create(guildId) };
+        var existingLan = new[] { LanGenerator.Create(guildId, CreateUser(guildId)), LanGenerator.Create(guildId, CreateUser(guildId)) };
         await SetupAggregates(guildId, existingLan[0], existingLan[1]);
 
         //Act
@@ -81,10 +81,10 @@ public class GetAll_lan : IntegrationTestBase
             (Id: CreateGuild(), Lans: new List<Lan>()),
         };
 
-        foreach (var (id, lans) in guilds)
+        foreach (var (guildId, lans) in guilds)
         {
-            var generatedLans = new[] { LanGenerator.Create(id), LanGenerator.Create(id)};
-            await SetupAggregates(id, generatedLans[0], generatedLans[1]);
+            var generatedLans = new[] { LanGenerator.Create(guildId, CreateUser(guildId)), LanGenerator.Create(guildId, CreateUser(guildId))};
+            await SetupAggregates(guildId, generatedLans[0], generatedLans[1]);
             lans.AddRange(generatedLans);
         }
 

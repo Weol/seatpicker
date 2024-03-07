@@ -9,15 +9,6 @@ try
 {
     await container.StartAsync();
 
-    using var store = DocumentStore.For(
-        options =>
-        {
-            options.ApplicationAssembly = typeof(Seatpicker.Infrastructure.Program).Assembly;
-            options.Connection(container.GetConnectionString);
-        });
-
-    await store.Storage.ApplyAllConfiguredChangesToDatabaseAsync(AutoCreate.All);
-
     var connectionString = container.GetConnectionString();
 
     Environment.SetEnvironmentVariable(environmentVariableName, connectionString, EnvironmentVariableTarget.User);

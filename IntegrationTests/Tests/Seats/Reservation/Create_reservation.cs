@@ -28,8 +28,8 @@ public class Create_reservation : IntegrationTestBase
         var identity = await CreateIdentity(guildId, Role.User);
         var client = GetClient(identity);
 
-        var lan = LanGenerator.Create(guildId);
-        var seat = SeatGenerator.Create(lan);
+        var lan = LanGenerator.Create(guildId, CreateUser(guildId));
+        var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId));
 
         await SetupAggregates(guildId, seat);
 
@@ -55,8 +55,8 @@ public class Create_reservation : IntegrationTestBase
         var identity = await CreateIdentity(guildId, Role.User);
         var client = GetClient(identity);
 
-        var lan = LanGenerator.Create(guildId);
-        var seat = SeatGenerator.Create(lan, reservedBy: identity.User);
+        var lan = LanGenerator.Create(guildId, CreateUser(guildId));
+        var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId), reservedBy: identity.User);
 
         await SetupAggregates(guildId, seat);
 
@@ -81,10 +81,10 @@ public class Create_reservation : IntegrationTestBase
 		var guildId = CreateGuild();
         var client = GetClient(guildId);
 
-        var alreadyReservedBy = await CreateUser(guildId);
+        var alreadyReservedBy = CreateUser(guildId);
 
-        var lan = LanGenerator.Create(guildId);
-        var seat = SeatGenerator.Create(lan, reservedBy: alreadyReservedBy);
+        var lan = LanGenerator.Create(guildId, CreateUser(guildId));
+        var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId), reservedBy: alreadyReservedBy);
 
         await SetupAggregates(guildId, seat);
 
@@ -109,8 +109,8 @@ public class Create_reservation : IntegrationTestBase
 		var guildId = CreateGuild();
         var client = GetClient(guildId);
 
-        var lan = LanGenerator.Create(guildId);
-        var seat = SeatGenerator.Create(lan);
+        var lan = LanGenerator.Create(guildId, CreateUser(guildId));
+        var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId));
 
         //Act
         var response = await MakeRequest(client, guildId, lan.Id, seat.Id);
@@ -127,9 +127,9 @@ public class Create_reservation : IntegrationTestBase
         var identity = await CreateIdentity(guildId, Role.User);
         var client = GetClient(identity);
 
-        var lan = LanGenerator.Create(guildId);
-        var alreadyReservedSeat = SeatGenerator.Create(lan, reservedBy: identity.User);
-        var seat = SeatGenerator.Create(lan);
+        var lan = LanGenerator.Create(guildId, CreateUser(guildId));
+        var alreadyReservedSeat = SeatGenerator.Create(lan, CreateUser(lan.GuildId), reservedBy: identity.User);
+        var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId));
 
         await SetupAggregates(guildId, alreadyReservedSeat, seat);
 

@@ -30,7 +30,7 @@ public class Create_seat : IntegrationTestBase
 		var guildId = CreateGuild();
         var client = GetClient(guildId, Role.Operator);
 
-        var lan = LanGenerator.Create(guildId);
+        var lan = LanGenerator.Create(guildId, CreateUser(guildId));
         await SetupAggregates(guildId, lan);
 
         var model = Generator.CreateSeatRequest();

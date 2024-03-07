@@ -5,8 +5,14 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using NSubstitute;
+using Seatpicker.Application.Features;
+using Seatpicker.Infrastructure;
+using Seatpicker.Infrastructure.Adapters.Database;
 using Seatpicker.Infrastructure.Adapters.Discord;
+using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.IntegrationTests.TestAdapters;
+using AuthenticationService = Microsoft.AspNetCore.Authentication.AuthenticationService;
 
 namespace Seatpicker.IntegrationTests;
 
@@ -31,10 +37,13 @@ public class TestWebApplicationFactory : WebApplicationFactory<Infrastructure.Pr
             }))
             .ConfigureServices(services =>
             {
+                // Replace document repositories
+                services.RemoveAll<IDocumentRepository>();
+                services.AddPortMapping<IDocumentRepository, TestDocumentRepository>();
+                
                 // Add intercepting http message handler
                 services.RemoveAll<DiscordAdapter>();
-                services.AddSingleton<TestDiscordAdapter>();
-                services.AddSingleton<DiscordAdapter>(provider => provider.GetRequiredService<TestDiscordAdapter>());
+                services.AddPortMapping<DiscordAdapter, TestDiscordAdapter>();
             });
     }
 

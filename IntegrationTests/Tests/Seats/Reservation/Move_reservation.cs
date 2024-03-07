@@ -32,9 +32,9 @@ public class Move_reservation : IntegrationTestBase
         var identity = await CreateIdentity(guildId, Role.User);
         var client = GetClient(identity);
 
-        var lan = LanGenerator.Create(guildId);
-        var fromSeat = SeatGenerator.Create(lan, reservedBy: identity.User);
-        var toSeat = SeatGenerator.Create(lan);
+        var lan = LanGenerator.Create(guildId, CreateUser(guildId));
+        var fromSeat = SeatGenerator.Create(lan, CreateUser(lan.GuildId), reservedBy: identity.User);
+        var toSeat = SeatGenerator.Create(lan, CreateUser(lan.GuildId));
 
         await SetupAggregates(guildId, fromSeat, toSeat);
 
@@ -70,10 +70,10 @@ public class Move_reservation : IntegrationTestBase
 		var guildId = CreateGuild();
         var client = GetClient(guildId);
 
-        var alreadyReservedBy = await CreateUser(guildId);
-        var lan = LanGenerator.Create(guildId);
-        var fromSeat = SeatGenerator.Create(lan, reservedBy: alreadyReservedBy);
-        var toSeat = SeatGenerator.Create(lan);
+        var alreadyReservedBy = CreateUser(guildId);
+        var lan = LanGenerator.Create(guildId, CreateUser(guildId));
+        var fromSeat = SeatGenerator.Create(lan, CreateUser(lan.GuildId), reservedBy: alreadyReservedBy);
+        var toSeat = SeatGenerator.Create(lan, CreateUser(lan.GuildId));
 
         await SetupAggregates(guildId, fromSeat, toSeat);
 

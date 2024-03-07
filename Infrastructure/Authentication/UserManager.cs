@@ -30,9 +30,9 @@ public class UserManager : IUserProvider
             .Select(document => new User(document.Id, document.Name, document.Avatar, document.Roles));
     }
 
-    public async Task Store(User user)
+    public async Task Store(string guildId, User user)
     {
-        using var transaction = documentRepository.CreateTransaction();
+        using var transaction = documentRepository.CreateTransaction(guildId);
         transaction.Store(new UserDocument(user.Id, user.Name, user.Avatar, user.Roles));
         await transaction.Commit();
     }

@@ -10,7 +10,7 @@ namespace Seatpicker.Infrastructure.Authentication;
 public class JwtTokenCreator
 {
     public const string GuildIdClaimName = "guild_id";
-    
+
     private readonly ILogger<JwtTokenCreator> logger;
     private readonly AuthenticationOptions options;
 
@@ -22,7 +22,7 @@ public class JwtTokenCreator
         this.options = options.Value;
     }
 
-    public Task<(string Token, DateTimeOffset ExpiresAt)> CreateToken(DiscordToken discordToken, ICollection<Role> roles)
+    public Task<(string Token, DateTimeOffset ExpiresAt)> CreateToken(AuthenticationToken authenticationToken)
     {
         var certificate = options.SigningCertificate;
 
@@ -36,24 +36,24 @@ public class JwtTokenCreator
 
         var defaultClaims = new List<Claim>
         {
-            new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new (JwtRegisteredClaimNames.Name, discordToken.Nick),
-            new (JwtRegisteredClaimNames.Sub, discordToken.Id),
-            new (GuildIdClaimName, discordToken.GuildId),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(JwtRegisteredClaimNames.Name, authenticationToken.Nick),
+            new(JwtRegisteredClaimNames.Sub, authenticationToken.Id),
+            new(GuildIdClaimName, authenticationToken.GuildId),
         };
 
-        if (discordToken.Avatar is not null) defaultClaims.Add(new Claim("avatar", discordToken.Avatar));
+        if (authenticationToken.Avatar is not null) defaultClaims.Add(new Claim("avatar", authenticationToken.Avatar));
 
-        var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role.ToString()));
+        var roleClaims = authenticationToken.Roles.Select(role => new Claim(ClaimTypes.Role, role.ToString()));
 
         var handler = new JwtSecurityTokenHandler();
 
         var now = DateTime.UtcNow;
         var expiresAt = now.AddSeconds(options.TokenLifetime);
-        
+
         var token = handler.CreateJwtSecurityToken(
-            discordToken.GuildId,
-            discordToken.Id,
+            authenticationToken.GuildId,
+            authenticationToken.Id,
             new ClaimsIdentity(roleClaims.Concat(defaultClaims)),
             now.AddSeconds(-1),
             expiresAt,

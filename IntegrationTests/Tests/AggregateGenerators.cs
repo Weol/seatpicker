@@ -7,18 +7,18 @@ public static class SeatGenerator
 {
     public static Seat Create(
         Lan lan,
+        User initiator,
+        User? reservedBy = null,
         Guid? id = null,
         string? title = null,
-        Bounds? bounds = null,
-        User? reservedBy = null,
-        User? initiator = null)
+        Bounds? bounds = null)
     {
         var seat = new Seat(
             id ?? Guid.NewGuid(),
             lan,
             title ?? "Test title",
             bounds ?? new Bounds(0, 0, 1, 1),
-            initiator ?? new User("124", "asd", null, Array.Empty<Role>()));
+            initiator);
 
         if (reservedBy is not null) seat.MakeReservation(reservedBy, 0);
 
@@ -34,13 +34,13 @@ public static class LanGenerator
         return Encoding.UTF8.GetBytes(svg);
     }
 
-    public static Lan Create(string guildId, Guid? id = null, string? title = null, byte[]? background = null, User? initiator = null)
+    public static Lan Create(string guildId, User initiator, Guid? id = null, string? title = null, byte[]? background = null)
     {
         return new Lan(
             id ?? Guid.NewGuid(),
             guildId,
             title ?? "Test title",
             background ?? CreateValidBackround(),
-            initiator ?? new User("124", "asd", null, Array.Empty<Role>()));
+            initiator);
     }
 }

@@ -7,16 +7,16 @@ namespace Seatpicker.Infrastructure.Adapters.Database.GuildHostMapping;
 
 public class GuildHostMappingRepository
 {
-    private readonly GlobalDocumentRepository documentRepository;
+    private readonly DocumentRepository documentRepository;
 
-    public GuildHostMappingRepository(GlobalDocumentRepository documentRepository)
+    public GuildHostMappingRepository(DocumentRepository documentRepository)
     {
         this.documentRepository = documentRepository;
     }
 
     public async Task Save(ICollection<(string GuildId, string[] Hostnames)> mappings)
     {
-        using var transaction = documentRepository.CreateTransaction();
+        using var transaction = documentRepository.CreateGlobalTransaction();
         
         var duplicateHosts = mappings
             .SelectMany(mapping => mapping.Hostnames)
@@ -49,7 +49,7 @@ public class GuildHostMappingRepository
 
     public async IAsyncEnumerable<(string GuildId, IEnumerable<string> Hostnames)> GetAll()
     {
-        using var reader = documentRepository.CreateReader();
+        using var reader = documentRepository.CreateGlobalReader();
 
         var mappings = reader.Query<GuildHostMapping>()
             .ToAsyncEnumerable()

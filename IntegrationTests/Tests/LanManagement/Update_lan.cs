@@ -46,7 +46,7 @@ public class Update_lan : IntegrationTestBase
 		var guildId = CreateGuild();
         var client = GetClient(guildId, Role.Admin);
 
-        var existingLan = LanGenerator.Create(guildId, request.Id);
+        var existingLan = LanGenerator.Create(guildId, CreateUser(guildId), request.Id);
         await SetupAggregates(guildId, existingLan);
 
         //Act
@@ -89,7 +89,7 @@ public class Update_lan : IntegrationTestBase
 		var guildId = CreateGuild();
         var client = GetClient(guildId, Role.Admin);
 
-        var existingLan = LanGenerator.Create(guildId);
+        var existingLan = LanGenerator.Create(guildId, CreateUser(guildId));
         await SetupAggregates(guildId, existingLan);
 
         //Act
@@ -106,7 +106,7 @@ public class Update_lan : IntegrationTestBase
 		var guildId = CreateGuild();
         var client = GetClient(guildId, Role.Admin);
 
-        var existingLan = LanGenerator.Create(guildId);
+        var existingLan = LanGenerator.Create(guildId, CreateUser(guildId));
         await SetupAggregates(guildId, existingLan);
 
         //Act

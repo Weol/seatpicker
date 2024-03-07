@@ -8,26 +8,21 @@ namespace Seatpicker.Infrastructure.Authentication.Discord;
 public class DiscordAuthenticationService
 {
     private readonly DiscordAdapter discordAdapter;
-    private readonly JwtTokenCreator tokenCreator;
-    private readonly AuthenticationOptions options;
-    private readonly UserManager userManager;
+    private readonly AuthenticationService authenticationService;
     private readonly GuildRoleMappingRepository roleMappingRepository;
 
     public DiscordAuthenticationService(
         DiscordAdapter discordAdapter,
-        JwtTokenCreator tokenCreator,
+        AuthenticationService authenticationService,
         IOptions<AuthenticationOptions> options,
-        UserManager userManager,
         GuildRoleMappingRepository roleMappingRepository)
     {
         this.discordAdapter = discordAdapter;
-        this.tokenCreator = tokenCreator;
-        this.userManager = userManager;
+        this.authenticationService = authenticationService;
         this.roleMappingRepository = roleMappingRepository;
-        this.options = options.Value;
     }
 
-    public async Task<(string JwtToken, DateTimeOffset ExpiresAt, DiscordToken DiscordToken)> Renew(
+    public async Task<(string JwtToken, DateTimeOffset ExpiresAt, AuthenticationToken DiscordToken)> Renew(
         string refreshToken,
         string guildId)
     {
@@ -37,58 +32,61 @@ public class DiscordAuthenticationService
         return await CreateToken(accessToken, discordUser, guildId);
     }
 
-    public async Task<(string JwtToken, DateTimeOffset ExpiresAt, DiscordToken DiscordToken)> Login(
+    public async Task<(string JwtToken, DateTimeOffset ExpiresAt, AuthenticationToken DiscordToken)> Login(
         string discordToken,
-        string guildId,
+        string? guildId,
         string redirectUrl)
     {
         var accessToken = await discordAdapter.GetAccessToken(discordToken, redirectUrl);
         var discordUser = await discordAdapter.Lookup(accessToken.AccessToken);
 
-        await discordAdapter.AddGuildMember(guildId, discordUser.Id, accessToken.AccessToken);
+        if (guildId is not null)
+            await discordAdapter.AddGuildMember(guildId, discordUser.Id, accessToken.AccessToken);
 
         return await CreateToken(accessToken, discordUser, guildId);
     }
 
-    private async Task<(string JwtToken, DateTimeOffset ExpiresAt, DiscordToken DiscordToken)> CreateToken(
-        DiscordAccessToken accessToken,
-        DiscordUser discordUser,
-        string guildId)
+    private async Task<(string JwtToken, DateTimeOffset ExpiresAt, AuthenticationToken AuthenticationToken)>
+        CreateToken(
+            DiscordAccessToken accessToken,
+            DiscordUser discordUser,
+            string? guildId)
     {
-        var (roles, username, avatar) = await GetUserInfo(discordUser, guildId);
+        if (guildId is null)
+        {
+            return await authenticationService.Login(
+                discordUser.Id,
+                AuthenticationProvider.Discord,
+                discordUser.Username,
+                discordUser.Avatar,
+                accessToken.RefreshToken,
+                new[] { Role.Superadmin },
+                null);
+        }
 
-        var token = new DiscordToken(
+        var (roles, guildNick, guildAvatar) = await GetGuildUserInfo(discordUser, guildId);
+
+        return await authenticationService.Login(
             discordUser.Id,
-            username,
-            avatar,
+            AuthenticationProvider.Discord,
+            guildNick ?? discordUser.Username,
+            guildAvatar ?? discordUser.Avatar,
             accessToken.RefreshToken,
             roles,
-            guildId,
-            AuthenticationProvider.Discord);
-
-        var (jwtToken, expiresAt) = await tokenCreator.CreateToken(token, roles);
-        await userManager.Store(new User(discordUser.Id, username, avatar, roles));
-
-        return (jwtToken, expiresAt, token);
+            null);
     }
 
-    private async Task<(Role[] Roles, string Username, string? Avatar)> GetUserInfo(DiscordUser discordUser,
+    private async Task<(Role[] Roles, string? Nick, string? Avatar)> GetGuildUserInfo(DiscordUser discordUser,
         string guildId)
     {
         var guildMember = await discordAdapter.GetGuildMember(guildId, discordUser.Id);
-
-        if (options.Superadmins.Any(admin => admin == discordUser.Id))
-        {
-            return (Enum.GetValues<Role>(), guildMember?.Nick ?? discordUser.Username,
-                guildMember?.Avatar ?? discordUser.Avatar);
-        }
 
         if (guildMember == null) return (new[] { Role.User }, discordUser.Username, discordUser.Avatar);
 
         var roleMappings = await roleMappingRepository.GetRoleMapping(guildId).ToArrayAsync();
         var roles = GetGuildMemberRoles(roleMappings, guildMember).Append(Role.User).Distinct().ToArray();
 
-        return (roles, guildMember.Nick ?? discordUser.Username, guildMember.Avatar ?? discordUser.Avatar);
+        return (roles, guildMember.Nick, guildMember.Avatar);
     }
 
     private static IEnumerable<Role> GetGuildMemberRoles((string RoleId, Role Role)[] roleMapping,

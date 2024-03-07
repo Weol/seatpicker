@@ -1,7 +1,10 @@
 import { atom, useRecoilState } from "recoil"
-import Config from "../../config"
+import ApiRequest from "../ApiRequest"
 import { Role } from "../AuthAdapter"
-import { synchronizeWithLocalStorage } from "../Utils"
+
+export interface DiscoveredGuild {
+  guildId: string
+}
 
 export interface Guild {
   id: string
@@ -16,14 +19,22 @@ export interface GuildRole {
   roles: Role[]
 }
 
-const defaultGuildId = Config.IsLocalhost ? "654016371260260412" : "817425364656586762"
-export const activeGuildIdAtom = atom<string>({
+export const activeGuildIdAtom = atom<string | null>({
   key: "activeGuildId",
-  effects: [synchronizeWithLocalStorage("activeGuildId", defaultGuildId)],
+  effects: [({ setSelf }) => setSelf(DiscoverGuild())],
 })
 
-export function useActiveGuildId() {
-  const [activeGuildId, setActiveGuildId] = useRecoilState(activeGuildIdAtom)
+async function DiscoverGuild() {
+  const response = await ApiRequest("GET", `guild/discover`)
+  if (response.status == 404) return null
 
-  return { activeGuildId, setActiveGuildId }
+  const discoveredGuild = (await response.json()) as DiscoveredGuild
+
+  return discoveredGuild.guildId
+}
+
+export function useActiveGuildId() {
+  const [activeGuildId] = useRecoilState(activeGuildIdAtom)
+
+  return { activeGuildId }
 }

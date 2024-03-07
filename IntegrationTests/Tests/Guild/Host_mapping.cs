@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Database.GuildHostMapping;
 using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
@@ -23,6 +24,12 @@ public class Host_mapping : IntegrationTestBase
         databaseFixture,
         testOutputHelper)
     {
+    }
+
+    protected override void ConfigureServices(IServiceCollection services, PostgresFixture postgresFixture)
+    {
+        base.ConfigureServices(services, postgresFixture);
+        services.PostConfigure()
     }
 
     [Fact]

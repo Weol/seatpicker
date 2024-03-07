@@ -15,9 +15,10 @@ public static class AuthenticationExtensions
         this IServiceCollection services)
     {
         services
+            .AddSingleton<AuthenticationService>()
             .AddSingleton<JwtTokenCreator>()
-            .AddDiscordAuthentication(ConfigureDiscordAuthentication)
             .AddUserManager()
+            .AddDiscordAuthentication(ConfigureDiscordAuthentication)
             .AddAuthorization()
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer();

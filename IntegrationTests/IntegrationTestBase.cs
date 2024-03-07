@@ -5,6 +5,7 @@ using Marten.Storage;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Seatpicker.Application.Features;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Database;
@@ -106,11 +107,7 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
             session.Store(document);
         }
 
-        // We cant allow more than one test to run commit at a time otherwise there is a deadlock on macOS
-        lock (factory)
-        {
-            session.SaveChanges();
-        }
+        session.SaveChanges();
 
         return Task.CompletedTask;
     }
@@ -133,40 +130,35 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
         return reader.Query<TDocument>().AsEnumerable();
     }
 
-    protected async Task<User> CreateUser(string guildId)
+    protected User CreateUser(string guildId)
     {
-        var userDocument = new UserManager.UserDocument(
-            Guid.NewGuid().ToString(),
-            guildId,
-            new Faker().Name.FirstName(),
-            Array.Empty<Role>());
-
-        await SetupDocuments(guildId, userDocument);
-
-        return new User(userDocument.Id, userDocument.Name, userDocument.Avatar, Array.Empty<Role>());
+        return CreateIdentity(guildId).GetAwaiter().GetResult().User;
     }
 
     protected async Task<TestIdentity> CreateIdentity(string guildId, params Role[] roles)
     {
         if (roles.Length == 0) roles = new[] { Role.User };
+        
+        var authenticationService = factory.Services.GetRequiredService<AuthenticationService>();
 
-        var jwtTokenCreator = factory.Services.GetRequiredService<JwtTokenCreator>();
+        var (jwtToken, expiresAt, authenticationToken) = await authenticationService.Login(
+            new Faker().Random.Int(99999).ToString(),
+            AuthenticationProvider.Discord,
+            new Faker().Name.FirstName(),
+            new Faker().Random.Int(99999).ToString(),
+            "asdasdasd",
+            roles,
+            guildId);
 
-        var user = await CreateUser(guildId);
+        var identity = new TestIdentity(
+            new User(authenticationToken.Id,
+                authenticationToken.Nick,
+                authenticationToken.Avatar,
+                authenticationToken.Roles),
+            roles,
+            jwtToken,
+            guildId);
 
-        var discordToken = new DiscordToken(
-            Id: user.Id,
-            Nick: user.Name,
-            RefreshToken: "8ioq3",
-            Avatar: user.Avatar,
-            Roles: roles,
-            GuildId: guildId,
-            Provider: AuthenticationProvider.Discord
-        );
-
-        var (token, _) = await jwtTokenCreator.CreateToken(discordToken, roles);
-
-        var identity = new TestIdentity(user, roles, token, guildId);
         return identity;
     }
 
