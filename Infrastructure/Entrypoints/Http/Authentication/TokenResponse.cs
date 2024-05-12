@@ -9,4 +9,4 @@ public record TokenResponse(string Token,
     string UserId,
     string Nick,
     string? Avatar,
-    ICollection<Role> Roles);
+    IEnumerable<Role> Roles);

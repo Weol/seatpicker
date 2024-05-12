@@ -2,13 +2,14 @@ using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Entrypoints.Filters;
 using Seatpicker.Infrastructure.Entrypoints.Http.Authentication;
 using Seatpicker.Infrastructure.Entrypoints.Http.Authentication.Discord;
+using Seatpicker.Infrastructure.Entrypoints.Http.Frontend;
 using Seatpicker.Infrastructure.Entrypoints.Http.Guild;
-using Seatpicker.Infrastructure.Entrypoints.Http.Guild.Discord;
 using Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 using Seatpicker.Infrastructure.Entrypoints.Http.Marten;
 using Seatpicker.Infrastructure.Entrypoints.Http.Reservation;
 using Seatpicker.Infrastructure.Entrypoints.Http.ReservationManagement;
 using Seatpicker.Infrastructure.Entrypoints.Http.Seat;
+using UpdateLan = Seatpicker.Infrastructure.Entrypoints.Http.Lan.UpdateLan;
 
 namespace Seatpicker.Infrastructure.Entrypoints;
 
@@ -25,8 +26,7 @@ public static class EntrypointsMappingExtensions
         rootRouteBuilder(rootBuilder);
 
         rootBuilder.MapGroup("guild")
-            .MapGuildEndpoints()
-            .MapDiscordGuildEndpoints();
+            .MapGuildEndpoints();
 
         rootBuilder.MapGroup("authentication")
             .MapAuthenticationEndpoints();
@@ -53,32 +53,20 @@ public static class EntrypointsMappingExtensions
         discordGroup.MapPost("renew", RenewEndpoint.Renew);
     }
 
-    private static void MapDiscordGuildEndpoints(this RouteGroupBuilder builder)
-    {
-        var discordGroup = builder.MapGroup("discord/{guildId}")
-            .RequireRole(Role.Admin)
-            .AddEndpointFilter<GuildIdAuthorizationFilter>();
-
-        discordGroup.MapGet("roles", GetRoleMapping.Get);
-        discordGroup.MapPut("roles", PutRoleMapping.Put);
-    }
-
     private static RouteGroupBuilder MapGuildEndpoints(this RouteGroupBuilder builder)
     {
-        builder.MapGet("/", GetGuilds.GetAll);
-
-        builder.MapGet("/discover", DiscoverGuild.Get);
-
-        builder.MapGet("hosts", GetHostMapping.GetALl)
+        builder.MapGet("/", GetGuild.GetAll)
             .RequireRole(Role.Superadmin);
 
-        builder.MapPut("hosts", PutHostMapping.Put)
-            .RequireRole(Role.Superadmin);
+        builder.MapGet("/discover", Discover.Get);
 
         var guildGroup = builder.MapGroup("{guildId}")
             .AddEndpointFilter<GuildIdAuthorizationFilter>();
 
-        guildGroup.MapGet("/", GetGuilds.Get);
+        guildGroup.MapPut("/", UpdateGuild.Update)
+            .RequireRole(Role.Admin);
+
+        guildGroup.MapGet("/", GetGuild.Get);
 
         guildGroup.MapGroup("lan")
             .MapLanEndpoints();

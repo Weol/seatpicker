@@ -28,7 +28,7 @@ public class Move_reservation : IntegrationTestBase
     public async Task succeeds_when_seat_is_reserved_and_target_seat_is_not_reserved()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Operator);
 
         var lan = LanGenerator.Create(guildId, CreateUser(guildId));
@@ -67,7 +67,7 @@ public class Move_reservation : IntegrationTestBase
     public async Task fails_when_seat_is_not_reserved()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Operator);
 
         var lan = LanGenerator.Create(guildId, CreateUser(guildId));
@@ -103,7 +103,7 @@ public class Move_reservation : IntegrationTestBase
     public async Task fails_when_target_seat_is_reserved()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Operator);
         var lan = LanGenerator.Create(guildId, CreateUser(guildId));
         var fromSeat = SeatGenerator.Create(lan, CreateUser(lan.GuildId), reservedBy: CreateUser(guildId));
@@ -139,7 +139,7 @@ public class Move_reservation : IntegrationTestBase
     public async Task fails_when_seat_and_target_seat_is_reserved()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Operator);
 
         var lan = LanGenerator.Create(guildId, CreateUser(guildId));
@@ -177,7 +177,7 @@ public class Move_reservation : IntegrationTestBase
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId);
 
         //Act

@@ -1,7 +1,5 @@
 import ApiRequest from "./ApiRequest"
-import { User } from "./AuthAdapter"
-import { Lan } from "./Lans/Lans"
-import { Seat } from "./SeatsAdapter"
+import { Lan, Seat, User } from "./Models"
 
 export default function useReservationAdapter(lan: Lan | null) {
   const makeReservation = async (seat: Seat) => {
@@ -26,7 +24,7 @@ export default function useReservationAdapter(lan: Lan | null) {
 
   const moveReservationFor = async (fromSeat: Seat, toSeat: Seat) => {
     await ApiRequest("PUT", `lan/${lan?.id}/seat/${fromSeat.id}/reservationmanagement`, {
-      toSeatId: toSeat.id
+      toSeatId: toSeat.id,
     })
   }
 

@@ -26,7 +26,7 @@ public class Create_lan : IntegrationTestBase
     public async Task succeeds_when_lan_is_valid()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Admin);
 
         var request = Generator.CreateLanRequest(guildId);
@@ -52,7 +52,7 @@ public class Create_lan : IntegrationTestBase
     public async Task fails_when_background_is_not_svg()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Admin);
 
         var request = Generator.CreateLanRequest(guildId) with { Background = new byte[] { 1, 2, 3, 4, 5, 6 } };
@@ -68,7 +68,7 @@ public class Create_lan : IntegrationTestBase
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId);
 
         //Act

@@ -26,15 +26,10 @@ public class Update_lan : IntegrationTestBase
 
     public static IEnumerable<object[]> ValidUpdateRequests = new[]
     {
-        new object[] { Generator.UpdateLanRequest() with { Title = null } },
-        new object[] { Generator.UpdateLanRequest() with { Active = null } },
         new object[]
         {
-            Generator.UpdateLanRequest() with { Background = null },
-        },
-        new object[]
-        {
-            Generator.UpdateLanRequest(),
+            Generator.UpdateLanRequest() with { Active = true },
+            Generator.UpdateLanRequest() with { Active = false },
         },
     };
 
@@ -43,10 +38,10 @@ public class Update_lan : IntegrationTestBase
     public async Task succeeds_when_valid(UpdateLan.Request request)
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Admin);
 
-        var existingLan = LanGenerator.Create(guildId, CreateUser(guildId), request.Id);
+        var existingLan = LanGenerator.Create(guildId, CreateUser(guildId), id: request.Id);
         await SetupAggregates(guildId, existingLan);
 
         //Act
@@ -62,20 +57,16 @@ public class Update_lan : IntegrationTestBase
                 var lan = committedAggregates.Should().ContainSingle().Subject;
                 Assert.Multiple(
                     () => lan.Id.Should().Be(request.Id),
-                    () =>
-                    {
-                        if (request.Title is not null) lan.Title.Should().Be(request.Title);
-                    },
-                    () =>
-                    {
-                        if (request.Background is not null) lan.Background.Should().Equal(request.Background);
-                    });
+                    () => lan.Title.Should().Be(request.Title),
+                    () => lan.Active.Should().Be(request.Active),
+                    () => lan.Background.Should().Equal(request.Background));
             });
     }
 
     public static IEnumerable<object[]> InvalidUpdateRequests = new[]
     {
-        new object[] { Generator.UpdateLanRequest() with { Background = null, Title = null } },
+        new object[] { Generator.UpdateLanRequest() with { Background = null! } },
+        new object[] { Generator.UpdateLanRequest() with { Title = null! } },
         new object[] { Generator.UpdateLanRequest() with { Title = "" } },
         new object[] { Generator.UpdateLanRequest() with { Background = Array.Empty<byte>() } },
         new object[] { Generator.UpdateLanRequest() with { Background = new byte[] { 1, 2, 3, 4 } } },
@@ -86,7 +77,7 @@ public class Update_lan : IntegrationTestBase
     public async Task fails_when_invalid(UpdateLan.Request request)
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Admin);
 
         var existingLan = LanGenerator.Create(guildId, CreateUser(guildId));
@@ -103,7 +94,7 @@ public class Update_lan : IntegrationTestBase
     public async Task fails_when_model_id_does_not_match_path_id()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Admin);
 
         var existingLan = LanGenerator.Create(guildId, CreateUser(guildId));
@@ -120,7 +111,7 @@ public class Update_lan : IntegrationTestBase
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId);
 
         //Act

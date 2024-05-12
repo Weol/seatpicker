@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
 using Seatpicker.Infrastructure.Adapters.Discord;
+using Seatpicker.Infrastructure.Adapters.Guilds;
 
 namespace Seatpicker.Infrastructure.Authentication.Discord;
 
@@ -9,17 +9,17 @@ public class DiscordAuthenticationService
 {
     private readonly DiscordAdapter discordAdapter;
     private readonly AuthenticationService authenticationService;
-    private readonly GuildRoleMappingRepository roleMappingRepository;
+    private readonly GuildAdapter guildAdapter;
 
     public DiscordAuthenticationService(
         DiscordAdapter discordAdapter,
         AuthenticationService authenticationService,
         IOptions<AuthenticationOptions> options,
-        GuildRoleMappingRepository roleMappingRepository)
+        GuildAdapter guildAdapter)
     {
         this.discordAdapter = discordAdapter;
         this.authenticationService = authenticationService;
-        this.roleMappingRepository = roleMappingRepository;
+        this.guildAdapter = guildAdapter;
     }
 
     public async Task<(string JwtToken, DateTimeOffset ExpiresAt, AuthenticationToken DiscordToken)> Renew(
@@ -56,8 +56,7 @@ public class DiscordAuthenticationService
         {
             return await authenticationService.Login(
                 discordUser.Id,
-                AuthenticationProvider.Discord,
-                discordUser.Username,
+                discordUser.GlobalName ?? discordUser.Username,
                 discordUser.Avatar,
                 accessToken.RefreshToken,
                 new[] { Role.Superadmin },
@@ -68,12 +67,11 @@ public class DiscordAuthenticationService
 
         return await authenticationService.Login(
             discordUser.Id,
-            AuthenticationProvider.Discord,
             guildNick ?? discordUser.Username,
             guildAvatar ?? discordUser.Avatar,
             accessToken.RefreshToken,
             roles,
-            null);
+            guildId);
     }
 
     private async Task<(Role[] Roles, string? Nick, string? Avatar)> GetGuildUserInfo(DiscordUser discordUser,
@@ -83,13 +81,15 @@ public class DiscordAuthenticationService
 
         if (guildMember == null) return (new[] { Role.User }, discordUser.Username, discordUser.Avatar);
 
-        var roleMappings = await roleMappingRepository.GetRoleMapping(guildId).ToArrayAsync();
+        var guild = await guildAdapter.GetGuild(guildId);
+        var roleMappings = guild?.RoleMapping ?? Array.Empty<(string RoleId, Role[] Roles)>();
+
         var roles = GetGuildMemberRoles(roleMappings, guildMember).Append(Role.User).Distinct().ToArray();
 
         return (roles, guildMember.Nick, guildMember.Avatar);
     }
 
-    private static IEnumerable<Role> GetGuildMemberRoles((string RoleId, Role Role)[] roleMapping,
+    private static IEnumerable<Role> GetGuildMemberRoles((string RoleId, Role[] Roles)[] roleMapping,
         DiscordGuildMember discordGuildMember)
     {
         yield return Role.User;
@@ -100,7 +100,10 @@ public class DiscordAuthenticationService
             {
                 if (guildRoleId != mapping.RoleId) continue;
 
-                yield return mapping.Role;
+                foreach (var role in mapping.Roles)
+                {
+                    yield return role;
+                }
             }
         }
     }

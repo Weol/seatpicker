@@ -27,7 +27,7 @@ public class Create_reservation : IntegrationTestBase
     public async Task succeeds_when_reserving_existing_available_seat()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Operator);
         var lan = LanGenerator.Create(guildId, CreateUser(guildId));
         var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId));
@@ -53,7 +53,7 @@ public class Create_reservation : IntegrationTestBase
     public async Task succeeds_when_reserving_seat_that_user_has_already_reserved()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Operator);
 
         var lan = LanGenerator.Create(guildId, CreateUser(guildId));
@@ -80,7 +80,7 @@ public class Create_reservation : IntegrationTestBase
     public async Task fails_when_seat_is_already_reserved()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Operator);
 
         var alreadyReservedBy = CreateUser(guildId);
@@ -108,7 +108,7 @@ public class Create_reservation : IntegrationTestBase
     public async Task fails_when_seat_does_not_exist()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Operator);
 
         var lan = LanGenerator.Create(guildId, CreateUser(guildId));
@@ -126,7 +126,7 @@ public class Create_reservation : IntegrationTestBase
     public async Task fails_when_user_already_has_a_reserved_seat()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Operator);
 
         var reserveFor = CreateUser(guildId);
@@ -153,7 +153,7 @@ public class Create_reservation : IntegrationTestBase
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId);
 
         //Act

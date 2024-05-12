@@ -16,24 +16,22 @@ public static class UpdateSeat
     {
         var user = await loggedInUserAccessor.Get();
 
-        await seatManagementService.Update(lanId, seatId, request.Title, request.Bounds?.ToDomainBounds(), user);
+        await seatManagementService.Update(lanId, seatId, request.Title, request.Bounds.ToDomainBounds(), user);
 
         return TypedResults.Ok();
     }
 
-    public record Request(string? Title, Bounds? Bounds);
+    public record Request(string Title, Bounds Bounds);
 
     public class Validator : AbstractValidator<Request>
     {
         public Validator()
         {
             RuleFor(x => x.Title)
-                .NotEmpty()
-                .When(x => x.Title is not null);
+                .NotEmpty();
 
             RuleFor(x => x.Bounds)
-                .SetValidator(new BoundsValidator()!)
-                .When(x => x.Bounds is not null);
+                .SetValidator(new BoundsValidator()!);
         }
     }
 }

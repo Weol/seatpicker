@@ -25,7 +25,7 @@ public class TestWebApplicationFactory : WebApplicationFactory<Infrastructure.Pr
             .ConfigureAppConfiguration(b => b.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["Logging:LogLevel:Default"] = "Trace",
-                ["Logging:LogLevel:Marten"] = "Information",
+                ["Logging:LogLevel:Marten"] = "Trace",
 
                 // Values from key vault
                 ["DiscordClientId"] = "9124761923842139",
@@ -37,10 +37,6 @@ public class TestWebApplicationFactory : WebApplicationFactory<Infrastructure.Pr
             }))
             .ConfigureServices(services =>
             {
-                // Replace document repositories
-                services.RemoveAll<IDocumentRepository>();
-                services.AddPortMapping<IDocumentRepository, TestDocumentRepository>();
-                
                 // Add intercepting http message handler
                 services.RemoveAll<DiscordAdapter>();
                 services.AddPortMapping<DiscordAdapter, TestDiscordAdapter>();

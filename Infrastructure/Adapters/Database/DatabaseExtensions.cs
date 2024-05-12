@@ -4,8 +4,7 @@ using Marten;
 using Marten.Storage;
 using Microsoft.Extensions.Options;
 using Seatpicker.Application.Features;
-using Seatpicker.Infrastructure.Adapters.Database.GuildHostMapping;
-using Seatpicker.Infrastructure.Adapters.Database.GuildRoleMapping;
+using Seatpicker.Infrastructure.Adapters.Guilds;
 using Shared;
 using Weasel.Core;
 
@@ -21,11 +20,9 @@ internal static class DatabaseExtensions
 
         services.AddSingleton<IAggregateRepository, AggregateRepository>()
             .AddPortMapping<IDocumentRepository, DocumentRepository>()
-            .AddSingleton<GuildIdProvider>()
-            .AddGuildRoleMappingRepository()
-            .AddGuildHostMappingRepository();
+            .AddSingleton<GuildIdProvider>();
 
-        var configuration = services.AddMarten(
+        services.AddMarten(
                 provider =>
                 {
                     var databaseOptions = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
@@ -35,7 +32,6 @@ internal static class DatabaseExtensions
                 })
             .InitializeWith()
             .OptimizeArtifactWorkflow();
-
         
         return services;
     }
@@ -71,7 +67,7 @@ internal static class DatabaseExtensions
             options.RegisterDocumentType(document);
         }
 
-        options.Schema.For<GuildHostMapping.GuildHostMapping>().SingleTenanted();
+        options.Schema.For<GuildAdapter.GuildDocument>().SingleTenanted();
     }
 
     private static void RegisterAllEvents(StoreOptions options)

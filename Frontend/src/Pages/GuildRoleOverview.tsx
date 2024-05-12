@@ -1,13 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Cancel, CheckBox, CheckBoxOutlineBlank } from "@mui/icons-material"
 import { Autocomplete, Box, Button, Checkbox, IconButton, Stack, TextField } from "@mui/material"
 import Divider from "@mui/material/Divider"
 import Typography from "@mui/material/Typography"
 import { useState } from "react"
-import { Role } from "../Adapters/AuthAdapter"
-import { Guild, GuildRole } from "../Adapters/Guilds/ActiveGuild"
 import { useGuildRoles } from "../Adapters/Guilds/GuildRoles"
 import { useGuild } from "../Adapters/Guilds/Guilds"
+import { Guild, GuildRole, Role } from "../Adapters/Models"
 import { useAlerts } from "../Contexts/AlertContext"
 
 type RoleMapping = {
@@ -51,7 +49,7 @@ function hasUnsavedChanges(stagedMappings: RoleMapping[], savedMappings: GuildRo
   return false
 }
 
-export default function GuildSettings(props: { guildId: string }) {
+export default function GuildRoleOverview(props: { guildId: string }) {
   const guild = useGuild(props.guildId)
 
   return guild ? <GuildSettingsWithGuild guild={guild} /> : <NotFound />
@@ -169,7 +167,7 @@ function GuildSettingsWithGuild(props: { guild: Guild }) {
         multiple
         disableCloseOnSelect
         limitTags={1}
-        options={Object.values(Role)}
+        options={Object.values(Role).filter((role) => role != Role.SUPERADMIN)}
         autoHighlight
         sx={{ width: "50%" }}
         value={mapping.roles}

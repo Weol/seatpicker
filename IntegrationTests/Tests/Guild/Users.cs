@@ -23,7 +23,7 @@ public class Users : IntegrationTestBase
     public async Task getting_users_returns_all_users_who_have_logged_in()
     {
         // Arrange
-        var guildId = CreateGuild();
+        var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Operator);
 
         var users = Enumerable.Range(0, 5)
@@ -60,9 +60,9 @@ public class Users : IntegrationTestBase
         // Arrange
         var guilds = new[]
         {
-            (Id: CreateGuild(), Lans: new List<UserManager.UserDocument>()),
-            (Id: CreateGuild(), Lans: new List<UserManager.UserDocument>()),
-            (Id: CreateGuild(), Lans: new List<UserManager.UserDocument>()),
+            (Id: await CreateGuild(), Lans: new List<UserManager.UserDocument>()),
+            (Id: await CreateGuild(), Lans: new List<UserManager.UserDocument>()),
+            (Id: await CreateGuild(), Lans: new List<UserManager.UserDocument>()),
         };
 
         foreach (var (id, users) in guilds)

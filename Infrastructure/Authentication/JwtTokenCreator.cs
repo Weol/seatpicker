@@ -39,12 +39,16 @@ public class JwtTokenCreator
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Name, authenticationToken.Nick),
             new(JwtRegisteredClaimNames.Sub, authenticationToken.Id),
-            new(GuildIdClaimName, authenticationToken.GuildId),
         };
 
-        if (authenticationToken.Avatar is not null) defaultClaims.Add(new Claim("avatar", authenticationToken.Avatar));
+        if (authenticationToken.Avatar is not null) 
+            defaultClaims.Add(new Claim("avatar", authenticationToken.Avatar));
 
-        var roleClaims = authenticationToken.Roles.Select(role => new Claim(ClaimTypes.Role, role.ToString()));
+        if (authenticationToken.GuildId is not null)
+            defaultClaims.Add(new Claim(GuildIdClaimName, authenticationToken.GuildId));
+        
+        var roleClaims = authenticationToken.Roles
+            .Select(role => new Claim(ClaimTypes.Role, role.ToString()));
 
         var handler = new JwtSecurityTokenHandler();
 

@@ -19,26 +19,36 @@ import {
 } from "@mui/material"
 import * as React from "react"
 import { useState } from "react"
-import { Role, User, useAuth } from "../Adapters/AuthAdapter"
+import { useActiveGuildId } from "../Adapters/ActiveGuild"
+import { useAuth } from "../Adapters/AuthAdapter"
 import { useGuildUsers } from "../Adapters/Guilds/GuildUsers"
-import { useActiveLan } from "../Adapters/Lans/ActiveLan"
-import { Lan } from "../Adapters/Lans/Lans"
-import useReservationAdapter from "../Adapters/ReservationAdapter"
-import { Seat, useSeats } from "../Adapters/SeatsAdapter"
+import { useActiveLan } from "../Adapters/Lans/AllLans"
+import { Lan, Role, Seat, User } from "../Adapters/Models"
+import useReservationAdapter from "../Adapters/Reservation"
+import { useSeats } from "../Adapters/Seats"
 import { DiscordUserAvatar } from "../Components/DiscordAvatar"
 import { useAlerts } from "../Contexts/AlertContext"
 import { useDialogs } from "../Contexts/DialogContext"
+import config from "../config"
 
 export default function Seats() {
   const activeLan = useActiveLan()
+  const activeGuildId = useActiveGuildId()
 
-  return activeLan ? <SeatsWithLan activeLan={activeLan} /> : <NoActiveLan />
+  if (activeGuildId == null) {
+    const message = `No guild is configured for this host (${config.ApiHost})`
+    return <ErrorMessage message={message} />
+  } else if (activeLan == null) {
+    return <ErrorMessage message="Det er ikke konfigurert et aktivt lan" />
+  } else {
+    return <SeatsWithLan activeLan={activeLan} />
+  }
 }
 
-function NoActiveLan() {
+function ErrorMessage(props: { message: string }) {
   return (
     <Stack width="100%" justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }}>
-      <Typography>No active lan is configured</Typography>
+      <Typography>{props.message}</Typography>
     </Stack>
   )
 }
@@ -546,7 +556,7 @@ function SeatMenu(props: SeatMenuProps & { menuProps: MenuProps }) {
         components.push(message("Logg inn for å reservere plass"))
       }
     } else if (loggedInUser != null) {
-      if (loggedInUser.isInRole(Role.OPERATOR)) {
+      if (loggedInUser.roles.includes(Role.OPERATOR)) {
         if (props.seat.reservedBy != null) {
           components.push(header("ADMIN"), removeReservationFor(), moveReservationFor())
         } else if (showUserList) {

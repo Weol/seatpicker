@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Seat } from "./Adapters/SeatsAdapter"
+import { Seat } from "./Adapters/Models"
 
 interface SeatReference {
   Id: string | null

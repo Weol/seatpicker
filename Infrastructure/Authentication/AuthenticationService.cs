@@ -20,24 +20,14 @@ public class AuthenticationService
     }
 
     public async Task<(string JwtToken, DateTimeOffset ExpiresAt, AuthenticationToken AuthenticationToken)> Login(
-        string providerUserId,
-        AuthenticationProvider provider,
+        string userId,
         string nick,
         string? avatar,
         string refreshToken,
         Role[] roles,
         string? guildId)
     {
-        var token = AuthenticationToken.CreateWithProviderId(
-            providerUserId,
-            provider,
-            nick,
-            avatar,
-            refreshToken,
-            roles,
-            guildId);
-
-        var isSuperAdmin = IsSuperAdmin(token.Id);
+        var isSuperAdmin = IsSuperAdmin(userId);
         
         if (roles.Contains(Role.Superadmin) && !isSuperAdmin)
             throw new IllegalLoginAttemptException("Only whitelisted users can have the superadmin role");
@@ -47,14 +37,23 @@ public class AuthenticationService
 
         if (isSuperAdmin) roles = Enum.GetValues<Role>();
 
+        var token = new AuthenticationToken(
+            userId,
+            nick,
+            avatar,
+            refreshToken,
+            roles,
+            guildId);
+        
         var (jwtToken, expiresAt) = await tokenCreator.CreateToken(token);
-        await userManager.Store(guildId, new User(token.Id, nick, avatar, roles));
+        
+        if (guildId is not null)
+            await userManager.Store(guildId, new User(token.Id, nick, avatar, roles));
 
         return (jwtToken, expiresAt, token);
     }
 
-    // Virtual for testing
-    public virtual bool IsSuperAdmin(string userId)
+    private bool IsSuperAdmin(string userId)
     {
         return options.Superadmins.Any(admin => admin == userId);
     }

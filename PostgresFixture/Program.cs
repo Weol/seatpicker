@@ -2,7 +2,8 @@ using Marten;
 using Testcontainers.PostgreSql;
 using Weasel.Core;
 
-var container = new PostgreSqlBuilder().Build();
+var container = new PostgreSqlBuilder()
+    .Build();
 
 const string environmentVariableName = "POSTGRES_CONNECTION_STRING";
 try

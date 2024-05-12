@@ -25,7 +25,7 @@ export default async function ApiRequest(
   }
 
   if (method == "POST" || method == "PUT") {
-    headers.append("Content-Type", "text/json")
+    headers.append("Content-Type", "application/json")
     if (typeof body !== "undefined") requestInit.body = JSON.stringify(body)
   }
 

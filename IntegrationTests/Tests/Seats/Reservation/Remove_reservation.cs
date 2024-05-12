@@ -23,7 +23,7 @@ public class Remove_reservation : IntegrationTestBase
     public async Task succeeds_when_seat_is_reserved_by_user()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var identity = await CreateIdentity(guildId);
         var client = GetClient(identity);
 
@@ -49,7 +49,7 @@ public class Remove_reservation : IntegrationTestBase
     public async Task succeeds_when_seat_is_not_reserved()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var identity = await CreateIdentity(guildId);
         var client = GetClient(identity);
 
@@ -69,7 +69,7 @@ public class Remove_reservation : IntegrationTestBase
     public async Task fails_when_seat_is_reserved_by_different_user()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var identity = await CreateIdentity(guildId);
         var client = GetClient(identity);
 
@@ -97,7 +97,7 @@ public class Remove_reservation : IntegrationTestBase
     public async Task fails_when_seat_does_not_exist()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var identity = await CreateIdentity(guildId);
         var client = GetClient(identity);
 

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Net;
 using System.Text.Json;
 using Bogus;
@@ -10,19 +11,20 @@ namespace Seatpicker.IntegrationTests.TestAdapters;
 
 public class TestDiscordAdapter : DiscordAdapter
 {
-    private readonly ISet<TestUser> users = new HashSet<TestUser>();
-    private readonly ISet<TestGuild> guilds = new HashSet<TestGuild>();
+    private readonly IDictionary<string, TestUser> users = new ConcurrentDictionary<string, TestUser>();
+    private readonly IDictionary<string, TestGuild> guilds = new ConcurrentDictionary<string, TestGuild>();
 
     public TestDiscordAdapter(HttpClient httpClient, IOptions<DiscordAdapterOptions> options, JsonSerializerOptions jsonSerializerOptions, ILogger<DiscordAdapter> logger, IMemoryCache memoryCache) : base(httpClient, options, jsonSerializerOptions, logger, memoryCache)
     {
     }
     
-    public void AddGuild(string id, IEnumerable<string>? guildRoleIds = null)
+    public void AddGuild(string id, string name, string icon, IEnumerable<string>? guildRoleIds = null)
     {
         var discordGuild = new DiscordGuild
         {
             Id = id,
-            Name = new Faker().Internet.DomainWord(),
+            Name = name,
+            Icon = icon
         };
 
         var roles = guildRoleIds == null
@@ -34,7 +36,7 @@ public class TestDiscordAdapter : DiscordAdapter
                 Name = new Faker().Random.Word()
             });
 
-        guilds.Add(new TestGuild(discordGuild, roles));
+        guilds.Add(discordGuild.Id, new TestGuild(discordGuild, roles));
     }
 
     public (string DiscordToken, string RefreshToken) AddUser(DiscordUser discordUser,
@@ -43,7 +45,7 @@ public class TestDiscordAdapter : DiscordAdapter
         string? guildAvatar = null,
         params string[] guildRoleIds)
     {
-        var guild = guilds.First(guild => guild.DiscordGuild.Id == guildId);
+        var guild = guilds[guildId];
         foreach (var guildRoleId in guildRoleIds)
         {
             if (guild.Roles.All(guildRole => guildRole.Id != guildRoleId))
@@ -61,7 +63,7 @@ public class TestDiscordAdapter : DiscordAdapter
                 guildRoleIds)
         );
 
-        users.Add(user);
+        users.Add(user.DiscordUser.Id, user);
 
         return (user.DiscordToken, user.RefreshToken);
     }
@@ -74,14 +76,14 @@ public class TestDiscordAdapter : DiscordAdapter
             new Faker().Random.AlphaNumeric(15),
             null
         );
-        users.Add(user);
+        users.Add(discordUser.Id, user);
 
         return (user.DiscordToken, user.RefreshToken);
     }
 
     public override Task<DiscordAccessToken> GetAccessToken(string discordToken, string redirectUrl)
     {
-        var matchingUser = users.FirstOrDefault(x => x.DiscordToken == discordToken);
+        var matchingUser = users.Values.FirstOrDefault(x => x.DiscordToken == discordToken);
 
         if (matchingUser is null)
             throw new DiscordException("Error from Discord test adapter")
@@ -100,7 +102,7 @@ public class TestDiscordAdapter : DiscordAdapter
 
     public override Task<DiscordAccessToken> RefreshAccessToken(string refreshToken)
     {
-        var matchingUser = users.FirstOrDefault(x => x.RefreshToken == refreshToken);
+        var matchingUser = users.Values.FirstOrDefault(x => x.RefreshToken == refreshToken);
 
         if (matchingUser is null)
             throw new DiscordException("Error from Discord test adapter")
@@ -109,13 +111,13 @@ public class TestDiscordAdapter : DiscordAdapter
                 Body = "Refresh token not valid for some reason"
             };
 
-        users.Remove(matchingUser);
+        users.Remove(matchingUser.DiscordUser.Id);
         var newUser = matchingUser with
         {
             AccessToken = new Faker().Random.AlphaNumeric(15),
             RefreshToken = new Faker().Random.AlphaNumeric(15),
         };
-        users.Add(newUser);
+        users[newUser.DiscordUser.Id] = newUser;
 
         return Task.FromResult(new DiscordAccessToken
         {
@@ -127,25 +129,25 @@ public class TestDiscordAdapter : DiscordAdapter
 
     public override Task<DiscordUser> Lookup(string accessToken)
     {
-        var matchingUser = users.First(x => x.AccessToken == accessToken);
+        var matchingUser = users.Values.First(x => x.AccessToken == accessToken);
 
         return Task.FromResult(matchingUser.DiscordUser);
     }
 
     public override Task<IEnumerable<DiscordGuild>> GetGuilds()
     {
-        return Task.FromResult(guilds.Select(guild => guild.DiscordGuild));
+        return Task.FromResult(guilds.Values.Select(guild => guild.DiscordGuild));
     }
 
     public override Task<IEnumerable<DiscordGuildRole>> GetGuildRoles(string guildId)
     {
-        var guild = guilds.First(x => x.DiscordGuild.Id == guildId);
+        var guild = guilds.Values.First(x => x.DiscordGuild.Id == guildId);
         return Task.FromResult(guild.Roles);
     }
 
     public override Task<DiscordGuildMember?> GetGuildMember(string guildId, string memberId)
     {
-        var matchingUser = users.FirstOrDefault(x =>
+        var matchingUser = users.Values.FirstOrDefault(x =>
             x.DiscordUser.Id == memberId && x.Membership != null && x.Membership.Guild.DiscordGuild.Id == guildId);
 
         if (matchingUser is null) return Task.FromResult<DiscordGuildMember?>(null);

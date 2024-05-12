@@ -28,7 +28,7 @@ public class Move_reservation : IntegrationTestBase
     public async Task succeeds_when_seat_is_reserved_by_user_and_other_seat_is_not_reserved()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var identity = await CreateIdentity(guildId, Role.User);
         var client = GetClient(identity);
 
@@ -67,7 +67,7 @@ public class Move_reservation : IntegrationTestBase
     public async Task fails_when_seat_is_reserved_by_another_user()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId);
 
         var alreadyReservedBy = CreateUser(guildId);

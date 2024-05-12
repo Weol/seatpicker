@@ -16,7 +16,7 @@ public static class GetLan
         var lans = documentReader.Query<ProjectedLan>()
             .OrderByDescending(lan => lan.CreatedAt)
             .AsEnumerable()
-            .Select(lan => Response.FromProjectedLan(lan));
+            .Select(lan => LanResponse.FromProjectedLan(lan));
 
         return TypedResults.Ok(lans);
     }
@@ -33,25 +33,6 @@ public static class GetLan
 
         if (lan is null) return TypedResults.NotFound();
 
-        return TypedResults.Ok(Response.FromProjectedLan(lan));
-    }
-
-    public record Response(
-        Guid Id,
-        string GuildId,
-        bool Active,
-        string Title,
-        byte[] Background,
-        DateTimeOffset CreatedAt,
-        DateTimeOffset UpdatedAt)
-    {
-        public static Response FromProjectedLan(ProjectedLan lan) => new Response(
-            lan.Id,
-            lan.GuildId,
-            lan.Active,
-            lan.Title,
-            lan.Background,
-            lan.CreatedAt,
-            lan.UpdatedAt);
+        return TypedResults.Ok(LanResponse.FromProjectedLan(lan));
     }
 }

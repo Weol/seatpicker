@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using Bogus;
+using FluentAssertions;
 using Marten;
 using Marten.Storage;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -9,7 +10,9 @@ using Microsoft.Extensions.Options;
 using Seatpicker.Application.Features;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Database;
+using Seatpicker.Infrastructure.Adapters.Guilds;
 using Seatpicker.Infrastructure.Authentication;
+using Seatpicker.IntegrationTests.TestAdapters;
 using Shared;
 using Xunit.Abstractions;
 using Xunit.Extensions.AssemblyFixture;
@@ -19,6 +22,8 @@ namespace Seatpicker.IntegrationTests;
 public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
     IAssemblyFixture<TestWebApplicationFactory>
 {
+    private static object lockObject = new();
+    
     private readonly WebApplicationFactory<Infrastructure.Program> factory;
     private readonly ITestOutputHelper testOutputHelper;
 
@@ -84,7 +89,7 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
 
     protected async Task SetupAggregates(string guildId, params AggregateBase[] aggregates)
     {
-        var repository = factory.Services.GetRequiredService<IAggregateRepository>();
+        var repository = GetService<IAggregateRepository>();
         using var aggregateTransaction = repository.CreateTransaction(guildId);
         foreach (var aggregate in aggregates)
         {
@@ -92,42 +97,40 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
         }
 
         await aggregateTransaction.Commit();
-    }
+}
 
-    protected Task SetupDocuments<TDocument>(string guildId, params TDocument[] documents)
+    protected async Task SetupDocuments<TDocument>(params TDocument[] documents)
         where TDocument : IDocument
     {
-        var store = factory.Services.GetRequiredService<IDocumentStore>();
-
-        var tenant = documents is IGlobalDocument[] ? Tenancy.DefaultTenantId : guildId;
-
-        using var session = store.LightweightSession(tenant);
-        foreach (var document in documents)
-        {
-            session.Store(document);
-        }
-
-        session.SaveChanges();
-
-        return Task.CompletedTask;
+        var repository = GetService<DocumentRepository>();
+        var transaction = repository.CreateGuildlessTransaction();
+        transaction.Store(documents);
+        await transaction.Commit();
     }
 
-    protected async Task ClearDocumentsByType<TDocument>()
+    protected async Task SetupDocuments<TDocument>(string guildId, params TDocument[] documents)
         where TDocument : IDocument
     {
-        var store = factory.Services.GetRequiredService<IDocumentStore>();
-
-        await store.Advanced.Clean.DeleteDocumentsByTypeAsync(typeof(TDocument));
+        var repository = GetService<IDocumentRepository>();
+        var transaction = repository.CreateTransaction(guildId);
+        transaction.Store(documents);
+        await transaction.Commit();
     }
 
-    protected IEnumerable<TDocument> GetCommittedDocuments<TDocument>(string? guildId = null)
+    protected IEnumerable<TDocument> GetCommittedDocuments<TDocument>()
         where TDocument : IDocument
     {
-        guildId ??= Tenancy.DefaultTenantId;
-
+        var repository = factory.Services.GetRequiredService<DocumentRepository>();
+        using var reader = repository.CreateGuildlessReader();
+        return reader.Query<TDocument>().ToArray();
+    }
+    
+    protected IEnumerable<TDocument> GetCommittedDocuments<TDocument>(string guildId)
+        where TDocument : IDocument
+    {
         var repository = factory.Services.GetRequiredService<IDocumentRepository>();
         using var reader = repository.CreateReader(guildId);
-        return reader.Query<TDocument>().AsEnumerable();
+        return reader.Query<TDocument>().ToArray();
     }
 
     protected User CreateUser(string guildId)
@@ -135,36 +138,61 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
         return CreateIdentity(guildId).GetAwaiter().GetResult().User;
     }
 
-    protected async Task<TestIdentity> CreateIdentity(string guildId, params Role[] roles)
+    protected Task<TestIdentity> CreateIdentity(string guildId, params Role[] roles)
+    {
+        return CreateIdentity(guildId, roles, false);
+    }
+    
+    protected async Task<TestIdentity> CreateIdentity(string guildId, Role[] roles, bool withoutGuildIdClaim)
     {
         if (roles.Length == 0) roles = new[] { Role.User };
-        
-        var authenticationService = factory.Services.GetRequiredService<AuthenticationService>();
 
-        var (jwtToken, expiresAt, authenticationToken) = await authenticationService.Login(
+        var jwtTokenCreator = factory.Services.GetRequiredService<JwtTokenCreator>();
+
+        var token = new AuthenticationToken(
             new Faker().Random.Int(99999).ToString(),
-            AuthenticationProvider.Discord,
             new Faker().Name.FirstName(),
             new Faker().Random.Int(99999).ToString(),
             "asdasdasd",
             roles,
-            guildId);
+            withoutGuildIdClaim ? null : guildId);
+
+        var userDocument = new UserManager.UserDocument(token.Id, token.Nick, token.Avatar, token.Roles);
+        await SetupDocuments(guildId, userDocument);
+
+        var (jwtToken, _) = await jwtTokenCreator.CreateToken(token);
 
         var identity = new TestIdentity(
-            new User(authenticationToken.Id,
-                authenticationToken.Nick,
-                authenticationToken.Avatar,
-                authenticationToken.Roles),
-            roles,
-            jwtToken,
-            guildId);
+                new User(userDocument.Id, userDocument.Name, userDocument.Avatar, userDocument.Roles),
+                roles,
+                jwtToken,
+                guildId);
 
         return identity;
     }
 
-    protected string CreateGuild()
+    protected async Task<string> CreateGuild(string? guildId = null, 
+        string[]? hostnames = null, 
+        (string RoleId, Role[] Roles)[]? roleMapping = null)
     {
-        return new Faker().Random.Int(1).ToString();
+        var id = guildId ?? new Faker().Random.Int(1).ToString();
+        var mapping = roleMapping ?? Array.Empty<(string RoleId, Role[] Roles)>();
+        var name = new Faker().Company.CompanyName();
+        var icon = new Faker().Random.Int(111111,999999).ToString();
+        
+        var discordAdapter = GetService<TestDiscordAdapter>();
+        discordAdapter.AddGuild(id, name, icon ,mapping.Select(x => x.RoleId));
+
+        var document = new GuildAdapter.GuildDocument(
+                id,
+                name,
+                icon,
+                hostnames ?? Array.Empty<string>(),
+                mapping.Select(x => new GuildAdapter.GuildRoleMapping(x.RoleId, x.Roles)).ToArray());
+
+        await SetupDocuments(document);
+
+        return id;
     }
 
     public record TestIdentity(User User, Role[] Roles, string Token, string GuildId);

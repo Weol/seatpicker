@@ -24,7 +24,7 @@ public class Create_reservation : IntegrationTestBase
     public async Task succeeds_when_reserving_existing_available_seat()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var identity = await CreateIdentity(guildId, Role.User);
         var client = GetClient(identity);
 
@@ -51,7 +51,7 @@ public class Create_reservation : IntegrationTestBase
     public async Task succeeds_when_reserving_seat_that_user_has_already_reserved()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var identity = await CreateIdentity(guildId, Role.User);
         var client = GetClient(identity);
 
@@ -78,7 +78,7 @@ public class Create_reservation : IntegrationTestBase
     public async Task fails_when_seat_is_already_reserved()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId);
 
         var alreadyReservedBy = CreateUser(guildId);
@@ -106,7 +106,7 @@ public class Create_reservation : IntegrationTestBase
     public async Task fails_when_seat_does_not_exist()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId);
 
         var lan = LanGenerator.Create(guildId, CreateUser(guildId));
@@ -123,7 +123,7 @@ public class Create_reservation : IntegrationTestBase
     public async Task fails_when_user_already_has_a_reserved_seat()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var identity = await CreateIdentity(guildId, Role.User);
         var client = GetClient(identity);
 

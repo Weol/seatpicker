@@ -1,5 +1,6 @@
 ﻿using Seatpicker.Infrastructure.Adapters.Database;
 using Seatpicker.Infrastructure.Adapters.Discord;
+using Seatpicker.Infrastructure.Adapters.Guilds;
 using Seatpicker.Infrastructure.Adapters.SignalR;
 using Seatpicker.Infrastructure.Authentication;
 
@@ -13,7 +14,7 @@ public static class AdapterExtensions
             .AddDatabase(ConfigureDatabase)
             .AddSignalRAdapter()
             .AddDiscordAdapter(ConfigureDiscordAdapter)
-            .AddUserManager();
+            .AddGuildAdapter();
     }
 
     public static WebApplication UseAdapters(this WebApplication app)

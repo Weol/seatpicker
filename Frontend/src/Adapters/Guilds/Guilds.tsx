@@ -1,8 +1,8 @@
 import { atom, useRecoilValue } from "recoil"
 import ApiRequest from "../ApiRequest"
-import { Guild } from "./ActiveGuild"
+import { Guild } from "../Models"
 
-async function LoadAllGuilds() {
+async function loadAllGuilds() {
   const response = await ApiRequest("GET", `guild`)
   const guilds = (await response.json()) as Guild[]
 
@@ -11,7 +11,7 @@ async function LoadAllGuilds() {
 
 export const allGuildsAtom = atom<Guild[]>({
   key: "allGuilds",
-  effects: [({ setSelf }) => setSelf(LoadAllGuilds())],
+  effects: [({ setSelf }) => setSelf(loadAllGuilds())],
 })
 
 export function useGuilds() {

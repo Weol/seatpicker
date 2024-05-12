@@ -1,3 +1,4 @@
+using DotNet.Testcontainers.Builders;
 using Marten;
 using Seatpicker.Infrastructure.Adapters.Database;
 using Testcontainers.PostgreSql;
@@ -17,7 +18,12 @@ public class PostgresFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        var postgres = new PostgreSqlBuilder().Build();
+        var postgres = new PostgreSqlBuilder()
+            .WithImage("postgres:16.2")
+            .WithReuse(false)
+            .WithAutoRemove(true)
+            .WithCleanUp(true)
+            .Build();
 
         await postgres.StartAsync();
 

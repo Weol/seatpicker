@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http.Json;
 
 namespace Seatpicker.Infrastructure;
 
@@ -9,11 +9,11 @@ public static class JsonSerializationExtensions
     public static IServiceCollection ConfigureJsonSerialization(this IServiceCollection services)
     {
         var jsonOptions = new JsonOptions();
-        ConfigureJsonOptions(jsonOptions.JsonSerializerOptions);
+        ConfigureJsonOptions(jsonOptions.SerializerOptions);
 
         return services
-            .AddSingleton(jsonOptions.JsonSerializerOptions)
-            .Configure<JsonOptions>(options => ConfigureJsonOptions(options.JsonSerializerOptions));
+            .AddSingleton(jsonOptions.SerializerOptions)
+            .Configure<JsonOptions>(options => ConfigureJsonOptions(options.SerializerOptions));
     }
 
     public static void ConfigureJsonOptions(JsonSerializerOptions jsonSerializerOptions)

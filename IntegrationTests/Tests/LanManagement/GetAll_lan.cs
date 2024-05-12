@@ -26,7 +26,7 @@ public class GetAll_lan : IntegrationTestBase
     public async Task returns_all_lans_that_exist_for_tenant()
     {
         // Arrange
-        var guildId = CreateGuild();
+        var guildId = await CreateGuild();
         var client = GetClient(guildId);
 
         var existingLan = new[] { LanGenerator.Create(guildId, CreateUser(guildId)), LanGenerator.Create(guildId, CreateUser(guildId)) };
@@ -34,7 +34,7 @@ public class GetAll_lan : IntegrationTestBase
 
         //Act
         var response = await MakeRequest(client, guildId);
-        var body = await response.Content.ReadAsJsonAsync<GetLan.Response[]>();
+        var body = await response.Content.ReadAsJsonAsync<LanResponse[]>();
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -57,12 +57,12 @@ public class GetAll_lan : IntegrationTestBase
     public async Task returns_empty_array_when_no_lans_exist()
     {
         // Arrange
-        var guildId = CreateGuild();
+        var guildId = await CreateGuild();
         var client = GetClient(guildId);
 
         //Act
         var response = await MakeRequest(client, guildId);
-        var body = await response.Content.ReadAsJsonAsync<GetLan.Response[]>();
+        var body = await response.Content.ReadAsJsonAsync<LanResponse[]>();
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -76,9 +76,9 @@ public class GetAll_lan : IntegrationTestBase
         // Arrange
         var guilds = new[]
         {
-            (Id: CreateGuild(), Lans: new List<Lan>()),
-            (Id: CreateGuild(), Lans: new List<Lan>()),
-            (Id: CreateGuild(), Lans: new List<Lan>()),
+            (Id: await CreateGuild(), Lans: new List<Lan>()),
+            (Id: await CreateGuild(), Lans: new List<Lan>()),
+            (Id: await CreateGuild(), Lans: new List<Lan>()),
         };
 
         foreach (var (guildId, lans) in guilds)
@@ -93,7 +93,7 @@ public class GetAll_lan : IntegrationTestBase
             //Act
             var client = GetClient(guildId, Role.Admin);
             var response = await MakeRequest(client, guildId);
-            var body = await response.Content.ReadAsJsonAsync<GetLan.Response[]>();
+            var body = await response.Content.ReadAsJsonAsync<LanResponse[]>();
 
             //Assert
             body.Should().NotBeNull();

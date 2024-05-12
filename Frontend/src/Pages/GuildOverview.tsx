@@ -12,7 +12,6 @@ import {
   ListItemSecondaryAction,
   Paper,
   Stack,
-  styled,
   Switch,
   Table,
   TableBody,
@@ -20,6 +19,7 @@ import {
   TableContainer,
   TableRow,
   TextField,
+  styled,
 } from "@mui/material"
 import Divider from "@mui/material/Divider"
 import ListItemIcon from "@mui/material/ListItemIcon"
@@ -27,26 +27,21 @@ import ListItemText from "@mui/material/ListItemText"
 import Typography from "@mui/material/Typography"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Guild } from "../Adapters/Guilds/ActiveGuild"
-import { useGuilds } from "../Adapters/Guilds/Guilds"
-import { Lan, useLans } from "../Adapters/Lans/Lans"
-import { GuildSettingsPath } from "../App"
+import { useLans } from "../Adapters/Lans/AllLans"
+import { Guild, Lan } from "../Adapters/Models"
 import DiscordGuildAvatar from "../Components/DiscordAvatar"
 import Modal from "../Components/Modal"
 import { useAlerts } from "../Contexts/AlertContext"
 
-export default function Admin() {
+export default function GuildOverview(props: { guildId: string }) {
   const { alertLoading, alertSuccess } = useAlerts()
-  const guilds = useGuilds()
-  const { lans, updateLan, createLan, deleteLan, setActiveLan } = useLans()
+  const { lans, updateLan, createLan, deleteLan, setActiveLan } = useLans(props.guildId)
 
   const [selectedGuild, setSelectedGuild] = useState<Guild | null>(null)
   const [previewBackground, setPreviewBackground] = useState<string | null>(null)
   const [editingLan, setEditingLan] = useState<Lan | null>(null)
   const [selectedLan, setSelectedLan] = useState<Lan | null>(null)
   const [showCreateLan, setShowCreateLan] = useState<boolean>(false)
-  const selectedGuildLans =
-    (selectedGuild && lans.filter((lan) => lan.guildId == selectedGuild?.id)) ?? []
 
   function handleGuildSelect(guild: Guild) {
     setSelectedGuild(guild)
@@ -115,30 +110,25 @@ export default function Admin() {
 
   return (
     <Stack spacing={2} justifyContent="center" alignItems="center">
-      <Typography variant="h4">Alle servere</Typography>
-      <GuildList guilds={guilds} selectedGuild={selectedGuild} onGuildSelect={handleGuildSelect} />
-
-      {selectedGuild && <Divider orientation="horizontal" sx={{ width: "100%" }} />}
-      {selectedGuild && (
-        <Stack width={"100%"}>
-          <LanListHeader guild={selectedGuild} onCreateClick={handleLanCreateClick} />
-          <Stack justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }} width="100%">
-            {selectedGuildLans.map((lan) => (
-              <LanDetails
-                key={lan.id}
-                lan={lan}
-                selected={selectedLan?.id == lan.id}
-                onEditClick={() => handleLanEditClick(lan)}
-                onClick={() => handleOnLanClick(lan)}
-                onActiveToggleClick={() => handleActiveToggleClick(lan)}
-                onDeleteClick={() => handleDeleteClick(lan)}
-                onPreviewBackgroundClick={() => handlePreviewBackgrundClick(lan.background)}
-              />
-            ))}
-            {selectedGuildLans.length == 0 && <NoLanExists />}
-          </Stack>
+      <Stack width={"100%"}>
+        <LanListHeader guild={selectedGuild} onCreateClick={handleLanCreateClick} />
+        <Stack justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }} width="100%">
+          {lans.map((lan) => (
+            <LanDetails
+              key={lan.id}
+              lan={lan}
+              selected={selectedLan?.id == lan.id}
+              onEditClick={() => handleLanEditClick(lan)}
+              onClick={() => handleOnLanClick(lan)}
+              onActiveToggleClick={() => handleActiveToggleClick(lan)}
+              onDeleteClick={() => handleDeleteClick(lan)}
+              onPreviewBackgroundClick={() => handlePreviewBackgrundClick(lan.background)}
+            />
+          ))}
+          {lans.length == 0 && <NoLanExists />}
         </Stack>
-      )}
+      </Stack>
+
       {editingLan && (
         <LanEditorModal
           open={Boolean(editingLan)}
@@ -186,7 +176,7 @@ function GuildList(props: {
             key={guild.id}
           >
             <ListItemSecondaryAction>
-              <IconButton onClick={() => navigate(GuildSettingsPath(guild.id))}>
+              <IconButton onClick={() => navigate("/")}>
                 <Edit />
               </IconButton>
             </ListItemSecondaryAction>

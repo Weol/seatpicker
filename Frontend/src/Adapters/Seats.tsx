@@ -1,23 +1,9 @@
 import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr"
-import { atomFamily, DefaultValue, useRecoilState } from "recoil"
+import { DefaultValue, atomFamily, useRecoilState } from "recoil"
 import Config from "../config"
 import ApiRequest from "./ApiRequest"
-import { useAuth, User } from "./AuthAdapter"
-import { Lan } from "./Lans/Lans"
-
-export type Bounds = {
-  x: number
-  y: number
-  width: number
-  height: number
-}
-
-export type Seat = {
-  id: string
-  title: string
-  bounds: Bounds
-  reservedBy: User | null
-}
+import { useAuth } from "./AuthAdapter"
+import { Lan, Seat, User } from "./Models"
 
 async function LoadSeats(lanId: string) {
   const response = await ApiRequest("GET", `lan/${lanId}/seat`)

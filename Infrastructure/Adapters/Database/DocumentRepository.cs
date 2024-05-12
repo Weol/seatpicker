@@ -29,7 +29,7 @@ public class DocumentRepository : IDocumentRepository
         return new DocumentTransaction(session);
     }
 
-    public IDocumentReader CreateReader(string? guildId = null)
+    public virtual IDocumentReader CreateReader(string? guildId = null)
     {
         guildId ??= guildIdProvider.GetGuildId();
 
@@ -39,7 +39,7 @@ public class DocumentRepository : IDocumentRepository
         return new DocumentReader(session);
     }
     
-    public IDocumentTransaction CreateGlobalTransaction()
+    public virtual IDocumentTransaction CreateGuildlessTransaction()
     {
         logger.LogInformation("Creating document transaction for default tenant");
 
@@ -47,7 +47,7 @@ public class DocumentRepository : IDocumentRepository
         return new DocumentTransaction(session);
     }
 
-    public IDocumentReader CreateGlobalReader()
+    public IDocumentReader CreateGuildlessReader()
     {
         logger.LogInformation("Creating document reader for default tenant");
 

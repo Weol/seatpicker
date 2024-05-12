@@ -24,7 +24,7 @@ public class Remove_reservation : IntegrationTestBase
     public async Task succeeds_when_seat_is_reserved_by_logged_in_user()
     {
         // Arrange
-        var guildId = CreateGuild();
+        var guildId = await CreateGuild();
         var identity = await CreateIdentity(guildId, Role.Operator);
         var client = GetClient(identity);
 
@@ -50,7 +50,7 @@ public class Remove_reservation : IntegrationTestBase
     public async Task succeeds_when_seat_is_reserved_by_a_different_user()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Operator);
 
         var user = CreateUser(guildId);
@@ -76,7 +76,7 @@ public class Remove_reservation : IntegrationTestBase
     public async Task succeeds_when_seat_is_not_reserved()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Operator);
 
         var user = CreateUser(guildId);
@@ -96,7 +96,7 @@ public class Remove_reservation : IntegrationTestBase
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId);
 
         //Act
@@ -110,7 +110,7 @@ public class Remove_reservation : IntegrationTestBase
     public async Task fails_when_seat_does_not_exist()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Operator);
 
         //Act

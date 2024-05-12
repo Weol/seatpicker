@@ -24,7 +24,7 @@ public class Remove_seat : IntegrationTestBase
     public async Task succeeds_when_seat_exists()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Operator);
 
         var lan = LanGenerator.Create(guildId, CreateUser(guildId));
@@ -43,7 +43,7 @@ public class Remove_seat : IntegrationTestBase
     public async Task fails_when_seat_does_not_exists()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Operator);
 
         var lan = LanGenerator.Create(guildId, CreateUser(guildId));
@@ -60,7 +60,7 @@ public class Remove_seat : IntegrationTestBase
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
         // Arrange
-		var guildId = CreateGuild();
+		var guildId = await CreateGuild();
         var client = GetClient(guildId);
 
         //Act
