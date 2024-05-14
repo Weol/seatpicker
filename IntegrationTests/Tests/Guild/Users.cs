@@ -37,7 +37,7 @@ public class Users : IntegrationTestBase
 
         await SetupDocuments(guildId, users);
 
-        //Act
+        // Act
         var response = await client.GetAsync($"guild/{guildId}/users");
         var body = await response.Content.ReadAsJsonAsync<User[]>();
 
@@ -86,7 +86,7 @@ public class Users : IntegrationTestBase
             var identity = await CreateIdentity(guildId, Role.Operator);
             var client = GetClient(identity);
 
-            //Act
+            // Act
             var response = await client.GetAsync($"guild/{guildId}/users");
             var body = await response.Content.ReadAsJsonAsync<User[]>();
 

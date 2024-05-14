@@ -3,16 +3,10 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using NSubstitute;
-using Seatpicker.Application.Features;
 using Seatpicker.Infrastructure;
-using Seatpicker.Infrastructure.Adapters.Database;
 using Seatpicker.Infrastructure.Adapters.Discord;
-using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.IntegrationTests.TestAdapters;
-using AuthenticationService = Microsoft.AspNetCore.Authentication.AuthenticationService;
 
 namespace Seatpicker.IntegrationTests;
 

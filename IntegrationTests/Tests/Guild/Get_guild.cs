@@ -37,11 +37,11 @@ public class Get_guild : IntegrationTestBase
 
         var client = GetClient(guildIds[0], Role.Superadmin);
 
-        //Act
+        // Act
         var response = await MakeRequest(client);
         var body = await response.Content.ReadAsJsonAsync<GetGuild.Response[]>();
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         body.Should().HaveCount(guildIds.Length);
 
@@ -58,11 +58,11 @@ public class Get_guild : IntegrationTestBase
         var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Admin);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId);
         var body = await response.Content.ReadAsJsonAsync<GetGuild.Response>();
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         body.Should().NotBeNull();
         body!.Id.Should().Be(guildId);

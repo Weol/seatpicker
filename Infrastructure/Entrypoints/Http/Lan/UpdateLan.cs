@@ -33,8 +33,10 @@ public static class UpdateLan
             RuleFor(x => x.Title).NotEmpty();
 
             RuleFor(x => x.Background)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .Must(SvgUtils.IsSvg);
+                .Must(SvgUtils.IsSvg)
+                .WithMessage("Background must be a valid svg");
         }
     }
 }

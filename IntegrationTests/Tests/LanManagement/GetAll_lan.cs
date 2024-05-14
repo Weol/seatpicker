@@ -32,11 +32,11 @@ public class GetAll_lan : IntegrationTestBase
         var existingLan = new[] { LanGenerator.Create(guildId, CreateUser(guildId)), LanGenerator.Create(guildId, CreateUser(guildId)) };
         await SetupAggregates(guildId, existingLan[0], existingLan[1]);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId);
         var body = await response.Content.ReadAsJsonAsync<LanResponse[]>();
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         body.Should().NotBeNull();
@@ -60,11 +60,11 @@ public class GetAll_lan : IntegrationTestBase
         var guildId = await CreateGuild();
         var client = GetClient(guildId);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId);
         var body = await response.Content.ReadAsJsonAsync<LanResponse[]>();
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         body.Should().NotBeNull();
         body.Should().BeEmpty();
@@ -90,12 +90,12 @@ public class GetAll_lan : IntegrationTestBase
 
         foreach (var (guildId, lans) in guilds)
         {
-            //Act
+            // Act
             var client = GetClient(guildId, Role.Admin);
             var response = await MakeRequest(client, guildId);
             var body = await response.Content.ReadAsJsonAsync<LanResponse[]>();
 
-            //Assert
+            // Assert
             body.Should().NotBeNull();
             body.Should().HaveCount(lans.Count);
 

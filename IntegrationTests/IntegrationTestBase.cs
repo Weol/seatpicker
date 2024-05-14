@@ -1,12 +1,8 @@
 using System.Net.Http.Headers;
 using Bogus;
-using FluentAssertions;
-using Marten;
-using Marten.Storage;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Seatpicker.Application.Features;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Database;

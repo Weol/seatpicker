@@ -1,9 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
-using Bogus;
 using FluentAssertions;
 using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Adapters.Guilds;
 using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Entrypoints.Http.Authentication;
 using Seatpicker.IntegrationTests.TestAdapters;
@@ -50,7 +48,7 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
 
         (DiscordToken, RefreshToken) = GetService<TestDiscordAdapter>().AddUser(discordUser, guildId);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId);
         var body = await response.Content.ReadAsJsonAsync<TokenResponse>();
 
@@ -60,7 +58,7 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
 
         var testResponse = await TestAuthentication(client, guildId, body!.Token);
         testResponse.Should().NotBeNull();
-        
+
         var userId = discordUser.Id;
 
         Assert.Multiple(
@@ -78,17 +76,19 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
     public async Task succeeds_and_jwt_has_roles_according_to_mapping(Role[] roles)
     {
         // Arrange
+        var rolesWithUser = roles.Append(Role.User).Distinct().ToArray();
+
         var guildRoleId = "999999";
         var guildId = await CreateGuild(guildRoleId, null, new []
         {
-            (guildRoleId, roles)
+            (guildRoleId, rolesWithUser),
         });
         var client = GetAnonymousClient();
         var discordUser = Generator.GenerateDiscordUser();
-        
+
         (DiscordToken, RefreshToken) = GetService<TestDiscordAdapter>().AddUser(discordUser, guildId, null, null, guildRoleId);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId);
         var body = await response.Content.ReadAsJsonAsync<TokenResponse>();
 
@@ -98,8 +98,8 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
 
         var testResponse = await TestAuthentication(client, guildId, body!.Token);
         testResponse.Should().NotBeNull();
-        
-        var expectedRoles = roles.Append(Role.User).Distinct();
+
+        var expectedRoles = rolesWithUser.Append(Role.User).Distinct();
         Assert.Multiple(
             () => testResponse.Id.Should().Be(discordUser.Id),
             () => testResponse.Name.Should().Be(discordUser.Username),
@@ -119,8 +119,8 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
         var discordUser = Generator.GenerateDiscordUser();
 
         (DiscordToken, RefreshToken) = GetService<TestDiscordAdapter>().AddUser(discordUser, guildId, guildUsername, guildAvatar);
-       
-        //Act
+
+        // Act
         var response = await MakeRequest(client, guildId);
         var body
             = await response.Content.ReadAsJsonAsync<TokenResponse>();
@@ -128,7 +128,7 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         body.Should().NotBeNull();
-        
+
         Assert.Multiple(
             () => body!.UserId.Should().Be(discordUser.Id),
             () => body!.Nick.Should().Be(guildUsername ?? discordUser.Username),
@@ -144,8 +144,8 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
         var discordUser = Generator.GenerateDiscordUser();
 
         (DiscordToken, RefreshToken) = GetService<TestDiscordAdapter>().AddUser(discordUser);
-        
-        //Act
+
+        // Act
         var response = await MakeRequest(client, guildId);
         var body
             = await response.Content.ReadAsJsonAsync<TokenResponse>();
@@ -169,25 +169,27 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
         // Arrange
         var guildId = await CreateGuild();
         var client = GetAnonymousClient();
-        var discordUser = Generator.GenerateDiscordUser();
-        discordUser.Avatar = null;
+        var discordUser = Generator.GenerateDiscordUser() with
+        {
+            Avatar = null,
+        };
 
         (DiscordToken, RefreshToken) = GetService<TestDiscordAdapter>().AddUser(discordUser, guildId);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId);
         var body = await response.Content.ReadAsJsonAsync<TokenResponse>();
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         body.Should().NotBeNull();
-        
+
         Assert.Multiple(
             () => body!.UserId.Should().Be(discordUser.Id),
             () => body!.Nick.Should().Be(discordUser.Username),
             () => body!.Avatar.Should().BeNull());
     }
-    
+
     [Theory]
     [InlineData("Tore XD Tang", "1231289378")]
     [InlineData(null, "1231289378")]
@@ -202,7 +204,7 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
 
         (DiscordToken, RefreshToken) = GetService<TestDiscordAdapter>().AddUser(discordUser, guildId, guildUsername, guildAvatar);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId);
         var body = await response.Content.ReadAsJsonAsync<TokenResponse>();
 
@@ -212,11 +214,11 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
 
         var userDocuments = GetCommittedDocuments<UserManager.UserDocument>(guildId);
         var userDocument = userDocuments.Should().ContainSingle(doc => doc.Id == discordUser.Id).Subject;
-        
+
         Assert.Multiple(() => userDocument.Name.Should().Be(guildUsername ?? discordUser.Username),
             () => userDocument.Avatar.Should().Be(guildAvatar ?? discordUser.Avatar));
     }
-    
+
     [Fact]
     public async Task persists_user_when_user_is_not_member_of_guild()
     {
@@ -227,7 +229,7 @@ public abstract class LoginAndRenewBase : IntegrationTestBase
 
         (DiscordToken, RefreshToken) = GetService<TestDiscordAdapter>().AddUser(discordUser);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId);
         var body = await response.Content.ReadAsJsonAsync<TokenResponse>();
 

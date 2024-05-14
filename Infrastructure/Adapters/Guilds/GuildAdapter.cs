@@ -92,10 +92,7 @@ public class GuildAdapter
 
         if (duplicateHosts.Length > 0)
         {
-            throw new DuplicateHostsException
-            {
-                DuplicateHosts = duplicateHosts
-            };
+            throw new DuplicateHostsException(duplicateHosts);
         }
 
         var guildDocument = GuildDocument.FromGuild(guild) with
@@ -117,6 +114,11 @@ public class GuildAdapter
 
     public class DuplicateHostsException : Exception
     {
+        public DuplicateHostsException(IEnumerable<string> duplicateHosts)
+        {
+            DuplicateHosts = duplicateHosts;
+        }
+
         public IEnumerable<string> DuplicateHosts { get; init; }
     }
 

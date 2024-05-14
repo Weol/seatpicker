@@ -1,12 +1,8 @@
 using System.Net;
 using Bogus;
 using FluentAssertions;
-using Marten;
-using NSubstitute.ClearExtensions;
-using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Guilds;
 using Seatpicker.Infrastructure.Entrypoints.Http.Frontend;
-using Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -33,7 +29,7 @@ public class Discover_guild : IntegrationTestBase
         var client2 = GetClient(guild2);
         client2.DefaultRequestHeaders.Host = "guild2.host1";
 
-        //Act
+        // Act
         var response1 = await client1.GetAsync("guild/discover");
         var body1 = await response1.Content.ReadAsJsonAsync<Discover.Response>();
 
@@ -69,7 +65,7 @@ public class Discover_guild : IntegrationTestBase
         activeLan.SetActive(true, initiator);
         await SetupAggregates(guildId, activeLan);
 
-        //Act
+        // Act
         var response = await client1.GetAsync("guild/discover");
         var body = await response.Content.ReadAsJsonAsync<Discover.Response>();
 
@@ -96,7 +92,7 @@ public class Discover_guild : IntegrationTestBase
         var client = GetClient(guildId);
         client.DefaultRequestHeaders.Host = new Faker().Random.Word() + ".com";
 
-        //Act
+        // Act
         var response = await client.GetAsync("guild/discover");
 
         // Assert

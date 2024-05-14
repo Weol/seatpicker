@@ -1,6 +1,4 @@
-using Marten;
 using Testcontainers.PostgreSql;
-using Weasel.Core;
 
 var container = new PostgreSqlBuilder()
     .Build();

@@ -38,10 +38,10 @@ public class Move_reservation : IntegrationTestBase
 
         await SetupAggregates(guildId, fromSeat, toSeat);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, lan.Id, fromSeat.Id, toSeat.Id);
 
-        //Assert
+        // Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
@@ -77,10 +77,10 @@ public class Move_reservation : IntegrationTestBase
 
         await SetupAggregates(guildId, fromSeat, toSeat);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, lan.Id, fromSeat.Id, toSeat.Id);
 
-        //Assert
+        // Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.Conflict),
             () =>

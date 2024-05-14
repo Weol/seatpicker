@@ -40,11 +40,11 @@ public class Get_lan : IntegrationTestBase
         };
         await SetupAggregates(guildId, existingLans[0], existingLans[1], existingLans[2]);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId);
         var body = await response.Content.ReadAsJsonAsync<LanResponse[]>();
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         body.Should().HaveCount(existingLans.Length);
 
@@ -70,11 +70,11 @@ public class Get_lan : IntegrationTestBase
         var existingLan = LanGenerator.Create(guildId, CreateUser(guildId));
         await SetupAggregates(guildId, existingLan);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, existingLan.Id);
         var body = await response.Content.ReadAsJsonAsync<LanResponse>();
 
-        //Assert
+        // Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
@@ -94,10 +94,10 @@ public class Get_lan : IntegrationTestBase
         var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Admin);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, Guid.NewGuid());
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 }

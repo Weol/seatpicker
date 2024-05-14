@@ -38,10 +38,10 @@ public class Move_reservation : IntegrationTestBase
 
         await SetupAggregates(guildId, lan, fromSeat, toSeat);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, lan.Id, fromSeat.Id, toSeat.Id);
 
-        //Assert
+        // Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
@@ -76,10 +76,10 @@ public class Move_reservation : IntegrationTestBase
 
         await SetupAggregates(guildId, lan, fromSeat, toSeat);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, lan.Id, fromSeat.Id, toSeat.Id);
 
-        //Assert
+        // Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.NotFound),
             () =>
@@ -112,10 +112,10 @@ public class Move_reservation : IntegrationTestBase
 
         await SetupAggregates(guildId, lan, fromSeat, toSeat);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, lan.Id, fromSeat.Id, toSeat.Id);
 
-        //Assert
+        // Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.Conflict),
             () =>
@@ -150,10 +150,10 @@ public class Move_reservation : IntegrationTestBase
 
         await SetupAggregates(guildId, lan, fromSeat, toSeat);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, lan.Id, fromSeat.Id, toSeat.Id);
 
-        //Assert
+        // Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.Conflict),
             () =>
@@ -180,10 +180,10 @@ public class Move_reservation : IntegrationTestBase
 		var guildId = await CreateGuild();
         var client = GetClient(guildId);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 }

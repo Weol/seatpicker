@@ -8,10 +8,11 @@ public class Generator
     public static DiscordUser GenerateDiscordUser()
     {
         return new DiscordUser
-        {
-            Id = new Faker().Random.Int(1).ToString(),
-            Username = new Faker().Name.FirstName(),
-            Avatar = new Faker().Random.Int(1).ToString(),
-        };
+        (
+            new Faker().Random.Int(1).ToString(),
+            new Faker().Name.FirstName(),
+            null,
+            new Faker().Random.Int(1).ToString()
+        );
     }
 }

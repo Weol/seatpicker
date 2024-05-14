@@ -31,10 +31,10 @@ public class Create_lan : IntegrationTestBase
 
         var request = Generator.CreateLanRequest(guildId);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, request);
 
-        //Assert
+        // Assert
         var committedProjections = GetCommittedDocuments<ProjectedLan>(guildId);
 
         Assert.Multiple(
@@ -57,10 +57,10 @@ public class Create_lan : IntegrationTestBase
 
         var request = Generator.CreateLanRequest(guildId) with { Background = new byte[] { 1, 2, 3, 4, 5, 6 } };
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, request);
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
     
@@ -71,10 +71,10 @@ public class Create_lan : IntegrationTestBase
 		var guildId = await CreateGuild();
         var client = GetClient(guildId);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, Generator.CreateLanRequest(guildId));
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 }

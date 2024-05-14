@@ -35,10 +35,10 @@ public class Create_seat : IntegrationTestBase
 
         var model = Generator.CreateSeatRequest();
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, lan.Id, model);
 
-        //Assert
+        // Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
@@ -49,14 +49,21 @@ public class Create_seat : IntegrationTestBase
             });
     }
 
-    public static IEnumerable<object[]> InvalidUpdateRequests = new[]
+    public static TheoryData<CreateSeat.Request> InvalidUpdateRequests()
     {
-        new object[] { Generator.CreateSeatRequest() with { Title = "" } },
-        new object[]
-            { Generator.CreateSeatRequest() with { Bounds = new Seatpicker.Infrastructure.Entrypoints.Http.Seat.Bounds(0, 0, -1, 1) } },
-        new object[]
-            { Generator.CreateSeatRequest() with { Bounds = new Seatpicker.Infrastructure.Entrypoints.Http.Seat.Bounds(0, 0, 1, -1) } },
-    };
+        return new TheoryData<CreateSeat.Request>
+        {
+            Generator.CreateSeatRequest() with { Title = "" },
+            Generator.CreateSeatRequest() with
+            {
+                Bounds = new Seatpicker.Infrastructure.Entrypoints.Http.Seat.Bounds(0, 0, -1, 1)
+            },
+            Generator.CreateSeatRequest() with
+            {
+                Bounds = new Seatpicker.Infrastructure.Entrypoints.Http.Seat.Bounds(0, 0, 1, -1)
+            },
+        };
+    }
 
     [Theory]
     [MemberData(nameof(InvalidUpdateRequests))]
@@ -66,13 +73,13 @@ public class Create_seat : IntegrationTestBase
 		var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Operator);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, Guid.NewGuid(), request);
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
-    
+
     [Fact]
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
@@ -80,10 +87,10 @@ public class Create_seat : IntegrationTestBase
 		var guildId = await CreateGuild();
         var client = GetClient(guildId);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, Guid.NewGuid(), Generator.CreateSeatRequest());
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 }

@@ -1,5 +1,4 @@
 using Bogus;
-using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 
 namespace Seatpicker.IntegrationTests.Tests.Guild;
@@ -14,6 +13,6 @@ public static class Generator
             faker.Company.CompanyName(),
             null,
             faker.Make(2, () => faker.Internet.DomainName()).ToArray(),
-            Array.Empty<(string RoleId, Role[] Roles)>());
+            Array.Empty<UpdateGuild.RoleMapping>());
     }
 }

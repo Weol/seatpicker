@@ -1,12 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
-using Remotion.Linq.Parsing.Structure.IntermediateModel;
-using Seatpicker.Application.Features.Lans;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Guilds;
 using Seatpicker.Infrastructure.Entrypoints.Http.Guild;
-using Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -14,12 +11,10 @@ namespace Seatpicker.IntegrationTests.Tests.Guild;
 
 public class Update_guild : IntegrationTestBase
 {
-    public Update_guild(TestWebApplicationFactory factory,
+    public Update_guild(
+        TestWebApplicationFactory factory,
         PostgresFixture databaseFixture,
-        ITestOutputHelper testOutputHelper) : base(
-        factory,
-        databaseFixture,
-        testOutputHelper)
+        ITestOutputHelper testOutputHelper) : base(factory, databaseFixture, testOutputHelper)
     {
     }
 
@@ -27,19 +22,19 @@ public class Update_guild : IntegrationTestBase
         MakeRequest(HttpClient client, string guildId, UpdateGuild.Request request) =>
         await client.PutAsJsonAsync($"guild/{guildId}", request);
 
-    public static IEnumerable<object[]> ValidUpdateRequests = new[]
+    public static TheoryData<UpdateGuild.Request> ValidUpdateRequests()
     {
-        new object[] { Generator.UpdateGuildRequest() },
-        new object[] { Generator.UpdateGuildRequest() with { Icon = "12312321" } },
-        new object[]
+        return new TheoryData<UpdateGuild.Request>
         {
+            Generator.UpdateGuildRequest(),
+            Generator.UpdateGuildRequest() with { Icon = "12312321" },
             Generator.UpdateGuildRequest() with { Hostnames = Array.Empty<string>() },
-        },
-        new object[]
-        {
-            Generator.UpdateGuildRequest() with { RoleMapping = new[] { ("123", new[] { Role.Admin }) } },
-        },
-    };
+            Generator.UpdateGuildRequest() with
+            {
+                RoleMapping = new[] { new UpdateGuild.RoleMapping("123", new[] { Role.Admin }) },
+            },
+        };
+    }
 
     [Theory]
     [MemberData(nameof(ValidUpdateRequests))]
@@ -52,10 +47,10 @@ public class Update_guild : IntegrationTestBase
         var defaultDocument = GetCommittedDocuments<GuildAdapter.GuildDocument>()
             .First(guild => guild.Id == request.Id);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, request);
 
-        //Assert
+        // Assert
         var commitedDocument = GetCommittedDocuments<GuildAdapter.GuildDocument>()
             .First(guild => guild.Id == request.Id);
 
@@ -72,25 +67,30 @@ public class Update_guild : IntegrationTestBase
                     {
                         if (commitedDocument.RoleMappings.Any())
                         {
-                            commitedDocument.RoleMappings.Should().AllSatisfy(mapping =>
-                            {
-                                var subject = commitedDocument.RoleMappings.Should()
-                                    .ContainSingle(x => x.RoleId == mapping.RoleId)
-                                    .Subject;
+                            commitedDocument.RoleMappings.Should()
+                                .AllSatisfy(
+                                    mapping =>
+                                    {
+                                        var subject = commitedDocument.RoleMappings.Should()
+                                            .ContainSingle(x => x.RoleId == mapping.RoleId)
+                                            .Subject;
 
-                                subject.Roles.Should().Equal(mapping.Roles);
-                            });
+                                        subject.Roles.Should().Equal(mapping.Roles);
+                                    });
                         }
                     });
             });
     }
 
-    public static IEnumerable<object[]> InvalidUpdateRequests = new[]
+    public static TheoryData<UpdateGuild.Request> InvalidUpdateRequests()
     {
-        new object[] { Generator.UpdateGuildRequest() with { Name = "" } },
-        new object[] { Generator.UpdateGuildRequest() with { Hostnames = new[] { "%R%%!#$(/)" } } },
-        new object[] { Generator.UpdateGuildRequest() with { Id = "" } },
-    };
+        return new TheoryData<UpdateGuild.Request>
+        {
+            Generator.UpdateGuildRequest() with { Name = "" },
+            Generator.UpdateGuildRequest() with { Hostnames = new[] { "%R%%!#$(/)" } },
+            Generator.UpdateGuildRequest() with { Id = "" },
+        };
+    }
 
     [Theory]
     [MemberData(nameof(InvalidUpdateRequests))]
@@ -100,10 +100,10 @@ public class Update_guild : IntegrationTestBase
         var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Admin);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, request);
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
@@ -114,10 +114,10 @@ public class Update_guild : IntegrationTestBase
         var guildId = await CreateGuild();
         var client = GetClient(guildId, Role.Admin);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, Generator.UpdateGuildRequest());
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
@@ -128,10 +128,10 @@ public class Update_guild : IntegrationTestBase
         var guildId = await CreateGuild();
         var client = GetClient(guildId);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, Generator.UpdateGuildRequest());
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 }

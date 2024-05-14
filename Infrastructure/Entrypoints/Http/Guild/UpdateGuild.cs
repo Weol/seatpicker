@@ -2,12 +2,10 @@ using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Guilds;
-using Seatpicker.Infrastructure.Authentication;
-using System.Linq;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 
-public static class UpdateGuild 
+public static class UpdateGuild
 {
     public static async Task<IResult> Update(
         [FromServices] GuildAdapter guildAdapter,
@@ -15,12 +13,12 @@ public static class UpdateGuild
         [FromBody] Request request)
     {
         if (guildId != request.Id) throw new BadRequestException("Route parameter id does not match the request model id");
-        
+
         var savedGuild = await guildAdapter.SaveGuild(new Adapters.Guilds.Guild(request.Id,
             request.Name,
             request.Icon,
             request.Hostnames,
-            request.RoleMapping));
+            request.RoleMapping.Select(mapping => (mapping.RoleId, mapping.Roles)).ToArray()));
 
         return TypedResults.Ok(savedGuild);
     }
@@ -30,8 +28,10 @@ public static class UpdateGuild
         string Name,
         string? Icon,
         string[] Hostnames,
-        (string RoleId, Role[] Roles)[] RoleMapping);
-    
+        RoleMapping[] RoleMapping);
+
+    public record RoleMapping(string RoleId, Role[] Roles);
+
     public class RequestValidator : AbstractValidator<Request>
     {
         public RequestValidator()
@@ -47,7 +47,7 @@ public static class UpdateGuild
             RuleFor(x => x.Icon)
                 .NotEmpty()
                 .When(x => x.Icon != null);
-            
+
             RuleForEach(x => x.Hostnames)
                 .NotEmpty()
                 .Must(IsValidDomain)
@@ -69,7 +69,7 @@ public static class UpdateGuild
             return Uri.CheckHostName(hostname) != UriHostNameType.Unknown;
         }
 
-        private static bool HaveNoDuplicateRolesAcrossMappings((string RoleId, Role[] Roles)[] roleMapping)
+        private static bool HaveNoDuplicateRolesAcrossMappings(RoleMapping[] roleMapping)
         {
             var allRoles = roleMapping.SelectMany(mapping => mapping.Roles).ToList();
             return allRoles.Distinct().Count() == allRoles.Count;

@@ -33,10 +33,10 @@ public class Create_reservation : IntegrationTestBase
 
         await SetupAggregates(guildId, seat);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, lan.Id, seat.Id);
 
-        //Assert
+        // Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
@@ -60,10 +60,10 @@ public class Create_reservation : IntegrationTestBase
 
         await SetupAggregates(guildId, seat);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, lan.Id, seat.Id);
 
-        //Assert
+        // Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
@@ -88,10 +88,10 @@ public class Create_reservation : IntegrationTestBase
 
         await SetupAggregates(guildId, seat);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, lan.Id, seat.Id);
 
-        //Assert
+        // Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.Conflict),
             () =>
@@ -112,10 +112,10 @@ public class Create_reservation : IntegrationTestBase
         var lan = LanGenerator.Create(guildId, CreateUser(guildId));
         var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId));
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, lan.Id, seat.Id);
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -133,10 +133,10 @@ public class Create_reservation : IntegrationTestBase
 
         await SetupAggregates(guildId, alreadyReservedSeat, seat);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, lan.Id, seat.Id);
 
-        //Assert
+        // Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity),
             () =>

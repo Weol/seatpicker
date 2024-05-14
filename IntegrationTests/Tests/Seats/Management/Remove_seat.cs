@@ -31,10 +31,10 @@ public class Remove_seat : IntegrationTestBase
         var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId));
         await SetupAggregates(guildId, seat);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, lan.Id, seat.Id);
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         GetCommittedDocuments<ProjectedSeat>(guildId).Should().BeEmpty();
     }
@@ -49,10 +49,10 @@ public class Remove_seat : IntegrationTestBase
         var lan = LanGenerator.Create(guildId, CreateUser(guildId));
         await SetupAggregates(guildId, lan);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, lan.Id, Guid.NewGuid());
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
     
@@ -63,10 +63,10 @@ public class Remove_seat : IntegrationTestBase
 		var guildId = await CreateGuild();
         var client = GetClient(guildId);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, Guid.NewGuid(), Guid.NewGuid());
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 }

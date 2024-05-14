@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features;
 using Seatpicker.Application.Features.Lans;
-using Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 

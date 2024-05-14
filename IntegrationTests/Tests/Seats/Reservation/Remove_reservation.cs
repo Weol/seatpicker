@@ -32,10 +32,10 @@ public class Remove_reservation : IntegrationTestBase
 
         await SetupAggregates(guildId, lan, seat);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, lan.Id, seat.Id);
 
-        //Assert
+        // Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
@@ -58,10 +58,10 @@ public class Remove_reservation : IntegrationTestBase
 
         await SetupAggregates(guildId, seat);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, lan.Id, seat.Id);
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -79,10 +79,10 @@ public class Remove_reservation : IntegrationTestBase
 
         await SetupAggregates(guildId, seat);
 
-        //Act
+        // Act
         var response = await MakeRequest(client, guildId, lan.Id, seat.Id);
 
-        //Assert
+        // Assert
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.Conflict),
             () =>
@@ -101,10 +101,10 @@ public class Remove_reservation : IntegrationTestBase
         var identity = await CreateIdentity(guildId);
         var client = GetClient(identity);
 
-        //Act
+        // Act
         var response = await client.DeleteAsync($"reservation/{Guid.NewGuid()}");
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 }

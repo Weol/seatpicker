@@ -31,8 +31,9 @@ public static class CreateLan
                 .NotEmpty();
 
             RuleFor(x => x.Background)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .Must((_, background) => SvgUtils.IsSvg(background))
+                .Must(SvgUtils.IsSvg)
                 .WithMessage("Background must be a valid svg");
         }
     }

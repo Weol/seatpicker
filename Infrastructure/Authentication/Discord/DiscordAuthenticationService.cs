@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using Seatpicker.Domain;
+﻿using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Discord;
 using Seatpicker.Infrastructure.Adapters.Guilds;
 
@@ -14,7 +13,6 @@ public class DiscordAuthenticationService
     public DiscordAuthenticationService(
         DiscordAdapter discordAdapter,
         AuthenticationService authenticationService,
-        IOptions<AuthenticationOptions> options,
         GuildAdapter guildAdapter)
     {
         this.discordAdapter = discordAdapter;
@@ -59,7 +57,7 @@ public class DiscordAuthenticationService
                 discordUser.GlobalName ?? discordUser.Username,
                 discordUser.Avatar,
                 accessToken.RefreshToken,
-                new[] { Role.Superadmin },
+                new[] { Role.User, Role.Superadmin },
                 null);
         }
 
