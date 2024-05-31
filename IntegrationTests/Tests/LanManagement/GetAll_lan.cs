@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using FluentAssertions;
 using Seatpicker.Domain;
@@ -8,6 +9,7 @@ using Xunit.Abstractions;
 namespace Seatpicker.IntegrationTests.Tests.LanManagement;
 
 // ReSharper disable once InconsistentNaming
+[SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class GetAll_lan : IntegrationTestBase
 {
     public GetAll_lan(TestWebApplicationFactory factory,
@@ -19,21 +21,21 @@ public class GetAll_lan : IntegrationTestBase
     {
     }
 
-    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId) =>
+    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId) =>
         await client.GetAsync($"guild/{guildId}/lan");
 
     [Fact]
     public async Task returns_all_lans_that_exist_for_tenant()
     {
         // Arrange
-        var guildId = await CreateGuild();
-        var client = GetClient(guildId);
+        var guild = await CreateGuild();
+        var client = GetClient(guild.Id);
 
-        var existingLan = new[] { LanGenerator.Create(guildId, CreateUser(guildId)), LanGenerator.Create(guildId, CreateUser(guildId)) };
-        await SetupAggregates(guildId, existingLan[0], existingLan[1]);
+        var existingLan = new[] { RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id)), RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id)) };
+        await SetupAggregates(guild.Id, existingLan[0], existingLan[1]);
 
         // Act
-        var response = await MakeRequest(client, guildId);
+        var response = await MakeRequest(client, guild.Id);
         var body = await response.Content.ReadAsJsonAsync<LanResponse[]>();
 
         // Assert
@@ -57,11 +59,11 @@ public class GetAll_lan : IntegrationTestBase
     public async Task returns_empty_array_when_no_lans_exist()
     {
         // Arrange
-        var guildId = await CreateGuild();
-        var client = GetClient(guildId);
+        var guild = await CreateGuild();
+        var client = GetClient(guild.Id);
 
         // Act
-        var response = await MakeRequest(client, guildId);
+        var response = await MakeRequest(client, guild.Id);
         var body = await response.Content.ReadAsJsonAsync<LanResponse[]>();
 
         // Assert
@@ -81,18 +83,18 @@ public class GetAll_lan : IntegrationTestBase
             (Id: await CreateGuild(), Lans: new List<Lan>()),
         };
 
-        foreach (var (guildId, lans) in guilds)
+        foreach (var (guild, lans) in guilds)
         {
-            var generatedLans = new[] { LanGenerator.Create(guildId, CreateUser(guildId)), LanGenerator.Create(guildId, CreateUser(guildId))};
-            await SetupAggregates(guildId, generatedLans[0], generatedLans[1]);
+            var generatedLans = new[] { RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id)), RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id))};
+            await SetupAggregates(guild.Id, generatedLans[0], generatedLans[1]);
             lans.AddRange(generatedLans);
         }
 
-        foreach (var (guildId, lans) in guilds)
+        foreach (var (guild, lans) in guilds)
         {
             // Act
-            var client = GetClient(guildId, Role.Admin);
-            var response = await MakeRequest(client, guildId);
+            var client = GetClient(guild.Id, Role.Admin);
+            var response = await MakeRequest(client, guild.Id);
             var body = await response.Content.ReadAsJsonAsync<LanResponse[]>();
 
             // Assert

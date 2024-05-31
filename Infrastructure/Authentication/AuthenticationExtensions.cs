@@ -65,14 +65,13 @@ public static class AuthenticationExtensions
 
     private static void ConfigureDevelopmentCertificate(AuthenticationOptions options, ILogger<AuthenticationOptions> logger)
     {
-        if (options.Base64SigningCertificate is null)
-        {
-            logger.LogWarning("No signing certificate was provided, generating certificate for development purposes");
+        if (options.Base64SigningCertificate is not null) return;
+        
+        logger.LogWarning("No signing certificate was provided, generating certificate for development purposes");
 
-            var rsa = RSA.Create();
-            var req = new CertificateRequest("cn=test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-            var certificate = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(5));
-            options.Base64SigningCertificate = Convert.ToBase64String(certificate.Export(X509ContentType.Pfx, ""));
-        }
+        var rsa = RSA.Create();
+        var req = new CertificateRequest("cn=test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        var certificate = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(5));
+        options.Base64SigningCertificate = Convert.ToBase64String(certificate.Export(X509ContentType.Pfx, ""));
     }
 }

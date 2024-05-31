@@ -49,7 +49,7 @@ export function useActiveLan() {
   return activeLan
 }
 
-export function useLans(guildId: string) {
+export function useAllLans(guildId: string) {
   const [lans, setLans] = useRecoilState(allLansAtomFamily(guildId))
 
   const createLan = async (guildId: string, title: string, background: string) => {

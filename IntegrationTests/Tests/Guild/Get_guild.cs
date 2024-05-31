@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using FluentAssertions;
 using Seatpicker.Domain;
@@ -7,6 +8,7 @@ using Xunit.Abstractions;
 
 namespace Seatpicker.IntegrationTests.Tests.Guild;
 
+[SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class Get_guild : IntegrationTestBase
 {
     public Get_guild(TestWebApplicationFactory factory,
@@ -18,24 +20,24 @@ public class Get_guild : IntegrationTestBase
     {
     }
 
-    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId) =>
+    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId) =>
         await client.GetAsync($"guild/{guildId}");
 
-    private async Task<HttpResponseMessage> MakeRequest(HttpClient client) =>
+    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client) =>
         await client.GetAsync($"guild");
 
     [Fact]
     public async Task returns_all_guilds()
     {
         // Arrange
-        var guildIds = new[]
+        var guilds = new[]
         {
             await CreateGuild(),
             await CreateGuild(),
             await CreateGuild(),
         };
 
-        var client = GetClient(guildIds[0], Role.Superadmin);
+        var client = GetClient(guilds[0].Id, Role.Superadmin);
 
         // Act
         var response = await MakeRequest(client);
@@ -43,11 +45,11 @@ public class Get_guild : IntegrationTestBase
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        body.Should().HaveCount(guildIds.Length);
+        body.Should().HaveCount(guilds.Length);
 
-        foreach (var guildId in guildIds)
+        foreach (var guild in guilds)
         {
-            body.Should().ContainSingle(guild => guild.Id == guildId);
+            body.Should().ContainSingle(responseGuild => guild.Id == responseGuild.Id);
         }
     }
 
@@ -55,16 +57,16 @@ public class Get_guild : IntegrationTestBase
     public async Task returns_guild()
     {
         // Arrange
-        var guildId = await CreateGuild();
-        var client = GetClient(guildId, Role.Admin);
+        var guild = await CreateGuild();
+        var client = GetClient(guild.Id, Role.Admin);
 
         // Act
-        var response = await MakeRequest(client, guildId);
+        var response = await MakeRequest(client, guild.Id);
         var body = await response.Content.ReadAsJsonAsync<GetGuild.Response>();
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         body.Should().NotBeNull();
-        body!.Id.Should().Be(guildId);
+        body!.Id.Should().Be(guild.Id);
     }
 }

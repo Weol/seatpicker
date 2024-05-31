@@ -4,7 +4,7 @@ namespace Seatpicker.Application.Features.Seats;
 
 public interface IReservationManagementService
 {
-    public Task Move(Guid lanId, Guid fromSeatId, Guid toSeatId, User initiator);
+    public Task Move(Guid lanId, Guid fromSeatId, Guid toSeatId, User movedBy);
 
     public Task Create(Guid lanId, Guid seatId, string userId, User reservedBy);
 

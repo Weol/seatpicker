@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using FluentAssertions;
 using Seatpicker.Domain;
@@ -8,6 +9,7 @@ using Xunit.Abstractions;
 namespace Seatpicker.IntegrationTests.Tests.LanManagement;
 
 // ReSharper disable once InconsistentNaming
+[SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class Get_lan : IntegrationTestBase
 {
     public Get_lan(TestWebApplicationFactory factory,
@@ -19,29 +21,29 @@ public class Get_lan : IntegrationTestBase
     {
     }
 
-    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, Guid lanId) =>
+    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, Guid lanId) =>
         await client.GetAsync($"guild/{guildId}/lan/{lanId}");
 
-    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId) =>
+    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId) =>
         await client.GetAsync($"guild/{guildId}/lan");
 
     [Fact]
     public async Task returns_all_lans_in_guild()
     {
         // Arrange
-        var guildId = await CreateGuild();
-        var client = GetClient(guildId, Role.Admin);
+        var guild = await CreateGuild();
+        var client = GetClient(guild.Id, Role.Admin);
 
         var existingLans = new[]
         {
-            LanGenerator.Create(guildId, CreateUser(guildId)),
-            LanGenerator.Create(guildId, CreateUser(guildId)),
-            LanGenerator.Create(guildId, CreateUser(guildId)),
+            RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id)),
+            RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id)),
+            RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id)),
         };
-        await SetupAggregates(guildId, existingLans[0], existingLans[1], existingLans[2]);
+        await SetupAggregates(guild.Id, existingLans[0], existingLans[1], existingLans[2]);
 
         // Act
-        var response = await MakeRequest(client, guildId);
+        var response = await MakeRequest(client, guild.Id);
         var body = await response.Content.ReadAsJsonAsync<LanResponse[]>();
 
         // Assert
@@ -64,14 +66,14 @@ public class Get_lan : IntegrationTestBase
     public async Task returns_lan_when_lan_exists()
     {
         // Arrange
-        var guildId = await CreateGuild();
-        var client = GetClient(guildId, Role.Admin);
+        var guild = await CreateGuild();
+        var client = GetClient(guild.Id, Role.Admin);
 
-        var existingLan = LanGenerator.Create(guildId, CreateUser(guildId));
-        await SetupAggregates(guildId, existingLan);
+        var existingLan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
+        await SetupAggregates(guild.Id, existingLan);
 
         // Act
-        var response = await MakeRequest(client, guildId, existingLan.Id);
+        var response = await MakeRequest(client, guild.Id, existingLan.Id);
         var body = await response.Content.ReadAsJsonAsync<LanResponse>();
 
         // Assert
@@ -91,11 +93,11 @@ public class Get_lan : IntegrationTestBase
     public async Task returns_nothing_when_lan_does_not_exist()
     {
         // Arrange
-        var guildId = await CreateGuild();
-        var client = GetClient(guildId, Role.Admin);
+        var guild = await CreateGuild();
+        var client = GetClient(guild.Id, Role.Admin);
 
         // Act
-        var response = await MakeRequest(client, guildId, Guid.NewGuid());
+        var response = await MakeRequest(client, guild.Id, Guid.NewGuid());
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);

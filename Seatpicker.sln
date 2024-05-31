@@ -19,6 +19,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "Integra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PostgresFixture", "PostgresFixture\PostgresFixture.csproj", "{267D2768-BDC1-479C-B6A9-68725EA4BF7B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{1878E682-8563-4064-80F6-CCF326E7D56E}"
+	ProjectSection(SolutionItems) = preProject
+		AnalyzerConfig = AnalyzerConfig
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|Any CPU = Release|Any CPU

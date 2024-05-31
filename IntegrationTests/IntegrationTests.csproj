@@ -7,7 +7,14 @@
         <RootNamespace>Seatpicker.IntegrationTests</RootNamespace>
         <IsPackable>false</IsPackable>
         <LangVersion>11</LangVersion>
+        <EnableNETAnalyzers>true</EnableNETAnalyzers>
+        <AnalysisLevel>latest-Recommended</AnalysisLevel>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
+    
+    <ItemGroup>
+        <GlobalAnalyzerConfigFiles Include="../AnalyzerConfig" />
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Bogus" Version="35.0.1" />
@@ -31,10 +38,4 @@
     <ItemGroup>
       <Folder Include="Tests\Frontend\" />
     </ItemGroup>
-
-
-    <PropertyGroup>
-        <CodeAnalysisRuleSet>analysers.ruleset</CodeAnalysisRuleSet>
-    </PropertyGroup>
-
 </Project>

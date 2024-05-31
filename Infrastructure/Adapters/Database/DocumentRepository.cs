@@ -90,9 +90,9 @@ public class DocumentTransaction : IDocumentTransaction
         return session.SaveChangesAsync();
     }
 
-    public Task<TDocument?> Get<TDocument>(string id)
+    public Task<TDocument?> Query<TDocument>(string id)
         where TDocument : IDocument =>
-        reader.Get<TDocument>(id);
+        reader.Query<TDocument>(id);
 
     public Task<bool> Exists<TDocument>(string id)
         where TDocument : IDocument =>
@@ -106,6 +106,7 @@ public class DocumentTransaction : IDocumentTransaction
     {
         session.Dispose();
         reader.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
 
@@ -118,7 +119,7 @@ public class DocumentReader : IDocumentReader
         this.session = session;
     }
 
-    public Task<TDocument?> Get<TDocument>(string id)
+    public Task<TDocument?> Query<TDocument>(string id)
         where TDocument : IDocument
     {
         return session.LoadAsync<TDocument>(id);
@@ -127,7 +128,7 @@ public class DocumentReader : IDocumentReader
     public async Task<bool> Exists<TDocument>(string id)
         where TDocument : IDocument
     {
-        return await Get<TDocument>(id) is not null;
+        return await Query<TDocument>(id) is not null;
     }
 
     public IQueryable<TDocument> Query<TDocument>()
@@ -139,5 +140,6 @@ public class DocumentReader : IDocumentReader
     public void Dispose()
     {
         session.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

@@ -12,7 +12,7 @@ public static class CreateReservation
         [FromServices] ILoggedInUserAccessor loggedInUserAccessor,
         [FromServices] IReservationService reservationService)
     {
-        var user = await loggedInUserAccessor.Get();
+        var user = await loggedInUserAccessor.GetUser();
 
         await reservationService.Create(lanId, seatId, user);
 

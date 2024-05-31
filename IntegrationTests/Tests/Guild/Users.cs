@@ -1,15 +1,14 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using Bogus;
 using FluentAssertions;
 using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Authentication;
 using Xunit;
 using Xunit.Abstractions;
-using User = Seatpicker.Infrastructure.Entrypoints.Http.User;
 
 namespace Seatpicker.IntegrationTests.Tests.Guild;
 
 // ReSharper disable once InconsistentNaming
+[SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class Users : IntegrationTestBase
 {
     public Users(
@@ -23,22 +22,19 @@ public class Users : IntegrationTestBase
     public async Task getting_users_returns_all_users_who_have_logged_in()
     {
         // Arrange
-        var guildId = await CreateGuild();
-        var client = GetClient(guildId, Role.Operator);
+        var guild = await CreateGuild();
+        var client = GetClient(guild.Id, Role.Operator);
 
-        var users = Enumerable.Range(0, 5)
-            .Select(
-                i => new UserManager.UserDocument(
-                    i.ToString(),
-                    new Faker().Name.FirstName(),
-                    new Faker().Random.Int(1).ToString(),
-                    Array.Empty<Role>()))
-            .ToArray();
-
-        await SetupDocuments(guildId, users);
+        var users = new[]
+        {
+            CreateUser(guild.Id),
+            CreateUser(guild.Id),
+            CreateUser(guild.Id),
+            CreateUser(guild.Id),
+        };
 
         // Act
-        var response = await client.GetAsync($"guild/{guildId}/users");
+        var response = await client.GetAsync($"guild/{guild.Id}/users");
         var body = await response.Content.ReadAsJsonAsync<User[]>();
 
         // Assert
@@ -60,34 +56,26 @@ public class Users : IntegrationTestBase
         // Arrange
         var guilds = new[]
         {
-            (Id: await CreateGuild(), Lans: new List<UserManager.UserDocument>()),
-            (Id: await CreateGuild(), Lans: new List<UserManager.UserDocument>()),
-            (Id: await CreateGuild(), Lans: new List<UserManager.UserDocument>()),
+            (Guild: await CreateGuild(), Lans: new List<User>()),
+            (Guild: await CreateGuild(), Lans: new List<User>()),
+            (Guild: await CreateGuild(), Lans: new List<User>()),
         };
 
-        foreach (var (id, users) in guilds)
+        foreach (var (guild, users) in guilds)
         {
-            var generatedUsers = Enumerable.Range(0, 5)
-                .Select(
-                    i => new UserManager.UserDocument(
-                        i.ToString(),
-                        new Faker().Name.FirstName(),
-                        new Faker().Random.Int(1).ToString(),
-                        Array.Empty<Role>()))
-                .ToArray();
-
-            await SetupDocuments(id, generatedUsers);
-
-            users.AddRange(generatedUsers);
+            users.Add(CreateUser(guild.Id));
+            users.Add(CreateUser(guild.Id));
+            users.Add(CreateUser(guild.Id));
+            users.Add(CreateUser(guild.Id));
         }
 
-        foreach (var (guildId, users) in guilds)
+        foreach (var (guild, users) in guilds)
         {
-            var identity = await CreateIdentity(guildId, Role.Operator);
+            var identity = await CreateIdentity(guild.Id, Role.Operator);
             var client = GetClient(identity);
 
             // Act
-            var response = await client.GetAsync($"guild/{guildId}/users");
+            var response = await client.GetAsync($"guild/{guild.Id}/users");
             var body = await response.Content.ReadAsJsonAsync<User[]>();
 
             // Assert

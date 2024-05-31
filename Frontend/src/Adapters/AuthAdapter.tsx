@@ -111,10 +111,6 @@ export class AuthAdapter {
     path: string,
     body: unknown
   ): Promise<Response> {
-    const tenantStorage = localStorage.getItem("activeGuildId")
-    if (tenantStorage == null) throw "tenant is null"
-    const tenant = JSON.parse(tenantStorage) as string
-
     const requestInit: RequestInit = {
       method: method,
       redirect: "follow",
@@ -125,7 +121,6 @@ export class AuthAdapter {
       if (typeof body !== "undefined") requestInit.body = JSON.stringify(body)
       headers.append("Content-Type", "application/json")
     }
-    headers.append("Tenant-Id", tenant)
     requestInit.headers = headers
 
     return fetch(Config.ApiBaseUrl + "/" + path, requestInit)

@@ -21,7 +21,7 @@ public class DiscordAdapterOptions
 
     private static int GetVersionFromDiscordUri(Uri baseUri)
     {
-        var version = baseUri.Segments.Single(x => x.StartsWith("v"));
+        var version = baseUri.Segments.Single(x => x.StartsWith("v", StringComparison.Ordinal));
         if (int.TryParse(version.Trim('v').Trim('/'), out var number))
         {
             return number;

@@ -7,7 +7,7 @@ public abstract class AggregateBase
     public Guid Id { get; set; }
 
     [JsonIgnore]
-    public IList<object> RaisedEvents = new List<object>();
+    public IList<object> RaisedEvents { get; } = new List<object>();
 
     protected void Raise(object evt)
     {

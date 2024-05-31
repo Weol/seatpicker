@@ -52,7 +52,7 @@ export default function AllGuildsOverview() {
       {selectedGuild && (
         <HostList
           guild={selectedGuild}
-          hosts={["ASD"]}
+          hosts={selectedGuild}
           onHostSave={(hosts) => handleHostSave(selectedGuild, hosts)}
         />
       )}
@@ -80,7 +80,7 @@ function HostList(props: { guild: Guild; hosts: string[]; onHostSave: (hosts: st
     <Stack spacing={2} justifyContent="center" alignItems="center" width={"100%"}>
       <Stack direction={"row"} width="100%" justifyContent="space-between" alignItems="center">
         <Typography height={"100%"} variant={"h5"}>
-          {props.guild.name}
+          Host mapping
         </Typography>
       </Stack>
       <Stack spacing={2} width={"100%"} justifyContent="center" alignItems="center">

@@ -9,7 +9,7 @@ public static class TestEndpoint
         [FromRoute] string guildId,
         [FromServices] ILoggedInUserAccessor loggedInUserAccessor)
     {
-        var loggedInUser = await loggedInUserAccessor.Get();
+        var loggedInUser = await loggedInUserAccessor.GetUser();
 
         return TypedResults.Ok(new Response(loggedInUser.Id, loggedInUser.Name, loggedInUser.Roles));
     }

@@ -14,7 +14,7 @@ public static class UpdateSeat
         [FromServices] ILoggedInUserAccessor loggedInUserAccessor,
         [FromServices] ISeatManagementService seatManagementService)
     {
-        var user = await loggedInUserAccessor.Get();
+        var user = await loggedInUserAccessor.GetUser();
 
         await seatManagementService.Update(lanId, seatId, request.Title, request.Bounds.ToDomainBounds(), user);
 

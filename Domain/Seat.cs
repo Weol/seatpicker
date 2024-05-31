@@ -9,6 +9,7 @@ namespace Seatpicker.Domain;
 // ReSharper disable UnusedParameter.Local
 #pragma warning disable CS1998 // Disable warning about async methods missing awaits
 #pragma warning disable CS8618 // Disable warning about uninitialized properties
+[SuppressMessage("Performance", "CA1822:Mark members as static")]
 public class Seat : AggregateBase
 {
     public Guid LanId { get; private set; }

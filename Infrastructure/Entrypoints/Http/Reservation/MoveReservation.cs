@@ -14,7 +14,7 @@ public static class MoveReservation
         [FromServices] ILoggedInUserAccessor loggedInUserAccessor,
         [FromServices] IReservationService reservationService)
     {
-        var user = await loggedInUserAccessor.Get();
+        var user = await loggedInUserAccessor.GetUser();
 
         await reservationService.Move(lanId, seatId, request.ToSeatId, user);
 

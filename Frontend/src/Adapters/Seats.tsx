@@ -5,20 +5,20 @@ import ApiRequest from "./ApiRequest"
 import { useAuth } from "./AuthAdapter"
 import { Lan, Seat, User } from "./Models"
 
-async function LoadSeats(lanId: string) {
-  const response = await ApiRequest("GET", `lan/${lanId}/seat`)
+async function LoadSeats(guildId: string, lanId: string) {
+  const response = await ApiRequest("GET", `guild/${guildId}lan/${lanId}/seat`)
   const seats = (await response.json()) as Seat[]
 
   return seats.reduce((map, seat) => map.set(seat.id, seat), new Map<string, Seat>())
 }
 
-const seatsAtomFamily = atomFamily<Map<string, Seat>, string>({
+const seatsAtomFamily = atomFamily<Map<string, Seat>, [string, string]>({
   key: "seats",
-  default: (lanId) => LoadSeats(lanId),
-  effects: () => [
+  default: ([guildId, lanId]) => LoadSeats(guildId, lanId),
+  effects: ([, lanId]) => [
     ({ setSelf }) => {
       const connection = new HubConnectionBuilder()
-        .withUrl(Config.ApiBaseUrl + "/hubs/reservation")
+        .withUrl(Config.ApiBaseUrl + `/hubs/reservation?lanId=${lanId}`)
         .configureLogging(LogLevel.Information)
         .build()
 
@@ -66,7 +66,7 @@ function findSeatReservedBy(seats: Seat[], loggedInUser: User | null) {
 }
 
 export function useSeats(lan: Lan) {
-  const [seatsMap, setSeatsMap] = useRecoilState(seatsAtomFamily(lan.id))
+  const [seatsMap, setSeatsMap] = useRecoilState(seatsAtomFamily([lan.guildId, lan.id]))
   const { loggedInUser } = useAuth()
   const seats = Array.from(seatsMap.values())
   const reservedSeat = findSeatReservedBy(seats, loggedInUser)
@@ -76,7 +76,7 @@ export function useSeats(lan: Lan) {
       title: seat.title,
       bounds: seat.bounds,
     })
-    setSeatsMap(await LoadSeats(lan.id))
+    setSeatsMap(await LoadSeats(lan.guildId, lan.id))
   }
 
   return { seats, reservedSeat, createNewSeat }

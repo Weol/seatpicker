@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Seatpicker.Application.Features;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Database;
+using Seatpicker.Infrastructure.Adapters.Discord;
 using Seatpicker.Infrastructure.Adapters.Guilds;
 using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.IntegrationTests.TestAdapters;
@@ -19,7 +20,7 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
     IAssemblyFixture<TestWebApplicationFactory>
 {
     private static object lockObject = new();
-    
+
     private readonly WebApplicationFactory<Infrastructure.Program> factory;
     private readonly ITestOutputHelper testOutputHelper;
 
@@ -93,7 +94,7 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
         }
 
         await aggregateTransaction.Commit();
-}
+    }
 
     protected async Task SetupDocuments<TDocument>(params TDocument[] documents)
         where TDocument : IDocument
@@ -120,7 +121,7 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
         using var reader = repository.CreateGuildlessReader();
         return reader.Query<TDocument>().ToArray();
     }
-    
+
     protected IEnumerable<TDocument> GetCommittedDocuments<TDocument>(string guildId)
         where TDocument : IDocument
     {
@@ -138,17 +139,18 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
     {
         return CreateIdentity(guildId, roles, false);
     }
-    
+
     protected async Task<TestIdentity> CreateIdentity(string guildId, Role[] roles, bool withoutGuildIdClaim)
     {
         if (roles.Length == 0) roles = new[] { Role.User };
 
         var jwtTokenCreator = factory.Services.GetRequiredService<JwtTokenCreator>();
 
+        var user = RandomData.User();
         var token = new AuthenticationToken(
-            new Faker().Random.Int(99999).ToString(),
-            new Faker().Name.FirstName(),
-            new Faker().Random.Int(99999).ToString(),
+            user.Id,
+            user.Name,
+            user.Avatar,
             "asdasdasd",
             roles,
             withoutGuildIdClaim ? null : guildId);
@@ -159,37 +161,39 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
         var (jwtToken, _) = await jwtTokenCreator.CreateToken(token);
 
         var identity = new TestIdentity(
-                new User(userDocument.Id, userDocument.Name, userDocument.Avatar, userDocument.Roles),
-                roles,
-                jwtToken,
-                guildId);
+            new User(userDocument.Id, userDocument.Name, userDocument.Avatar, userDocument.Roles),
+            roles,
+            jwtToken);
 
         return identity;
     }
 
-    protected async Task<string> CreateGuild(string? guildId = null, 
-        string[]? hostnames = null, 
-        (string RoleId, Role[] Roles)[]? roleMapping = null)
+    protected async Task<Guild> CreateGuild()
     {
-        var id = guildId ?? new Faker().Random.Int(1).ToString();
-        var mapping = roleMapping ?? Array.Empty<(string RoleId, Role[] Roles)>();
-        var name = new Faker().Company.CompanyName();
-        var icon = new Faker().Random.Int(111111,999999).ToString();
-        
+        return await CreateGuild(RandomData.Guild());
+    }
+    
+    protected async Task<Guild> CreateGuild(Guild guild)
+    {
+        var discordGuild = new DiscordGuild(guild.Id, guild.Name, guild.Icon);
+
         var discordAdapter = GetService<TestDiscordAdapter>();
-        discordAdapter.AddGuild(id, name, icon ,mapping.Select(x => x.RoleId));
+        discordAdapter.AddGuild(discordGuild, guild.Roles.Select(
+                guildRole => new DiscordGuildRole(guildRole.Id, guildRole.Name, guildRole.Color, guildRole.Icon)));
 
+        var roleMappings = guild.RoleMapping
+            .Select(mapping => new GuildAdapter.GuildRoleMapping(mapping.GuildRoleId, mapping.Roles))
+            .ToArray();
+        
         var document = new GuildAdapter.GuildDocument(
-                id,
-                name,
-                icon,
-                hostnames ?? Array.Empty<string>(),
-                mapping.Select(x => new GuildAdapter.GuildRoleMapping(x.RoleId, x.Roles)).ToArray());
+            discordGuild.Id,
+            guild.Hostnames,
+            roleMappings);
+            
+            await SetupDocuments(document);
 
-        await SetupDocuments(document);
-
-        return id;
+            return guild;
     }
 
-    public record TestIdentity(User User, Role[] Roles, string Token, string GuildId);
+    public record TestIdentity(User User, Role[] Roles, string Token);
 }

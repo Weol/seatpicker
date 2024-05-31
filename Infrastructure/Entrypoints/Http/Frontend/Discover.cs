@@ -17,18 +17,18 @@ public static class Discover
     {
         if (host is null) return Results.BadRequest("Host header cannot be null");
 
-        var guild = await guildAdapter.GetGuildByHost(host);
-        if (guild is null) return Results.NotFound();
+        var guildId = await guildAdapter.GetGuildIdByHost(host);
+        if (guildId is null) return Results.NotFound();
 
-        using var reader = documentRepository.CreateReader(guild.Id);
+        using var reader = documentRepository.CreateReader(guildId);
 
         var activeLan = reader
             .Query<ProjectedLan>()
             .FirstOrDefault(lan => lan.Active);
 
         var lanResponse = activeLan is null ? null : LanResponse.FromProjectedLan(activeLan);
-        
-        return TypedResults.Ok(new Response(guild.Id, lanResponse));
+
+        return TypedResults.Ok(new Response(guildId, lanResponse));
     }
 
     public record Response(string GuildId, LanResponse? Lan);

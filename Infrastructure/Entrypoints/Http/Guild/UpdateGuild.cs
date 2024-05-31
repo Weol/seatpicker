@@ -12,25 +12,32 @@ public static class UpdateGuild
         [FromRoute] string guildId,
         [FromBody] Request request)
     {
-        if (guildId != request.Id) throw new BadRequestException("Route parameter id does not match the request model id");
+        if (guildId != request.Id)
+            throw new BadRequestException("Route parameter id does not match the request model id");
 
-        var savedGuild = await guildAdapter.SaveGuild(new Adapters.Guilds.Guild(request.Id,
-            request.Name,
-            request.Icon,
-            request.Hostnames,
-            request.RoleMapping.Select(mapping => (mapping.RoleId, mapping.Roles)).ToArray()));
+        await guildAdapter.SaveGuild(request.ToGuild());
 
-        return TypedResults.Ok(savedGuild);
+        return TypedResults.Ok();
     }
+
+    public record RoleMapping(string GuildRoleId, Role[] Roles);
 
     public record Request(
         string Id,
         string Name,
         string? Icon,
         string[] Hostnames,
-        RoleMapping[] RoleMapping);
-
-    public record RoleMapping(string RoleId, Role[] Roles);
+        RoleMapping[] RoleMapping,
+        GuildRole[] Roles)
+    {
+        public Adapters.Guilds.Guild ToGuild() =>
+            new(Id,
+                Name,
+                Icon,
+                Hostnames,
+                RoleMapping.Select(mapping => (mapping.GuildRoleId, mapping.Roles)).ToArray(),
+                Roles);
+    };
 
     public class RequestValidator : AbstractValidator<Request>
     {

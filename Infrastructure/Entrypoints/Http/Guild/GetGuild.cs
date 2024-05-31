@@ -32,11 +32,12 @@ public static class GetGuild
         string Name,
         string? Icon,
         IEnumerable<string> Hostnames,
-        (string RoleId, Role[] Roles)[] RoleMapping)
+        (string GuildRoleId, Role[] Roles)[] RoleMapping,
+        GuildRole[] Roles)
     {
         public static Response FromGuild(Adapters.Guilds.Guild guild)
         {
-            return new Response(guild.Id, guild.Name, guild.Icon, guild.Hostnames, guild.RoleMapping);
+            return new Response(guild.Id, guild.Name, guild.Icon, guild.Hostnames, guild.RoleMapping, guild.Roles);
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
@@ -10,6 +11,7 @@ using Xunit.Abstractions;
 namespace Seatpicker.IntegrationTests.Tests.LanManagement;
 
 // ReSharper disable once InconsistentNaming
+[SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class Update_lan : IntegrationTestBase
 {
     public Update_lan(
@@ -19,7 +21,7 @@ public class Update_lan : IntegrationTestBase
     {
     }
 
-    private async Task<HttpResponseMessage> MakeRequest(
+    private static async Task<HttpResponseMessage> MakeRequest(
         HttpClient client,
         string guildId,
         Guid lanId,
@@ -30,8 +32,8 @@ public class Update_lan : IntegrationTestBase
     {
         return new TheoryData<UpdateLan.Request>
         {
-            Generator.UpdateLanRequest() with { Active = true },
-            Generator.UpdateLanRequest() with { Active = false },
+            UpdateLanRequest() with { Active = true },
+            UpdateLanRequest() with { Active = false },
         };
     }
 
@@ -40,17 +42,17 @@ public class Update_lan : IntegrationTestBase
     public async Task succeeds_when_valid(UpdateLan.Request request)
     {
         // Arrange
-        var guildId = await CreateGuild();
-        var client = GetClient(guildId, Role.Admin);
+        var guild = await CreateGuild();
+        var client = GetClient(guild.Id, Role.Admin);
 
-        var existingLan = LanGenerator.Create(guildId, CreateUser(guildId), id: request.Id);
-        await SetupAggregates(guildId, existingLan);
+        var existingLan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id), id: request.Id);
+        await SetupAggregates(guild.Id, existingLan);
 
         // Act
-        var response = await MakeRequest(client, guildId, existingLan.Id, request);
+        var response = await MakeRequest(client, guild.Id, existingLan.Id, request);
 
         // Assert
-        var committedAggregates = GetCommittedDocuments<ProjectedLan>(guildId);
+        var committedAggregates = GetCommittedDocuments<ProjectedLan>(guild.Id);
 
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
@@ -69,11 +71,11 @@ public class Update_lan : IntegrationTestBase
     {
         return new TheoryData<UpdateLan.Request>
         {
-            Generator.UpdateLanRequest() with { Background = null! },
-            Generator.UpdateLanRequest() with { Title = null! },
-            Generator.UpdateLanRequest() with { Title = "" },
-            Generator.UpdateLanRequest() with { Background = Array.Empty<byte>() },
-            Generator.UpdateLanRequest() with { Background = new byte[] { 1, 2, 3, 4 } },
+            UpdateLanRequest() with { Background = null! },
+            UpdateLanRequest() with { Title = null! },
+            UpdateLanRequest() with { Title = "" },
+            UpdateLanRequest() with { Background = Array.Empty<byte>() },
+            UpdateLanRequest() with { Background = new byte[] { 1, 2, 3, 4 } },
         };
     }
 
@@ -82,14 +84,14 @@ public class Update_lan : IntegrationTestBase
     public async Task fails_when_invalid(UpdateLan.Request request)
     {
         // Arrange
-        var guildId = await CreateGuild();
-        var client = GetClient(guildId, Role.Admin);
+        var guild = await CreateGuild();
+        var client = GetClient(guild.Id, Role.Admin);
 
-        var existingLan = LanGenerator.Create(guildId, CreateUser(guildId));
-        await SetupAggregates(guildId, existingLan);
+        var existingLan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
+        await SetupAggregates(guild.Id, existingLan);
 
         // Act
-        var response = await MakeRequest(client, guildId, existingLan.Id, request);
+        var response = await MakeRequest(client, guild.Id, existingLan.Id, request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -99,14 +101,14 @@ public class Update_lan : IntegrationTestBase
     public async Task fails_when_model_id_does_not_match_path_id()
     {
         // Arrange
-        var guildId = await CreateGuild();
-        var client = GetClient(guildId, Role.Admin);
+        var guild = await CreateGuild();
+        var client = GetClient(guild.Id, Role.Admin);
 
-        var existingLan = LanGenerator.Create(guildId, CreateUser(guildId));
-        await SetupAggregates(guildId, existingLan);
+        var existingLan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
+        await SetupAggregates(guild.Id, existingLan);
 
         // Act
-        var response = await MakeRequest(client, guildId, existingLan.Id, Generator.UpdateLanRequest());
+        var response = await MakeRequest(client, guild.Id, existingLan.Id, UpdateLanRequest());
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -116,13 +118,22 @@ public class Update_lan : IntegrationTestBase
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
         // Arrange
-        var guildId = await CreateGuild();
-        var client = GetClient(guildId);
+        var guild = await CreateGuild();
+        var client = GetClient(guild.Id);
 
         // Act
-        var response = await MakeRequest(client, guildId, Guid.NewGuid(), Generator.UpdateLanRequest());
+        var response = await MakeRequest(client, guild.Id, Guid.NewGuid(), UpdateLanRequest());
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    public static UpdateLan.Request UpdateLanRequest()
+    {
+        return new UpdateLan.Request(
+            Guid.NewGuid(),
+            false,
+            RandomData.Faker.Hacker.Noun(),
+            RandomData.Aggregates.LanBackground());
     }
 }

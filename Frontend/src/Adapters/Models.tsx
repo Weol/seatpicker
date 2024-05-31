@@ -1,4 +1,4 @@
-export interface ActiveGuild {
+export type ActiveGuild = {
   guildId: string
   lanId: string | null
 }
@@ -7,7 +7,13 @@ export type Guild = {
   id: string
   name: string
   icon: string | null
-  provider: string
+  hostnames: string[]
+  roleMappings: GuildRoleMapping[]
+}
+
+export type GuildRoleMapping = {
+  roleId: string
+  roles: Role[]
 }
 
 export type Lan = {

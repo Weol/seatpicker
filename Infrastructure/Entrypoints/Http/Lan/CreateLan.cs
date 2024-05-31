@@ -12,7 +12,7 @@ public static class CreateLan
         ILoggedInUserAccessor loggedInUserAccessor,
         ILanManagementService lanManagementService)
     {
-        var user = await loggedInUserAccessor.Get();
+        var user = await loggedInUserAccessor.GetUser();
 
         var lanId = await lanManagementService.Create(guildId, request.Title, request.Background, user);
 

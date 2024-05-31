@@ -15,7 +15,7 @@ public static class UpdateLan
     {
         if (lanId != request.Id) throw new BadRequestException("Route parameter id does not match the request model id");
 
-        var user = await loggedInUserAccessor.Get();
+        var user = await loggedInUserAccessor.GetUser();
 
         await lanManagementService.Update(request.Id, request.Active, request.Title, request.Background, user);
 

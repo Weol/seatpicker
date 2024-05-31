@@ -19,7 +19,6 @@ import {
 } from "@mui/material"
 import * as React from "react"
 import { useState } from "react"
-import { useActiveGuildId } from "../Adapters/ActiveGuild"
 import { useAuth } from "../Adapters/AuthAdapter"
 import { useGuildUsers } from "../Adapters/Guilds/GuildUsers"
 import { useActiveLan } from "../Adapters/Lans/AllLans"
@@ -29,16 +28,11 @@ import { useSeats } from "../Adapters/Seats"
 import { DiscordUserAvatar } from "../Components/DiscordAvatar"
 import { useAlerts } from "../Contexts/AlertContext"
 import { useDialogs } from "../Contexts/DialogContext"
-import config from "../config"
 
 export default function Seats() {
   const activeLan = useActiveLan()
-  const activeGuildId = useActiveGuildId()
 
-  if (activeGuildId == null) {
-    const message = `No guild is configured for this host (${config.ApiHost})`
-    return <ErrorMessage message={message} />
-  } else if (activeLan == null) {
+  if (activeLan == null) {
     return <ErrorMessage message="Det er ikke konfigurert et aktivt lan" />
   } else {
     return <SeatsWithLan activeLan={activeLan} />

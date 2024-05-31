@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Net;
 using System.Text.Json;
-using Bogus;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -23,20 +22,9 @@ public class TestDiscordAdapter : DiscordAdapter
     {
     }
 
-    public void AddGuild(string id, string name, string icon, IEnumerable<string>? guildRoleIds = null)
+    public void AddGuild(DiscordGuild discordGuild, IEnumerable<DiscordGuildRole>? guildRoles = null)
     {
-        var discordGuild = new DiscordGuild(id, name, icon);
-
-        var roles = guildRoleIds == null
-            ? Array.Empty<DiscordGuildRole>()
-            : guildRoleIds.Select(
-                roleId => new DiscordGuildRole(
-                    roleId,
-                    new Faker().Random.Word(),
-                    new Faker().Random.Int(10000, 99999),
-                    null));
-
-        guilds.Add(discordGuild.Id, new TestGuild(discordGuild, roles));
+        guilds.Add(discordGuild.Id, new TestGuild(discordGuild, guildRoles ?? Array.Empty<DiscordGuildRole>()));
     }
 
     public (string DiscordToken, string RefreshToken) AddUser(
@@ -55,9 +43,9 @@ public class TestDiscordAdapter : DiscordAdapter
 
         var user = new TestUser(
             discordUser,
-            new Faker().Random.AlphaNumeric(15),
-            new Faker().Random.AlphaNumeric(15),
-            new Faker().Random.AlphaNumeric(15),
+            RandomData.Faker.Random.AlphaNumeric(15),
+            RandomData.Faker.Random.AlphaNumeric(15),
+            RandomData.Faker.Random.AlphaNumeric(15),
             new Membership(guild, guildNick, guildAvatar, guildRoleIds));
 
         users.Add(user.DiscordUser.Id, user);
@@ -69,9 +57,9 @@ public class TestDiscordAdapter : DiscordAdapter
     {
         var user = new TestUser(
             discordUser,
-            new Faker().Random.AlphaNumeric(15),
-            new Faker().Random.AlphaNumeric(15),
-            new Faker().Random.AlphaNumeric(15),
+            RandomData.Faker.Random.AlphaNumeric(15),
+            RandomData.Faker.Random.AlphaNumeric(15),
+            RandomData.Faker.Random.AlphaNumeric(15),
             null);
         users.Add(discordUser.Id, user);
 
@@ -106,8 +94,8 @@ public class TestDiscordAdapter : DiscordAdapter
         users.Remove(matchingUser.DiscordUser.Id);
         var newUser = matchingUser with
         {
-            AccessToken = new Faker().Random.AlphaNumeric(15),
-            RefreshToken = new Faker().Random.AlphaNumeric(15),
+            AccessToken = RandomData.Faker.Random.AlphaNumeric(15),
+            RefreshToken = RandomData.Faker.Random.AlphaNumeric(15),
         };
         users[newUser.DiscordUser.Id] = newUser;
 
@@ -142,8 +130,8 @@ public class TestDiscordAdapter : DiscordAdapter
         return Task.FromResult<DiscordGuildMember?>(
             new DiscordGuildMember(
                 matchingUser.DiscordUser,
-                matchingUser.Membership!.GuildAvatar,
                 matchingUser.Membership!.GuildNick,
+                matchingUser.Membership!.GuildAvatar,
                 matchingUser.Membership!.GuildRoleIds));
     }
 

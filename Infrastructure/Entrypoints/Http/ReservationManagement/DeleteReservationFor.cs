@@ -12,7 +12,7 @@ public static class DeleteReservationFor
         [FromServices] ILoggedInUserAccessor loggedInUserAccessor,
         [FromServices] IReservationManagementService reservationManagementService)
     {
-        var user = await loggedInUserAccessor.Get();
+        var user = await loggedInUserAccessor.GetUser();
 
         await reservationManagementService.Delete(lanId, seatId, user);
 

@@ -22,7 +22,7 @@ const discordIcon = require("./Media/discord.svg").default
 
 const settings = ["Logg ut"]
 
-function ResponsiveAppBar() {
+function MainAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null)
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
   const { logout, loggedInUser } = useAuth()
@@ -215,4 +215,4 @@ function ResponsiveAppBar() {
   )
 }
 
-export default ResponsiveAppBar
+export default MainAppBar

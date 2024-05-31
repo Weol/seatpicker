@@ -15,7 +15,7 @@ public static class SignalRExtensions
     public static WebApplication UseSignalRAdapter(this WebApplication app)
     {
         app.MapHub<ReservationHub>("hubs/reservation");
-        
+         
         return app;
     }
 }

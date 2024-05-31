@@ -11,7 +11,7 @@ public static class DeleteLan
         ILoggedInUserAccessor loggedInUserAccessor,
         ILanManagementService lanManagementService)
     {
-        var user = await loggedInUserAccessor.Get();
+        var user = await loggedInUserAccessor.GetUser();
 
         await lanManagementService.Delete(lanId, user);
 

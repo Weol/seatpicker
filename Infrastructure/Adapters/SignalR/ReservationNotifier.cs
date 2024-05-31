@@ -19,7 +19,7 @@ public class ReservationNotifier : IReservationNotifier
     public async Task NotifySeatReservationChanged(Seat seat)
     {
         var user = seat.ReservedBy is null ? null : await userProvider.GetById(seat.ReservedBy);
-        await reservationHub.Clients.All.SendAsync("ReservationChanged", new Response(seat.Id, user is null ? null : User.FromDomainUser(user)));
+        await reservationHub.Clients.Group(seat.LanId.ToString()).SendAsync("ReservationChanged", new Response(seat.Id, user is null ? null : User.FromDomainUser(user)));
     }
     
     public record Response(Guid Id, User? ReservedBy);

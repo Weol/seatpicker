@@ -1,3 +1,4 @@
+using JasperFx.Core;
 using Marten;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Database;
@@ -19,35 +20,43 @@ public class GuildAdapter
 
     public async IAsyncEnumerable<Guild> GetGuilds()
     {
-        var discordGuilds = (await discordAdapter.GetGuilds())
-            .ToArray();
-
         using var reader = documentRepository.CreateGuildlessReader();
         var guildDocuments = reader.Query<GuildDocument>()
             .ToArray();
+        
+        var discordGuilds = await discordAdapter.GetGuilds();
 
-        foreach (var discordGuild in discordGuilds)
+        foreach (var guild in discordGuilds)
         {
-            var guildDocument = guildDocuments.FirstOrDefault(document => document.Id == discordGuild.Id);
+            var roles = await discordAdapter.GetGuildRoles(guild.Id);
+            
+            var guildDocument = guildDocuments.FirstOrDefault(document => document.Id == guild.Id);
 
             var hostnames = guildDocument?.Hostnames ?? Array.Empty<string>();
             var roleMappings = guildDocument?.RoleMappings ?? Array.Empty<GuildRoleMapping>();
 
-            yield return new Guild(discordGuild.Id,
-                discordGuild.Name,
-                discordGuild.Icon,
+            var mappings = roleMappings
+                .Select(mapping => (mapping.RoleId, mapping.Roles))
+                .ToArray();
+            
+            yield return new Guild(guild.Id,
+                guild.Name,
+                guild.Icon,
                 hostnames,
-                roleMappings.Select(mapping => (mapping.RoleId, mapping.Roles)).ToArray());
+                mappings,
+                roles.Select(GuildRoleFromDiscordGuildRole).ToArray());
         }
     }
-
+    
     public async Task<Guild?> GetGuild(string id)
     {
         var guild = (await discordAdapter.GetGuilds())
             .FirstOrDefault(guild => guild.Id == id);
 
+        var guildRoles = await discordAdapter.GetGuildRoles(id);
+        
         using var reader = documentRepository.CreateGuildlessReader();
-        var guildDocument = await reader.Get<GuildDocument>(id);
+        var guildDocument = await reader.Query<GuildDocument>(id);
 
         var hostnames = guildDocument?.Hostnames ?? Array.Empty<string>();
         var roleMappings = guildDocument?.RoleMappings.ToArray() ?? Array.Empty<GuildRoleMapping>();
@@ -58,59 +67,65 @@ public class GuildAdapter
             guild.Name,
             guild.Icon,
             hostnames,
-            roleMappings.Select(mapping => (mapping.RoleId, mapping.Roles)).ToArray()
+            roleMappings.Select(mapping => (mapping.RoleId, mapping.Roles)).ToArray(),
+            guildRoles.Select(GuildRoleFromDiscordGuildRole).ToArray()
         );
     }
+    
+    public async Task<(string RoleId, Role[] Roles)[]> GetGuildRoleMapping(string id)
+    {
+        using var reader = documentRepository.CreateGuildlessReader();
+        var guildDocument = await reader.Query<GuildDocument>(id);
 
-    public async Task<Guild?> GetGuildByHost(string host)
+        if (guildDocument is null) return Array.Empty<(string RoleId, Role[] Roles)>();
+
+        return guildDocument.RoleMappings
+            .Select(mapping => (mapping.RoleId, mapping.Roles))
+            .ToArray();
+    }
+
+    public async Task<string?> GetGuildIdByHost(string host)
     {
         using var reader = documentRepository.CreateGuildlessReader();
         var guildDocument = await reader.Query<GuildDocument>()
             .SingleOrDefaultAsync(document => document.Hostnames.Contains(host));
 
-        return guildDocument != null
-            ? (Guild)new(guildDocument.Id,
-                guildDocument.Name,
-                guildDocument.Icon,
-                guildDocument.Hostnames,
-                guildDocument.RoleMappings.Select(mapping => (mapping.RoleId, mapping.Roles)).ToArray())
-            : null;
+        if (guildDocument is null) return null;
+
+        return guildDocument.Id;
     }
 
-    public async Task<Guild> SaveGuild(Guild guild)
+    public async Task SaveGuild(Guild guild)
     {
-        var discordGuild = (await discordAdapter.GetGuilds())
-            .First(discordGuild => discordGuild.Id == guild.Id);
-
         using var reader = documentRepository.CreateGuildlessReader();
 
+        var distinctHosts = guild.Hostnames.Distinct().ToArray();
+        if (distinctHosts.Length != guild.Hostnames.Length)
+        {
+            throw new DuplicateHostsException(guild.Hostnames.Except(distinctHosts));
+        }
+        
         var duplicateHosts = reader.Query<GuildDocument>()
+            .Where(document => document.Id != guild.Id)
             .Where(document => document.Hostnames.Any(hostname => guild.Hostnames.Contains(hostname)))
             .AsEnumerable()
             .SelectMany(document => document.Hostnames.Intersect(guild.Hostnames))
             .ToArray();
-
+        
         if (duplicateHosts.Length > 0)
         {
             throw new DuplicateHostsException(duplicateHosts);
         }
 
-        var guildDocument = GuildDocument.FromGuild(guild) with
-        {
-            Name = discordGuild.Name,
-            Icon = discordGuild.Icon
-        };
+        var guildDocument = GuildDocument.FromGuild(guild);
 
         using var transaction = documentRepository.CreateGuildlessTransaction();
         transaction.Store(guildDocument);
         await transaction.Commit();
-
-        return new Guild(guildDocument.Id,
-            guildDocument.Name,
-            guildDocument.Icon,
-            guildDocument.Hostnames,
-            guildDocument.RoleMappings.Select(mapping => (mapping.RoleId, mapping.Roles)).ToArray());
     }
+
+    private static GuildRole GuildRoleFromDiscordGuildRole(DiscordGuildRole role) =>
+        new(role.Id, role.Name, role.Color, role.Icon);
 
     public class DuplicateHostsException : Exception
     {
@@ -124,20 +139,16 @@ public class GuildAdapter
 
     public record GuildDocument(
         string Id,
-        string Name,
-        string? Icon,
         string[] Hostnames,
         GuildRoleMapping[] RoleMappings) : IDocument
     {
         public static GuildDocument FromGuild(Guild guild)
         {
             var roleMappings = guild.RoleMapping
-                .Select(mapping => new GuildRoleMapping(mapping.RoleId, mapping.Roles))
+                .Select(mapping => new GuildRoleMapping(mapping.GuildRoleId, mapping.Roles))
                 .ToArray();
 
             return new GuildDocument(guild.Id,
-                guild.Name,
-                guild.Icon,
                 guild.Hostnames,
                 roleMappings);
         }

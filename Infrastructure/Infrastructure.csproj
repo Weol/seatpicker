@@ -8,8 +8,9 @@
         <LangVersion>11</LangVersion>
         <EnableNETAnalyzers>true</EnableNETAnalyzers>
         <AnalysisLevel>latest-Recommended</AnalysisLevel>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
-    <ItemGroup>
+    <ItemGroup>    
         <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.2" />
         <PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.5.1" />
         <PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.5.0" />
@@ -28,6 +29,7 @@
         </None>
         <None Remove=".gitignore" />
         <None Remove="Properties\launchSettings.json" />
+        <GlobalAnalyzerConfigFiles Include="../AnalyzerConfig" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\Application\Application.csproj" />

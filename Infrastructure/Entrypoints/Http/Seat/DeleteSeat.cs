@@ -12,7 +12,7 @@ public static class DeleteSeat
         [FromServices] ILoggedInUserAccessor loggedInUserAccessor,
         [FromServices] ISeatManagementService seatManagementService)
     {
-        var user = await loggedInUserAccessor.Get();
+        var user = await loggedInUserAccessor.GetUser();
 
         await seatManagementService.Remove(lanId, seatId, user);
 

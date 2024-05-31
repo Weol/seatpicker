@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using Shared;
 
 namespace Seatpicker.Application.Features;
@@ -12,7 +13,7 @@ public interface IDocumentRepository
 
 public interface IDocumentReader : IDisposable
 {
-    public Task<TDocument?> Get<TDocument>(string id)
+    public Task<TDocument?> Query<TDocument>(string id)
         where TDocument : IDocument;
 
     public IQueryable<TDocument> Query<TDocument>()

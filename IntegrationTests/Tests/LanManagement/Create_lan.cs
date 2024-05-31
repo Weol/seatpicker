@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
@@ -10,6 +11,7 @@ using Xunit.Abstractions;
 namespace Seatpicker.IntegrationTests.Tests.LanManagement;
 
 // ReSharper disable once InconsistentNaming
+[SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class Create_lan : IntegrationTestBase
 {
     public Create_lan(TestWebApplicationFactory factory, PostgresFixture databaseFixture, ITestOutputHelper testOutputHelper) : base(
@@ -19,23 +21,30 @@ public class Create_lan : IntegrationTestBase
     {
     }
 
-    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, CreateLan.Request request) =>
+    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, CreateLan.Request request) =>
         await client.PostAsJsonAsync($"guild/{guildId}/lan", request);
+
+    private static CreateLan.Request CreateLanRequest(string guildId)
+    {
+        return new CreateLan.Request(
+            RandomData.Faker.Hacker.Noun(),
+            RandomData.Aggregates.LanBackground());
+    }
 
     [Fact]
     public async Task succeeds_when_lan_is_valid()
     {
         // Arrange
-		var guildId = await CreateGuild();
-        var client = GetClient(guildId, Role.Admin);
+		var guild = await CreateGuild();
+        var client = GetClient(guild.Id, Role.Admin);
 
-        var request = Generator.CreateLanRequest(guildId);
+        var request = CreateLanRequest(guild.Id);
 
         // Act
-        var response = await MakeRequest(client, guildId, request);
+        var response = await MakeRequest(client, guild.Id, request);
 
         // Assert
-        var committedProjections = GetCommittedDocuments<ProjectedLan>(guildId);
+        var committedProjections = GetCommittedDocuments<ProjectedLan>(guild.Id);
 
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
@@ -52,27 +61,27 @@ public class Create_lan : IntegrationTestBase
     public async Task fails_when_background_is_not_svg()
     {
         // Arrange
-		var guildId = await CreateGuild();
-        var client = GetClient(guildId, Role.Admin);
+		var guild = await CreateGuild();
+        var client = GetClient(guild.Id, Role.Admin);
 
-        var request = Generator.CreateLanRequest(guildId) with { Background = new byte[] { 1, 2, 3, 4, 5, 6 } };
+        var request = CreateLanRequest(guild.Id) with { Background = new byte[] { 1, 2, 3, 4, 5, 6 } };
 
         // Act
-        var response = await MakeRequest(client, guildId, request);
+        var response = await MakeRequest(client, guild.Id, request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
-    
+
     [Fact]
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
         // Arrange
-		var guildId = await CreateGuild();
-        var client = GetClient(guildId);
+		var guild = await CreateGuild();
+        var client = GetClient(guild.Id);
 
         // Act
-        var response = await MakeRequest(client, guildId, Generator.CreateLanRequest(guildId));
+        var response = await MakeRequest(client, guild.Id, CreateLanRequest(guild.Id));
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);

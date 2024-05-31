@@ -27,25 +27,21 @@ import ListItemText from "@mui/material/ListItemText"
 import Typography from "@mui/material/Typography"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { useLans } from "../Adapters/Lans/AllLans"
+import { useGuild } from "../Adapters/Guilds/Guilds"
+import { useAllLans } from "../Adapters/Lans/AllLans"
 import { Guild, Lan } from "../Adapters/Models"
 import DiscordGuildAvatar from "../Components/DiscordAvatar"
 import Modal from "../Components/Modal"
 import { useAlerts } from "../Contexts/AlertContext"
 
 export default function GuildOverview(props: { guildId: string }) {
+  const guild = useGuild(props.guildId)
   const { alertLoading, alertSuccess } = useAlerts()
-  const { lans, updateLan, createLan, deleteLan, setActiveLan } = useLans(props.guildId)
-
-  const [selectedGuild, setSelectedGuild] = useState<Guild | null>(null)
+  const { lans, updateLan, createLan, deleteLan, setActiveLan } = useAllLans(props.guildId)
   const [previewBackground, setPreviewBackground] = useState<string | null>(null)
   const [editingLan, setEditingLan] = useState<Lan | null>(null)
   const [selectedLan, setSelectedLan] = useState<Lan | null>(null)
   const [showCreateLan, setShowCreateLan] = useState<boolean>(false)
-
-  function handleGuildSelect(guild: Guild) {
-    setSelectedGuild(guild)
-  }
 
   function handleEditLanClose() {
     setEditingLan(null)
@@ -83,13 +79,11 @@ export default function GuildOverview(props: { guildId: string }) {
   }
 
   async function handleCreateLanClick(title: string, background: string) {
-    if (selectedGuild) {
-      await alertLoading("Oppretter " + title, async () => {
-        await createLan(selectedGuild.id, title, background)
-      })
-      alertSuccess(title + " har blitt opprettet")
-      handleCreateLanClose()
-    }
+    await alertLoading("Oppretter " + title, async () => {
+      await createLan(props.guildId, title, background)
+    })
+    alertSuccess(title + " har blitt opprettet")
+    handleCreateLanClose()
   }
 
   function handleOnLanClick(lan: Lan) {
@@ -111,7 +105,7 @@ export default function GuildOverview(props: { guildId: string }) {
   return (
     <Stack spacing={2} justifyContent="center" alignItems="center">
       <Stack width={"100%"}>
-        <LanListHeader guild={selectedGuild} onCreateClick={handleLanCreateClick} />
+        <LanListHeader guild={guild} onCreateClick={handleLanCreateClick} />
         <Stack justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }} width="100%">
           {lans.map((lan) => (
             <LanDetails

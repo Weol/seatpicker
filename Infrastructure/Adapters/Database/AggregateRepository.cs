@@ -71,5 +71,6 @@ public class AggregateTransaction : IAggregateTransaction
     public void Dispose()
     {
         session.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

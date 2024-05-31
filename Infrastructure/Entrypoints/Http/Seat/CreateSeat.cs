@@ -13,7 +13,7 @@ public static class CreateSeat
         [FromServices] ILoggedInUserAccessor loggedInUserAccessor,
         [FromServices] ISeatManagementService seatManagementService)
     {
-        var user = await loggedInUserAccessor.Get();
+        var user = await loggedInUserAccessor.GetUser();
 
         var id = await seatManagementService.Create(lanId, request.Title, request.Bounds.ToDomainBounds(), user);
 

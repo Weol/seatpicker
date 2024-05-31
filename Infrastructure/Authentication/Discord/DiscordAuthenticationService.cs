@@ -79,8 +79,7 @@ public class DiscordAuthenticationService
 
         if (guildMember == null) return (new[] { Role.User }, discordUser.Username, discordUser.Avatar);
 
-        var guild = await guildAdapter.GetGuild(guildId);
-        var roleMappings = guild?.RoleMapping ?? Array.Empty<(string RoleId, Role[] Roles)>();
+        var roleMappings = await guildAdapter.GetGuildRoleMapping(guildId);
 
         var roles = GetGuildMemberRoles(roleMappings, guildMember).Append(Role.User).Distinct().ToArray();
 

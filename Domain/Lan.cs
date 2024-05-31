@@ -1,4 +1,5 @@
-﻿using Shared;
+﻿using System.Diagnostics.CodeAnalysis;
+using Shared;
 
 namespace Seatpicker.Domain;
 
@@ -8,6 +9,7 @@ namespace Seatpicker.Domain;
 // ReSharper disable UnusedParameter.Local
 #pragma warning disable CS1998 // Disable warning about async methods missing awaits
 #pragma warning disable CS8618 // Disable warning about uninitialized properties
+[SuppressMessage("Performance", "CA1822:Mark members as static")]
 public class Lan : AggregateBase
 {
     public Lan(Guid lanId, string guildId, string title, byte[] background, User initiator)

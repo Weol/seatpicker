@@ -14,7 +14,7 @@ public static class CreateReservationFor
         [FromServices] ILoggedInUserAccessor loggedInUserAccessor,
         [FromServices] IReservationManagementService reservationManagementService)
     {
-        var user = await loggedInUserAccessor.Get();
+        var user = await loggedInUserAccessor.GetUser();
 
         await reservationManagementService.Create(lanId, seatId, request.UserId, user);
 

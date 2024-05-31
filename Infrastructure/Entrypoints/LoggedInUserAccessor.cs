@@ -6,7 +6,7 @@ namespace Seatpicker.Infrastructure.Entrypoints;
 
 public interface ILoggedInUserAccessor
 {
-    Task<User> Get();
+    Task<User> GetUser();
 }
 
 public class LoggedInUserAccessor : ILoggedInUserAccessor
@@ -23,7 +23,7 @@ public class LoggedInUserAccessor : ILoggedInUserAccessor
     private HttpContext HttpContext =>
         httpContextAccessor.HttpContext ?? throw new HttpContextIsNullException();
 
-    public async Task<User> Get()
+    public async Task<User> GetUser()
     {
         var id  = HttpContext.User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
 

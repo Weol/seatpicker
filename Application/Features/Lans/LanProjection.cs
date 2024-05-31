@@ -1,10 +1,12 @@
-﻿using Marten.Events;
+﻿using System.Diagnostics.CodeAnalysis;
+using Marten.Events;
 using Marten.Events.Aggregation;
 using Seatpicker.Domain;
 using Shared;
 
 namespace Seatpicker.Application.Features.Lans;
 
+[SuppressMessage("Performance", "CA1822:Mark members as static")]
 public class LanProjection : SingleStreamProjection<ProjectedLan>
 {
     public LanProjection()

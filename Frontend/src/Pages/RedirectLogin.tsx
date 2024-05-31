@@ -20,7 +20,7 @@ export default function RedirectLogin() {
     }
   }, [])
 
-  const welcome = (user: User) => {
+  const Welcome = (user: User) => {
     return (
       <Stack spacing={1} justifyContent="center" alignItems="center">
         <Typography variant="h5" component="h1" gutterBottom>
@@ -39,7 +39,7 @@ export default function RedirectLogin() {
     )
   }
 
-  const loading = () => {
+  const Loading = () => {
     return (
       <Stack>
         <CircularProgress />
@@ -49,7 +49,7 @@ export default function RedirectLogin() {
 
   return (
     <Stack sx={{ my: 4, alignItems: "center" }}>
-      {loggedInUser ? welcome(loggedInUser) : loading()}
+      {loggedInUser ? Welcome(loggedInUser) : Loading()}
     </Stack>
   )
 }

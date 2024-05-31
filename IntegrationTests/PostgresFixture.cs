@@ -13,7 +13,7 @@ public class PostgresFixture : IAsyncLifetime
 {
     private PostgreSqlContainer? container;
 
-    public PostgreSqlContainer Container => container ?? throw new NullReferenceException();
+    public PostgreSqlContainer Container => container ?? throw new Exception();
 
     public async Task InitializeAsync()
     {

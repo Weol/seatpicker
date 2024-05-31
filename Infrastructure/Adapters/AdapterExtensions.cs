@@ -46,8 +46,8 @@ public static class AdapterExtensions
         var port = section.GetValue<string>("Port");
 
         // Values from keyvault
-        var password = configuration["DatabaseAdminPassword"] ?? throw new NullReferenceException();
-        var user = configuration["DatabaseAdminUsername"] ?? throw new NullReferenceException();
+        var password = configuration["DatabaseAdminPassword"] ?? throw new ArgumentException("Database admin password cannot be null");
+        var user = configuration["DatabaseAdminUsername"] ?? throw new ArgumentException("Database admin username cannot be null");
 
         options.ConnectionString =
             $"Server={host};Database={name};Port={port};User Id={user};Password={password};Ssl Mode=Require;Trust Server Certificate=true;";
@@ -58,8 +58,8 @@ public static class AdapterExtensions
         configuration.GetSection("Discord").Bind(options);
 
         // Configuration values from key vault
-        options.ClientId = configuration["DiscordClientId"] ?? throw new NullReferenceException();
-        options.ClientSecret = configuration["DiscordClientSecret"] ?? throw new NullReferenceException();
-        options.BotToken = configuration["DiscordBotToken"] ?? throw new NullReferenceException();
+        options.ClientId = configuration["DiscordClientId"] ?? throw new ArgumentException("Discord client id cannot be null");
+        options.ClientSecret = configuration["DiscordClientSecret"] ?? throw new ArgumentException("Discord client secret cannot be null");
+        options.BotToken = configuration["DiscordBotToken"] ?? throw new ArgumentException("Discord bot token cannot be null");
     }
 }

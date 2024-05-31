@@ -28,19 +28,5 @@ public static class SeatGenerator
 
 public static class LanGenerator
 {
-    public static byte[] CreateValidBackround()
-    {
-        var svg = $"<svg>{Random.Shared.NextInt64().ToString()}</svg>";
-        return Encoding.UTF8.GetBytes(svg);
-    }
 
-    public static Lan Create(string guildId, User initiator, Guid? id = null, string? title = null, byte[]? background = null)
-    {
-        return new Lan(
-            id ?? Guid.NewGuid(),
-            guildId,
-            title ?? "Test title",
-            background ?? CreateValidBackround(),
-            initiator);
-    }
 }

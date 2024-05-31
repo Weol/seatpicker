@@ -8,11 +8,6 @@ export default async function ApiRequest(
 ): Promise<Response> {
   const headers = new Headers()
 
-  const tenantStorage = localStorage.getItem("activeGuildId")
-  if (tenantStorage == null) throw "tenant is null"
-  const tenant = JSON.parse(tenantStorage) as string
-  headers.append("Tenant-Id", tenant)
-
   const token = await AuthAdapter.GetToken()
   if (token != null) {
     headers.append("Authorization", "Bearer " + token)
@@ -50,5 +45,6 @@ export default async function ApiRequest(
   if (response.status > 499) {
     throw response
   }
+
   return response
 }

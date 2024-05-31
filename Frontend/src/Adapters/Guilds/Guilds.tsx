@@ -1,4 +1,5 @@
 import { atom, useRecoilValue } from "recoil"
+import { NotFoundError } from "../AdapterError"
 import ApiRequest from "../ApiRequest"
 import { Guild } from "../Models"
 
@@ -22,7 +23,8 @@ export function useGuilds() {
 
 export function useGuild(guildId: string) {
   const guilds = useRecoilValue(allGuildsAtom)
-  const guild = guilds.find((guild) => guild.id == guildId) ?? null
+  const guild = guilds.find((guild) => guild.id == guildId)
+  if (!guild) throw new NotFoundError()
 
   return guild
 }
