@@ -4,15 +4,9 @@ using Xunit.Abstractions;
 
 namespace Seatpicker.IntegrationTests;
 
-internal sealed class XUnitLoggerProvider : ILoggerProvider
+internal sealed class XUnitLoggerProvider(ITestOutputHelper testOutputHelper) : ILoggerProvider
 {
-    private readonly ITestOutputHelper testOutputHelper;
     private readonly LoggerExternalScopeProvider scopeProvider = new();
-
-    public XUnitLoggerProvider(ITestOutputHelper testOutputHelper)
-    {
-        this.testOutputHelper = testOutputHelper;
-    }
 
     public ILogger CreateLogger(string categoryName)
     {
@@ -24,35 +18,21 @@ internal sealed class XUnitLoggerProvider : ILoggerProvider
     }
 }
 
-internal sealed class XUnitLogger<T> : XUnitLogger, ILogger<T>
-{
-    public XUnitLogger(ITestOutputHelper testOutputHelper, LoggerExternalScopeProvider scopeProvider)
-        : base(testOutputHelper, scopeProvider, typeof(T).FullName!)
-    {
-    }
-}
+internal sealed class XUnitLogger<T>(ITestOutputHelper testOutputHelper, LoggerExternalScopeProvider scopeProvider)
+    : XUnitLogger(testOutputHelper, scopeProvider, typeof(T).FullName!), ILogger<T>;
 
-internal class XUnitLogger : ILogger
+internal class XUnitLogger(
+    ITestOutputHelper testOutputHelper,
+    LoggerExternalScopeProvider scopeProvider,
+    string categoryName) : ILogger
 {
-    private readonly ITestOutputHelper testOutputHelper;
-    private readonly string categoryName;
-    private readonly LoggerExternalScopeProvider scopeProvider;
+    private readonly string categoryName = categoryName;
 
     public static ILogger CreateLogger(ITestOutputHelper testOutputHelper) =>
         new XUnitLogger(testOutputHelper, new LoggerExternalScopeProvider(), "");
 
     public static ILogger<T> CreateLogger<T>(ITestOutputHelper testOutputHelper) =>
         new XUnitLogger<T>(testOutputHelper, new LoggerExternalScopeProvider());
-
-    public XUnitLogger(
-        ITestOutputHelper testOutputHelper,
-        LoggerExternalScopeProvider scopeProvider,
-        string categoryName)
-    {
-        this.testOutputHelper = testOutputHelper;
-        this.scopeProvider = scopeProvider;
-        this.categoryName = categoryName;
-    }
 
     public bool IsEnabled(LogLevel logLevel) => logLevel != LogLevel.None;
 

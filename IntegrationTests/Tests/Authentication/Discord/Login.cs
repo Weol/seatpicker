@@ -5,17 +5,11 @@ using Xunit.Abstractions;
 namespace Seatpicker.IntegrationTests.Tests.Authentication.Discord;
 
 // ReSharper disable once InconsistentNaming
-public class Login : LoginAndRenewBase
+public class Login(
+    TestWebApplicationFactory factory,
+    PostgresFixture databaseFixture,
+    ITestOutputHelper testOutputHelper) : LoginAndRenewBase(factory, databaseFixture, testOutputHelper)
 {
-    public Login(TestWebApplicationFactory factory,
-        PostgresFixture databaseFixture,
-        ITestOutputHelper testOutputHelper) : base(
-        factory,
-        databaseFixture,
-        testOutputHelper)
-    {
-    }
-
     protected override Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId)
     {
         return client.PostAsync(

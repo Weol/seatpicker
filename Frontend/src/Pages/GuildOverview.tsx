@@ -12,6 +12,7 @@ import {
   ListItemSecondaryAction,
   Paper,
   Stack,
+  styled,
   Switch,
   Table,
   TableBody,
@@ -19,7 +20,6 @@ import {
   TableContainer,
   TableRow,
   TextField,
-  styled,
 } from "@mui/material"
 import Divider from "@mui/material/Divider"
 import ListItemIcon from "@mui/material/ListItemIcon"
@@ -27,17 +27,15 @@ import ListItemText from "@mui/material/ListItemText"
 import Typography from "@mui/material/Typography"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { useGuild } from "../Adapters/Guilds/Guilds"
-import { useAllLans } from "../Adapters/Lans/AllLans"
+import { useLans } from "../Adapters/Lans/AllLans"
 import { Guild, Lan } from "../Adapters/Models"
 import DiscordGuildAvatar from "../Components/DiscordAvatar"
 import Modal from "../Components/Modal"
 import { useAlerts } from "../Contexts/AlertContext"
 
-export default function GuildOverview(props: { guildId: string }) {
-  const guild = useGuild(props.guildId)
+export default function GuildOverview(props: { guild: Guild }) {
   const { alertLoading, alertSuccess } = useAlerts()
-  const { lans, updateLan, createLan, deleteLan, setActiveLan } = useAllLans(props.guildId)
+  const { lans, updateLan, createLan, deleteLan, setActiveLan } = useLans(props.guild.id)
   const [previewBackground, setPreviewBackground] = useState<string | null>(null)
   const [editingLan, setEditingLan] = useState<Lan | null>(null)
   const [selectedLan, setSelectedLan] = useState<Lan | null>(null)
@@ -80,7 +78,7 @@ export default function GuildOverview(props: { guildId: string }) {
 
   async function handleCreateLanClick(title: string, background: string) {
     await alertLoading("Oppretter " + title, async () => {
-      await createLan(props.guildId, title, background)
+      await createLan(props.guild.id, title, background)
     })
     alertSuccess(title + " har blitt opprettet")
     handleCreateLanClose()
@@ -105,7 +103,7 @@ export default function GuildOverview(props: { guildId: string }) {
   return (
     <Stack spacing={2} justifyContent="center" alignItems="center">
       <Stack width={"100%"}>
-        <LanListHeader guild={guild} onCreateClick={handleLanCreateClick} />
+        <LanListHeader guild={props.guild} onCreateClick={handleLanCreateClick} />
         <Stack justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }} width="100%">
           {lans.map((lan) => (
             <LanDetails

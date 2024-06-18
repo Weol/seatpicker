@@ -11,9 +11,8 @@ import Tooltip from "@mui/material/Tooltip"
 import Typography from "@mui/material/Typography"
 import * as React from "react"
 import { useNavigate } from "react-router-dom"
-import { useActiveGuildId } from "./Adapters/ActiveGuild"
 import { useAuth } from "./Adapters/AuthAdapter"
-import { Role } from "./Adapters/Models"
+import { ActiveGuild, Role } from "./Adapters/Models"
 import { RedirectToDiscordLogin } from "./Adapters/RedirectToDiscordLogin"
 import { DiscordUserAvatar } from "./Components/DiscordAvatar"
 
@@ -22,11 +21,10 @@ const discordIcon = require("./Media/discord.svg").default
 
 const settings = ["Logg ut"]
 
-function MainAppBar() {
+export default function MainAppBar(props: { activeGuild: ActiveGuild }) {
+  const { logout, loggedInUser } = useAuth()
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null)
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
-  const { logout, loggedInUser } = useAuth()
-  const activeGuildId = useActiveGuildId()
   const navigate = useNavigate()
 
   const getPages = () => {
@@ -84,9 +82,7 @@ function MainAppBar() {
               textDecoration: "none",
               cursor: "pointer",
             }}
-          >
-            SALTENLAN
-          </Typography>
+          ></Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
             <IconButton
@@ -214,5 +210,3 @@ function MainAppBar() {
     </AppBar>
   )
 }
-
-export default MainAppBar

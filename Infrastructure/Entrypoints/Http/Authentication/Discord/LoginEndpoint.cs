@@ -8,7 +8,6 @@ public static class LoginEndpoint
 {
     public static async Task<IResult> Login(
         [FromServices] DiscordAuthenticationService discordAuthenticationService,
-        [FromServices] GuildIdProvider guildIdProvider,
         [FromBody] Request request)
     {
         var (jwtToken, expiresAt, discordToken)

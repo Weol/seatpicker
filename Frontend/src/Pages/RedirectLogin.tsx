@@ -3,20 +3,18 @@ import Button from "@mui/material/Button"
 import Typography from "@mui/material/Typography"
 import { useEffect } from "react"
 import { Link, useSearchParams } from "react-router-dom"
-import { useActiveGuildId } from "../Adapters/ActiveGuild"
 import { useAuth } from "../Adapters/AuthAdapter"
-import { User } from "../Adapters/Models"
+import { ActiveGuild, User } from "../Adapters/Models"
 import { DiscordUserAvatar } from "../Components/DiscordAvatar"
 
-export default function RedirectLogin() {
-  const activeGuildId = useActiveGuildId()
+export default function RedirectLogin(props: { activeGuild: ActiveGuild }) {
   const { login, loggedInUser } = useAuth()
   const [searchParams] = useSearchParams()
 
   useEffect(() => {
     const code = searchParams.get("code")
     if (code) {
-      login(code, activeGuildId)
+      login(code, props.activeGuild.guildId)
     }
   }, [])
 

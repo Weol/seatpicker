@@ -12,11 +12,11 @@ namespace Seatpicker.Domain;
 [SuppressMessage("Performance", "CA1822:Mark members as static")]
 public class Lan : AggregateBase
 {
-    public Lan(Guid lanId, string guildId, string title, byte[] background, User initiator)
+    public Lan(string lanId, string title, byte[] background, User initiator)
     {
         if (title.Length <= 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
 
-        var evt = new LanCreated(lanId, guildId, title, background, initiator.Id);
+        var evt = new LanCreated(lanId, title, background, initiator.Id);
 
         Raise(evt);
         Apply(evt);
@@ -29,8 +29,6 @@ public class Lan : AggregateBase
     }
 
     public string Title { get; private set; }
-
-    public string GuildId { get; private set; }
 
     public byte[] Background { get; private set; }
 
@@ -67,31 +65,30 @@ public class Lan : AggregateBase
         Apply(evt);
     }
 
-    public void Apply(LanCreated evt)
+    private void Apply(LanCreated evt)
     {
         Id = evt.Id;
         Title = evt.Title;
         Background = evt.Background;
-        GuildId = evt.GuildId;
         Active = false;
     }
 
-    public void Apply(LanTitleChanged evt)
+    private void Apply(LanTitleChanged evt)
     {
         Title = evt.Title;
     }
 
-    public void Apply(LanBackgroundChanged evt)
+    private void Apply(LanBackgroundChanged evt)
     {
         Background = evt.Background;
     }
 
-    public void Apply(LanActiveChanged evt)
+    private void Apply(LanActiveChanged evt)
     {
         Active = evt.Active;
     }
 
-    public void Apply(LanArchived evt)
+    private void Apply(LanArchived evt)
     {
     }
 }
@@ -99,7 +96,7 @@ public class Lan : AggregateBase
 /**
  * Events
  */
-public record LanCreated(Guid Id, string GuildId, string Title, byte[] Background, string CreatedBy) : IEvent;
+public record LanCreated(string Id, string Title, byte[] Background, string CreatedBy) : IEvent;
 
 public record LanTitleChanged(string Title, string ChangedBy) : IEvent;
 

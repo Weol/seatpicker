@@ -1,28 +1,20 @@
-﻿using Seatpicker.Domain;
+﻿using Marten;
+using Seatpicker.Application.Features;
+using Seatpicker.Application.Features.Guilds;
+using Seatpicker.Domain;
+using Seatpicker.Infrastructure.Adapters.Database;
 using Seatpicker.Infrastructure.Adapters.Discord;
-using Seatpicker.Infrastructure.Adapters.Guilds;
 
 namespace Seatpicker.Infrastructure.Authentication.Discord;
 
-public class DiscordAuthenticationService
+public class DiscordAuthenticationService(
+    DiscordAdapter discordAdapter,
+    AuthenticationService authenticationService,
+    IDocumentStore documentStore)
 {
-    private readonly DiscordAdapter discordAdapter;
-    private readonly AuthenticationService authenticationService;
-    private readonly GuildAdapter guildAdapter;
-
-    public DiscordAuthenticationService(
-        DiscordAdapter discordAdapter,
-        AuthenticationService authenticationService,
-        GuildAdapter guildAdapter)
-    {
-        this.discordAdapter = discordAdapter;
-        this.authenticationService = authenticationService;
-        this.guildAdapter = guildAdapter;
-    }
-
     public async Task<(string JwtToken, DateTimeOffset ExpiresAt, AuthenticationToken DiscordToken)> Renew(
         string refreshToken,
-        string guildId)
+        string? guildId)
     {
         var accessToken = await discordAdapter.RefreshAccessToken(refreshToken);
         var discordUser = await discordAdapter.Lookup(accessToken.AccessToken);
@@ -79,14 +71,20 @@ public class DiscordAuthenticationService
 
         if (guildMember == null) return (new[] { Role.User }, discordUser.Username, discordUser.Avatar);
 
-        var roleMappings = await guildAdapter.GetGuildRoleMapping(guildId);
+        await using var querySession = documentStore.QuerySession();
+        var guild = await querySession.LoadAsync<Guild>(guildId);
 
-        var roles = GetGuildMemberRoles(roleMappings, guildMember).Append(Role.User).Distinct().ToArray();
+        if (guild is null) throw new DiscordGuildNotFoundException { GuildId = guildId };
+
+        var roles = GetGuildMemberRoles(guild.RoleMapping, guildMember)
+            .Append(Role.User)
+            .Distinct()
+            .ToArray();
 
         return (roles, guildMember.Nick, guildMember.Avatar);
     }
 
-    private static IEnumerable<Role> GetGuildMemberRoles((string RoleId, Role[] Roles)[] roleMapping,
+    private static IEnumerable<Role> GetGuildMemberRoles(GuildRoleMapping[] roleMapping,
         DiscordGuildMember discordGuildMember)
     {
         yield return Role.User;
@@ -103,5 +101,10 @@ public class DiscordAuthenticationService
                 }
             }
         }
+    }
+
+    private class DiscordGuildNotFoundException : Exception
+    {
+        public string GuildId { get; init; }
     }
 }

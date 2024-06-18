@@ -12,7 +12,7 @@ namespace Seatpicker.Domain;
 [SuppressMessage("Performance", "CA1822:Mark members as static")]
 public class Seat : AggregateBase
 {
-    public Guid LanId { get; private set; }
+    public string LanId { get; private set; }
 
     public string Title { get; private set; }
 
@@ -20,7 +20,7 @@ public class Seat : AggregateBase
 
     public string? ReservedBy { get; private set; }
 
-    public Seat(Guid id, Lan lan, string title, Bounds bounds, User initiator)
+    public Seat(string id, Lan lan, string title, Bounds bounds, User initiator)
     {
         if (title.Length == 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
 
@@ -226,42 +226,40 @@ public class Bounds
 /**
  * Events
  */
-public record SeatCreated(Guid Id, Guid LanId, string Title, Bounds Bounds, string CreatedBy) : IEvent;
+public interface ISeatEvent
+{
+    string LanId { get; }
+}
 
-public record SeatTitleChanged(Guid LanId, string Title, string ChangedBy) : IEvent;
+public record SeatCreated(string Id, string LanId, string Title, Bounds Bounds, string CreatedBy) : ISeatEvent;
 
-public record SeatBoundsChanged(Guid LanId, Bounds Bounds, string ChangedBy) : IEvent;
+public record SeatTitleChanged(string LanId, string Title, string ChangedBy) : ISeatEvent;
 
-public record SeatReservationMade(Guid LanId, string UserId) : IEvent;
+public record SeatBoundsChanged(string LanId, Bounds Bounds, string ChangedBy) : ISeatEvent;
 
-public record SeatReservationRemoved(Guid LanId, string UserId) : IEvent;
+public record SeatReservationMade(string LanId, string UserId) : ISeatEvent;
 
-public record SeatReservationMoved(Guid LanId, string UserId, Guid FromSeatId, Guid ToSeatId) : IEvent;
+public record SeatReservationRemoved(string LanId, string UserId) : ISeatEvent;
 
-public record SeatReservationMadeFor(Guid LanId, string UserId, string MadeBy) : IEvent;
+public record SeatReservationMoved(string LanId, string UserId, string FromSeatId, string ToSeatId) : ISeatEvent;
 
-public record SeatReservationRemovedFor(Guid LanId, string UserId, string RemovedBy) : IEvent;
+public record SeatReservationMadeFor(string LanId, string UserId, string MadeBy) : ISeatEvent;
 
-public record SeatReservationMovedFor(Guid LanId, string UserId, Guid FromSeatId, Guid ToSeatId, string MovedBy) : IEvent;
+public record SeatReservationRemovedFor(string LanId, string UserId, string RemovedBy) : ISeatEvent;
 
-public record SeatArchived(Guid LanId, string ArchivedBy) : IEvent;
+public record SeatReservationMovedFor(string LanId, string UserId, string FromSeatId, string ToSeatId, string MovedBy) : ISeatEvent;
+
+public record SeatArchived(string LanId, string ArchivedBy) : ISeatEvent;
 
 /**
  * Exceptions
  */
-public class SeatReservationConflictException : DomainException
+[method: SetsRequiredMembers]
+public class SeatReservationConflictException(Seat seat, string reservedUser, string attemptedUser) : DomainException
 {
-    public required Seat Seat { get; init; }
-    public required string ReservedUser { get; init; }
-    public required string AttemptedUser { get; init; }
-
-    [SetsRequiredMembers]
-    public SeatReservationConflictException(Seat seat, string reservedUser, string attemptedUser)
-    {
-        ReservedUser = reservedUser;
-        AttemptedUser = attemptedUser;
-        Seat = seat;
-    }
+    public required Seat Seat { get; init; } = seat;
+    public required string ReservedUser { get; init; } = reservedUser;
+    public required string AttemptedUser { get; init; } = attemptedUser;
 
     protected override string ErrorMessage =>
         $"{Seat} is reserved by {ReservedUser}, cannot be changed by {AttemptedUser} ";

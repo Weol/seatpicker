@@ -4,37 +4,25 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using Seatpicker.Application.Features.Guilds;
 
 // ReSharper disable NotAccessedPositionalProperty.Global
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
 namespace Seatpicker.Infrastructure.Adapters.Discord;
 
-public class DiscordAdapter
+public class DiscordAdapter(
+    HttpClient httpClient,
+    IOptions<DiscordAdapterOptions> options,
+    JsonSerializerOptions jsonSerializerOptions,
+    ILogger<DiscordAdapter> logger) : IDiscordGuildProvider
 {
-    private readonly HttpClient httpClient;
-    private readonly JsonSerializerOptions jsonSerializerOptions;
-    private readonly DiscordAdapterOptions options;
-    private readonly ILogger<DiscordAdapter> logger;
-    private readonly IMemoryCache memoryCache;
-
-    public DiscordAdapter(
-        HttpClient httpClient,
-        IOptions<DiscordAdapterOptions> options,
-        JsonSerializerOptions jsonSerializerOptions,
-        ILogger<DiscordAdapter> logger,
-        IMemoryCache memoryCache)
-    {
-        this.httpClient = httpClient;
-        this.jsonSerializerOptions = jsonSerializerOptions;
-        this.options = options.Value;
-        this.logger = logger;
-        this.memoryCache = memoryCache;
-    }
+    private readonly DiscordAdapterOptions options = options.Value;
 
     public virtual async Task<DiscordAccessToken> GetAccessToken(string discordToken, string redirectUrl)
     {
-        logger.LogInformation("Getting access token using code {Code} and redirect uri {RedirectUri}",
+        logger.LogInformation(
+            "Getting access token using code {Code} and redirect uri {RedirectUri}",
             discordToken,
             redirectUrl);
         var response = await httpClient.PostAsync(
@@ -82,10 +70,7 @@ public class DiscordAdapter
         using var requestMessage = new HttpRequestMessage(HttpMethod.Put, $"guilds/{guildId}/members/{memberId}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
 
-        var json = JsonSerializer.Serialize(new
-        {
-            access_token = accessToken
-        });
+        var json = JsonSerializer.Serialize(new { access_token = accessToken, });
         requestMessage.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
         var response = await httpClient.SendAsync(requestMessage);
@@ -124,50 +109,32 @@ public class DiscordAdapter
         }
     }
 
-    public virtual async Task<IEnumerable<DiscordGuildRole>> GetGuildRoles(string guildId)
-    {
-        return await MakeCachedRequest($"guild_roles_{guildId}",
-            async () =>
-            {
-                using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"guilds/{guildId}/roles");
-
-                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
-
-                var response = await httpClient.SendAsync(requestMessage);
-                return await DeserializeContent<DiscordGuildRole[]>(response);
-            });
-    }
-
     public virtual async Task<IEnumerable<DiscordGuild>> GetGuilds()
     {
-        return await MakeCachedRequest("get_bot_guilds",
-            async () =>
-            {
-                using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "users/@me/guilds");
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "users/@me/guilds");
 
-                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
 
-                var response = await httpClient.SendAsync(requestMessage);
-                return await DeserializeContent<IEnumerable<DiscordGuild>>(response);
-            });
+        var response = await httpClient.SendAsync(requestMessage);
+        return await DeserializeContent<IEnumerable<DiscordGuild>>(response);
     }
 
-    private async Task<TResponse> MakeCachedRequest<TResponse>(string cacheKey,
-        Func<Task<TResponse>> requestFunc)
-        where TResponse : notnull
+    public async IAsyncEnumerable<Application.Features.Guilds.DiscordGuild> GetAll()
     {
-        if (memoryCache.TryGetValue(cacheKey, out TResponse? cachedResponse))
-        {
-            if (cachedResponse is not null)
-            {
-                logger.LogInformation("Returning cached payload for cache key {CacheKey}", cacheKey);
-                return cachedResponse;
-            }
-        }
+        var discordGuilds = await GetGuilds();
 
-        var response = await requestFunc();
-        memoryCache.Set(cacheKey, response, TimeSpan.FromMinutes(5));
-        return response;
+        foreach (var discordGuild in discordGuilds)
+        {
+            var roles = discordGuild.Roles.Select(
+                    role => new Application.Features.Guilds.DiscordGuildRole(role.Id, role.Name, role.Color, role.Icon))
+                .ToArray();
+
+            yield return new Application.Features.Guilds.DiscordGuild(
+                discordGuild.Id,
+                discordGuild.Name,
+                discordGuild.Icon,
+                roles);
+        }
     }
 
     private async Task<TModel> DeserializeContent<TModel>(HttpResponseMessage response)
@@ -183,7 +150,7 @@ public class DiscordAdapter
                 body);
 
             return JsonSerializer.Deserialize<TModel>(body, jsonSerializerOptions) ??
-                throw new JsonException($"Could not deserialize Discord response to {nameof(TModel)}");
+                   throw new JsonException($"Could not deserialize Discord response to {nameof(TModel)}");
         }
 
         logger.LogError(
@@ -192,8 +159,7 @@ public class DiscordAdapter
 
         throw new DiscordException($"Non-successful response code from Discord {response.StatusCode}")
         {
-            StatusCode = response.StatusCode,
-            Body = body,
+            StatusCode = response.StatusCode, Body = body,
         };
     }
 
@@ -214,14 +180,14 @@ public class DiscordAdapter
             resetAfter?.FirstOrDefault(),
             bucket?.FirstOrDefault(),
             global?.FirstOrDefault(),
-            scope?.FirstOrDefault()
-        );
+            scope?.FirstOrDefault());
 
         logger.LogInformation("Discord rate limit: {@RateLimit}", rateLimit);
     }
 }
 
-public record DiscordRateLimit(string? Limit,
+public record DiscordRateLimit(
+    string? Limit,
     string? Remaining,
     string? Reset,
     string? ResetAfter,

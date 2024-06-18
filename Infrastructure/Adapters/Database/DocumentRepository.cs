@@ -10,36 +10,30 @@ public class DocumentRepository : IDocumentRepository
 {
     private readonly IDocumentStore store;
     private readonly ILogger<DocumentRepository> logger;
-    private readonly GuildIdProvider guildIdProvider;
 
-    public DocumentRepository(IDocumentStore store, GuildIdProvider guildIdProvider, ILogger<DocumentRepository> logger)
+    public DocumentRepository(IDocumentStore store, ILogger<DocumentRepository> logger)
     {
         this.store = store;
-        this.guildIdProvider = guildIdProvider;
         this.logger = logger;
     }
 
-    public IDocumentTransaction CreateTransaction(string? guildId = null)
+    public IDocumentTransaction CreateTransaction(string guildId)
     {
-        guildId ??= guildIdProvider.GetGuildId();
-
         logger.LogInformation("Creating document transaction for tenant {TenantId}", guildId);
 
         var session = store.LightweightSession(guildId);
         return new DocumentTransaction(session);
     }
 
-    public virtual IDocumentReader CreateReader(string? guildId = null)
+    public virtual IDocumentReader CreateReader(string guildId)
     {
-        guildId ??= guildIdProvider.GetGuildId();
-
         logger.LogInformation("Creating document reader for tenant {TenantId}", guildId);
 
         var session = store.QuerySession(guildId);
         return new DocumentReader(session);
     }
-    
-    public virtual IDocumentTransaction CreateGuildlessTransaction()
+
+    public virtual IGuildlessDocumentTransaction CreateGuildlessTransaction()
     {
         logger.LogInformation("Creating document transaction for default tenant");
 
@@ -47,7 +41,7 @@ public class DocumentRepository : IDocumentRepository
         return new DocumentTransaction(session);
     }
 
-    public IDocumentReader CreateGuildlessReader()
+    public IGuildlessDocumentReader CreateGuildlessReader()
     {
         logger.LogInformation("Creating document reader for default tenant");
 
@@ -56,7 +50,7 @@ public class DocumentRepository : IDocumentRepository
     }
 }
 
-public class DocumentTransaction : IDocumentTransaction
+public class DocumentTransaction : IGuildlessDocumentTransaction, IDisposable
 {
     private readonly IDocumentSession session;
     private readonly DocumentReader reader;
@@ -78,7 +72,7 @@ public class DocumentTransaction : IDocumentTransaction
     {
         session.Delete<TDocument>(id);
     }
-    
+
     public void DeleteWhere<TDocument>(Expression<Func<TDocument,bool>> where)
         where TDocument : IDocument
     {
@@ -110,7 +104,7 @@ public class DocumentTransaction : IDocumentTransaction
     }
 }
 
-public class DocumentReader : IDocumentReader
+public class DocumentReader : IGuildlessDocumentReader
 {
     private readonly IQuerySession session;
 

@@ -1,10 +1,10 @@
 ﻿using System.Reflection;
 using JasperFx.CodeGeneration;
 using Marten;
+using Marten.Events;
 using Marten.Storage;
 using Microsoft.Extensions.Options;
-using Seatpicker.Application.Features;
-using Seatpicker.Infrastructure.Adapters.Guilds;
+using Seatpicker.Application.Features.Guilds;
 using Shared;
 using Weasel.Core;
 
@@ -18,10 +18,6 @@ internal static class DatabaseExtensions
     {
         services.AddValidatedOptions(configureAction);
 
-        services.AddSingleton<IAggregateRepository, AggregateRepository>()
-            .AddPortMapping<IDocumentRepository, DocumentRepository>()
-            .AddSingleton<GuildIdProvider>();
-
         services.AddMarten(
                 provider =>
                 {
@@ -32,7 +28,7 @@ internal static class DatabaseExtensions
                 })
             .InitializeWith()
             .OptimizeArtifactWorkflow();
-        
+
         return services;
     }
 
@@ -41,6 +37,7 @@ internal static class DatabaseExtensions
         options.Connection(connectionString);
         options.Policies.AllDocumentsAreMultiTenanted();
         options.Events.TenancyStyle = TenancyStyle.Conjoined;
+        options.Events.StreamIdentity = StreamIdentity.AsString;
 
         RegisterAllDocuments(options);
         RegisterAllEvents(options);
@@ -67,12 +64,12 @@ internal static class DatabaseExtensions
             options.RegisterDocumentType(document);
         }
 
-        options.Schema.For<GuildAdapter.GuildDocument>().SingleTenanted();
+        options.Schema.For<Guild>().SingleTenanted();
     }
 
     private static void RegisterAllEvents(StoreOptions options)
     {
-        var type = typeof(IEvent);
+        var type = typeof(Shared.IEvent);
         var assembly = typeof(DatabaseExtensions).Assembly;
         var events = assembly.GetReferencedAssemblies()
             .Select(Assembly.Load)

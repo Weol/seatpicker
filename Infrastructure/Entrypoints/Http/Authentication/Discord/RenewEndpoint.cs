@@ -8,11 +8,8 @@ public static class RenewEndpoint
 {
     public static async Task<IResult> Renew(
         [FromServices] DiscordAuthenticationService discordAuthenticationService,
-        [FromServices] GuildIdProvider guildIdProvider,
         [FromBody] Request request)
     {
-        guildIdProvider.SetGuildId(request.GuildId);
-        
         var (jwtToken, expiresAt, discordToken)
             = await discordAuthenticationService.Renew(request.RefreshToken, request.GuildId);
 

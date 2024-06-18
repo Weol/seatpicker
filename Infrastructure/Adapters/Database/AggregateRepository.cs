@@ -4,25 +4,22 @@ using Shared;
 
 namespace Seatpicker.Infrastructure.Adapters.Database;
 
-public class AggregateRepository : IAggregateRepository
+public class AggregateRepository(IDocumentStore store) : IAggregateRepository
 {
-    private readonly IDocumentStore store;
-    private readonly GuildIdProvider guildIdProvider;
-
-    public AggregateRepository(IDocumentStore store, GuildIdProvider guildIdProvider)
+    public IAggregateTransaction CreateTransaction(string guildId)
     {
-        this.store = store;
-        this.guildIdProvider = guildIdProvider;
+        var session = store.LightweightSession(guildId);
+        return new AggregateTransaction(session);
     }
 
-    public IAggregateTransaction CreateTransaction(string? guildId = null)
+    public IGuildlessAggregateTransaction CreateGuildlessTransaction()
     {
-        var session = store.LightweightSession(guildId ?? guildIdProvider.GetGuildId());
+        var session = store.LightweightSession();
         return new AggregateTransaction(session);
     }
 }
 
-public class AggregateTransaction : IAggregateTransaction
+public class AggregateTransaction : IGuildlessAggregateTransaction
 {
     private readonly IDocumentSession session;
 
@@ -54,13 +51,13 @@ public class AggregateTransaction : IAggregateTransaction
         return session.SaveChangesAsync();
     }
 
-    public Task<TAggregate?> Aggregate<TAggregate>(Guid id)
+    public Task<TAggregate?> Aggregate<TAggregate>(string id)
         where TAggregate : AggregateBase
     {
         return session.Events.AggregateStreamAsync<TAggregate>(id);
     }
 
-    public async Task<bool> Exists<TAggregate>(Guid id)
+    public async Task<bool> Exists<TAggregate>(string id)
         where TAggregate : AggregateBase
     {
         var streamState = await session.Events.FetchStreamStateAsync(id);

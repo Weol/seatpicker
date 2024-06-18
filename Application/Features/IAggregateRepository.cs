@@ -4,8 +4,12 @@ namespace Seatpicker.Application.Features;
 
 public interface IAggregateRepository
 {
-    public IAggregateTransaction CreateTransaction(string? guildId = null);
+    public IAggregateTransaction CreateTransaction(string guildId);
+
+    public IGuildlessAggregateTransaction CreateGuildlessTransaction();
 }
+
+public interface IGuildlessAggregateTransaction : IAggregateTransaction;
 
 public interface IAggregateTransaction : IDisposable
 {
@@ -18,10 +22,10 @@ public interface IAggregateTransaction : IDisposable
     public void Archive<TAggregate>(TAggregate aggregate)
         where TAggregate : AggregateBase;
 
-    public Task<TAggregate?> Aggregate<TAggregate>(Guid id)
+    public Task<TAggregate?> Aggregate<TAggregate>(string id)
         where TAggregate : AggregateBase;
 
-    public Task<bool> Exists<TAggregate>(Guid id)
+    public Task<bool> Exists<TAggregate>(string id)
         where TAggregate : AggregateBase;
 
     public Task Commit();

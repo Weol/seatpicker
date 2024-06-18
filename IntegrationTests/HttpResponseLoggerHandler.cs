@@ -2,15 +2,8 @@ using Xunit.Abstractions;
 
 namespace Seatpicker.IntegrationTests;
 
-public class HttpResponseLoggerHandler : DelegatingHandler
+public class HttpResponseLoggerHandler(ITestOutputHelper testOutputHelper) : DelegatingHandler
 {
-    private readonly ITestOutputHelper testOutputHelper;
-
-    public HttpResponseLoggerHandler(ITestOutputHelper testOutputHelper)
-    {
-        this.testOutputHelper = testOutputHelper;
-    }
-
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var response = await base.SendAsync(request, cancellationToken);

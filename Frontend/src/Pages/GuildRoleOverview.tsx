@@ -4,7 +4,6 @@ import Divider from "@mui/material/Divider"
 import Typography from "@mui/material/Typography"
 import { useState } from "react"
 import { useGuildRoles } from "../Adapters/Guilds/GuildRoles"
-import { useGuild } from "../Adapters/Guilds/Guilds"
 import { Guild, GuildRole, Role } from "../Adapters/Models"
 import { useAlerts } from "../Contexts/AlertContext"
 
@@ -49,21 +48,7 @@ function hasUnsavedChanges(stagedMappings: RoleMapping[], savedMappings: GuildRo
   return false
 }
 
-export default function GuildRoleOverview(props: { guildId: string }) {
-  const guild = useGuild(props.guildId)
-
-  return guild ? <GuildSettingsWithGuild guild={guild} /> : <NotFound />
-}
-
-function NotFound() {
-  return (
-    <Stack width="100%" justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }}>
-      <Typography>Ingen server funner</Typography>
-    </Stack>
-  )
-}
-
-function GuildSettingsWithGuild(props: { guild: Guild }) {
+export function GuildRoleOverview(props: { guild: Guild }) {
   const { guildRoles, updateGuildRoles } = useGuildRoles(props.guild.id)
   const { alertLoading, alertSuccess } = useAlerts()
   const [stagedMappings, setStagedMappings] = useState<RoleMapping[]>(

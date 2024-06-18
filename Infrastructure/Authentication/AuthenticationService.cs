@@ -3,21 +3,12 @@ using Seatpicker.Domain;
 
 namespace Seatpicker.Infrastructure.Authentication;
 
-public class AuthenticationService
+public class AuthenticationService(
+    JwtTokenCreator tokenCreator,
+    IOptions<AuthenticationOptions> options,
+    UserManager userManager)
 {
-    private readonly JwtTokenCreator tokenCreator;
-    private readonly AuthenticationOptions options;
-    private readonly UserManager userManager;
-
-    public AuthenticationService(
-        JwtTokenCreator tokenCreator,
-        IOptions<AuthenticationOptions> options,
-        UserManager userManager)
-    {
-        this.tokenCreator = tokenCreator;
-        this.userManager = userManager;
-        this.options = options.Value;
-    }
+    private readonly AuthenticationOptions options = options.Value;
 
     public async Task<(string JwtToken, DateTimeOffset ExpiresAt, AuthenticationToken AuthenticationToken)> Login(
         string userId,
@@ -58,10 +49,5 @@ public class AuthenticationService
         return options.Superadmins.Any(admin => admin == userId);
     }
 
-    public class IllegalLoginAttemptException : Exception
-    {
-        public IllegalLoginAttemptException(string? message) : base(message)
-        {
-        }
-    } 
+    public class IllegalLoginAttemptException(string? message) : Exception(message); 
 }

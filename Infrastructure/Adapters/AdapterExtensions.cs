@@ -1,7 +1,5 @@
 ﻿using Seatpicker.Infrastructure.Adapters.Database;
 using Seatpicker.Infrastructure.Adapters.Discord;
-using Seatpicker.Infrastructure.Adapters.Guilds;
-using Seatpicker.Infrastructure.Adapters.SignalR;
 
 namespace Seatpicker.Infrastructure.Adapters;
 
@@ -9,17 +7,11 @@ public static class AdapterExtensions
 {
     public static IServiceCollection AddAdapters(this IServiceCollection services)
     {
-        return services
-            .AddDatabase(ConfigureDatabase)
-            .AddSignalRAdapter()
-            .AddDiscordAdapter(ConfigureDiscordAdapter)
-            .AddGuildAdapter();
+        return services.AddDatabase(ConfigureDatabase).AddDiscordAdapter(ConfigureDiscordAdapter);
     }
 
     public static WebApplication UseAdapters(this WebApplication app)
     {
-        app.UseSignalRAdapter();
-
         return app;
     }
 
@@ -52,7 +44,7 @@ public static class AdapterExtensions
         options.ConnectionString =
             $"Server={host};Database={name};Port={port};User Id={user};Password={password};Ssl Mode=Require;Trust Server Certificate=true;";
     }
-    
+
     private static void ConfigureDiscordAdapter(DiscordAdapterOptions options, IConfiguration configuration)
     {
         configuration.GetSection("Discord").Bind(options);

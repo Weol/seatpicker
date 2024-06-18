@@ -6,10 +6,18 @@ namespace Seatpicker.Application.Features;
 
 public interface IDocumentRepository
 {
-    public IDocumentTransaction CreateTransaction(string? guildId = null);
+    public IDocumentTransaction CreateTransaction(string guildId);
 
-    public IDocumentReader CreateReader(string? guildId = null);
+    public IDocumentReader CreateReader(string guildId);
+
+    public IGuildlessDocumentTransaction CreateGuildlessTransaction();
+
+    public IGuildlessDocumentReader CreateGuildlessReader();
 }
+
+public interface IGuildlessDocumentTransaction : IDocumentTransaction;
+
+public interface IGuildlessDocumentReader : IDocumentReader;
 
 public interface IDocumentReader : IDisposable
 {
@@ -20,7 +28,7 @@ public interface IDocumentReader : IDisposable
         where TDocument : IDocument;
 }
 
-public interface IDocumentTransaction : IDocumentReader
+public interface IDocumentTransaction : IDisposable
 {
     public void Store<TDocument>(params TDocument[] documentsToAdd)
         where TDocument : IDocument;

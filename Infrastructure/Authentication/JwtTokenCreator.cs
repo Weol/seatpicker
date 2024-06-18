@@ -6,20 +6,11 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Seatpicker.Infrastructure.Authentication;
 
-public class JwtTokenCreator
+public class JwtTokenCreator(ILogger<JwtTokenCreator> logger, IOptions<AuthenticationOptions> options)
 {
     public const string GuildIdClaimName = "guild_id";
 
-    private readonly ILogger<JwtTokenCreator> logger;
-    private readonly AuthenticationOptions options;
-
-    public JwtTokenCreator(
-        ILogger<JwtTokenCreator> logger,
-        IOptions<AuthenticationOptions> options)
-    {
-        this.logger = logger;
-        this.options = options.Value;
-    }
+    private readonly AuthenticationOptions options = options.Value;
 
     public Task<(string Token, DateTimeOffset ExpiresAt)> CreateToken(AuthenticationToken authenticationToken)
     {

@@ -22,6 +22,7 @@ builder.Services.AddApplicationInsightsTelemetry()
 
 var app = builder.Build();
 
+app.MapGraphQL();
 app.UseSwaggerGen();
 app.UseRouting();
 app.UseSeatpickerAuthentication();

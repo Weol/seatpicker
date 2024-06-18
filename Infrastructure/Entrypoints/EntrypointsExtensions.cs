@@ -1,5 +1,5 @@
-﻿using FluentValidation;
-using Seatpicker.Infrastructure.Entrypoints.Filters;
+﻿using Seatpicker.Infrastructure.Entrypoints.GraphQL;
+using Seatpicker.Infrastructure.Entrypoints.Http;
 
 namespace Seatpicker.Infrastructure.Entrypoints;
 
@@ -8,28 +8,19 @@ public static class EntrypointsExtensions
     public static IServiceCollection AddEntrypoints(this IServiceCollection services, IConfiguration configuration)
     {
         services
+            .AddGraphQLEntrypoint()
             .AddEndpointsApiExplorer()
             .AddLoggedInUserAccessor()
-            .AddFluentValidation()
             .AddHealthChecks();
 
         return services;
     }
 
-    private static IServiceCollection AddFluentValidation(this IServiceCollection services)
-    {
-        return services
-            .AddValidatorsFromAssemblyContaining<Program>();
-    }
 
     public static WebApplication UseEntrypoints(this WebApplication app)
     {
         app.UseHttpsRedirection();
-        app.MapEntrypoints(builder =>
-        {
-            builder.AddEndpointFilter<FluentValidationFilter>();
-            builder.AddEndpointFilter<HttpResponseExceptionFilter>();
-        });
+        app.MapEntrypoints();
 
         return app;
     }
