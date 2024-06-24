@@ -1,14 +1,14 @@
 ﻿using Seatpicker.Domain;
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-namespace Seatpicker.Application.Features.Lans;
+namespace Seatpicker.Application.Features.Lan;
 
-internal class LanManagementService(IAggregateTransaction aggregateTransaction, IDocumentReader documentReader, User initiator)
+public class LanManagementService(IAggregateTransaction aggregateTransaction, IDocumentReader documentReader, User initiator)
 {
     public async Task<string> Create(string title, byte[] background)
     {
         var id = Guid.NewGuid().ToString();
-        var lan = new Lan(id, title, background, initiator);
+        var lan = new Domain.Lan(id, title, background, initiator);
 
         aggregateTransaction.Create(lan);
 
@@ -17,7 +17,7 @@ internal class LanManagementService(IAggregateTransaction aggregateTransaction, 
 
     public async Task UpdateBackground(string id, byte[] background)
     {
-        var lan = await aggregateTransaction.Aggregate<Lan>(id);
+        var lan = await aggregateTransaction.Aggregate<Domain.Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
 
         lan.ChangeBackground(background, initiator);
@@ -27,7 +27,7 @@ internal class LanManagementService(IAggregateTransaction aggregateTransaction, 
 
     public async Task UpdateTitle(string id, string title)
     {
-        var lan = await aggregateTransaction.Aggregate<Lan>(id);
+        var lan = await aggregateTransaction.Aggregate<Domain.Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
 
         lan.ChangeTitle(title, initiator);
@@ -37,7 +37,7 @@ internal class LanManagementService(IAggregateTransaction aggregateTransaction, 
 
     public async Task SetActive(string id, bool active)
     {
-        var lan = await aggregateTransaction.Aggregate<Lan>(id);
+        var lan = await aggregateTransaction.Aggregate<Domain.Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
 
         var activeLans = documentReader.Query<ProjectedLan>()
@@ -47,7 +47,7 @@ internal class LanManagementService(IAggregateTransaction aggregateTransaction, 
 
         foreach (var activeLanId in activeLans)
         {
-            var activeLan = await aggregateTransaction.Aggregate<Lan>(activeLanId) ??
+            var activeLan = await aggregateTransaction.Aggregate<Domain.Lan>(activeLanId) ??
                             throw new LanNotFoundException { LanId = activeLanId };
 
             activeLan.SetActive(false, initiator);
@@ -61,7 +61,7 @@ internal class LanManagementService(IAggregateTransaction aggregateTransaction, 
 
     public async Task Delete(string id)
     {
-        var lan = await aggregateTransaction.Aggregate<Lan>(id);
+        var lan = await aggregateTransaction.Aggregate<Domain.Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
 
         lan.Archive(initiator);
