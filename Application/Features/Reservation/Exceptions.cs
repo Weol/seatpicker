@@ -1,4 +1,4 @@
-﻿namespace Seatpicker.Application.Features.Seats;
+﻿namespace Seatpicker.Application.Features.Reservation;
 
 public class SeatNotFoundException : ApplicationException
 {

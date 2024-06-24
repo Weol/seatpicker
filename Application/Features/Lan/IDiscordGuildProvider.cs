@@ -1,4 +1,4 @@
-﻿namespace Seatpicker.Application.Features.Guilds;
+﻿namespace Seatpicker.Application.Features.Lan;
 
 public interface IDiscordGuildProvider
 {

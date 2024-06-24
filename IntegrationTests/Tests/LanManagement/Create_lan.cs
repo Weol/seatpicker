@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
-using Seatpicker.Application.Features.Lans;
+using Seatpicker.Application.Features.Lan;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 using Xunit;

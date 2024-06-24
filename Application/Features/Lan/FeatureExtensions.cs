@@ -1,22 +1,17 @@
 ﻿using Marten;
 using Marten.Events.Projections;
 using Microsoft.Extensions.DependencyInjection;
-using Seatpicker.Application.Features.Lans;
 
-namespace Seatpicker.Application.Features.Guilds;
+namespace Seatpicker.Application.Features.Lan;
 
 internal static class FeatureExtension
 {
-    public static IServiceCollection AddGuildFeature(this IServiceCollection services)
+    public static IServiceCollection AddLanFeature(this IServiceCollection services)
     {
-        services.ConfigureMarten(
+        return services.ConfigureMarten(
             options =>
             {
                 options.Projections.Add<LanProjection>(ProjectionLifecycle.Inline);
             });
-
-        return services
-            .AddScoped<LanManagementService>()
-            .AddScoped<GuildService>();
     }
 }

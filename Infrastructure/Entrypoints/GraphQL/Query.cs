@@ -1,9 +1,8 @@
 ﻿using HotChocolate.Data;
 using Marten;
 using Microsoft.AspNetCore.Mvc;
-using Seatpicker.Application.Features.Guilds;
-using Seatpicker.Application.Features.Lans;
-using Seatpicker.Application.Features.Seats;
+using Seatpicker.Application.Features.Lan;
+using Seatpicker.Application.Features.Reservation;
 using Seatpicker.Infrastructure.Adapters.Discord;
 
 namespace Seatpicker.Infrastructure.Entrypoints.GraphQL;
@@ -34,8 +33,6 @@ public class GuildExtensions
 {
     public IExecutable<ProjectedLan> GetLan([FromServices] IQuerySession querySession, [Parent] Guild guild, string? id)
     {
-        var query = querySession.Query<ProjectedLan>().Where(lan => lan.GuildId == guild.Id);
-        if (id is not null) query = query.Where(lan => lan.Id == id);
         return query.AsExecutable();
     }
 }

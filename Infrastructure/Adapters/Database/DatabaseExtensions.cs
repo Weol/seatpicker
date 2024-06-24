@@ -4,7 +4,7 @@ using Marten;
 using Marten.Events;
 using Marten.Storage;
 using Microsoft.Extensions.Options;
-using Seatpicker.Application.Features.Guilds;
+using Seatpicker.Application.Features.Lan;
 using Shared;
 using Weasel.Core;
 

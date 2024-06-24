@@ -1,5 +1,5 @@
 ﻿using Marten;
-using Seatpicker.Application.Features.Seats;
+using Seatpicker.Application.Features.Reservation;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Database;
 using Shared;
@@ -9,9 +9,9 @@ namespace Seatpicker.Infrastructure.Authentication;
 #pragma warning disable CS1998
 public class UserManager(IDocumentStore documentStore) : IUserProvider
 {
-    public async Task<User?> GetById(string guildId, string userId)
+    public async Task<User?> GetById(string userId)
     {
-        await using var reader = documentStore.QuerySession(guildId);
+        await using var reader = documentStore.QuerySession();
         var userDocument = await reader.LoadAsync<UserDocument>(userId);
 
         return userDocument is null ? null : new User(userDocument.Id, userDocument.Name, userDocument.Avatar, userDocument.Roles);

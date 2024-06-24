@@ -3,7 +3,7 @@ using Marten.Events.Aggregation;
 using Seatpicker.Domain;
 using Shared;
 
-namespace Seatpicker.Application.Features.Seats;
+namespace Seatpicker.Application.Features.Reservation;
 
 [SuppressMessage("Performance", "CA1822:Mark members as static")]
 public class SeatProjection : SingleStreamProjection<ProjectedSeat>

@@ -1,18 +1,18 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
+using Marten;
 using Shared;
 
 namespace Seatpicker.Application.Features;
 
 public interface IDocumentRepository
 {
-    public IDocumentTransaction CreateTransaction(string guildId);
+    public IDocumentTransaction CreateTransaction(string guildId, IDocumentSession? documentSession = null);
 
-    public IDocumentReader CreateReader(string guildId);
+    public IDocumentReader CreateReader(string guildId, IQuerySession? querySession = null);
 
-    public IGuildlessDocumentTransaction CreateGuildlessTransaction();
+    public IGuildlessDocumentTransaction CreateGuildlessTransaction(IDocumentSession? documentSession = null);
 
-    public IGuildlessDocumentReader CreateGuildlessReader();
+    public IGuildlessDocumentReader CreateGuildlessReader(IQuerySession? querySession = null);
 }
 
 public interface IGuildlessDocumentTransaction : IDocumentTransaction;

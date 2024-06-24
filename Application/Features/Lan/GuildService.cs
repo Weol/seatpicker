@@ -1,13 +1,21 @@
-namespace Seatpicker.Application.Features.Guilds;
+namespace Seatpicker.Application.Features.Lan;
 
-public class GuildService(
-    IDiscordGuildProvider discordGuildProvider,
-    IGuildlessDocumentTransaction documentTransaction,
-    IDocumentReader documentReader)
+public class GuildService
 {
+    private readonly IGuildlessDocumentTransaction _documentTransaction;
+    private readonly IDocumentReader _documentReader;
+
+    internal GuildService(IDiscordGuildProvider discordGuildProvider,
+        IGuildlessDocumentTransaction documentTransaction,
+        IDocumentReader documentReader)
+    {
+        _documentTransaction = documentTransaction;
+        _documentReader = documentReader;
+    }
+
     public Task<Guild> Update(Guild guild)
     {
-        var duplicateHosts = documentReader.Query<Guild>()
+        var duplicateHosts = _documentReader.Query<Guild>()
             .Where(document => document.Hostnames.Any(hostname => guild.Hostnames.Contains(hostname)))
             .AsEnumerable()
             .SelectMany(document => document.Hostnames.Intersect(guild.Hostnames))
@@ -18,7 +26,7 @@ public class GuildService(
             throw new DuplicateHostsException(duplicateHosts);
         }
 
-        documentTransaction.Store(guild);
+        _documentTransaction.Store(guild);
 
         return Task.FromResult(guild);
     }

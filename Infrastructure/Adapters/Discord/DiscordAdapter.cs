@@ -4,7 +4,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using Seatpicker.Application.Features.Guilds;
+using Seatpicker.Application.Features.Lan;
 
 // ReSharper disable NotAccessedPositionalProperty.Global
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
@@ -119,17 +119,17 @@ public class DiscordAdapter(
         return await DeserializeContent<IEnumerable<DiscordGuild>>(response);
     }
 
-    public async IAsyncEnumerable<Application.Features.Guilds.DiscordGuild> GetAll()
+    public async IAsyncEnumerable<Application.Features.Lan.DiscordGuild> GetAll()
     {
         var discordGuilds = await GetGuilds();
 
         foreach (var discordGuild in discordGuilds)
         {
             var roles = discordGuild.Roles.Select(
-                    role => new Application.Features.Guilds.DiscordGuildRole(role.Id, role.Name, role.Color, role.Icon))
+                    role => new Application.Features.Lan.DiscordGuildRole(role.Id, role.Name, role.Color, role.Icon))
                 .ToArray();
 
-            yield return new Application.Features.Guilds.DiscordGuild(
+            yield return new Application.Features.Lan.DiscordGuild(
                 discordGuild.Id,
                 discordGuild.Name,
                 discordGuild.Icon,

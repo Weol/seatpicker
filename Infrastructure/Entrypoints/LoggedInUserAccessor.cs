@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-using Seatpicker.Application.Features.Seats;
+using Seatpicker.Application.Features.Reservation;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Authentication;
 
@@ -21,7 +21,7 @@ public class LoggedInUserAccessor(IHttpContextAccessor httpContextAccessor, IUse
         var id  = HttpContext.User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
         var guildId  = HttpContext.User.Claims.First(x => x.Type == JwtTokenCreator.GuildIdClaimName).Value;
 
-        return await userProvider.GetById(guildId, id) ??
+        return await userProvider.GetById(id) ??
                throw new UserNotFoundException($"Cannot find user with id {id}");
     }
 

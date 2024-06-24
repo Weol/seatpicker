@@ -1,7 +1,7 @@
 using Marten;
 using Microsoft.AspNetCore.Mvc;
-using Seatpicker.Application.Features.Lans;
-using Seatpicker.Application.Features.Seats;
+using Seatpicker.Application.Features.Lan;
+using Seatpicker.Application.Features.Reservation;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Marten;
 

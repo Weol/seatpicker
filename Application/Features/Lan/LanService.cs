@@ -3,71 +3,82 @@
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 namespace Seatpicker.Application.Features.Lan;
 
-public class LanManagementService(IAggregateTransaction aggregateTransaction, IDocumentReader documentReader, User initiator)
+public class LanService
 {
+    private readonly IAggregateTransaction _aggregateTransaction;
+    private readonly IDocumentReader _documentReader;
+    private readonly User _initiator;
+
+    internal LanService(IAggregateTransaction aggregateTransaction, IDocumentReader documentReader, User initiator)
+    {
+        _aggregateTransaction = aggregateTransaction;
+        _documentReader = documentReader;
+        _initiator = initiator;
+    }
+
     public async Task<string> Create(string title, byte[] background)
     {
         var id = Guid.NewGuid().ToString();
-        var lan = new Domain.Lan(id, title, background, initiator);
+        var lan = new Domain.Lan(id, title, background, _initiator);
 
-        aggregateTransaction.Create(lan);
+        _aggregateTransaction.Create(lan);
 
         return id;
     }
 
     public async Task UpdateBackground(string id, byte[] background)
     {
-        var lan = await aggregateTransaction.Aggregate<Domain.Lan>(id);
+        var lan = await _aggregateTransaction.Aggregate<Domain.Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
 
-        lan.ChangeBackground(background, initiator);
+        lan.ChangeBackground(background, _initiator);
 
-        aggregateTransaction.Update(lan);
+        _aggregateTransaction.Update(lan);
     }
 
     public async Task UpdateTitle(string id, string title)
     {
-        var lan = await aggregateTransaction.Aggregate<Domain.Lan>(id);
+        var lan = await _aggregateTransaction.Aggregate<Domain.Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
 
-        lan.ChangeTitle(title, initiator);
+        lan.ChangeTitle(title, _initiator);
 
-        aggregateTransaction.Update(lan);
+        _aggregateTransaction.Update(lan);
     }
 
     public async Task SetActive(string id, bool active)
     {
-        var lan = await aggregateTransaction.Aggregate<Domain.Lan>(id);
+        var lan = await _aggregateTransaction.Aggregate<Domain.Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
 
-        var activeLans = documentReader.Query<ProjectedLan>()
+        var activeLans = _documentReader.Query<ProjectedLan>()
             .Where(x => x.Active)
             .Select(x => x.Id)
             .ToArray();
 
         foreach (var activeLanId in activeLans)
         {
-            var activeLan = await aggregateTransaction.Aggregate<Domain.Lan>(activeLanId) ??
+            var activeLan = await _aggregateTransaction.Aggregate<Domain.Lan>(activeLanId) ??
                             throw new LanNotFoundException { LanId = activeLanId };
 
-            activeLan.SetActive(false, initiator);
-            aggregateTransaction.Update(activeLan);
+            activeLan.SetActive(false, _initiator);
+            _aggregateTransaction.Update(activeLan);
         }
 
-        lan.SetActive(false, initiator);
+        lan.SetActive(false, _initiator);
 
-        aggregateTransaction.Update(lan);
+        _aggregateTransaction.Update(lan);
     }
 
     public async Task Delete(string id)
     {
-        var lan = await aggregateTransaction.Aggregate<Domain.Lan>(id);
+        var lan = await _aggregateTransaction.Aggregate<Domain.Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
 
-        lan.Archive(initiator);
+        lan.Archive(_initiator);
 
-        aggregateTransaction.Update(lan);
-        aggregateTransaction.Archive(lan);
+        _aggregateTransaction.Update(lan);
+        _aggregateTransaction.Archive(lan);
     }
 }
 

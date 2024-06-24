@@ -2,20 +2,16 @@
 using Marten.Events.Projections;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Seatpicker.Application.Features.Seats;
+namespace Seatpicker.Application.Features.Reservation;
 
 internal static class FeatureExtension
 {
-    public static IServiceCollection AddSeatsFeature(this IServiceCollection services)
+    public static IServiceCollection AddReservationFeature(this IServiceCollection services)
     {
-        services.ConfigureMarten(
+        return services.ConfigureMarten(
             options =>
             {
                 options.Projections.Add<SeatProjection>(ProjectionLifecycle.Inline);
             });
-
-        return services.AddScoped<SeatManagementService>()
-            .AddScoped<ReservationManagementService>()
-            .AddScoped<ReservationService>();
     }
 }

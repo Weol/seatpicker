@@ -1,12 +1,13 @@
-﻿using Shared;
+﻿using Marten;
+using Shared;
 
 namespace Seatpicker.Application.Features;
 
 public interface IAggregateRepository
 {
-    public IAggregateTransaction CreateTransaction(string guildId);
+    public IAggregateTransaction CreateTransaction(string guildId, IDocumentSession? documentSession = null);
 
-    public IGuildlessAggregateTransaction CreateGuildlessTransaction();
+    public IGuildlessAggregateTransaction CreateGuildlessTransaction(IDocumentSession? documentSession = null);
 }
 
 public interface IGuildlessAggregateTransaction : IAggregateTransaction;

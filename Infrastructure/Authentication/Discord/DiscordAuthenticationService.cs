@@ -1,6 +1,6 @@
 ﻿using Marten;
 using Seatpicker.Application.Features;
-using Seatpicker.Application.Features.Guilds;
+using Seatpicker.Application.Features.Lan;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Database;
 using Seatpicker.Infrastructure.Adapters.Discord;

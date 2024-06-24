@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using FluentAssertions;
-using Seatpicker.Application.Features.Seats;
+using Seatpicker.Application.Features.Reservation;
 using Seatpicker.Domain;
 using Xunit;
 using Xunit.Abstractions;

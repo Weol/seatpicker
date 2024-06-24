@@ -1,50 +1,56 @@
 ﻿using Marten;
 using Microsoft.Extensions.DependencyInjection;
-using Seatpicker.Application.Features.Lans;
-using Seatpicker.Application.Features.Seats;
+using Seatpicker.Application.Features.Lan;
+using Seatpicker.Application.Features.Reservation;
 
 namespace Seatpicker.Application.Features;
 
-public class UnitOfWorkFactory(IDocumentStore documentStore, IAggregateRepository aggregateRepository, IDocumentRepository documentRepository)
+public class UnitOfWorkFactory(
+    IDocumentStore documentStore,
+    IAggregateRepository aggregateRepository,
+    IDocumentRepository documentRepository)
 {
-    public UnitOfWork Create(string guildId, Action<UnitOfWork> action)
+    public async Task<T> Create<T>(string guildId, Func<GuildScopedUnitOfWork, Task<T>> action)
     {
         var services = new ServiceCollection();
 
-        var querySession = documentStore.QuerySession(guildId);
-        var writeSession = documentStore.LightweightSession(guildId);
+        services.AddSingleton<IDocumentSession>(_ => documentStore.LightweightSession(guildId));
 
-        using var aggregateTransaction = writeSession.Events
-        using var documentTransaction = documentRepository.CreateTransaction(guildId);
-        using var documentReader = documentRepository.CreateReader(guildId);
+        services.AddSingleton<IAggregateTransaction>(provider =>
+            aggregateRepository.CreateTransaction(guildId, provider.GetRequiredService<IDocumentSession>()));
+        services.AddSingleton<IDocumentReader>(provider => 
+            documentRepository.CreateReader(guildId, provider.GetRequiredService<IDocumentSession>()));
+        services.AddSingleton<IDocumentTransaction>(provider => 
+            documentRepository.CreateTransaction(guildId, provider.GetRequiredService<IDocumentSession>()));
 
-        services.AddSingleton<GuildDependenBuilder<T>>()
+        services.AddSingleton<GuildScopedUnitOfWork>();
 
-        var provider = services.BuildServiceProvider();
+        // Reservation feature
+        services.AddSingleton<ReservationService>()
+            .AddSingleton<ReservationManagementService>()
+            .AddSingleton<SeatManagementService>();
 
+        // Lan feature
+        services.AddSingleton<LanService>();
 
+        await using var provider = services.BuildServiceProvider();
 
-
-        var unitOfWork = new UnitOfWork
-        {
-            LanManagement = new LanManagementService(),
-            SeatManagement = new SeatManagementService(),
-            ReservationManagement = new ReservationManagementService(),
-            Reservation = new ReservationService()
-        };
-
-        action();
+        var unitOfWork = provider.GetRequiredService<GuildScopedUnitOfWork>();
+        await action(unitOfWork);
+        var documentSession = provider.GetRequiredService<IDocumentSession>();
+        await documentSession.SaveChangesAsync();
     }
 }
 
-public class GuildDependenBuilder<T>
-    where T : GuildDependent;
-
-public interface GuildDependent;
-
-public interface IPorta : GuildDependent
-
-public class UnitOfWork(IServiceProvider provider, IPorta porta)
+public class GuildScopedUnitOfWork(
+    ReservationService reservationService,
+    ReservationManagementService reservationManagementService,
+    SeatManagementService seatManagementService,
+    LanService lanService
+)
 {
-
+    public ReservationService Reservation => reservationService;
+    public ReservationManagementService ReservationManagement => reservationManagementService;
+    public SeatManagementService SeatManagement => seatManagementService;
+    public LanService Lan => lanService;
 }

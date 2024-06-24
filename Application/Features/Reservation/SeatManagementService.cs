@@ -1,49 +1,58 @@
-﻿using Seatpicker.Application.Features.Lans;
+﻿using Seatpicker.Application.Features.Lan;
 using Seatpicker.Domain;
 
-namespace Seatpicker.Application.Features.Seats;
+namespace Seatpicker.Application.Features.Reservation;
 
-public class SeatManagementService(IAggregateTransaction aggregateTransaction, User initiator)
+public class SeatManagementService
 {
+    private readonly IAggregateTransaction _aggregateTransaction;
+    private readonly User _initiator;
+
+    internal SeatManagementService(IAggregateTransaction aggregateTransaction, User initiator)
+    {
+        _aggregateTransaction = aggregateTransaction;
+        _initiator = initiator;
+    }
+
     public async Task UpdateTitle(string seatId, string title)
     {
-        var seat = await aggregateTransaction.Aggregate<Seat>(seatId) ?? throw new SeatNotFoundException{ SeatId = seatId };
+        var seat = await _aggregateTransaction.Aggregate<Seat>(seatId) ?? throw new SeatNotFoundException{ SeatId = seatId };
 
-         seat.SetTitle(title, initiator);
+         seat.SetTitle(title, _initiator);
 
-        aggregateTransaction.Update(seat);
+        _aggregateTransaction.Update(seat);
     }
 
     public async Task UpdateBounds(string seatId, Bounds bounds)
     {
-        var seat = await aggregateTransaction.Aggregate<Seat>(seatId) ?? throw new SeatNotFoundException{ SeatId = seatId };
+        var seat = await _aggregateTransaction.Aggregate<Seat>(seatId) ?? throw new SeatNotFoundException{ SeatId = seatId };
 
-        seat.SetBounds(bounds, initiator);
+        seat.SetBounds(bounds, _initiator);
 
-        aggregateTransaction.Update(seat);
+        _aggregateTransaction.Update(seat);
     }
 
    public async Task<string> Create(string lanId, string title, Bounds bounds)
     {
         var id = Guid.NewGuid().ToString();
 
-        var lan = await aggregateTransaction.Aggregate<Lan>(lanId)
+        var lan = await _aggregateTransaction.Aggregate<Domain.Lan>(lanId)
             ?? throw new LanNotFoundException { LanId = lanId };
 
-        var seat = new Seat(id, lan, title, bounds, initiator);
+        var seat = new Seat(id, lan, title, bounds, _initiator);
 
-        aggregateTransaction.Create(seat);
+        _aggregateTransaction.Create(seat);
 
         return id;
     }
 
    public async Task Remove(string seatId)
     {
-        var seat = await aggregateTransaction.Aggregate<Seat>(seatId) ?? throw new SeatNotFoundException{ SeatId = seatId };
+        var seat = await _aggregateTransaction.Aggregate<Seat>(seatId) ?? throw new SeatNotFoundException{ SeatId = seatId };
 
-        seat.Archive(initiator);
+        seat.Archive(_initiator);
 
-        aggregateTransaction.Update(seat);
-        aggregateTransaction.Archive(seat);
+        _aggregateTransaction.Update(seat);
+        _aggregateTransaction.Archive(seat);
     }
 }
