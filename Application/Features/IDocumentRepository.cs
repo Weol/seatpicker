@@ -6,13 +6,13 @@ namespace Seatpicker.Application.Features;
 
 public interface IDocumentRepository
 {
-    public IDocumentTransaction CreateTransaction(string guildId, IDocumentSession? documentSession = null);
+    public IDocumentTransaction CreateTransaction(string guildId, IDocumentSession documentSession);
 
-    public IDocumentReader CreateReader(string guildId, IQuerySession? querySession = null);
+    public IDocumentReader CreateReader(string guildId, IQuerySession querySession);
 
-    public IGuildlessDocumentTransaction CreateGuildlessTransaction(IDocumentSession? documentSession = null);
+    public IGuildlessDocumentTransaction CreateGuildlessTransaction(IDocumentSession documentSession);
 
-    public IGuildlessDocumentReader CreateGuildlessReader(IQuerySession? querySession = null);
+    public IGuildlessDocumentReader CreateGuildlessReader(IQuerySession querySession);
 }
 
 public interface IGuildlessDocumentTransaction : IDocumentTransaction;

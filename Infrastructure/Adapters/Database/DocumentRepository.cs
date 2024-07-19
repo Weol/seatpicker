@@ -6,48 +6,62 @@ using Shared;
 
 namespace Seatpicker.Infrastructure.Adapters.Database;
 
-public class DocumentRepository : IDocumentRepository
+public class DocumentRepository(IDocumentStore store, ILogger<DocumentRepository> logger) : IDocumentRepository
 {
-    private readonly IDocumentStore store;
-    private readonly ILogger<DocumentRepository> logger;
-
-    public DocumentRepository(IDocumentStore store, ILogger<DocumentRepository> logger)
-    {
-        this.store = store;
-        this.logger = logger;
-    }
-
-    public IDocumentTransaction CreateTransaction(string guildId)
+    public IDocumentTransaction CreateTransaction(string guildId, IDocumentSession? documentSession = null)
     {
         logger.LogInformation("Creating document transaction for tenant {TenantId}", guildId);
 
-        var session = store.LightweightSession(guildId);
-        return new DocumentTransaction(session);
+        documentSession ??= store.LightweightSession(guildId);
+
+        return new DocumentTransaction(documentSession);
     }
 
-    public virtual IDocumentReader CreateReader(string guildId)
+    public virtual IDocumentReader CreateReader(string guildId, IQuerySession? querySession = null)
     {
         logger.LogInformation("Creating document reader for tenant {TenantId}", guildId);
 
-        var session = store.QuerySession(guildId);
-        return new DocumentReader(session);
+        querySession ??= store.QuerySession(guildId);
+
+        return new DocumentReader(querySession);
     }
 
-    public virtual IGuildlessDocumentTransaction CreateGuildlessTransaction()
+    public virtual IGuildlessDocumentTransaction CreateGuildlessTransaction(IDocumentSession? documentSession = null)
     {
         logger.LogInformation("Creating document transaction for default tenant");
 
-        var session = store.LightweightSession(Tenancy.DefaultTenantId);
-        return new DocumentTransaction(session);
+        documentSession ??= store.LightweightSession(Tenancy.DefaultTenantId);
+
+        if (documentSession.TenantId != Tenancy.DefaultTenantId)
+        {
+            throw new InvalidTenantIdForGuildlessSessionException {
+                TenantId = documentSession.TenantId,
+            };
+        }
+
+        return new DocumentTransaction(documentSession);
     }
 
-    public IGuildlessDocumentReader CreateGuildlessReader()
+    public IGuildlessDocumentReader CreateGuildlessReader(IQuerySession? querySession = null)
     {
         logger.LogInformation("Creating document reader for default tenant");
 
-        var session = store.QuerySession(Tenancy.DefaultTenantId);
-        return new DocumentReader(session);
+        querySession ??= store.QuerySession(Tenancy.DefaultTenantId);
+
+        if (querySession.TenantId != Tenancy.DefaultTenantId)
+        {
+            throw new InvalidTenantIdForGuildlessSessionException {
+                TenantId = querySession.TenantId,
+            };
+        }
+
+        return new DocumentReader(querySession);
     }
+
+    public class InvalidTenantIdForGuildlessSessionException : Exception
+    {
+        public string TenantId { get; init; }
+    };
 }
 
 public class DocumentTransaction : IGuildlessDocumentTransaction, IDisposable

@@ -7,12 +7,9 @@ public static class AdapterExtensions
 {
     public static IServiceCollection AddAdapters(this IServiceCollection services)
     {
-        return services.AddDatabase(ConfigureDatabase).AddDiscordAdapter(ConfigureDiscordAdapter);
-    }
-
-    public static WebApplication UseAdapters(this WebApplication app)
-    {
-        return app;
+        return services
+            .AddDatabase(ConfigureDatabase)
+            .AddDiscordAdapter(ConfigureDiscordAdapter);
     }
 
     private static void ConfigureDatabase(DatabaseOptions options, IConfiguration configuration)

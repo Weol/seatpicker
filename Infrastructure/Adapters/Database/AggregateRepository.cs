@@ -1,4 +1,5 @@
 ﻿using Marten;
+using Marten.Storage;
 using Seatpicker.Application.Features;
 using Shared;
 
@@ -6,17 +7,30 @@ namespace Seatpicker.Infrastructure.Adapters.Database;
 
 public class AggregateRepository(IDocumentStore store) : IAggregateRepository
 {
-    public IAggregateTransaction CreateTransaction(string guildId)
+    public IAggregateTransaction CreateTransaction(string guildId, IDocumentSession? documentSession = null)
     {
-        var session = store.LightweightSession(guildId);
-        return new AggregateTransaction(session);
+        documentSession ??= store.LightweightSession(guildId);
+        return new AggregateTransaction(documentSession);
     }
 
-    public IGuildlessAggregateTransaction CreateGuildlessTransaction()
+    public IGuildlessAggregateTransaction CreateGuildlessTransaction(IDocumentSession? documentSession = null)
     {
-        var session = store.LightweightSession();
-        return new AggregateTransaction(session);
+        documentSession ??= store.LightweightSession();
+
+        if (documentSession.TenantId != Tenancy.DefaultTenantId)
+        {
+            throw new InvalidTenantIdForGuildlessSessionException {
+                TenantId = documentSession.TenantId,
+            };
+        }
+
+        return new AggregateTransaction(documentSession);
     }
+
+    public class InvalidTenantIdForGuildlessSessionException : Exception
+    {
+        public string TenantId { get; init; }
+    };
 }
 
 public class AggregateTransaction : IGuildlessAggregateTransaction

@@ -4,6 +4,7 @@ using Marten;
 using Marten.Events;
 using Marten.Storage;
 using Microsoft.Extensions.Options;
+using Seatpicker.Application.Features;
 using Seatpicker.Application.Features.Lan;
 using Shared;
 using Weasel.Core;
@@ -17,6 +18,10 @@ internal static class DatabaseExtensions
         Action<DatabaseOptions, IConfiguration> configureAction)
     {
         services.AddValidatedOptions(configureAction);
+
+        services
+            .AddSingleton<IAggregateRepository, AggregateRepository>()
+            .AddSingleton<IDocumentRepository, DocumentRepository>();
 
         services.AddMarten(
                 provider =>

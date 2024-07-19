@@ -5,9 +5,9 @@ namespace Seatpicker.Application.Features;
 
 public interface IAggregateRepository
 {
-    public IAggregateTransaction CreateTransaction(string guildId, IDocumentSession? documentSession = null);
+    public IAggregateTransaction CreateTransaction(string guildId, IDocumentSession documentSession);
 
-    public IGuildlessAggregateTransaction CreateGuildlessTransaction(IDocumentSession? documentSession = null);
+    public IGuildlessAggregateTransaction CreateGuildlessTransaction(IDocumentSession documentSession);
 }
 
 public interface IGuildlessAggregateTransaction : IAggregateTransaction;

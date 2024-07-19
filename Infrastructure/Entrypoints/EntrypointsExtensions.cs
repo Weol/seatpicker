@@ -20,6 +20,7 @@ public static class EntrypointsExtensions
     public static WebApplication UseEntrypoints(this WebApplication app)
     {
         app.UseHttpsRedirection();
+        app.MapGraphQL();
         app.MapEntrypoints();
 
         return app;
