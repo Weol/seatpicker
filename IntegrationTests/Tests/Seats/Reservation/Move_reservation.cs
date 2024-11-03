@@ -13,11 +13,11 @@ namespace Seatpicker.IntegrationTests.Tests.Seats.Reservation;
 // ReSharper disable once InconsistentNaming
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class Move_reservation(
-    TestWebApplicationFactory factory,
+    TestWebApplicationFactory fusery,
     PostgresFixture databaseFixture,
-    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(fusery, databaseFixture, testOutputHelper)
 {
-    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, Guid lanId, Guid seatId, Guid toSeatId) =>
+    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, string lanId, string seatId, Guid toSeatId) =>
         await client.PutAsJsonAsync(
             $"guild/{guildId}/lan/{lanId}/seat/{seatId}/reservation",
             new MoveReservation.Request(toSeatId));
@@ -31,8 +31,8 @@ public class Move_reservation(
         var client = GetClient(identity);
 
         var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
-        var fromSeat = SeatGenerator.Create(lan, CreateUser(lan.GuildId), reservedBy: identity.User);
-        var toSeat = SeatGenerator.Create(lan, CreateUser(lan.GuildId));
+        var fromSeat = SeatGenerator.Create(lan, CreateUser(guild.Id), reservedBy: identity.User);
+        var toSeat = SeatGenerator.Create(lan, CreateUser(guild.Id));
 
         await SetupAggregates(guild.Id, fromSeat, toSeat);
 
@@ -70,8 +70,8 @@ public class Move_reservation(
 
         var alreadyReservedBy = CreateUser(guild.Id);
         var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
-        var fromSeat = SeatGenerator.Create(lan, CreateUser(lan.GuildId), reservedBy: alreadyReservedBy);
-        var toSeat = SeatGenerator.Create(lan, CreateUser(lan.GuildId));
+        var fromSeat = SeatGenerator.Create(lan, CreateUser(guild.Id), reservedBy: alreadyReservedBy);
+        var toSeat = SeatGenerator.Create(lan, CreateUser(guild.Id));
 
         await SetupAggregates(guild.Id, fromSeat, toSeat);
 

@@ -13,11 +13,11 @@ namespace Seatpicker.IntegrationTests.Tests.Seats.ReservationManagement;
 // ReSharper disable once InconsistentNaming
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class Create_reservation(
-    TestWebApplicationFactory factory,
+    TestWebApplicationFactory fusery,
     PostgresFixture databaseFixture,
-    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(fusery, databaseFixture, testOutputHelper)
 {
-    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, Guid lanId, Guid seatId, string userId) => await client.PostAsJsonAsync(
+    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, string lanId, string seatId, string userId) => await client.PostAsJsonAsync(
             $"guild/{guildId}/lan/{lanId}/seat/{seatId}/reservationmanagement",
             new CreateReservationFor.Request(userId));
     
@@ -28,7 +28,7 @@ public class Create_reservation(
 		var guild = await CreateGuild();
         var client = GetClient(guild.Id, Role.Operator);
         var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
-        var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId));
+        var seat = SeatGenerator.Create(lan, CreateUser(guild.Id));
         var reserveFor = CreateUser(guild.Id);
 
         await SetupAggregates(guild.Id, lan, seat);
@@ -56,7 +56,7 @@ public class Create_reservation(
 
         var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
         var reserveFor = CreateUser(guild.Id);
-        var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId), reservedBy: reserveFor);
+        var seat = SeatGenerator.Create(lan, CreateUser(guild.Id), reservedBy: reserveFor);
 
         await SetupAggregates(guild.Id, lan, seat);
 
@@ -83,7 +83,7 @@ public class Create_reservation(
 
         var alreadyReservedBy = CreateUser(guild.Id);
         var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
-        var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId), reservedBy: alreadyReservedBy);
+        var seat = SeatGenerator.Create(lan, CreateUser(guild.Id), reservedBy: alreadyReservedBy);
         var reserveFor = CreateUser(guild.Id);
 
         await SetupAggregates(guild.Id, lan, seat);
@@ -110,7 +110,7 @@ public class Create_reservation(
         var client = GetClient(guild.Id, Role.Operator);
 
         var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
-        var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId));
+        var seat = SeatGenerator.Create(lan, CreateUser(guild.Id));
         var reserveFor = CreateUser(guild.Id);
 
         // Act
@@ -129,8 +129,8 @@ public class Create_reservation(
 
         var reserveFor = CreateUser(guild.Id);
         var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
-        var alreadyReservedSeat = SeatGenerator.Create(lan, CreateUser(lan.GuildId), reservedBy: reserveFor);
-        var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId));
+        var alreadyReservedSeat = SeatGenerator.Create(lan, CreateUser(guild.Id), reservedBy: reserveFor);
+        var seat = SeatGenerator.Create(lan, CreateUser(guild.Id));
 
         await SetupAggregates(guild.Id, lan, alreadyReservedSeat, seat);
 
@@ -155,7 +155,7 @@ public class Create_reservation(
         var client = GetClient(guild.Id);
 
         // Act
-        var response = await MakeRequest(client, guild.Id, Guid.NewGuid(), Guid.NewGuid(), "123");
+        var response = await MakeRequest(client, guild.Id, Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), "123");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);

@@ -8,8 +8,11 @@ internal static class FeatureExtension
 {
     public static IServiceCollection AddReservationFeature(this IServiceCollection services)
     {
-        return services.ConfigureMarten(
-            options =>
+        return services
+            .AddScoped<ReservationService>()
+            .AddScoped<ReservationManagementService>()
+            .AddScoped<SeatManagementService>()
+            .ConfigureMarten(options =>
             {
                 options.Projections.Add<SeatProjection>(ProjectionLifecycle.Inline);
             });

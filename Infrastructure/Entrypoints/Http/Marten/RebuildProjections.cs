@@ -12,12 +12,12 @@ public static class RebuildProjections
     {
         using var daemon = await documentStore.BuildProjectionDaemonAsync();
 
-        await daemon.StartAllShards();
+        await daemon.StartAllAsync();
 
-        await daemon.RebuildProjection<SeatProjection>(TimeSpan.FromMinutes(5), CancellationToken.None);
-        await daemon.RebuildProjection<LanProjection>(TimeSpan.FromMinutes(5), CancellationToken.None);
+        await daemon.RebuildProjectionAsync<SeatProjection>(TimeSpan.FromMinutes(5), CancellationToken.None);
+        await daemon.RebuildProjectionAsync<LanProjection>(TimeSpan.FromMinutes(5), CancellationToken.None);
 
-        await daemon.StopAll();
+        await daemon.StopAllAsync();
 
         return TypedResults.Ok();
     }

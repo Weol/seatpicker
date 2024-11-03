@@ -27,7 +27,7 @@ import ListItemText from "@mui/material/ListItemText"
 import Typography from "@mui/material/Typography"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { useLans } from "../Adapters/Lans/AllLans"
+import { useAllLans } from "../Adapters/Lans/AllLans"
 import { Guild, Lan } from "../Adapters/Models"
 import DiscordGuildAvatar from "../Components/DiscordAvatar"
 import Modal from "../Components/Modal"
@@ -35,7 +35,7 @@ import { useAlerts } from "../Contexts/AlertContext"
 
 export default function GuildOverview(props: { guild: Guild }) {
   const { alertLoading, alertSuccess } = useAlerts()
-  const { lans, updateLan, createLan, deleteLan, setActiveLan } = useLans(props.guild.id)
+  const { lans, updateLan, createLan, deleteLan, setActiveLan } = useAllLans(props.guild.id)
   const [previewBackground, setPreviewBackground] = useState<string | null>(null)
   const [editingLan, setEditingLan] = useState<Lan | null>(null)
   const [selectedLan, setSelectedLan] = useState<Lan | null>(null)

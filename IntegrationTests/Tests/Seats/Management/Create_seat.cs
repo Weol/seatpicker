@@ -14,11 +14,11 @@ namespace Seatpicker.IntegrationTests.Tests.Seats.Management;
 // ReSharper disable once InconsistentNaming
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class Create_seat(
-    TestWebApplicationFactory factory,
+    TestWebApplicationFactory fusery,
     PostgresFixture databaseFixture,
-    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(fusery, databaseFixture, testOutputHelper)
 {
-    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, Guid lanId, CreateSeat.Request request) =>
+    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, string lanId, CreateSeat.Request request) =>
         await client.PostAsJsonAsync($"guild/{guildId}/lan/{lanId}/seat", request);
 
     [Fact]
@@ -49,18 +49,14 @@ public class Create_seat(
 
     public static TheoryData<CreateSeat.Request> InvalidUpdateRequests()
     {
-        return new TheoryData<CreateSeat.Request>
-        {
+        return
+        [
             CreateSeatRequest() with { Title = "" },
-            CreateSeatRequest() with
-            {
-                Bounds = new Bounds(0, 0, -1, 1)
-            },
-            CreateSeatRequest() with
-            {
-                Bounds = new Bounds(0, 0, 1, -1)
-            },
-        };
+            CreateSeatRequest() with { Bounds = new Bounds(0, 0, -1, 1) },
+
+            CreateSeatRequest() with { Bounds = new Bounds(0, 0, 1, -1) },
+
+        ];
     }
 
     [Theory]
@@ -72,7 +68,7 @@ public class Create_seat(
         var client = GetClient(guild.Id, Role.Operator);
 
         // Act
-        var response = await MakeRequest(client, guild.Id, Guid.NewGuid(), request);
+        var response = await MakeRequest(client, guild.Id, Guid.NewGuid().ToString(), request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -86,7 +82,7 @@ public class Create_seat(
         var client = GetClient(guild.Id);
 
         // Act
-        var response = await MakeRequest(client, guild.Id, Guid.NewGuid(), CreateSeatRequest());
+        var response = await MakeRequest(client, guild.Id, Guid.NewGuid().ToString(), CreateSeatRequest());
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);

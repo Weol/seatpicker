@@ -14,9 +14,9 @@ namespace Seatpicker.IntegrationTests.Tests.Authentication.Discord;
 // ReSharper disable once InconsistentNaming
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public abstract class LoginAndRenewBase(
-    TestWebApplicationFactory factory,
+    TestWebApplicationFactory fusery,
     PostgresFixture databaseFixture,
-    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(fusery, databaseFixture, testOutputHelper)
 {
     protected string DiscordToken { get; set; } = null!;
     protected string RefreshToken { get; set; } = null!;

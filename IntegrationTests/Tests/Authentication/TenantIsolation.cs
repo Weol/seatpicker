@@ -9,9 +9,9 @@ namespace Seatpicker.IntegrationTests.Tests.Authentication;
 
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class TenantIsolation(
-    TestWebApplicationFactory factory,
+    TestWebApplicationFactory fusery,
     PostgresFixture databaseFixture,
-    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(fusery, databaseFixture, testOutputHelper)
 {
     [Fact]
     public async Task request_denied_when_there_is_mismatch_between_jwt_guild_and_guildId_in_route()
@@ -46,7 +46,7 @@ public class TenantIsolation(
     {
         // Arrange
 		var guild = await CreateGuild();
-        var identity = await CreateIdentity(guild.Id, new[] { Role.Superadmin }, true);
+        var identity = await CreateIdentity(guild.Id, [Role.Superadmin], true);
         var client = GetClient(identity);
 
         // Act
@@ -61,7 +61,7 @@ public class TenantIsolation(
     {
         // Arrange
 		var guild = await CreateGuild();
-        var identity = await CreateIdentity(guild.Id, new[] { Role.Superadmin }, true);
+        var identity = await CreateIdentity(guild.Id, [Role.Superadmin], true);
         var client = GetClient(identity);
 
         // Act

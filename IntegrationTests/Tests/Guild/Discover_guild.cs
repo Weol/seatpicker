@@ -1,8 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using Bogus;
 using FluentAssertions;
-using Seatpicker.Infrastructure.Adapters.Guilds;
 using Seatpicker.Infrastructure.Entrypoints.Http.Frontend;
 using Xunit;
 using Xunit.Abstractions;
@@ -12,16 +10,16 @@ namespace Seatpicker.IntegrationTests.Tests.Guild;
 // ReSharper disable once InconsistentNaming
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class Discover_guild(
-    TestWebApplicationFactory factory,
+    TestWebApplicationFactory fusery,
     PostgresFixture databaseFixture,
-    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(fusery, databaseFixture, testOutputHelper)
 {
     [Fact]
     public async Task retrieves_only_guild_id_when_host_mapping_is_set_but_no_active_lan_is_set()
     {
         // Arrange
-        var guild1 = await CreateGuild(RandomData.Guild() with { Hostnames = new []{ "guild1.host1" }});
-        var guild2 = await CreateGuild(RandomData.Guild() with { Hostnames = new []{ "guild2.host1" }});
+        var guild1 = await CreateGuild(RandomData.Guild() with { Hostnames = ["guild1.host1"] });
+        var guild2 = await CreateGuild(RandomData.Guild() with { Hostnames = ["guild2.host1"] });
         var client1 = GetClient(guild1.Id);
         client1.DefaultRequestHeaders.Host = "guild1.host1";
         var client2 = GetClient(guild2.Id);
@@ -48,13 +46,13 @@ public class Discover_guild(
     public async Task retrieves_guild_id_and_active_lan_when_both_are_set()
     {
         // Arrange
-        var guild = await CreateGuild(RandomData.Guild() with { Hostnames = new []{ "guild3.host1" }});
+        var guild = await CreateGuild(RandomData.Guild() with { Hostnames = ["guild3.host1"] });
         var client1 = GetClient(guild.Id);
         client1.DefaultRequestHeaders.Host = "guild3.host1";
 
-        var actor = CreateUser(guild.Id);
-        var activeLan = RandomData.Aggregates.Lan(guild.Id, actor);
-        activeLan.SetActive(true, actor);
+        var user = CreateUser(guild.Id);
+        var activeLan = RandomData.Aggregates.Lan(guild.Id, user);
+        activeLan.SetActive(true, user);
         await SetupAggregates(guild.Id, activeLan);
 
         // Act

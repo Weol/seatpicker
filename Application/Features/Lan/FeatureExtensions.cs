@@ -8,8 +8,10 @@ internal static class FeatureExtension
 {
     public static IServiceCollection AddLanFeature(this IServiceCollection services)
     {
-        return services.ConfigureMarten(
-            options =>
+        return services
+            .AddScoped<GuildService>()
+            .AddScoped<LanService>()
+            .ConfigureMarten(options =>
             {
                 options.Projections.Add<LanProjection>(ProjectionLifecycle.Inline);
             });

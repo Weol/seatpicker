@@ -13,24 +13,24 @@ namespace Seatpicker.IntegrationTests.Tests.LanManagement;
 // ReSharper disable once InconsistentNaming
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class Update_lan(
-    TestWebApplicationFactory factory,
+    TestWebApplicationFactory fusery,
     PostgresFixture databaseFixture,
-    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(fusery, databaseFixture, testOutputHelper)
 {
     private static async Task<HttpResponseMessage> MakeRequest(
         HttpClient client,
         string guildId,
-        Guid lanId,
+        string lanId,
         UpdateLan.Request request) =>
         await client.PutAsJsonAsync($"guild/{guildId}/lan/{lanId}", request);
 
     public static TheoryData<UpdateLan.Request> ValidUpdateRequests()
     {
-        return new TheoryData<UpdateLan.Request>
-        {
+        return
+        [
             UpdateLanRequest() with { Active = true },
             UpdateLanRequest() with { Active = false },
-        };
+        ];
     }
 
     [Theory]
@@ -65,14 +65,14 @@ public class Update_lan(
 
     public static TheoryData<UpdateLan.Request> InvalidUpdateRequests()
     {
-        return new TheoryData<UpdateLan.Request>
-        {
+        return
+        [
             UpdateLanRequest() with { Background = null! },
             UpdateLanRequest() with { Title = null! },
             UpdateLanRequest() with { Title = "" },
-            UpdateLanRequest() with { Background = Array.Empty<byte>() },
-            UpdateLanRequest() with { Background = new byte[] { 1, 2, 3, 4 } },
-        };
+            UpdateLanRequest() with { Background = [] },
+            UpdateLanRequest() with { Background = [1, 2, 3, 4] },
+        ];
     }
 
     [Theory]
@@ -118,7 +118,7 @@ public class Update_lan(
         var client = GetClient(guild.Id);
 
         // Act
-        var response = await MakeRequest(client, guild.Id, Guid.NewGuid(), UpdateLanRequest());
+        var response = await MakeRequest(client, guild.Id, Guid.NewGuid().ToString(), UpdateLanRequest());
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -127,7 +127,7 @@ public class Update_lan(
     public static UpdateLan.Request UpdateLanRequest()
     {
         return new UpdateLan.Request(
-            Guid.NewGuid(),
+            Guid.NewGuid().ToString(),
             false,
             RandomData.Faker.Hacker.Noun(),
             RandomData.Aggregates.LanBackground());

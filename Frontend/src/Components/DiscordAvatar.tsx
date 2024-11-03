@@ -1,5 +1,5 @@
 ﻿import { Avatar, AvatarProps } from "@mui/material"
-import { Guild, User } from "../Adapters/Models"
+import {Guild, UnconfiguredGuild, User} from "../Adapters/Models"
 import Config from "../config"
 
 function stringToColor(string: string) {
@@ -30,16 +30,11 @@ function stringAvatar(name: string, props: AvatarProps) {
     children: `${name[0]}`,
   }
 }
-
-function getDiscordId(user: User) {
-  return user.id.substring(2)
-}
-
 export function DiscordUserAvatar(props: { user: User } & AvatarProps) {
-  return props.user.avatar != null ? (
+  return props.user.avatar ? (
     <Avatar
       alt={props.user.name}
-      src={Config.DiscordAvatarBaseUrl + getDiscordId(props.user) + "/" + props.user.avatar}
+      src={Config.DiscordAvatarBaseUrl + props.user.id + "/" + props.user.avatar}
       {...props}
     />
   ) : (
@@ -47,7 +42,7 @@ export function DiscordUserAvatar(props: { user: User } & AvatarProps) {
   )
 }
 
-export default function DiscordGuildAvatar(props: { guild: Guild } & AvatarProps) {
+export default function DiscordGuildAvatar(props: { guild: Guild | UnconfiguredGuild } & AvatarProps) {
   return props.guild.icon != null ? (
     <Avatar
       alt={props.guild.name}

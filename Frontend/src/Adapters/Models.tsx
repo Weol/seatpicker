@@ -3,6 +3,12 @@ export type ActiveGuild = {
   lanId: string | null
 }
 
+export type UnconfiguredGuild = {
+  id: string
+  name: string
+  icon: string | null
+}
+
 export type Guild = {
   id: string
   name: string

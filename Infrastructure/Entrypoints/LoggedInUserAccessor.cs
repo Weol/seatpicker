@@ -1,5 +1,4 @@
 ﻿using System.Security.Claims;
-using Seatpicker.Application.Features.Reservation;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Authentication;
 
@@ -10,7 +9,7 @@ public interface ILoggedInUserAccessor
     Task<User> GetUser();
 }
 
-public class LoggedInUserAccessor(IHttpContextAccessor httpContextAccessor, IUserProvider userProvider)
+public class LoggedInUserAccessor(IHttpContextAccessor httpContextAccessor, UserManager userManager)
     : ILoggedInUserAccessor
 {
     private HttpContext HttpContext =>
@@ -19,9 +18,9 @@ public class LoggedInUserAccessor(IHttpContextAccessor httpContextAccessor, IUse
     public async Task<User> GetUser()
     {
         var id  = HttpContext.User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
-        var guildId  = HttpContext.User.Claims.First(x => x.Type == JwtTokenCreator.GuildIdClaimName).Value;
+        var guildId  = HttpContext.User.Claims.FirstOrDefault(x => x.Type == JwtTokenCreator.GuildIdClaimName)?.Value;
 
-        return await userProvider.GetById(id) ??
+        return await userManager.GetById(guildId, id) ??
                throw new UserNotFoundException($"Cannot find user with id {id}");
     }
 
@@ -38,6 +37,6 @@ public static class LoggedInUserAccessorExtensions
     {
         return services
             .AddHttpContextAccessor()
-            .AddTransient<ILoggedInUserAccessor, LoggedInUserAccessor>();
+            .AddScoped<ILoggedInUserAccessor, LoggedInUserAccessor>();
     }
 }

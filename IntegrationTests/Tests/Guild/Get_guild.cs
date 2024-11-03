@@ -10,9 +10,9 @@ namespace Seatpicker.IntegrationTests.Tests.Guild;
 
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class Get_guild(
-    TestWebApplicationFactory factory,
+    TestWebApplicationFactory fusery,
     PostgresFixture databaseFixture,
-    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(fusery, databaseFixture, testOutputHelper)
 {
     private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId) =>
         await client.GetAsync($"guild/{guildId}");

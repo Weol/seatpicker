@@ -2,9 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
-using JasperFx.Core;
 using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Adapters.Guilds;
 using Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 using Xunit;
 using Xunit.Abstractions;
@@ -13,9 +11,9 @@ namespace Seatpicker.IntegrationTests.Tests.Guild;
 
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class Update_guild(
-    TestWebApplicationFactory factory,
+    TestWebApplicationFactory fusery,
     PostgresFixture databaseFixture,
-    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(fusery, databaseFixture, testOutputHelper)
 {
     private static async Task<HttpResponseMessage>
         MakeRequest(HttpClient client, string guildId, UpdateGuild.Request request) =>
@@ -37,8 +35,8 @@ public class Update_guild(
         var data = new TheoryData<Func<Infrastructure.Adapters.Guilds.Guild, UpdateGuild.Request>>
         {
             guild => UpdateGuildRequest(guild),
-            guild => UpdateGuildRequest(guild) with { Hostnames = Array.Empty<string>() },
-            guild => UpdateGuildRequest(guild) with { RoleMapping = Array.Empty<UpdateGuild.RoleMapping>() },
+            guild => UpdateGuildRequest(guild) with { Hostnames = [] },
+            guild => UpdateGuildRequest(guild) with { RoleMapping = [] },
         };
         
         return data;
@@ -103,7 +101,7 @@ public class Update_guild(
             guild => UpdateGuildRequest(guild) with { Name = "asdasd" },
 
             // Should not be able to have duplicate hostnames
-            guild => UpdateGuildRequest(guild) with { Hostnames = new[] { "test.org", "test.org" } },
+            guild => UpdateGuildRequest(guild) with { Hostnames = ["test.org", "test.org"] },
 
             // Should not be able to add a new role
             guild => UpdateGuildRequest(guild) with { Roles = new[] { RandomData.GuildRole() } },
@@ -119,12 +117,12 @@ public class Update_guild(
             guild =>
                 UpdateGuildRequest(guild) with
                 {
-                    RoleMapping = new[]
-                    {
+                    RoleMapping =
+                    [
                         new UpdateGuild.RoleMapping(
                             RandomData.NotAnyOf(guild.Roles.Select(role => role.Id), RandomData.NumericId),
-                            new[] { Role.Operator })
-                    }
+                            [Role.Operator]),
+                    ]
                 },
         };
 

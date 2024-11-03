@@ -19,9 +19,14 @@ internal static class DatabaseExtensions
     {
         services.AddValidatedOptions(configureAction);
 
-        services
-            .AddSingleton<IAggregateRepository, AggregateRepository>()
-            .AddSingleton<IDocumentRepository, DocumentRepository>();
+        services.AddPortMapping<IAggregateRepository, AggregateRepository>()
+            .AddPortMapping<IDocumentRepository, DocumentRepository>()
+            .AddScoped(CreateDocumentTransaction)
+            .AddScoped(CreateDocumentReader)
+            .AddScoped(CreateAggregateTransaction)
+            .AddScoped(CreateGuildlessDocumentTransaction)
+            .AddScoped(CreateGuildlessDocumentReader)
+            .AddScoped(CreateGuildlessAggregateTransaction);
 
         services.AddMarten(
                 provider =>
@@ -35,6 +40,57 @@ internal static class DatabaseExtensions
             .OptimizeArtifactWorkflow();
 
         return services;
+    }
+
+    private static IDocumentTransaction CreateDocumentTransaction(IServiceProvider provider)
+    {
+        var guildIdProvider = provider.GetRequiredService<GuildIdProvider>();
+        var documentSession = provider.GetRequiredService<IDocumentStore>().LightweightSession();
+
+        var repository = provider.GetRequiredService<IDocumentRepository>();
+        return repository.CreateTransaction(guildIdProvider.GuildId, documentSession);
+    }
+
+    private static IAggregateTransaction CreateAggregateTransaction(IServiceProvider provider)
+    {
+        var guildIdProvider = provider.GetRequiredService<GuildIdProvider>();
+        var documentSession = provider.GetRequiredService<IDocumentStore>().LightweightSession();
+
+        var repository = provider.GetRequiredService<IAggregateRepository>();
+        return repository.CreateTransaction(guildIdProvider.GuildId, documentSession);
+    }
+
+    private static IDocumentReader CreateDocumentReader(IServiceProvider provider)
+    {
+        var guildIdProvider = provider.GetRequiredService<GuildIdProvider>();
+        var querySession = provider.GetRequiredService<IDocumentStore>().QuerySession();
+
+        var repository = provider.GetRequiredService<IDocumentRepository>();
+        return repository.CreateReader(guildIdProvider.GuildId, querySession);
+    }
+
+    private static IGuildlessDocumentReader CreateGuildlessDocumentReader(IServiceProvider provider)
+    {
+        var querySession = provider.GetRequiredService<IDocumentStore>().QuerySession();
+
+        var repository = provider.GetRequiredService<IDocumentRepository>();
+        return repository.CreateGuildlessReader(querySession);
+    }
+
+    private static IGuildlessDocumentTransaction CreateGuildlessDocumentTransaction(IServiceProvider provider)
+    {
+        var documentSession = provider.GetRequiredService<IDocumentStore>().LightweightSession();
+
+        var repository = provider.GetRequiredService<IDocumentRepository>();
+        return repository.CreateGuildlessTransaction(documentSession);
+    }
+
+    private static IGuildlessAggregateTransaction CreateGuildlessAggregateTransaction(IServiceProvider provider)
+    {
+        var documentSession = provider.GetRequiredService<IDocumentStore>().LightweightSession();
+
+        var repository = provider.GetRequiredService<IAggregateRepository>();
+        return repository.CreateGuildlessTransaction(documentSession);
     }
 
     internal static StoreOptions ConfigureMarten(StoreOptions options, string connectionString)

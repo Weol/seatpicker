@@ -1,4 +1,5 @@
-﻿using Seatpicker.Infrastructure.Adapters.Database;
+﻿using Seatpicker.Application.Features.Reservation;
+using Seatpicker.Infrastructure.Adapters.Database;
 using Seatpicker.Infrastructure.Adapters.Discord;
 
 namespace Seatpicker.Infrastructure.Adapters;
@@ -8,6 +9,9 @@ public static class AdapterExtensions
     public static IServiceCollection AddAdapters(this IServiceCollection services)
     {
         return services
+            .AddHttpContextAccessor()
+            .AddScoped<GuildIdProvider>()
+            .AddScoped<IUserProvider, UserProvider>()
             .AddDatabase(ConfigureDatabase)
             .AddDiscordAdapter(ConfigureDiscordAdapter);
     }

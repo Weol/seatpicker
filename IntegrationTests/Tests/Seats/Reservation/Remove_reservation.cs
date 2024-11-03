@@ -10,11 +10,11 @@ namespace Seatpicker.IntegrationTests.Tests.Seats.Reservation;
 // ReSharper disable once InconsistentNaming
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class Remove_reservation(
-    TestWebApplicationFactory factory,
+    TestWebApplicationFactory fusery,
     PostgresFixture databaseFixture,
-    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(fusery, databaseFixture, testOutputHelper)
 {
-    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, Guid lanId, Guid seatId) =>
+    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, string lanId, string seatId) =>
         await client.DeleteAsync($"guild/{guildId}/lan/{lanId}/seat/{seatId}/reservation");
 
     [Fact]
@@ -26,7 +26,7 @@ public class Remove_reservation(
         var client = GetClient(identity);
 
         var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
-        var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId), reservedBy: identity.User);
+        var seat = SeatGenerator.Create(lan, CreateUser(guild.Id), reservedBy: identity.User);
 
         await SetupAggregates(guild.Id, lan, seat);
 
@@ -52,7 +52,7 @@ public class Remove_reservation(
         var client = GetClient(identity);
 
         var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
-        var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId));
+        var seat = SeatGenerator.Create(lan, CreateUser(guild.Id));
 
         await SetupAggregates(guild.Id, seat);
 
@@ -73,7 +73,7 @@ public class Remove_reservation(
 
         var alreadyReservedBy = CreateUser(guild.Id);
         var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
-        var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId), reservedBy: alreadyReservedBy);
+        var seat = SeatGenerator.Create(lan, CreateUser(guild.Id), reservedBy: alreadyReservedBy);
 
         await SetupAggregates(guild.Id, seat);
 

@@ -21,7 +21,7 @@ const discordIcon = require("./Media/discord.svg").default
 
 const settings = ["Logg ut"]
 
-export default function MainAppBar(props: { activeGuild: ActiveGuild }) {
+export default function MainAppBar(props: { activeGuild: ActiveGuild | null }) {
   const { logout, loggedInUser } = useAuth()
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null)
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
@@ -30,7 +30,7 @@ export default function MainAppBar(props: { activeGuild: ActiveGuild }) {
   const getPages = () => {
     if (loggedInUser != null) {
       const options = [] as string[]
-      if (loggedInUser.roles.includes(Role.ADMIN)) options.push("Admin")
+      if (loggedInUser.roles.includes(Role.ADMIN) && props.activeGuild) options.push("Admin")
       if (loggedInUser.roles.includes(Role.SUPERADMIN)) options.push("Superadmin")
       return options
     }
@@ -47,8 +47,8 @@ export default function MainAppBar(props: { activeGuild: ActiveGuild }) {
   const handleCloseNavMenu = (page: string) => {
     setAnchorElNav(null)
 
-    if (page == "Admin") {
-      navigate(`/guild/${activeGuildId}`)
+    if (page == "Admin" && props.activeGuild) {
+      navigate(`/guild/${props.activeGuild.guildId}`)
     } else if (page == "Superadmin") {
       navigate(`/guilds`)
     }

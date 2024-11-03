@@ -7,14 +7,14 @@ import { useAuth } from "../Adapters/AuthAdapter"
 import { ActiveGuild, User } from "../Adapters/Models"
 import { DiscordUserAvatar } from "../Components/DiscordAvatar"
 
-export default function RedirectLogin(props: { activeGuild: ActiveGuild }) {
+export default function RedirectLogin(props: { activeGuild: ActiveGuild | null }) {
   const { login, loggedInUser } = useAuth()
   const [searchParams] = useSearchParams()
 
   useEffect(() => {
     const code = searchParams.get("code")
     if (code) {
-      login(code, props.activeGuild.guildId)
+      login(code, props.activeGuild?.guildId ?? null)
     }
   }, [])
 

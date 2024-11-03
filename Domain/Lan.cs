@@ -12,11 +12,11 @@ namespace Seatpicker.Domain;
 [SuppressMessage("Performance", "CA1822:Mark members as static")]
 public class Lan : AggregateBase
 {
-    public Lan(string lanId, string title, byte[] background, User actor)
+    public Lan(string lanId, string title, byte[] background, User user)
     {
         if (title.Length <= 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
 
-        var evt = new LanCreated(lanId, title, background, actor.Id);
+        var evt = new LanCreated(lanId, title, background, user.Id);
 
         Raise(evt);
         Apply(evt);
@@ -36,31 +36,31 @@ public class Lan : AggregateBase
 
     public override string ToString() => $"Lan {Title} ({Id})";
 
-    public void ChangeBackground(byte[] newBackground, User actor)
+    public void ChangeBackground(byte[] newBackground, User user)
     {
-        var evt = new LanBackgroundChanged(newBackground, actor.Id);
+        var evt = new LanBackgroundChanged(newBackground, user.Id);
         Raise(evt);
         Apply(evt);
     }
 
-    public void ChangeTitle(string newTitle, User actor)
+    public void ChangeTitle(string newTitle, User user)
     {
-        var evt = new LanTitleChanged(newTitle, actor.Id);
+        var evt = new LanTitleChanged(newTitle, user.Id);
         Raise(evt);
         Apply(evt);
     }
 
-    public void SetActive(bool active, User actor)
+    public void SetActive(bool active, User user)
     {
-        var evt = new LanActiveChanged(active, actor.Id);
+        var evt = new LanActiveChanged(active, user.Id);
         Raise(evt);
         Apply(evt);
     }
 
 
-    public void Archive(User actor)
+    public void Archive(User user)
     {
-        var evt = new LanArchived(actor.Id);
+        var evt = new LanArchived(user.Id);
         Raise(evt);
         Apply(evt);
     }

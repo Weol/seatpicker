@@ -3,39 +3,39 @@
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 namespace Seatpicker.Application.Features.Lan;
 
-public class LanService(IAggregateTransaction aggregateTransaction, IDocumentReader documentReader, User actor)
+public class LanService(IAggregateTransaction aggregateTransaction, IDocumentReader documentReader)
 {
-    public async Task<string> Create(string title, byte[] background)
+    public async Task<string> Create(string title, byte[] background, User user)
     {
         var id = Guid.NewGuid().ToString();
-        var lan = new Domain.Lan(id, title, background, actor);
+        var lan = new Domain.Lan(id, title, background, user);
 
         aggregateTransaction.Create(lan);
 
         return id;
     }
 
-    public async Task UpdateBackground(string id, byte[] background)
+    public async Task UpdateBackground(string id, byte[] background, User user)
     {
         var lan = await aggregateTransaction.Aggregate<Domain.Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
 
-        lan.ChangeBackground(background, actor);
+        lan.ChangeBackground(background, user);
 
         aggregateTransaction.Update(lan);
     }
 
-    public async Task UpdateTitle(string id, string title)
+    public async Task UpdateTitle(string id, string title, User user)
     {
         var lan = await aggregateTransaction.Aggregate<Domain.Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
 
-        lan.ChangeTitle(title, actor);
+        lan.ChangeTitle(title, user);
 
         aggregateTransaction.Update(lan);
     }
 
-    public async Task SetActive(string id, bool active)
+    public async Task SetActive(string id, bool active, User user)
     {
         var lan = await aggregateTransaction.Aggregate<Domain.Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
@@ -50,21 +50,21 @@ public class LanService(IAggregateTransaction aggregateTransaction, IDocumentRea
             var activeLan = await aggregateTransaction.Aggregate<Domain.Lan>(activeLanId) ??
                             throw new LanNotFoundException { LanId = activeLanId };
 
-            activeLan.SetActive(false, actor);
+            activeLan.SetActive(false, user);
             aggregateTransaction.Update(activeLan);
         }
 
-        lan.SetActive(false, actor);
+        lan.SetActive(false, user);
 
         aggregateTransaction.Update(lan);
     }
 
-    public async Task Delete(string id)
+    public async Task Delete(string id, User user)
     {
         var lan = await aggregateTransaction.Aggregate<Domain.Lan>(id);
         if (lan is null) throw new LanNotFoundException { LanId = id };
 
-        lan.Archive(actor);
+        lan.Archive(user);
 
         aggregateTransaction.Update(lan);
         aggregateTransaction.Archive(lan);

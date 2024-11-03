@@ -11,13 +11,13 @@ namespace Seatpicker.IntegrationTests.Tests.Seats.ReservationManagement;
 // ReSharper disable once InconsistentNaming
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class Remove_reservation(
-    TestWebApplicationFactory factory,
+    TestWebApplicationFactory fusery,
     PostgresFixture databaseFixture,
-    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(fusery, databaseFixture, testOutputHelper)
 {
-    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, Guid lanId, Guid seatId) 
+    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, string lanId, string seatId)
         => await client.DeleteAsync($"guild/{guildId}/lan/{lanId}/seat/{seatId}/reservationmanagement");
-    
+
     [Fact]
     public async Task succeeds_when_seat_is_reserved_by_logged_in_user()
     {
@@ -27,7 +27,7 @@ public class Remove_reservation(
         var client = GetClient(identity);
 
         var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
-        var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId), reservedBy: identity.User);
+        var seat = SeatGenerator.Create(lan, CreateUser(guild.Id), reservedBy: identity.User);
 
         await SetupAggregates(guild.Id, lan, seat);
 
@@ -53,7 +53,7 @@ public class Remove_reservation(
 
         var user = CreateUser(guild.Id);
         var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
-        var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId), reservedBy: user);
+        var seat = SeatGenerator.Create(lan, CreateUser(guild.Id), reservedBy: user);
 
         await SetupAggregates(guild.Id, lan, seat);
 
@@ -69,7 +69,7 @@ public class Remove_reservation(
                 committedSeat.ReservedBy.Should().BeNull();
             });
     }
-    
+
     [Fact]
     public async Task succeeds_when_seat_is_not_reserved()
     {
@@ -79,7 +79,7 @@ public class Remove_reservation(
 
         var user = CreateUser(guild.Id);
         var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
-        var seat = SeatGenerator.Create(lan, CreateUser(lan.GuildId), reservedBy: user);
+        var seat = SeatGenerator.Create(lan, CreateUser(guild.Id), reservedBy: user);
 
         await SetupAggregates(guild.Id, seat);
 
@@ -98,12 +98,12 @@ public class Remove_reservation(
         var client = GetClient(guild.Id);
 
         // Act
-        var response = await MakeRequest(client, guild.Id, Guid.NewGuid(), Guid.NewGuid());
+        var response = await MakeRequest(client, guild.Id, Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
-    
+
     [Fact]
     public async Task fails_when_seat_does_not_exist()
     {
@@ -112,7 +112,7 @@ public class Remove_reservation(
         var client = GetClient(guild.Id, Role.Operator);
 
         // Act
-        var response = await MakeRequest(client, guild.Id, Guid.NewGuid(), Guid.NewGuid());
+        var response = await MakeRequest(client, guild.Id, Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);

@@ -20,11 +20,11 @@ public class Seat : AggregateBase
 
     public string? ReservedBy { get; private set; }
 
-    public Seat(string id, Lan lan, string title, Bounds bounds, User actor)
+    public Seat(string id, Lan lan, string title, Bounds bounds, User user)
     {
         if (title.Length == 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
 
-        var evt = new SeatCreated(id, lan.Id, title, bounds, actor.Id);
+        var evt = new SeatCreated(id, lan.Id, title, bounds, user.Id);
         Raise(evt);
         Apply(evt);
     }
@@ -35,27 +35,27 @@ public class Seat : AggregateBase
         // Marten needs this
     }
 
-    public void SetTitle(string title, User actor)
+    public void SetTitle(string title, User user)
     {
         if (title.Length == 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
 
-        var evt = new SeatTitleChanged(Id, title, actor.Id);
+        var evt = new SeatTitleChanged(Id, title, user.Id);
 
         Raise(evt);
         Apply(evt);
     }
 
-    public void SetBounds(Bounds bounds, User actor)
+    public void SetBounds(Bounds bounds, User user)
     {
-        var evt = new SeatBoundsChanged(Id, bounds, actor.Id);
+        var evt = new SeatBoundsChanged(Id, bounds, user.Id);
 
         Raise(evt);
         Apply(evt);
     }
 
-    public void Archive(User actor)
+    public void Archive(User user)
     {
-        var evt = new SeatArchived(Id, actor.Id);
+        var evt = new SeatArchived(Id, user.Id);
 
         Raise(evt);
         Apply(evt);
@@ -87,11 +87,11 @@ public class Seat : AggregateBase
         Apply(evt);
     }
 
-    public void RemoveReservation(User actor)
+    public void RemoveReservation(User user)
     {
         if (ReservedBy is null) return;
 
-        if (ReservedBy != actor.Id) throw new SeatReservationConflictException(this, ReservedBy, actor.Id);
+        if (ReservedBy != user.Id) throw new SeatReservationConflictException(this, ReservedBy, user.Id);
 
         var evt = new SeatReservationRemoved(Id, ReservedBy);
         Raise(evt);

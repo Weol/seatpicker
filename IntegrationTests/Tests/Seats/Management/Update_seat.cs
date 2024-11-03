@@ -14,15 +14,15 @@ namespace Seatpicker.IntegrationTests.Tests.Seats.Management;
 // ReSharper disable once InconsistentNaming
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class Update_seat(
-    TestWebApplicationFactory factory,
+    TestWebApplicationFactory fusery,
     PostgresFixture databaseFixture,
-    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(fusery, databaseFixture, testOutputHelper)
 {
     private static async Task<HttpResponseMessage> MakeRequest(
         HttpClient client,
         string guildId,
-        Guid lanId,
-        Guid seatId,
+        string lanId,
+        string seatId,
         UpdateSeat.Request request) =>
         await client.PutAsJsonAsync($"guild/{guildId}/lan/{lanId}/seat/{seatId}", request);
 
@@ -36,7 +36,7 @@ public class Update_seat(
         var client = GetClient(guild.Id, Role.Operator);
 
         var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
-        var existingSeat = SeatGenerator.Create(lan, CreateUser(lan.GuildId));
+        var existingSeat = SeatGenerator.Create(lan, CreateUser(guild.Id));
 
         await SetupAggregates(guild.Id, existingSeat);
 
@@ -66,7 +66,7 @@ public class Update_seat(
         await SetupAggregates(guild.Id, lan);
 
         // Act
-        var response = await MakeRequest(client, guild.Id, lan.Id, Guid.NewGuid(), UpdateSeatRequest());
+        var response = await MakeRequest(client, guild.Id, lan.Id, Guid.NewGuid().ToString(), UpdateSeatRequest());
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -74,18 +74,14 @@ public class Update_seat(
 
     public static TheoryData<UpdateSeat.Request> InvalidUpdateRequests()
     {
-        return new TheoryData<UpdateSeat.Request>
-        {
+        return
+        [
             UpdateSeatRequest() with { Title = "" },
-            UpdateSeatRequest() with
-            {
-                Bounds = new Bounds(0, 0, -1, 1)
-            },
-            UpdateSeatRequest() with
-            {
-                Bounds = new Bounds(0, 0, 1, -1)
-            },
-        };
+            UpdateSeatRequest() with { Bounds = new Bounds(0, 0, -1, 1) },
+
+            UpdateSeatRequest() with { Bounds = new Bounds(0, 0, 1, -1) },
+
+        ];
     }
 
     [Theory]
@@ -97,7 +93,7 @@ public class Update_seat(
         var client = GetClient(guild.Id, Role.Operator);
 
         // Act
-        var response = await MakeRequest(client, guild.Id, Guid.NewGuid(), Guid.NewGuid(), request);
+        var response = await MakeRequest(client, guild.Id, Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -114,8 +110,8 @@ public class Update_seat(
         var response = await MakeRequest(
             client,
             guild.Id,
-            Guid.NewGuid(),
-            Guid.NewGuid(),
+            Guid.NewGuid().ToString(),
+            Guid.NewGuid().ToString(),
             UpdateSeatRequest());
 
         // Assert

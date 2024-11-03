@@ -1,6 +1,6 @@
-import { atom, useRecoilValue } from "recoil"
+import {atom, useRecoilValue} from "recoil"
 import ApiRequest from "./ApiRequest"
-import { ActiveGuild } from "./Models"
+import {ActiveGuild} from "./Models"
 
 async function discoverGuild() {
   const response = await ApiRequest("GET", `guild/discover`)
@@ -16,8 +16,6 @@ export const activeGuildAtom = atom<ActiveGuild | null>({
   default: discoverGuild(),
 })
 
-export function useActiveGuildId() {
-  const activeGuild = useRecoilValue(activeGuildAtom)
-
-  return activeGuild?.guildId ?? null
+export function useActiveGuild() {
+  return useRecoilValue(activeGuildAtom)
 }

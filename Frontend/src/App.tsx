@@ -12,7 +12,6 @@ import ErrorPage from "./Pages/ErrorPage"
 import GuildOverview from "./Pages/GuildOverview"
 import { GuildRoleOverview } from "./Pages/GuildRoleOverview"
 import Loading from "./Pages/Loading"
-import NotFound from "./Pages/NotFound"
 import RedirectLogin from "./Pages/RedirectLogin"
 import Seats from "./Pages/Seats"
 
@@ -53,7 +52,23 @@ export default function App() {
 }
 
 function AppWithoutActiveGuild() {
-  return <div></div>
+  return (
+    <>
+      <MainAppBar activeGuild={null} />
+      <Suspense fallback={<Loading />}>
+        <Container maxWidth="sm" sx={{ paddingTop: "1em" }}>
+          <Routes>
+            <Route path="/" element={<ErrorPage header={"🙈"} message={"No guild has been configured for this host, please contact administrator"} />} />
+            <Route path="/redirect-login" element={<RedirectLogin activeGuild={null}/>} />
+            <Route path="/guilds" element={<AllGuildsOverview />} />
+            <Route path="/guild/:guildId" element={<GuildOverviewWrapper />} />
+            <Route path="/guild/:guildId/roles" element={<GuildRolesOverviewWrapper />} />
+            <Route path="*" element={<ErrorPage header={"404"} message={"Page not found"} />} />
+          </Routes>
+        </Container>
+      </Suspense>
+    </>
+  )
 }
 
 function AppWithActiveGuild(props: { activeGuild: ActiveGuild }) {
@@ -64,11 +79,11 @@ function AppWithActiveGuild(props: { activeGuild: ActiveGuild }) {
         <Container maxWidth="sm" sx={{ paddingTop: "1em" }}>
           <Routes>
             <Route path="/" element={<Seats />} />
-            <Route path="/redirect-login" element={<RedirectLogin />} />
+            <Route path="/redirect-login" element={<RedirectLogin activeGuild={props.activeGuild}/>} />
             <Route path="/guilds" element={<AllGuildsOverview />} />
             <Route path="/guild/:guildId" element={<GuildOverviewWrapper />} />
             <Route path="/guild/:guildId/roles" element={<GuildRolesOverviewWrapper />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<ErrorPage header={"404"} message={"Page not found"} />} />
           </Routes>
         </Container>
       </Suspense>

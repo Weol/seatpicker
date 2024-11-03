@@ -105,8 +105,8 @@ public class DocumentTransaction(IDocumentSession session) : IGuildlessDocumentT
 
     public void Dispose()
     {
+        session.SaveChanges();
         session.Dispose();
-        reader.Dispose();
         GC.SuppressFinalize(this);
     }
 }

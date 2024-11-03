@@ -2,11 +2,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 using Bogus;
-using Marten.Internal.CodeGeneration;
-using Microsoft.AspNetCore.Builder;
+using Seatpicker.Application.Features.Lan;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Discord;
-using Seatpicker.Infrastructure.Adapters.Guilds;
 
 namespace Seatpicker.IntegrationTests;
 
@@ -18,7 +16,7 @@ public static class RandomData
     public static T NotAnyOf<T>(IEnumerable<T> any, Func<T> func) where T : notnull
     {
         T t;
-        do { 
+        do {
             t = func();
         } while (any.Contains(t));
 
@@ -31,9 +29,9 @@ public static class RandomData
 
     public static DiscordUser DiscordUser() => new(NumericId(), Faker.Name.FirstName(), null, NumericId());
 
-    public static DiscordGuild DiscordGuild() => new(NumericId(), Faker.Company.CompanyName(), NumericId());
+    public static Infrastructure.Adapters.Discord.DiscordGuild DiscordGuild() => new(NumericId(), Faker.Company.CompanyName(), NumericId());
 
-    public static DiscordGuildRole DiscordGuildRole() =>
+    public static Infrastructure.Adapters.Discord.DiscordGuildRole DiscordGuildRole() =>
         new(NumericId(), Faker.Name.JobType(), DiscordColor(), NumericId());
 
     public static Guild Guild()
@@ -42,13 +40,10 @@ public static class RandomData
         return new Guild(NumericId(),
             Faker.Company.CompanyName(),
             NumericId(),
-            new[] { Hostname(), Hostname() },
-            new[] { (roles[0].Id, new[] { Role.Operator }) },
-            roles
-        );
+            [Hostname(), Hostname()],
+            [new GuildRoleMapping(roles[0].Id, [Role.Operator])]);
     }
 
-    public static GuildRole GuildRole() => new(NumericId(), Faker.Name.JobType(), DiscordColor(), NumericId());
 
     public static User User() => new(NumericId(), Faker.Name.FirstName(), NumericId(), Array.Empty<Role>());
 
@@ -61,17 +56,17 @@ public static class RandomData
         }
 
         public static Lan Lan(string guildId,
-            User actor,
+            User user,
             Guid? id = null,
             string? title = null,
             byte[]? background = null)
         {
             return new Lan(
-                id ?? Guid.NewGuid(),
+                id ?? Guid.NewGuid().ToString(),
                 guildId,
                 title ?? "Test title",
                 background ?? LanBackground(),
-                actor);
+                user);
         }
     }
 }

@@ -74,6 +74,7 @@ public class AggregateTransaction(IDocumentSession session) : IGuildlessAggregat
 
     public void Dispose()
     {
+        session.SaveChanges();
         session.Dispose();
         GC.SuppressFinalize(this);
     }

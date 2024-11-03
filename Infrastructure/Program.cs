@@ -1,3 +1,4 @@
+using Microsoft.IdentityModel.Logging;
 using Seatpicker.Application;
 using Seatpicker.Infrastructure;
 using Seatpicker.Infrastructure.Adapters;
@@ -10,6 +11,8 @@ builder.Configuration.AddJsonFile("appsettings.local.json");
 
 builder.Configuration.AddEnvironmentVariables("App_");
 builder.Configuration.AddSeatpickerKeyvault();
+
+IdentityModelEventSource.ShowPII = true;
 
 builder.Services.AddApplicationInsightsTelemetry()
     .AddLogging()

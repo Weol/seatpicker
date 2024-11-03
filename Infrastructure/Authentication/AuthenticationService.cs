@@ -19,11 +19,11 @@ public class AuthenticationService(
         string? guildId)
     {
         var isSuperAdmin = IsSuperAdmin(userId);
-        
+
         if (roles.Contains(Role.Superadmin) && !isSuperAdmin)
             throw new IllegalLoginAttemptException("Only whitelisted users can have the superadmin role");
-        
-        if (guildId is null && !isSuperAdmin) 
+
+        if (guildId is null && !isSuperAdmin)
             throw new IllegalLoginAttemptException("Only superadmins can have a token with no guild id");
 
         if (isSuperAdmin) roles = Enum.GetValues<Role>();
@@ -35,11 +35,10 @@ public class AuthenticationService(
             refreshToken,
             roles,
             guildId);
-        
+
         var (jwtToken, expiresAt) = await tokenCreator.CreateToken(token);
-        
-        if (guildId is not null)
-            await userManager.Store(guildId, new User(token.Id, nick, avatar, roles));
+
+        await userManager.Store(guildId, new User(token.Id, nick, avatar, roles));
 
         return (jwtToken, expiresAt, token);
     }
@@ -49,5 +48,5 @@ public class AuthenticationService(
         return options.Superadmins.Any(admin => admin == userId);
     }
 
-    public class IllegalLoginAttemptException(string? message) : Exception(message); 
+    public class IllegalLoginAttemptException(string? message) : Exception(message);
 }

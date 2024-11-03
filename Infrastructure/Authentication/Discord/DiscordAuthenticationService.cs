@@ -1,8 +1,6 @@
 ﻿using Marten;
-using Seatpicker.Application.Features;
 using Seatpicker.Application.Features.Lan;
 using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Adapters.Database;
 using Seatpicker.Infrastructure.Adapters.Discord;
 
 namespace Seatpicker.Infrastructure.Authentication.Discord;
@@ -49,7 +47,7 @@ public class DiscordAuthenticationService(
                 discordUser.GlobalName ?? discordUser.Username,
                 discordUser.Avatar,
                 accessToken.RefreshToken,
-                new[] { Role.User, Role.Superadmin },
+                [Role.User, Role.Superadmin],
                 null);
         }
 
@@ -69,7 +67,7 @@ public class DiscordAuthenticationService(
     {
         var guildMember = await discordAdapter.GetGuildMember(guildId, discordUser.Id);
 
-        if (guildMember == null) return (new[] { Role.User }, discordUser.Username, discordUser.Avatar);
+        if (guildMember == null) return ([Role.User], discordUser.Username, discordUser.Avatar);
 
         await using var querySession = documentStore.QuerySession();
         var guild = await querySession.LoadAsync<Guild>(guildId);

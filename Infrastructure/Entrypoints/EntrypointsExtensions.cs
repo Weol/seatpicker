@@ -1,5 +1,4 @@
-﻿using Seatpicker.Infrastructure.Entrypoints.GraphQL;
-using Seatpicker.Infrastructure.Entrypoints.Http;
+﻿using Seatpicker.Infrastructure.Entrypoints.Filters;
 
 namespace Seatpicker.Infrastructure.Entrypoints;
 
@@ -8,7 +7,6 @@ public static class EntrypointsExtensions
     public static IServiceCollection AddEntrypoints(this IServiceCollection services, IConfiguration configuration)
     {
         services
-            .AddGraphQLEntrypoints()
             .AddEndpointsApiExplorer()
             .AddLoggedInUserAccessor()
             .AddHealthChecks();
@@ -20,8 +18,11 @@ public static class EntrypointsExtensions
     public static WebApplication UseEntrypoints(this WebApplication app)
     {
         app.UseHttpsRedirection();
-        app.MapGraphQLEntrypoints();
-        app.MapEntrypoints();
+        app.MapEntrypoints(builder =>
+        {
+            builder.AddEndpointFilter<FluentValidationFilter>();
+            builder.AddEndpointFilter<HttpResponseExceptionFilter>();
+        });
 
         return app;
     }
