@@ -33,15 +33,8 @@ public class AggregateRepository(IDocumentStore store) : IAggregateRepository
     };
 }
 
-public class AggregateTransaction : IGuildlessAggregateTransaction
+public class AggregateTransaction(IDocumentSession session) : IGuildlessAggregateTransaction
 {
-    private readonly IDocumentSession session;
-
-    public AggregateTransaction(IDocumentSession session)
-    {
-        this.session = session;
-    }
-
     public void Update<TAggregate>(TAggregate aggregate)
         where TAggregate : AggregateBase
     {

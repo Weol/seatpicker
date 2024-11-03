@@ -8,7 +8,7 @@ public static class EntrypointsExtensions
     public static IServiceCollection AddEntrypoints(this IServiceCollection services, IConfiguration configuration)
     {
         services
-            .AddGraphQLEntrypoint()
+            .AddGraphQLEntrypoints()
             .AddEndpointsApiExplorer()
             .AddLoggedInUserAccessor()
             .AddHealthChecks();
@@ -20,7 +20,7 @@ public static class EntrypointsExtensions
     public static WebApplication UseEntrypoints(this WebApplication app)
     {
         app.UseHttpsRedirection();
-        app.MapGraphQL();
+        app.MapGraphQLEntrypoints();
         app.MapEntrypoints();
 
         return app;

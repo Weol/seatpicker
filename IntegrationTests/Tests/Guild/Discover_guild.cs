@@ -11,15 +11,11 @@ namespace Seatpicker.IntegrationTests.Tests.Guild;
 
 // ReSharper disable once InconsistentNaming
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
-public class Discover_guild : IntegrationTestBase
+public class Discover_guild(
+    TestWebApplicationFactory factory,
+    PostgresFixture databaseFixture,
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
 {
-    public Discover_guild(
-        TestWebApplicationFactory factory,
-        PostgresFixture databaseFixture,
-        ITestOutputHelper testOutputHelper) : base(factory, databaseFixture, testOutputHelper)
-    {
-    }
-
     [Fact]
     public async Task retrieves_only_guild_id_when_host_mapping_is_set_but_no_active_lan_is_set()
     {
@@ -56,9 +52,9 @@ public class Discover_guild : IntegrationTestBase
         var client1 = GetClient(guild.Id);
         client1.DefaultRequestHeaders.Host = "guild3.host1";
 
-        var initiator = CreateUser(guild.Id);
-        var activeLan = RandomData.Aggregates.Lan(guild.Id, initiator);
-        activeLan.SetActive(true, initiator);
+        var actor = CreateUser(guild.Id);
+        var activeLan = RandomData.Aggregates.Lan(guild.Id, actor);
+        activeLan.SetActive(true, actor);
         await SetupAggregates(guild.Id, activeLan);
 
         // Act

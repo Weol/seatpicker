@@ -3,24 +3,23 @@ using Marten;
 using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Lan;
 using Seatpicker.Application.Features.Reservation;
-using Seatpicker.Infrastructure.Adapters.Discord;
 
-namespace Seatpicker.Infrastructure.Entrypoints.GraphQL.GuildQueries;
+namespace Seatpicker.Infrastructure.Entrypoints.GraphQL.Guild;
 
 public class Queries
 {
-    public IExecutable<Guild> GetGuild(string? hostname, [FromServices] IQuerySession querySession)
+    public IExecutable<Application.Features.Lan.Guild> GetGuild(string? hostname, [FromServices] IQuerySession querySession)
     {
-        var query = querySession.Query<Guild>().AsQueryable();
+        var query = querySession.Query<Application.Features.Lan.Guild>().AsQueryable();
         if (hostname is not null) query = query.Where(guild => guild.Hostnames.Contains(hostname));
         return query.AsExecutable();
     }
 }
 
-[ExtendObjectType(typeof(Guild))]
+[ExtendObjectType(typeof(Application.Features.Lan.Guild))]
 public class GuildExtensions
 {
-    public IExecutable<ProjectedLan> GetLan([FromServices] IQuerySession querySession, [Parent] Guild guild, string? id)
+    public IExecutable<ProjectedLan> GetLan([FromServices] IQuerySession querySession, [Parent] Application.Features.Lan.Guild guild, string? id)
     {
         var query = querySession.Query<ProjectedLan>().AsQueryable();
         if (id is not null) query = query.Where(lan => lan.Id == id);

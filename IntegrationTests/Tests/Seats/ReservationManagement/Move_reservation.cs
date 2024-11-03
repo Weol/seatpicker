@@ -12,15 +12,11 @@ namespace Seatpicker.IntegrationTests.Tests.Seats.ReservationManagement;
 
 // ReSharper disable once InconsistentNaming
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
-public class Move_reservation : IntegrationTestBase
+public class Move_reservation(
+    TestWebApplicationFactory factory,
+    PostgresFixture databaseFixture,
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
 {
-    public Move_reservation(TestWebApplicationFactory factory, PostgresFixture databaseFixture, ITestOutputHelper testOutputHelper) : base(
-        factory,
-        databaseFixture,
-        testOutputHelper)
-    {
-    }
-
     private static Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, Guid lanId, Guid fromSeatId, Guid toSeatId) =>
         client.PutAsJsonAsync(
             $"guild/{guildId}/lan/{lanId}/seat/{fromSeatId}/reservationmanagement",

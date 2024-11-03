@@ -12,15 +12,11 @@ using Xunit.Abstractions;
 namespace Seatpicker.IntegrationTests.Tests.Guild;
 
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
-public class Update_guild : IntegrationTestBase
+public class Update_guild(
+    TestWebApplicationFactory factory,
+    PostgresFixture databaseFixture,
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
 {
-    public Update_guild(
-        TestWebApplicationFactory factory,
-        PostgresFixture databaseFixture,
-        ITestOutputHelper testOutputHelper) : base(factory, databaseFixture, testOutputHelper)
-    {
-    }
-
     private static async Task<HttpResponseMessage>
         MakeRequest(HttpClient client, string guildId, UpdateGuild.Request request) =>
         await client.PutAsJsonAsync($"guild/{guildId}", request);

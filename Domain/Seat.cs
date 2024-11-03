@@ -20,11 +20,11 @@ public class Seat : AggregateBase
 
     public string? ReservedBy { get; private set; }
 
-    public Seat(string id, Lan lan, string title, Bounds bounds, User initiator)
+    public Seat(string id, Lan lan, string title, Bounds bounds, User actor)
     {
         if (title.Length == 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
 
-        var evt = new SeatCreated(id, lan.Id, title, bounds, initiator.Id);
+        var evt = new SeatCreated(id, lan.Id, title, bounds, actor.Id);
         Raise(evt);
         Apply(evt);
     }
@@ -35,27 +35,27 @@ public class Seat : AggregateBase
         // Marten needs this
     }
 
-    public void SetTitle(string title, User initiator)
+    public void SetTitle(string title, User actor)
     {
         if (title.Length == 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
 
-        var evt = new SeatTitleChanged(Id, title, initiator.Id);
+        var evt = new SeatTitleChanged(Id, title, actor.Id);
 
         Raise(evt);
         Apply(evt);
     }
 
-    public void SetBounds(Bounds bounds, User initiator)
+    public void SetBounds(Bounds bounds, User actor)
     {
-        var evt = new SeatBoundsChanged(Id, bounds, initiator.Id);
+        var evt = new SeatBoundsChanged(Id, bounds, actor.Id);
 
         Raise(evt);
         Apply(evt);
     }
 
-    public void Archive(User initiator)
+    public void Archive(User actor)
     {
-        var evt = new SeatArchived(Id, initiator.Id);
+        var evt = new SeatArchived(Id, actor.Id);
 
         Raise(evt);
         Apply(evt);
@@ -87,11 +87,11 @@ public class Seat : AggregateBase
         Apply(evt);
     }
 
-    public void RemoveReservation(User initiator)
+    public void RemoveReservation(User actor)
     {
         if (ReservedBy is null) return;
 
-        if (ReservedBy != initiator.Id) throw new SeatReservationConflictException(this, ReservedBy, initiator.Id);
+        if (ReservedBy != actor.Id) throw new SeatReservationConflictException(this, ReservedBy, actor.Id);
 
         var evt = new SeatReservationRemoved(Id, ReservedBy);
         Raise(evt);

@@ -8,17 +8,11 @@ using Xunit.Abstractions;
 namespace Seatpicker.IntegrationTests.Tests.Authentication;
 
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
-public class TenantIsolation : IntegrationTestBase
+public class TenantIsolation(
+    TestWebApplicationFactory factory,
+    PostgresFixture databaseFixture,
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
 {
-    public TenantIsolation(TestWebApplicationFactory factory,
-        PostgresFixture databaseFixture,
-        ITestOutputHelper testOutputHelper) : base(
-        factory,
-        databaseFixture,
-        testOutputHelper)
-    {
-    }
-
     [Fact]
     public async Task request_denied_when_there_is_mismatch_between_jwt_guild_and_guildId_in_route()
     {

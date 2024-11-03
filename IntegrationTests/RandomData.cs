@@ -61,7 +61,7 @@ public static class RandomData
         }
 
         public static Lan Lan(string guildId,
-            User initiator,
+            User actor,
             Guid? id = null,
             string? title = null,
             byte[]? background = null)
@@ -71,7 +71,7 @@ public static class RandomData
                 guildId,
                 title ?? "Test title",
                 background ?? LanBackground(),
-                initiator);
+                actor);
         }
     }
 }

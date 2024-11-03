@@ -10,17 +10,11 @@ namespace Seatpicker.IntegrationTests.Tests.LanManagement;
 
 // ReSharper disable once InconsistentNaming
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
-public class GetAll_lan : IntegrationTestBase
+public class GetAll_lan(
+    TestWebApplicationFactory factory,
+    PostgresFixture databaseFixture,
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
 {
-    public GetAll_lan(TestWebApplicationFactory factory,
-        PostgresFixture databaseFixture,
-        ITestOutputHelper testOutputHelper) : base(
-        factory,
-        databaseFixture,
-        testOutputHelper)
-    {
-    }
-
     private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId) =>
         await client.GetAsync($"guild/{guildId}/lan");
 

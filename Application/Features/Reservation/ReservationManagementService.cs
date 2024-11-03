@@ -2,61 +2,49 @@
 
 namespace Seatpicker.Application.Features.Reservation;
 
-public class ReservationManagementService
+public class ReservationManagementService(
+    IUserProvider userProvider,
+    IAggregateTransaction transaction,
+    IDocumentReader reader,
+    User actor)
 {
-    private readonly IUserProvider _userProvider;
-    private readonly IAggregateTransaction _transaction;
-    private readonly IDocumentReader _reader;
-    private readonly User _initiator;
-
-    internal ReservationManagementService(IUserProvider userProvider,
-        IAggregateTransaction transaction,
-        IDocumentReader reader,
-        User initiator)
-    {
-        _userProvider = userProvider;
-        _transaction = transaction;
-        _reader = reader;
-        _initiator = initiator;
-    }
-
     public async Task Create(string lanId, string seatId, string userId)
     {
-        var userToReserveFor
-            = await _userProvider.GetById(userId) ?? throw new UserNotFoundException { UserId = userId };
+        var userToReserveFor =
+            await userProvider.GetById(userId) ?? throw new UserNotFoundException { UserId = userId };
 
-        var seatToReserve = await _transaction.Aggregate<Seat>(seatId) ??
-            throw new SeatNotFoundException { SeatId = seatId };
+        var seatToReserve = await transaction.Aggregate<Seat>(seatId) ??
+                            throw new SeatNotFoundException { SeatId = seatId };
 
-        var numReservedSeatsByUser = _reader.Query<ProjectedSeat>()
+        var numReservedSeatsByUser = reader.Query<ProjectedSeat>()
             .Where(seat => seat.LanId == lanId)
             .Count(seat => seat.ReservedBy != null && seat.ReservedBy == userId);
 
-        seatToReserve.MakeReservationFor(userToReserveFor, numReservedSeatsByUser, _initiator);
+        seatToReserve.MakeReservationFor(userToReserveFor, numReservedSeatsByUser, actor);
 
-        _transaction.Update(seatToReserve);
+        transaction.Update(seatToReserve);
     }
 
-   public async Task Delete(string lanId, string seatId)
+    public async Task Delete(string lanId, string seatId)
     {
-        var seat = await _transaction.Aggregate<Seat>(seatId) ?? throw new SeatNotFoundException { SeatId = seatId };
+        var seat = await transaction.Aggregate<Seat>(seatId) ?? throw new SeatNotFoundException { SeatId = seatId };
 
-        seat.RemoveReservationFor(_initiator);
+        seat.RemoveReservationFor(actor);
 
-        _transaction.Update(seat);
+        transaction.Update(seat);
     }
 
-   public async Task Move(string lanId, string fromSeatId, string toSeatId)
+    public async Task Move(string lanId, string fromSeatId, string toSeatId)
     {
-        var fromSeat = await _transaction.Aggregate<Seat>(fromSeatId) ??
-            throw new SeatNotFoundException { SeatId = fromSeatId };
+        var fromSeat = await transaction.Aggregate<Seat>(fromSeatId) ??
+                       throw new SeatNotFoundException { SeatId = fromSeatId };
 
-        var toSeat = await _transaction.Aggregate<Seat>(toSeatId) ??
-            throw new SeatNotFoundException { SeatId = toSeatId };
+        var toSeat = await transaction.Aggregate<Seat>(toSeatId) ??
+                     throw new SeatNotFoundException { SeatId = toSeatId };
 
-        toSeat.MoveReservationFor(fromSeat, _initiator);
+        toSeat.MoveReservationFor(fromSeat, actor);
 
-        _transaction.Update(fromSeat);
-        _transaction.Update(toSeat);
+        transaction.Update(fromSeat);
+        transaction.Update(toSeat);
     }
 }

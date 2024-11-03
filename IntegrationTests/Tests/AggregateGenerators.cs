@@ -7,7 +7,7 @@ public static class SeatGenerator
 {
     public static Seat Create(
         Lan lan,
-        User initiator,
+        User actor,
         User? reservedBy = null,
         Guid? id = null,
         string? title = null,
@@ -18,7 +18,7 @@ public static class SeatGenerator
             lan,
             title ?? "Test title",
             bounds ?? new Bounds(0, 0, 1, 1),
-            initiator);
+            actor);
 
         if (reservedBy is not null) seat.MakeReservation(reservedBy, 0);
 

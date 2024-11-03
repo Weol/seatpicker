@@ -3,7 +3,7 @@ using Seatpicker.Application.Features;
 using Seatpicker.Application.Features.Lan;
 using Seatpicker.Infrastructure.Adapters.Database;
 
-namespace Seatpicker.Infrastructure.Entrypoints.GraphQL.GuildQueries;
+namespace Seatpicker.Infrastructure.Entrypoints.GraphQL.Guild;
 
 public class Mutations(UnitOfWorkFactory unitOfWorkFactory, DocumentRepository documentRepository)
 {
@@ -17,8 +17,6 @@ public class Mutations(UnitOfWorkFactory unitOfWorkFactory, DocumentRepository d
         var lan = await reader.Query<ProjectedLan>(id);
         return lan;
     }
-
-
 }
 
 public record CreateLan(string Id, string Title, byte[] Background);

@@ -64,16 +64,9 @@ public class DocumentRepository(IDocumentStore store, ILogger<DocumentRepository
     };
 }
 
-public class DocumentTransaction : IGuildlessDocumentTransaction, IDisposable
+public class DocumentTransaction(IDocumentSession session) : IGuildlessDocumentTransaction, IDisposable
 {
-    private readonly IDocumentSession session;
-    private readonly DocumentReader reader;
-
-    public DocumentTransaction(IDocumentSession session)
-    {
-        this.session = session;
-        reader = new DocumentReader(session);
-    }
+    private readonly DocumentReader reader = new (session);
 
     public void Store<TDocument>(params TDocument[] documentsToAdd)
         where TDocument : IDocument
@@ -118,15 +111,8 @@ public class DocumentTransaction : IGuildlessDocumentTransaction, IDisposable
     }
 }
 
-public class DocumentReader : IGuildlessDocumentReader
+public class DocumentReader(IQuerySession session) : IGuildlessDocumentReader
 {
-    private readonly IQuerySession session;
-
-    public DocumentReader(IQuerySession session)
-    {
-        this.session = session;
-    }
-
     public Task<TDocument?> Query<TDocument>(string id)
         where TDocument : IDocument
     {

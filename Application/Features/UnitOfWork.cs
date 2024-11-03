@@ -28,6 +28,7 @@ public class UnitOfWorkFactory(
         // Reservation feature
         services.AddSingleton<ReservationService>()
             .AddSingleton<ReservationManagementService>()
+            .AddSingleton<LanService>()
             .AddSingleton<SeatManagementService>();
 
         // Lan feature

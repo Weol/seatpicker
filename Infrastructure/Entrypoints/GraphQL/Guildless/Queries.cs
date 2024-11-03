@@ -1,11 +1,7 @@
-﻿using HotChocolate.Data;
-using Marten;
-using Microsoft.AspNetCore.Mvc;
-using Seatpicker.Application.Features.Lan;
-using Seatpicker.Application.Features.Reservation;
+﻿using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Infrastructure.Adapters.Discord;
 
-namespace Seatpicker.Infrastructure.Entrypoints.GraphQL;
+namespace Seatpicker.Infrastructure.Entrypoints.GraphQL.Guildless;
 
 public class Queries
 {

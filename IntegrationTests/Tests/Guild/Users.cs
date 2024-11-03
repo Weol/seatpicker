@@ -9,15 +9,11 @@ namespace Seatpicker.IntegrationTests.Tests.Guild;
 
 // ReSharper disable once InconsistentNaming
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
-public class Users : IntegrationTestBase
+public class Users(
+    TestWebApplicationFactory factory,
+    PostgresFixture databaseFixture,
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
 {
-    public Users(
-        TestWebApplicationFactory factory,
-        PostgresFixture databaseFixture,
-        ITestOutputHelper testOutputHelper) : base(factory, databaseFixture, testOutputHelper)
-    {
-    }
-
     [Fact]
     public async Task getting_users_returns_all_users_who_have_logged_in()
     {
