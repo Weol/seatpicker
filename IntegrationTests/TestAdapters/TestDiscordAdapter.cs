@@ -17,8 +17,7 @@ public class TestDiscordAdapter : DiscordAdapter
         HttpClient httpClient,
         IOptions<DiscordAdapterOptions> options,
         JsonSerializerOptions jsonSerializerOptions,
-        ILogger<DiscordAdapter> logger,
-        IMemoryCache memoryCache) : base(httpClient, options, jsonSerializerOptions, logger, memoryCache)
+        ILogger<DiscordAdapter> logger) : base(httpClient, options, jsonSerializerOptions, logger)
     {
     }
 
@@ -112,12 +111,6 @@ public class TestDiscordAdapter : DiscordAdapter
     public override Task<IEnumerable<DiscordGuild>> GetGuilds()
     {
         return Task.FromResult(guilds.Values.Select(guild => guild.DiscordGuild));
-    }
-
-    public override Task<IEnumerable<DiscordGuildRole>> GetGuildRoles(string guildId)
-    {
-        var guild = guilds.Values.First(x => x.DiscordGuild.Id == guildId);
-        return Task.FromResult(guild.Roles);
     }
 
     public override Task<DiscordGuildMember?> GetGuildMember(string guildId, string memberId)

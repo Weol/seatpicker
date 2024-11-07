@@ -48,7 +48,7 @@ public class Remove_seat(
         await SetupAggregates(guild.Id, lan);
 
         // Act
-        var response = await MakeRequest(client, guild.Id, lan.Id, Guid.NewGuid());
+        var response = await MakeRequest(client, guild.Id, lan.Id, Guid.NewGuid().ToString());
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -62,7 +62,7 @@ public class Remove_seat(
         var client = GetClient(guild.Id);
 
         // Act
-        var response = await MakeRequest(client, guild.Id, Guid.NewGuid().ToString(), Guid.NewGuid());
+        var response = await MakeRequest(client, guild.Id, Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);

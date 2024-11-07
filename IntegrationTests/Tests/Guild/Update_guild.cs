@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
+using Seatpicker.Application.Features.Lan;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Entrypoints.Http.Guild;
 using Xunit;
@@ -19,20 +20,19 @@ public class Update_guild(
         MakeRequest(HttpClient client, string guildId, UpdateGuild.Request request) =>
         await client.PutAsJsonAsync($"guild/{guildId}", request);
 
-    private static UpdateGuild.Request UpdateGuildRequest(Infrastructure.Adapters.Guilds.Guild guild)
+    private static UpdateGuild.Request UpdateGuildRequest(Application.Features.Lan.Guild guild)
     {
         return new UpdateGuild.Request(guild.Id,
             guild.Name,
             guild.Id,
             guild.Hostnames,
-            guild.RoleMapping.Select(mapping => new UpdateGuild.RoleMapping(mapping.GuildRoleId, mapping.Roles))
-                .ToArray(),
+            guild.RoleMapping,
             guild.Roles);
     }
 
-    public static TheoryData<Func<Infrastructure.Adapters.Guilds.Guild, UpdateGuild.Request>> ValidUpdateRequests()
+    public static TheoryData<Func<Application.Features.Lan.Guild, UpdateGuild.Request>> ValidUpdateRequests()
     {
-        var data = new TheoryData<Func<Infrastructure.Adapters.Guilds.Guild, UpdateGuild.Request>>
+        var data = new TheoryData<Func<Application.Features.Lan.Guild, UpdateGuild.Request>>
         {
             guild => UpdateGuildRequest(guild),
             guild => UpdateGuildRequest(guild) with { Hostnames = [] },
@@ -44,21 +44,21 @@ public class Update_guild(
 
     [Theory]
     [MemberData(nameof(ValidUpdateRequests))]
-    public async Task succeeds_when_valid(Func<Infrastructure.Adapters.Guilds.Guild, UpdateGuild.Request> createRequest)
+    public async Task succeeds_when_valid(Func<Application.Features.Lan.Guild, UpdateGuild.Request> createRequest)
     {
         // Arrange
         var guild = await CreateGuild();
         var client = GetClient(guild.Id, Role.Admin);
         var request = createRequest(guild);
 
-        var defaultDocument = GetCommittedDocuments<GuildAdapter.GuildDocument>()
+        var defaultDocument = GetCommittedDocuments<Application.Features.Lan.Guild>()
             .First(document => document.Id == guild.Id);
 
         // Act
         var response = await MakeRequest(client, guild.Id, request);
 
         // Assert
-        var committedDocument = GetCommittedDocuments<GuildAdapter.GuildDocument>()
+        var committedDocument = GetCommittedDocuments<Application.Features.Lan.Guild>()
             .First(document => document.Id == guild.Id);
 
         Assert.Multiple(
@@ -70,11 +70,11 @@ public class Update_guild(
                     () => committedDocument.Hostnames.Should().BeEquivalentTo(request.Hostnames),
                     () =>
                     {
-                        committedDocument.RoleMappings.Should()
+                        committedDocument.RoleMapping.Should()
                             .AllSatisfy(
                                 mapping =>
                                 {
-                                    var subject = committedDocument.RoleMappings.Should()
+                                    var subject = committedDocument.RoleMapping.Should()
                                         .ContainSingle(x => x.RoleId == mapping.RoleId)
                                         .Subject;
 
@@ -84,9 +84,9 @@ public class Update_guild(
             });
     }
 
-    public static TheoryData<Func<Infrastructure.Adapters.Guilds.Guild, UpdateGuild.Request>> InvalidUpdateRequests()
+    public static TheoryData<Func<Application.Features.Lan.Guild, UpdateGuild.Request>> InvalidUpdateRequests()
     {
-        var data = new TheoryData<Func<Infrastructure.Adapters.Guilds.Guild, UpdateGuild.Request>>()
+        var data = new TheoryData<Func<Application.Features.Lan.Guild, UpdateGuild.Request>>()
         {
             // Should not be able to have empty or whitespace strings
             guild => UpdateGuildRequest(guild) with { Id = "" },
@@ -119,7 +119,7 @@ public class Update_guild(
                 {
                     RoleMapping =
                     [
-                        new UpdateGuild.RoleMapping(
+                        new GuildRoleMapping(
                             RandomData.NotAnyOf(guild.Roles.Select(role => role.Id), RandomData.NumericId),
                             [Role.Operator]),
                     ]
@@ -131,7 +131,7 @@ public class Update_guild(
 
     [Theory]
     [MemberData(nameof(InvalidUpdateRequests))]
-    public async Task fails_when_invalid(Func<Infrastructure.Adapters.Guilds.Guild, UpdateGuild.Request> createRequest)
+    public async Task fails_when_invalid(Func<Application.Features.Lan.Guild, UpdateGuild.Request> createRequest)
     {
         // Arrange
         var guild = await CreateGuild();

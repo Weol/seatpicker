@@ -74,14 +74,11 @@ public class Update_seat(
 
     public static TheoryData<UpdateSeat.Request> InvalidUpdateRequests()
     {
-        return
-        [
+        return new TheoryData<UpdateSeat.Request> {
             UpdateSeatRequest() with { Title = "" },
             UpdateSeatRequest() with { Bounds = new Bounds(0, 0, -1, 1) },
-
             UpdateSeatRequest() with { Bounds = new Bounds(0, 0, 1, -1) },
-
-        ];
+        };
     }
 
     [Theory]

@@ -23,17 +23,10 @@ public static class UpdateGuild
         return TypedResults.Ok();
     }
 
-    public record RoleMapping(string GuildRoleId, Role[] Roles);
-
-    public record Request(string Id, string Name, string? Icon, string[] Hostnames, RoleMapping[] RoleMapping)
+    public record Request(string Id, string Name, string? Icon, string[] Hostnames, GuildRoleMapping[] RoleMapping, GuildRole[] Roles)
     {
         public Application.Features.Lan.Guild ToGuild() =>
-            new (
-                Id,
-                Name,
-                Icon,
-                Hostnames,
-                RoleMapping.Select(mapping => new GuildRoleMapping(mapping.GuildRoleId, mapping.Roles)).ToArray());
+            new (Id, Name, Icon, Hostnames, RoleMapping, Roles); 
     };
 
     public class RequestValidator : AbstractValidator<Request>
@@ -67,7 +60,7 @@ public static class UpdateGuild
             return Uri.CheckHostName(hostname) != UriHostNameType.Unknown;
         }
 
-        private static bool HaveNoDuplicateRolesAcrossMappings(RoleMapping[] roleMapping)
+        private static bool HaveNoDuplicateRolesAcrossMappings(GuildRoleMapping[] roleMapping)
         {
             var allRoles = roleMapping.SelectMany(mapping => mapping.Roles).ToList();
             return allRoles.Distinct().Count() == allRoles.Count;

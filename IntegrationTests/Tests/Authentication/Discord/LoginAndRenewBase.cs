@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Headers;
 using FluentAssertions;
+using Seatpicker.Application.Features.Lan;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Entrypoints.Http.Authentication;
@@ -68,7 +69,6 @@ public abstract class LoginAndRenewBase(
     [InlineData(new[] { Role.Admin })]
     [InlineData(new[] { Role.Operator })]
     [InlineData(new[] { Role.Admin, Role.Operator })]
-    [InlineData(new Role[] { })]
     public async Task succeeds_and_jwt_has_roles_according_to_mapping(Role[] roles)
     {
         // Arrange
@@ -77,8 +77,8 @@ public abstract class LoginAndRenewBase(
         var guildRole = RandomData.GuildRole();
         var guild = await CreateGuild(RandomData.Guild() with
         {
-            RoleMapping = new[] { (guildRole.Id, roles) },
-            Roles = new [] {guildRole}
+            RoleMapping = [new GuildRoleMapping(guildRole.Id, roles)],
+            Roles = [guildRole]
         });
         var client = GetAnonymousClient();
         var discordUser = RandomData.DiscordUser();

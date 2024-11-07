@@ -17,7 +17,7 @@ public class Move_reservation(
     PostgresFixture databaseFixture,
     ITestOutputHelper testOutputHelper) : IntegrationTestBase(fusery, databaseFixture, testOutputHelper)
 {
-    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, string lanId, string seatId, Guid toSeatId) =>
+    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, string lanId, string seatId, string toSeatId) =>
         await client.PutAsJsonAsync(
             $"guild/{guildId}/lan/{lanId}/seat/{seatId}/reservation",
             new MoveReservation.Request(toSeatId));

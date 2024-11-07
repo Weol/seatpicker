@@ -16,7 +16,7 @@ namespace Seatpicker.IntegrationTests;
 public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
     IAssemblyFixture<TestWebApplicationFactory>
 {
-    private static object lockObject = new ();
+    private static object lockObject = new();
 
     private readonly WebApplicationFactory<Infrastructure.Program> fusery;
     private readonly ITestOutputHelper testOutputHelper;
@@ -180,15 +180,13 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
         discordAdapter.AddGuild(
             discordGuild,
             guild.RoleMapping.Select(
-                guildRole => );
+                roleMapping => new Infrastructure.Adapters.Discord.DiscordGuildRole(
+                    roleMapping.RoleId,
+                    RandomData.Faker.Random.Word(),
+                    RandomData.Faker.Random.Int(0, 16777215),
+                    null)));
 
-        var roleMappings = guild.RoleMapping
-            .Select(mapping => new GuildAdapter.GuildRoleMapping(mapping.GuildRoleId, mapping.Roles))
-            .ToArray();
-
-        var document = new GuildAdapter.GuildDocument(discordGuild.Id, guild.Hostnames, roleMappings);
-
-        await SetupDocuments(document);
+        await SetupDocuments(guild);
 
         return guild;
     }

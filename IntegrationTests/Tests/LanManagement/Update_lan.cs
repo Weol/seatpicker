@@ -5,6 +5,7 @@ using FluentAssertions;
 using Seatpicker.Application.Features.Lan;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Entrypoints.Http.Lan;
+using Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -26,11 +27,11 @@ public class Update_lan(
 
     public static TheoryData<UpdateLan.Request> ValidUpdateRequests()
     {
-        return
-        [
+        return new TheoryData<UpdateLan.Request>
+        {
             UpdateLanRequest() with { Active = true },
             UpdateLanRequest() with { Active = false },
-        ];
+        };
     }
 
     [Theory]
@@ -65,14 +66,14 @@ public class Update_lan(
 
     public static TheoryData<UpdateLan.Request> InvalidUpdateRequests()
     {
-        return
-        [
+        return new TheoryData<UpdateLan.Request>
+        {
             UpdateLanRequest() with { Background = null! },
             UpdateLanRequest() with { Title = null! },
             UpdateLanRequest() with { Title = "" },
             UpdateLanRequest() with { Background = [] },
             UpdateLanRequest() with { Background = [1, 2, 3, 4] },
-        ];
+        };
     }
 
     [Theory]

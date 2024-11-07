@@ -49,14 +49,12 @@ public class Create_seat(
 
     public static TheoryData<CreateSeat.Request> InvalidUpdateRequests()
     {
-        return
-        [
+        return new TheoryData<CreateSeat.Request>
+        {
             CreateSeatRequest() with { Title = "" },
             CreateSeatRequest() with { Bounds = new Bounds(0, 0, -1, 1) },
-
             CreateSeatRequest() with { Bounds = new Bounds(0, 0, 1, -1) },
-
-        ];
+        };
     }
 
     [Theory]

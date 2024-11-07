@@ -91,7 +91,7 @@ public class Get_lan(
         var client = GetClient(guild.Id, Role.Admin);
 
         // Act
-        var response = await MakeRequest(client, guild.Id, Guid.NewGuid());
+        var response = await MakeRequest(client, guild.Id, Guid.NewGuid().ToString());
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
