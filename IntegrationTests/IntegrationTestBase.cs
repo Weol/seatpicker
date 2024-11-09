@@ -18,11 +18,11 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
 {
     private static object lockObject = new();
 
-    private readonly WebApplicationFactory<Infrastructure.Program> fusery;
+    private readonly WebApplicationFactory<Infrastructure.Program> factory;
     private readonly ITestOutputHelper testOutputHelper;
 
     protected IntegrationTestBase(
-        TestWebApplicationFactory fusery,
+        TestWebApplicationFactory factory,
         PostgresFixture databaseFixture,
         ITestOutputHelper testOutputHelper)
     {
@@ -30,7 +30,7 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
             $"Using Postgres fixture with connection string: {databaseFixture.Container.GetConnectionString()}");
 
         this.testOutputHelper = testOutputHelper;
-        this.fusery = fusery.WithWebHostBuilder(
+        this.factory = factory.WithWebHostBuilder(
             builder =>
             {
                 builder.ConfigureServices(
@@ -53,7 +53,7 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
     protected T GetService<T>()
         where T : notnull
     {
-        return fusery.Services.GetRequiredService<T>();
+        return factory.Services.GetRequiredService<T>();
     }
 
     protected HttpClient GetClient(TestIdentity identity)
@@ -73,8 +73,8 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
 
     protected HttpClient GetAnonymousClient()
     {
-        var client = fusery.CreateDefaultClient(
-            fusery.ClientOptions.BaseAddress,
+        var client = factory.CreateDefaultClient(
+            factory.ClientOptions.BaseAddress,
             new HttpResponseLoggerHandler(testOutputHelper));
         return client;
     }
@@ -100,11 +100,11 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
         await transaction.Commit();
     }
 
-    protected async Task SetupDocuments<TDocument>(string guildId, params TDocument[] documents)
+    protected async Task SetupDocuments<TDocument>(string? guildId, params TDocument[] documents)
         where TDocument : IDocument
     {
         var repository = GetService<DocumentRepository>();
-        var transaction = repository.CreateTransaction(guildId);
+        var transaction = guildId is null ? repository.CreateGuildlessTransaction() : repository.CreateTransaction(guildId);
         transaction.Store(documents);
         await transaction.Commit();
     }
@@ -112,7 +112,7 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
     protected IEnumerable<TDocument> GetCommittedDocuments<TDocument>()
         where TDocument : IDocument
     {
-        var repository = fusery.Services.GetRequiredService<DocumentRepository>();
+        var repository = factory.Services.GetRequiredService<DocumentRepository>();
         using var reader = repository.CreateGuildlessReader();
         return reader.Query<TDocument>().ToArray();
     }
@@ -120,7 +120,7 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
     protected IEnumerable<TDocument> GetCommittedDocuments<TDocument>(string guildId)
         where TDocument : IDocument
     {
-        var repository = fusery.Services.GetRequiredService<DocumentRepository>();
+        var repository = factory.Services.GetRequiredService<DocumentRepository>();
         using var reader = repository.CreateReader(guildId);
         return reader.Query<TDocument>().ToArray();
     }
@@ -139,7 +139,7 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
     {
         if (roles.Length == 0) roles = [Role.User];
 
-        var jwtTokenCreator = fusery.Services.GetRequiredService<JwtTokenCreator>();
+        var jwtTokenCreator = factory.Services.GetRequiredService<JwtTokenCreator>();
 
         var user = RandomData.User();
         var token = new AuthenticationToken(
@@ -151,7 +151,7 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
             withoutGuildIdClaim ? null : guildId);
 
         var userDocument = new UserManager.UserDocument(token.Id, token.Nick, token.Avatar, token.Roles);
-        await SetupDocuments(guildId, userDocument);
+        await SetupDocuments(withoutGuildIdClaim ? null : guildId, userDocument);
 
         var (jwtToken, _) = await jwtTokenCreator.CreateToken(token);
 

@@ -18,8 +18,10 @@ public class TestWebApplicationFactory : WebApplicationFactory<Infrastructure.Pr
             .UseEnvironment("Development")
             .ConfigureAppConfiguration(b => b.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["Logging:LogLevel:Default"] = "Trace",
-                ["Logging:LogLevel:Marten"] = "Trace",
+                ["Logging:LogLevel:Default"] = "Information",
+                ["Logging:LogLevel:Marten"] = "Warning",
+                ["Logging:LogLevel:Npgsql"] = "Warning",
+                ["Logging:LogLevel:Microsoft.AspNetCore.Routing.EndpointMiddleware"] = "Warning",
 
                 // Values from key vault
                 ["DiscordClientId"] = "9124761923842139",

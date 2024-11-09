@@ -12,6 +12,6 @@ public static class DiscordAuthenticationExtensions
             .ValidateOnStart();
 
         return services
-            .AddSingleton<DiscordAuthenticationService>();
+            .AddScoped<DiscordAuthenticationService>();
     }
 }

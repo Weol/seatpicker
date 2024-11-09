@@ -46,6 +46,6 @@ public static class UserManagerExtensions
     public static IServiceCollection AddUserManager(this IServiceCollection services)
     {
         return services
-            .AddSingleton<UserManager>();
+            .AddScoped<UserManager>();
     }
 }

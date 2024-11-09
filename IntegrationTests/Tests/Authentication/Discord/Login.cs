@@ -6,9 +6,9 @@ namespace Seatpicker.IntegrationTests.Tests.Authentication.Discord;
 
 // ReSharper disable once InconsistentNaming
 public class Login(
-    TestWebApplicationFactory fusery,
+    TestWebApplicationFactory factory,
     PostgresFixture databaseFixture,
-    ITestOutputHelper testOutputHelper) : LoginAndRenewBase(fusery, databaseFixture, testOutputHelper)
+    ITestOutputHelper testOutputHelper) : LoginAndRenewBase(factory, databaseFixture, testOutputHelper)
 {
     protected override Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId)
     {

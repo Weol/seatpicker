@@ -14,9 +14,9 @@ namespace Seatpicker.IntegrationTests.Tests.Seats.Management;
 // ReSharper disable once InconsistentNaming
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class Create_seat(
-    TestWebApplicationFactory fusery,
+    TestWebApplicationFactory factory,
     PostgresFixture databaseFixture,
-    ITestOutputHelper testOutputHelper) : IntegrationTestBase(fusery, databaseFixture, testOutputHelper)
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
 {
     private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, string lanId, CreateSeat.Request request) =>
         await client.PostAsJsonAsync($"guild/{guildId}/lan/{lanId}/seat", request);

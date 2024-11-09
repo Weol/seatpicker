@@ -10,9 +10,9 @@ namespace Seatpicker.IntegrationTests.Tests.Guild;
 // ReSharper disable once InconsistentNaming
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class Discover_guild(
-    TestWebApplicationFactory fusery,
+    TestWebApplicationFactory factory,
     PostgresFixture databaseFixture,
-    ITestOutputHelper testOutputHelper) : IntegrationTestBase(fusery, databaseFixture, testOutputHelper)
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
 {
     [Fact]
     public async Task retrieves_only_guild_id_when_host_mapping_is_set_but_no_active_lan_is_set()

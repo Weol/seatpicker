@@ -9,9 +9,9 @@ namespace Seatpicker.IntegrationTests.Tests.Authentication;
 
 [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
 public class TenantIsolation(
-    TestWebApplicationFactory fusery,
+    TestWebApplicationFactory factory,
     PostgresFixture databaseFixture,
-    ITestOutputHelper testOutputHelper) : IntegrationTestBase(fusery, databaseFixture, testOutputHelper)
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
 {
     [Fact]
     public async Task request_denied_when_there_is_mismatch_between_jwt_guild_and_guildId_in_route()

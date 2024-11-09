@@ -15,7 +15,7 @@ public static class AuthenticationExtensions
         this IServiceCollection services)
     {
         services
-            .AddSingleton<AuthenticationService>()
+            .AddScoped<AuthenticationService>()
             .AddSingleton<JwtTokenCreator>()
             .AddUserManager()
             .AddDiscordAuthentication(ConfigureDiscordAuthentication)
@@ -66,7 +66,7 @@ public static class AuthenticationExtensions
     private static void ConfigureDevelopmentCertificate(AuthenticationOptions options, ILogger<AuthenticationOptions> logger)
     {
         if (options.Base64SigningCertificate is not null) return;
-        
+
         logger.LogWarning("No signing certificate was provided, generating certificate for development purposes");
 
         var rsa = RSA.Create();

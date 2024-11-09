@@ -19,8 +19,12 @@ internal static class DatabaseExtensions
     {
         services.AddValidatedOptions(configureAction);
 
-        services.AddPortMapping<IAggregateRepository, AggregateRepository>()
-            .AddPortMapping<IDocumentRepository, DocumentRepository>()
+        services.AddScoped<IAggregateRepository, AggregateRepository>()
+            .AddScoped<IDocumentRepository, DocumentRepository>()
+            .AddScoped<AggregateRepository>()
+            .AddScoped<DocumentRepository>()
+            .AddScoped(CreateDocumentSession)
+            .AddScoped(CreateQuerySession)
             .AddScoped(CreateDocumentTransaction)
             .AddScoped(CreateDocumentReader)
             .AddScoped(CreateAggregateTransaction)
@@ -42,6 +46,16 @@ internal static class DatabaseExtensions
         return services;
     }
 
+    private static IDocumentSession CreateDocumentSession(IServiceProvider provider)
+    {
+        return provider.GetRequiredService<IDocumentStore>().LightweightSession();
+    }
+
+    private static IQuerySession CreateQuerySession(IServiceProvider provider)
+    {
+        return provider.GetRequiredService<IDocumentStore>().QuerySession();
+    }
+
     private static IDocumentTransaction CreateDocumentTransaction(IServiceProvider provider)
     {
         var guildIdProvider = provider.GetRequiredService<GuildIdProvider>();
@@ -54,7 +68,7 @@ internal static class DatabaseExtensions
     private static IAggregateTransaction CreateAggregateTransaction(IServiceProvider provider)
     {
         var guildIdProvider = provider.GetRequiredService<GuildIdProvider>();
-        var documentSession = provider.GetRequiredService<IDocumentStore>().LightweightSession();
+        var documentSession = provider.GetRequiredService<IDocumentSession>();
 
         var repository = provider.GetRequiredService<IAggregateRepository>();
         return repository.CreateTransaction(guildIdProvider.GuildId, documentSession);

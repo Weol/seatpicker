@@ -6,13 +6,13 @@ using Shared;
 
 namespace Seatpicker.Infrastructure.Adapters.Database;
 
-public class DocumentRepository(IDocumentStore store, ILogger<DocumentRepository> logger) : IDocumentRepository
+public class DocumentRepository(IServiceProvider provider, ILogger<DocumentRepository> logger) : IDocumentRepository
 {
     public IDocumentTransaction CreateTransaction(string guildId, IDocumentSession? documentSession = null)
     {
         logger.LogInformation("Creating document transaction for tenant {TenantId}", guildId);
 
-        documentSession ??= store.LightweightSession(guildId);
+        documentSession ??= provider.GetRequiredService<IDocumentSession>();
 
         return new DocumentTransaction(documentSession);
     }
@@ -21,7 +21,7 @@ public class DocumentRepository(IDocumentStore store, ILogger<DocumentRepository
     {
         logger.LogInformation("Creating document reader for tenant {TenantId}", guildId);
 
-        querySession ??= store.QuerySession(guildId);
+        querySession ??= provider.GetRequiredService<IQuerySession>();
 
         return new DocumentReader(querySession);
     }
@@ -30,7 +30,7 @@ public class DocumentRepository(IDocumentStore store, ILogger<DocumentRepository
     {
         logger.LogInformation("Creating document transaction for default tenant");
 
-        documentSession ??= store.LightweightSession(Tenancy.DefaultTenantId);
+        documentSession ??= provider.GetRequiredService<IDocumentSession>();
 
         if (documentSession.TenantId != Tenancy.DefaultTenantId)
         {
@@ -46,7 +46,7 @@ public class DocumentRepository(IDocumentStore store, ILogger<DocumentRepository
     {
         logger.LogInformation("Creating document reader for default tenant");
 
-        querySession ??= store.QuerySession(Tenancy.DefaultTenantId);
+        querySession ??= provider.GetRequiredService<IQuerySession>();
 
         if (querySession.TenantId != Tenancy.DefaultTenantId)
         {

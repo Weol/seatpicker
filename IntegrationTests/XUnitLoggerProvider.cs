@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using Xunit.Abstractions;
 
 namespace Seatpicker.IntegrationTests;

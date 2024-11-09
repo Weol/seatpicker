@@ -5,17 +5,17 @@ using Shared;
 
 namespace Seatpicker.Infrastructure.Adapters.Database;
 
-public class AggregateRepository(IDocumentStore store) : IAggregateRepository
+public class AggregateRepository(IServiceProvider provider) : IAggregateRepository
 {
     public IAggregateTransaction CreateTransaction(string guildId, IDocumentSession? documentSession = null)
     {
-        documentSession ??= store.LightweightSession(guildId);
+        documentSession ??= provider.GetRequiredService<IDocumentSession>();
         return new AggregateTransaction(documentSession);
     }
 
     public IGuildlessAggregateTransaction CreateGuildlessTransaction(IDocumentSession? documentSession = null)
     {
-        documentSession ??= store.LightweightSession();
+        documentSession ??= provider.GetRequiredService<IDocumentSession>();
 
         if (documentSession.TenantId != Tenancy.DefaultTenantId)
         {
