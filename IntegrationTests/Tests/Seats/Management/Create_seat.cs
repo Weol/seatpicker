@@ -28,7 +28,7 @@ public class Create_seat(
 		var guild = await CreateGuild();
         var client = GetClient(guild.Id, Role.Operator);
 
-        var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
+        var lan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
         await SetupAggregates(guild.Id, lan);
 
         var model = CreateSeatRequest();
@@ -37,11 +37,12 @@ public class Create_seat(
         var response = await MakeRequest(client, guild.Id, lan.Id, model);
 
         // Assert
+        var committedSeats = await GetCommittedDocuments<ProjectedSeat>(guild.Id);
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                var committedSeat = GetCommittedDocuments<ProjectedSeat>(guild.Id).Should().ContainSingle().Subject;
+                var committedSeat = committedSeats.Should().ContainSingle().Subject;
                 committedSeat.Title.Should().Be(model.Title);
                 committedSeat.Bounds.Should().BeEquivalentTo<Bounds>(model.Bounds);
             });

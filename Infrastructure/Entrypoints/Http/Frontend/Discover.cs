@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Marten;
+using Microsoft.AspNetCore.Mvc;
 using Seatpicker.Application.Features.Lan;
 using Seatpicker.Infrastructure.Adapters.Database;
 using Seatpicker.Infrastructure.Adapters.Discord;
@@ -10,12 +11,12 @@ public static class Discover
 {
     public static async Task<IResult> Get(
         [FromHeader(Name = "Host")] string? host,
-        [FromServices] DocumentRepository documentrepository,
+        [FromServices] DocumentRepository documentRepository,
         [FromServices] DiscordAdapter discordAdapter)
     {
         if (host is null) return Results.BadRequest("Host header cannot be null");
 
-        var guildlessReader = documentrepository.CreateGuildlessReader();
+        await using var guildlessReader = documentRepository.CreateGuildlessReader();
 
         var guild = guildlessReader
             .Query<Application.Features.Lan.Guild>()
@@ -23,9 +24,9 @@ public static class Discover
 
         if (guild is null) return Results.NotFound();
 
-        var guildReader = documentrepository.CreateReader(guild.Id);
+        await using var guildReader = documentRepository.CreateReader(guild.Id);
 
-        var activeLan = guildlessReader
+        var activeLan = guildReader
             .Query<ProjectedLan>()
             .FirstOrDefault(lan => lan.Active);
 

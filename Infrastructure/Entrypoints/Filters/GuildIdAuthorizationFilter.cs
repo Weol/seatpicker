@@ -28,8 +28,5 @@ public class GuildIdAuthorizationFilter(GuildIdProvider guildIdProvider) : IEndp
         return await next(context);
     }
 
-    public class GuildIdMissingException : Exception
-    {
-
-    }
+    public class GuildIdMissingException : Exception;
 }

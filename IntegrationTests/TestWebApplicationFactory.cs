@@ -41,7 +41,7 @@ public class TestWebApplicationFactory : WebApplicationFactory<Infrastructure.Pr
 
     private static string GenerateSelfSignedBase64Certificate()
     {
-        var rsa = RSA.Create();
+        using var rsa = RSA.Create();
         var req = new CertificateRequest("cn=test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         var certificate = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(5));
         return Convert.ToBase64String(certificate.Export(X509ContentType.Pfx, ""));

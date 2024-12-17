@@ -61,13 +61,13 @@ public class TenantIsolation(
     {
         // Arrange
 		var guild = await CreateGuild();
-        var identity = await CreateIdentity(guild.Id, [Role.Superadmin], true);
+        var identity = await CreateIdentity(guild.Id, [Role.Admin], true);
         var client = GetClient(identity);
 
         // Act
         var response = await client.GetAsync($"authentication/test/{guild.Id}");
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 }

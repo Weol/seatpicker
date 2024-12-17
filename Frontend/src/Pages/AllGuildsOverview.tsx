@@ -18,11 +18,13 @@ import {useGuilds} from "../Adapters/Guilds/Guilds"
 import {Guild} from "../Adapters/Models"
 import DiscordGuildAvatar from "../Components/DiscordAvatar"
 import {useUnconfiguredGuilds} from "../Adapters/Guilds/UnconfiguredGuilds";
+import {useNavigate} from "react-router-dom";
 
 export default function AllGuildsOverview() {
-  const guilds = useGuilds()
+  const configuredGuilds = useGuilds()
   const { unconfiguredGuilds, configureGuild } = useUnconfiguredGuilds()
   const [ selectedGuild, setSelectedGuild ] = useState<Guild | null>(null)
+  const navigate = useNavigate()
 
   function handleGuildSelect(guild: Guild) {
     setSelectedGuild(guild)
@@ -58,13 +60,13 @@ export default function AllGuildsOverview() {
         ) : (<></>)}
       <Typography variant={"h5"}>Configured guilds</Typography>
       <Paper sx={{ width: "100%" }}>
-        {guilds.length === 0 ?
+        {configuredGuilds.length === 0 ?
           (
             <Typography sx={{ width: "100%", padding: "1em", textAlign: "center" }}>There are no configured
               guilds</Typography>
           ) : (
             <List component={"nav"}>
-              {guilds.map((guild) => (
+              {configuredGuilds.map((guild) => (
                 <ListItemButton
                   onClick={() => handleGuildSelect(guild)}
                   selected={selectedGuild?.id == guild.id}
@@ -74,6 +76,11 @@ export default function AllGuildsOverview() {
                     <DiscordGuildAvatar guild={guild}/>
                   </ListItemIcon>
                   <ListItemText primary={guild.name} secondary={guild.id}/>
+                  <ListItemSecondaryAction>
+                    <IconButton onClick={() => navigate(`/guild/${guild.id}`)}>
+                      <Edit/>
+                    </IconButton>
+                  </ListItemSecondaryAction>
                 </ListItemButton>
               ))}
             </List>
@@ -97,7 +104,6 @@ function HostList(props: {
   onHostSave: (hosts: string[]) => void
 })
 {
-
   function handleSaveClick() {
     props.onHostSave([ "asd" ])
   }

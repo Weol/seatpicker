@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using Marten.Storage;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -8,16 +9,15 @@ using Seatpicker.Infrastructure.Adapters.Database;
 using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.IntegrationTests.TestAdapters;
 using Shared;
+using Xunit;
 using Xunit.Abstractions;
 using Xunit.Extensions.AssemblyFixture;
 
 namespace Seatpicker.IntegrationTests;
 
 public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
-    IAssemblyFixture<TestWebApplicationFactory>
+    IClassFixture<TestWebApplicationFactory>
 {
-    private static object lockObject = new();
-
     private readonly WebApplicationFactory<Infrastructure.Program> factory;
     private readonly ITestOutputHelper testOutputHelper;
 
@@ -82,7 +82,7 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
     protected async Task SetupAggregates(string guildId, params AggregateBase[] aggregates)
     {
         var repository = GetService<AggregateRepository>();
-        using var aggregateTransaction = repository.CreateTransaction(guildId);
+        await using var aggregateTransaction = repository.CreateTransaction(guildId);
         foreach (var aggregate in aggregates)
         {
             aggregateTransaction.Create(aggregate);
@@ -100,28 +100,28 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
         await transaction.Commit();
     }
 
-    protected async Task SetupDocuments<TDocument>(string? guildId, params TDocument[] documents)
+    protected async Task SetupDocuments<TDocument>(string guildId, params TDocument[] documents)
         where TDocument : IDocument
     {
         var repository = GetService<DocumentRepository>();
-        var transaction = guildId is null ? repository.CreateGuildlessTransaction() : repository.CreateTransaction(guildId);
+        await using var transaction = repository.CreateTransaction(guildId);
         transaction.Store(documents);
         await transaction.Commit();
     }
 
-    protected IEnumerable<TDocument> GetCommittedDocuments<TDocument>()
+    protected async Task<TDocument[]> GetCommittedDocuments<TDocument>()
         where TDocument : IDocument
     {
         var repository = factory.Services.GetRequiredService<DocumentRepository>();
-        using var reader = repository.CreateGuildlessReader();
+        await using var reader = repository.CreateGuildlessReader();
         return reader.Query<TDocument>().ToArray();
     }
 
-    protected IEnumerable<TDocument> GetCommittedDocuments<TDocument>(string guildId)
+    protected async Task<TDocument[]> GetCommittedDocuments<TDocument>(string guildId)
         where TDocument : IDocument
     {
-        var repository = factory.Services.GetRequiredService<DocumentRepository>();
-        using var reader = repository.CreateReader(guildId);
+        var repository = GetService<DocumentRepository>();
+        await using var reader = repository.CreateReader(guildId);
         return reader.Query<TDocument>().ToArray();
     }
 
@@ -150,8 +150,8 @@ public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
             roles,
             withoutGuildIdClaim ? null : guildId);
 
-        var userDocument = new UserManager.UserDocument(token.Id, token.Nick, token.Avatar, token.Roles);
-        await SetupDocuments(withoutGuildIdClaim ? null : guildId, userDocument);
+        var userDocument = new UserDocument(token.Id, token.Nick, token.Avatar, token.Roles);
+        await SetupDocuments(guildId, userDocument);
 
         var (jwtToken, _) = await jwtTokenCreator.CreateToken(token);
 

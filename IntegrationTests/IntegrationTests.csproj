@@ -10,6 +10,8 @@
         <EnableNETAnalyzers>true</EnableNETAnalyzers>
         <AnalysisLevel>latest-Recommended</AnalysisLevel>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <WarningsAsErrors>CA2000</WarningsAsErrors>
+        <NoWarn>CA1848</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>

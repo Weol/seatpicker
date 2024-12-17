@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Seatpicker.Application.Features;
 using Seatpicker.Application.Features.Lan;
 using Seatpicker.Infrastructure.Adapters.Database;
 
@@ -8,11 +9,8 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 public static class GetLan
 {
     public static async Task<IResult> GetAll(
-        [FromRoute] string guildId,
-        [FromServices] DocumentRepository documentRepository)
+        [FromServices] IDocumentReader documentReader)
     {
-        using var documentReader = documentRepository.CreateReader(guildId);
-
         var lans = documentReader.Query<ProjectedLan>()
             .OrderByDescending(lan => lan.CreatedAt)
             .AsEnumerable()
@@ -22,12 +20,9 @@ public static class GetLan
     }
 
     public static async Task<IResult> Get(
-        [FromRoute] string guildId,
         [FromRoute] string lanId,
-        [FromServices] DocumentRepository documentRepository)
+        [FromServices] IDocumentReader documentReader)
     {
-        using var documentReader = documentRepository.CreateReader(guildId);
-
         var lan = documentReader.Query<ProjectedLan>()
             .SingleOrDefault(lan => lan.Id == lanId);
 

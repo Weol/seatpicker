@@ -25,7 +25,7 @@ public class Remove_seat(
 		var guild = await CreateGuild();
         var client = GetClient(guild.Id, Role.Operator);
 
-        var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
+        var lan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
         var seat = SeatGenerator.Create(lan, CreateUser(guild.Id));
         await SetupAggregates(guild.Id, seat);
 
@@ -34,7 +34,8 @@ public class Remove_seat(
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        GetCommittedDocuments<ProjectedSeat>(guild.Id).Should().BeEmpty();
+        var committedSeats = await GetCommittedDocuments<ProjectedSeat>(guild.Id);
+        committedSeats.Should().BeEmpty();
     }
 
     [Fact]
@@ -44,7 +45,7 @@ public class Remove_seat(
 		var guild = await CreateGuild();
         var client = GetClient(guild.Id, Role.Operator);
 
-        var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
+        var lan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
         await SetupAggregates(guild.Id, lan);
 
         // Act

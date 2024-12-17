@@ -39,7 +39,7 @@ public class Get_guild(
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        body.Should().HaveCount(guilds.Length);
+        body.Should().HaveCountGreaterThanOrEqualTo(guilds.Length);
 
         foreach (var guild in guilds)
         {

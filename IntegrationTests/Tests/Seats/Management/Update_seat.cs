@@ -35,7 +35,7 @@ public class Update_seat(
         var guild = await CreateGuild();
         var client = GetClient(guild.Id, Role.Operator);
 
-        var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
+        var lan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
         var existingSeat = SeatGenerator.Create(lan, CreateUser(guild.Id));
 
         await SetupAggregates(guild.Id, existingSeat);
@@ -44,11 +44,12 @@ public class Update_seat(
         var response = await MakeRequest(client, guild.Id, lan.Id, existingSeat.Id, request);
 
         // Assert
+        var committedSeats = await GetCommittedDocuments<ProjectedSeat>(guild.Id);
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                var seat = GetCommittedDocuments<ProjectedSeat>(guild.Id).Should().ContainSingle().Subject;
+                var seat = committedSeats.Should().ContainSingle().Subject;
                 Assert.Multiple(
                     () => seat.Title.Should().Be(seat.Title),
                     () => seat.Bounds.Should().BeEquivalentTo(seat.Bounds));
@@ -62,7 +63,7 @@ public class Update_seat(
         var guild = await CreateGuild();
         var client = GetClient(guild.Id, Role.Operator);
 
-        var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
+        var lan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
         await SetupAggregates(guild.Id, lan);
 
         // Act

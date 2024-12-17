@@ -30,9 +30,9 @@ public class Get_lan(
 
         var existingLans = new[]
         {
-            RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id)),
-            RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id)),
-            RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id)),
+            RandomData.Aggregates.Lan(CreateUser(guild.Id)),
+            RandomData.Aggregates.Lan(CreateUser(guild.Id)),
+            RandomData.Aggregates.Lan(CreateUser(guild.Id)),
         };
         await SetupAggregates(guild.Id, existingLans[0], existingLans[1], existingLans[2]);
 
@@ -63,7 +63,7 @@ public class Get_lan(
         var guild = await CreateGuild();
         var client = GetClient(guild.Id, Role.Admin);
 
-        var existingLan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
+        var existingLan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
         await SetupAggregates(guild.Id, existingLan);
 
         // Act

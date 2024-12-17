@@ -20,13 +20,13 @@ public class Discover_guild(
         // Arrange
         var guild1 = await CreateGuild(RandomData.Guild() with { Hostnames = ["guild1.host1"] });
         var guild2 = await CreateGuild(RandomData.Guild() with { Hostnames = ["guild2.host1"] });
-        var client1 = GetClient(guild1.Id);
-        client1.DefaultRequestHeaders.Host = "guild1.host1";
+        var client = GetClient(guild1.Id);
+        client.DefaultRequestHeaders.Host = "guild1.host1";
         var client2 = GetClient(guild2.Id);
         client2.DefaultRequestHeaders.Host = "guild2.host1";
 
         // Act
-        var response1 = await client1.GetAsync("guild/discover");
+        var response1 = await client.GetAsync("guild/discover");
         var body1 = await response1.Content.ReadAsJsonAsync<Discover.Response>();
 
         var response2 = await client2.GetAsync("guild/discover");
@@ -47,16 +47,16 @@ public class Discover_guild(
     {
         // Arrange
         var guild = await CreateGuild(RandomData.Guild() with { Hostnames = ["guild3.host1"] });
-        var client1 = GetClient(guild.Id);
-        client1.DefaultRequestHeaders.Host = "guild3.host1";
+        var client = GetClient(guild.Id);
+        client.DefaultRequestHeaders.Host = "guild3.host1";
 
         var user = CreateUser(guild.Id);
-        var activeLan = RandomData.Aggregates.Lan(guild.Id, user);
+        var activeLan = RandomData.Aggregates.Lan(user);
         activeLan.SetActive(true, user);
         await SetupAggregates(guild.Id, activeLan);
 
         // Act
-        var response = await client1.GetAsync("guild/discover");
+        var response = await client.GetAsync("guild/discover");
         var body = await response.Content.ReadAsJsonAsync<Discover.Response>();
 
         // Assert

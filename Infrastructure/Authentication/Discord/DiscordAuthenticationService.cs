@@ -1,4 +1,5 @@
 ﻿using Marten;
+using Seatpicker.Application.Features;
 using Seatpicker.Application.Features.Lan;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Discord;
@@ -8,7 +9,7 @@ namespace Seatpicker.Infrastructure.Authentication.Discord;
 public class DiscordAuthenticationService(
     DiscordAdapter discordAdapter,
     AuthenticationService authenticationService,
-    IDocumentStore documentStore)
+    IGuildlessDocumentReader documentReader)
 {
     public async Task<(string JwtToken, DateTimeOffset ExpiresAt, AuthenticationToken DiscordToken)> Renew(
         string refreshToken,
@@ -69,8 +70,7 @@ public class DiscordAuthenticationService(
 
         if (guildMember == null) return ([Role.User], discordUser.Username, discordUser.Avatar);
 
-        await using var querySession = documentStore.QuerySession();
-        var guild = await querySession.LoadAsync<Guild>(guildId);
+        var guild = await documentReader.Query<Guild>(guildId);
 
         if (guild is null) throw new DiscordGuildNotFoundException { GuildId = guildId };
 
@@ -103,6 +103,6 @@ public class DiscordAuthenticationService(
 
     private class DiscordGuildNotFoundException : Exception
     {
-        public string GuildId { get; init; }
+        public required string GuildId { get; init; }
     }
 }

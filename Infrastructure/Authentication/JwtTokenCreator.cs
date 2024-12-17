@@ -9,6 +9,10 @@ namespace Seatpicker.Infrastructure.Authentication;
 public class JwtTokenCreator(ILogger<JwtTokenCreator> logger, IOptions<AuthenticationOptions> options)
 {
     public const string GuildIdClaimName = "guild_id";
+    public const string IdClaimName = JwtRegisteredClaimNames.Sub;
+    public const string NickClaimName = JwtRegisteredClaimNames.Name;
+    public const string AvatarClaimName = "avatar";
+    public const string RoleClaimName = ClaimTypes.Role;
 
     private readonly AuthenticationOptions options = options.Value;
 
@@ -27,18 +31,18 @@ public class JwtTokenCreator(ILogger<JwtTokenCreator> logger, IOptions<Authentic
         var defaultClaims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new(JwtRegisteredClaimNames.Name, authenticationToken.Nick),
-            new(JwtRegisteredClaimNames.Sub, authenticationToken.Id),
+            new(NickClaimName, authenticationToken.Nick),
+            new(IdClaimName, authenticationToken.Id),
         };
 
         if (authenticationToken.Avatar is not null) 
-            defaultClaims.Add(new Claim("avatar", authenticationToken.Avatar));
+            defaultClaims.Add(new Claim(AvatarClaimName, authenticationToken.Avatar));
 
         if (authenticationToken.GuildId is not null)
             defaultClaims.Add(new Claim(GuildIdClaimName, authenticationToken.GuildId));
         
         var roleClaims = authenticationToken.Roles
-            .Select(role => new Claim(ClaimTypes.Role, role.ToString()));
+            .Select(role => new Claim(RoleClaimName, role.ToString()));
 
         var handler = new JwtSecurityTokenHandler();
 

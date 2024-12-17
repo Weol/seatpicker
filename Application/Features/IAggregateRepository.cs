@@ -3,16 +3,9 @@ using Shared;
 
 namespace Seatpicker.Application.Features;
 
-public interface IAggregateRepository
-{
-    public IAggregateTransaction CreateTransaction(string guildId, IDocumentSession documentSession);
-
-    public IGuildlessAggregateTransaction CreateGuildlessTransaction(IDocumentSession documentSession);
-}
-
 public interface IGuildlessAggregateTransaction : IAggregateTransaction;
 
-public interface IAggregateTransaction : IDisposable
+public interface IAggregateTransaction : IAsyncDisposable
 {
     public void Update<TAggregate>(TAggregate aggregate)
         where TAggregate : AggregateBase;

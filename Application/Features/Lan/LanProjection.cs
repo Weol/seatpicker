@@ -48,7 +48,7 @@ public class ProjectedLan(
     public string Id { get; set; } = id;
     public string Title { get; set; } = title;
     public byte[] Background { get; set; } = background;
-    public bool Active { get; set; } = false;
+    public bool Active { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = createdAt;
     public DateTimeOffset UpdatedAt { get; set; } = updatedAt;
 }

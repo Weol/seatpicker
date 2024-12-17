@@ -30,6 +30,7 @@ public class Update_lan(
         return new TheoryData<UpdateLan.Request>
         {
             UpdateLanRequest() with { Active = true },
+            UpdateLanRequest() with { Title = "Testy namy" },
             UpdateLanRequest() with { Active = false },
         };
     }
@@ -42,14 +43,14 @@ public class Update_lan(
         var guild = await CreateGuild();
         var client = GetClient(guild.Id, Role.Admin);
 
-        var existingLan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id), id: request.Id);
+        var existingLan = RandomData.Aggregates.Lan(CreateUser(guild.Id), id: request.Id);
         await SetupAggregates(guild.Id, existingLan);
 
         // Act
         var response = await MakeRequest(client, guild.Id, existingLan.Id, request);
 
         // Assert
-        var committedAggregates = GetCommittedDocuments<ProjectedLan>(guild.Id);
+        var committedAggregates = await GetCommittedDocuments<ProjectedLan>(guild.Id);
 
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
@@ -84,7 +85,7 @@ public class Update_lan(
         var guild = await CreateGuild();
         var client = GetClient(guild.Id, Role.Admin);
 
-        var existingLan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
+        var existingLan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
         await SetupAggregates(guild.Id, existingLan);
 
         // Act
@@ -101,7 +102,7 @@ public class Update_lan(
         var guild = await CreateGuild();
         var client = GetClient(guild.Id, Role.Admin);
 
-        var existingLan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
+        var existingLan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
         await SetupAggregates(guild.Id, existingLan);
 
         // Act

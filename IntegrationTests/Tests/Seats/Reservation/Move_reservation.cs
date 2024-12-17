@@ -30,7 +30,7 @@ public class Move_reservation(
         var identity = await CreateIdentity(guild.Id, Role.User);
         var client = GetClient(identity);
 
-        var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
+        var lan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
         var fromSeat = SeatGenerator.Create(lan, CreateUser(guild.Id), reservedBy: identity.User);
         var toSeat = SeatGenerator.Create(lan, CreateUser(guild.Id));
 
@@ -40,16 +40,17 @@ public class Move_reservation(
         var response = await MakeRequest(client, guild.Id, lan.Id, fromSeat.Id, toSeat.Id);
 
         // Assert
+        var committedSeats = await GetCommittedDocuments<ProjectedSeat>(guild.Id);
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                var committedFromSeat = GetCommittedDocuments<ProjectedSeat>(guild.Id)
+                var committedFromSeat = committedSeats 
                     .Should()
                     .ContainSingle(seat => seat.Id == fromSeat.Id)
                     .Subject;
 
-                var committedToSeat = GetCommittedDocuments<ProjectedSeat>(guild.Id)
+                var committedToSeat = committedSeats
                     .Should()
                     .ContainSingle(seat => seat.Id == toSeat.Id)
                     .Subject;
@@ -69,7 +70,7 @@ public class Move_reservation(
         var client = GetClient(guild.Id);
 
         var alreadyReservedBy = CreateUser(guild.Id);
-        var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
+        var lan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
         var fromSeat = SeatGenerator.Create(lan, CreateUser(guild.Id), reservedBy: alreadyReservedBy);
         var toSeat = SeatGenerator.Create(lan, CreateUser(guild.Id));
 
@@ -79,16 +80,17 @@ public class Move_reservation(
         var response = await MakeRequest(client, guild.Id, lan.Id, fromSeat.Id, toSeat.Id);
 
         // Assert
+        var committedSeats = await GetCommittedDocuments<ProjectedSeat>(guild.Id);
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.Conflict),
             () =>
             {
-                var committedFromSeat = GetCommittedDocuments<ProjectedSeat>(guild.Id)
+                var committedFromSeat = committedSeats
                     .Should()
                     .ContainSingle(seat => seat.Id == fromSeat.Id)
                     .Subject;
 
-                var committedToSeat = GetCommittedDocuments<ProjectedSeat>(guild.Id)
+                var committedToSeat = committedSeats
                     .Should()
                     .ContainSingle(seat => seat.Id == toSeat.Id)
                     .Subject;

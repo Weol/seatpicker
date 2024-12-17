@@ -1,4 +1,8 @@
-﻿using System.Security.Claims;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using JasperFx.Core.Reflection;
+using Seatpicker.Application.Features;
+using Seatpicker.Application.Features.Lan;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Authentication;
 
@@ -9,7 +13,7 @@ public interface ILoggedInUserAccessor
     Task<User> GetUser();
 }
 
-public class LoggedInUserAccessor(IHttpContextAccessor httpContextAccessor, UserManager userManager)
+public class LoggedInUserAccessor(IHttpContextAccessor httpContextAccessor, IDocumentReader documentReader)
     : ILoggedInUserAccessor
 {
     private HttpContext HttpContext =>
@@ -19,16 +23,29 @@ public class LoggedInUserAccessor(IHttpContextAccessor httpContextAccessor, User
     {
         var id  = HttpContext.User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
         var guildId  = HttpContext.User.Claims.FirstOrDefault(x => x.Type == JwtTokenCreator.GuildIdClaimName)?.Value;
+        var roles = HttpContext.User.Claims
+            .Where(x => x.Type == ClaimTypes.Role)
+            .Select(x => Enum.Parse<Role>(x.Value));
 
-        return await userManager.GetById(guildId, id) ??
-               throw new UserNotFoundException($"Cannot find user with id {id}");
+        if (guildId is null)
+        {
+            var nick  = HttpContext.User.Claims.First(x => x.Type == JwtTokenCreator.NickClaimName).Value;
+            var avatar = HttpContext.User.Claims.FirstOrDefault(x => x?.Type == JwtTokenCreator.IdClaimName, null)?.Value;
+            return new User(id, nick, avatar, roles);
+        }
+
+        var userDocument = await documentReader.Query<UserDocument>(id) ??
+               throw new UserNotFoundException{ UserId = id };
+
+        return new User(userDocument.Id, userDocument.Name, userDocument.Avatar, userDocument.Roles);
     }
 
-    public class HttpContextIsNullException : Exception
+    public class HttpContextIsNullException : Exception;
+
+    public class UserNotFoundException : Exception
     {
+        public required string UserId { get; init; }
     }
-
-    public class UserNotFoundException(string message) : Exception(message);
 }
 
 public static class LoggedInUserAccessorExtensions

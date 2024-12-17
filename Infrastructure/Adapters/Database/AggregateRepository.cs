@@ -1,22 +1,37 @@
-﻿using Marten;
+﻿using System.Diagnostics;
+using System.Timers;
+using Marten;
 using Marten.Storage;
 using Seatpicker.Application.Features;
 using Shared;
+using Timer = System.Timers.Timer;
 
 namespace Seatpicker.Infrastructure.Adapters.Database;
 
-public class AggregateRepository(IServiceProvider provider) : IAggregateRepository
+public class AggregateRepository(ILogger<AggregateRepository> logger, IServiceProvider provider)
 {
-    public IAggregateTransaction CreateTransaction(string guildId, IDocumentSession? documentSession = null)
+    public IAggregateTransaction CreateTransaction(string guildId)
     {
-        documentSession ??= provider.GetRequiredService<IDocumentSession>();
-        return new AggregateTransaction(documentSession);
+        var documentSession = provider.GetRequiredService<IDocumentStore>().LightweightSession(guildId);
+        
+        if (documentSession.TenantId == Tenancy.DefaultTenantId)
+        {
+            throw new InvalidTenantIdForGuildSessionException {
+                TenantId = documentSession.TenantId,
+            };
+        }
+
+        var transactionId = Interlocked.Add(ref DatabaseExtensions.SessionIdCounter, 1);
+        logger.LogDebug("[{TransactionId}] Creating aggregate transaction for tenant {TenantId}", transactionId, documentSession.TenantId);
+
+        var transactionLogger = provider.GetRequiredService<ILogger<AggregateTransaction>>();
+        return new AggregateTransaction(documentSession, transactionId, transactionLogger);
     }
 
-    public IGuildlessAggregateTransaction CreateGuildlessTransaction(IDocumentSession? documentSession = null)
+    public IGuildlessAggregateTransaction CreateGuildlessTransaction()
     {
-        documentSession ??= provider.GetRequiredService<IDocumentSession>();
-
+        var documentSession = provider.GetRequiredService<IDocumentStore>().LightweightSession();
+        
         if (documentSession.TenantId != Tenancy.DefaultTenantId)
         {
             throw new InvalidTenantIdForGuildlessSessionException {
@@ -24,16 +39,25 @@ public class AggregateRepository(IServiceProvider provider) : IAggregateReposito
             };
         }
 
-        return new AggregateTransaction(documentSession);
+        var transactionId = Interlocked.Add(ref DatabaseExtensions.SessionIdCounter, 1);
+        logger.LogDebug("[{TransactionId}] Creating aggregate transaction for tenant {TenantId}", transactionId, documentSession.TenantId);
+
+        var transactionLogger = provider.GetRequiredService<ILogger<AggregateTransaction>>();
+        return new AggregateTransaction(documentSession, transactionId, transactionLogger);
     }
 
     public class InvalidTenantIdForGuildlessSessionException : Exception
     {
-        public string TenantId { get; init; }
+        public required string TenantId { get; init; }
+    };
+    
+    public class InvalidTenantIdForGuildSessionException : Exception
+    {
+        public required string TenantId { get; init; }
     };
 }
 
-public class AggregateTransaction(IDocumentSession session) : IGuildlessAggregateTransaction
+public class AggregateTransaction(IDocumentSession session, int transactionId, ILogger<AggregateTransaction> logger) : IGuildlessAggregateTransaction
 {
     public void Update<TAggregate>(TAggregate aggregate)
         where TAggregate : AggregateBase
@@ -72,10 +96,10 @@ public class AggregateTransaction(IDocumentSession session) : IGuildlessAggregat
         return !streamState.IsArchived;
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        session.SaveChanges();
-        session.Dispose();
+        logger.LogDebug("[{TransactionId}] Disposing aggregate transaction for tenant {TenantId}", transactionId, session.TenantId);
+        await session.DisposeAsync();
         GC.SuppressFinalize(this);
     }
 }

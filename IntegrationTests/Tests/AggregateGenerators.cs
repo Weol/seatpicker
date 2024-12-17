@@ -25,7 +25,4 @@ public static class SeatGenerator
     }
 }
 
-public static class LanGenerator
-{
-
-}
+public static class LanGenerator;

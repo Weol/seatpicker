@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Seatpicker.Application.Features;
 using Seatpicker.Application.Features.Reservation;
+using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Database;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
@@ -7,13 +9,10 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 public static class GetSeat
 {
     public static async Task<IResult> GetAll(
-        [FromRoute] string guildId,
         [FromRoute] string lanId,
-        [FromServices] DocumentRepository documentRepository,
+        [FromServices] IDocumentReader documentReader,
         [FromServices] IUserProvider userProvider)
     {
-        using var documentReader = documentRepository.CreateReader(guildId);
-
         var tasks = documentReader.Query<ProjectedSeat>()
             .Where(seat => seat.LanId == lanId)
             .AsEnumerable()
@@ -24,10 +23,7 @@ public static class GetSeat
                     if (seat.ReservedBy is not null)
                     {
                         var user = await userProvider.GetById(seat.ReservedBy);
-                        if (user is not null)
-                        {
-                            reservedBy = new User(user.Id, user.Name, user.Avatar);
-                        }
+                        if (user is not null) reservedBy = user;
                     }
 
                     return new SeatResponse(seat.Id, seat.Title, Bounds.FromDomainBounds(seat.Bounds), reservedBy);
@@ -39,14 +35,11 @@ public static class GetSeat
     }
 
     public static async Task<IResult> Get(
-        [FromRoute] string guildId,
         [FromRoute] string lanId,
         [FromRoute] string seatId,
         [FromServices] IUserProvider userProvider,
-        [FromServices] DocumentRepository documentRepository)
+        [FromServices] IDocumentReader documentReader)
     {
-        using var documentReader = documentRepository.CreateReader(guildId);
-
         var seat = documentReader.Query<ProjectedSeat>()
             .Where(seat => seat.LanId == lanId)
             .SingleOrDefault(seat => seat.Id == seatId);
@@ -57,10 +50,7 @@ public static class GetSeat
         if (seat.ReservedBy is not null)
         {
             var user = await userProvider.GetById(seat.ReservedBy);
-            if (user is not null)
-            {
-                reservedBy = new User(user.Id, user.Name, user.Avatar);
-            }
+            if (user is not null) reservedBy = user;
         }
 
         return TypedResults.Ok(new SeatResponse(seat.Id, seat.Title, Bounds.FromDomainBounds(seat.Bounds), reservedBy));

@@ -14,7 +14,7 @@ public static class UpdateGuild
         [FromServices] GuildService guildService)
     {
         if (guildId != request.Id)
-            throw new BadRequestException("Route parameter id doeSaveGuilds not match the request model id");
+            throw new BadRequestException("Route parameter id does not match the request model id");
 
         var user = await loggedInUserAccessor.GetUser();
 

@@ -40,7 +40,7 @@ public class Create_lan(
         var response = await MakeRequest(client, guild.Id, request);
 
         // Assert
-        var committedProjections = GetCommittedDocuments<ProjectedLan>(guild.Id);
+        var committedProjections = await GetCommittedDocuments<ProjectedLan>(guild.Id);
 
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),

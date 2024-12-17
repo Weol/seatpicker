@@ -1,12 +1,13 @@
 ﻿using Microsoft.Extensions.Options;
 using Seatpicker.Domain;
+using Seatpicker.Infrastructure.Adapters.Database;
 
 namespace Seatpicker.Infrastructure.Authentication;
 
 public class AuthenticationService(
     JwtTokenCreator tokenCreator,
     IOptions<AuthenticationOptions> options,
-    UserManager userManager)
+    DocumentRepository documentRepository)
 {
     private readonly AuthenticationOptions options = options.Value;
 
@@ -38,7 +39,12 @@ public class AuthenticationService(
 
         var (jwtToken, expiresAt) = await tokenCreator.CreateToken(token);
 
-        await userManager.Store(guildId, new User(token.Id, nick, avatar, roles));
+        if (guildId is not null)
+        {
+            await using var transaction = documentRepository.CreateTransaction(guildId);
+            transaction.Store(new UserDocument(token.Id, nick, avatar, roles));
+            await transaction.Commit();
+        }
 
         return (jwtToken, expiresAt, token);
     }

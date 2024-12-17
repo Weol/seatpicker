@@ -25,7 +25,7 @@ public class GetAll_lan(
         var guild = await CreateGuild();
         var client = GetClient(guild.Id);
 
-        var existingLan = new[] { RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id)), RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id)) };
+        var existingLan = new[] { RandomData.Aggregates.Lan(CreateUser(guild.Id)), RandomData.Aggregates.Lan(CreateUser(guild.Id)) };
         await SetupAggregates(guild.Id, existingLan[0], existingLan[1]);
 
         // Act
@@ -79,7 +79,7 @@ public class GetAll_lan(
 
         foreach (var (guild, lans) in guilds)
         {
-            var generatedLans = new[] { RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id)), RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id))};
+            var generatedLans = new[] { RandomData.Aggregates.Lan(CreateUser(guild.Id)), RandomData.Aggregates.Lan(CreateUser(guild.Id))};
             await SetupAggregates(guild.Id, generatedLans[0], generatedLans[1]);
             lans.AddRange(generatedLans);
         }

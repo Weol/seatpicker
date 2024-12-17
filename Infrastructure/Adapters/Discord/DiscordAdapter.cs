@@ -1,22 +1,47 @@
-﻿using System.Net;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
+using Seatpicker.Application.Features.Lan;
 
 // ReSharper disable NotAccessedPositionalProperty.Global
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
 namespace Seatpicker.Infrastructure.Adapters.Discord;
 
+[SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope")]
 public class DiscordAdapter(
     HttpClient httpClient,
     IOptions<DiscordAdapterOptions> options,
     JsonSerializerOptions jsonSerializerOptions,
-    ILogger<DiscordAdapter> logger)
+    ILogger<DiscordAdapter> logger) : IDiscordGuildProvider
 {
     private readonly DiscordAdapterOptions options = options.Value;
 
+    /*
+     * Port implementations
+     */
+    
+    public async IAsyncEnumerable<Application.Features.Lan.DiscordGuild> GetAll()
+    {
+        var guilds = await GetGuilds();
+        foreach (var guild in guilds)
+        {
+            var guildRoles = await 
+            var roles = guild.Roles.Select(role =>
+                new Application.Features.Lan.DiscordGuildRole(role.Id, role.Name, role.Color, role.Icon))
+                .ToArray();
+            
+            yield return new Application.Features.Lan.DiscordGuild(guild.Id, guild.Name, guild.Icon, roles);
+        }
+    }
+    
+    /*
+     * Adapter methods
+     */
+    
     public virtual async Task<DiscordAccessToken> GetAccessToken(string discordToken, string redirectUrl)
     {
         logger.LogInformation(
@@ -107,14 +132,32 @@ public class DiscordAdapter(
         }
     }
 
-    public virtual async Task<IEnumerable<DiscordGuild>> GetGuilds()
+    public virtual async IAsyncEnumerable<DiscordGuildWithRoles> GetGuilds()
     {
         using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "users/@me/guilds");
 
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
 
         var response = await httpClient.SendAsync(requestMessage);
-        return await DeserializeContent<IEnumerable<DiscordGuild>>(response);
+        var guilds = await DeserializeContent<IEnumerable<DiscordGuild>>(response);
+        await foreach (var guild in guilds)
+        {
+            var roles = 
+        }
+    }
+    
+    private virtual async IAsyncEnumerable<DiscordGuildRole> GetGuilds()
+    {
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "users/@me/guilds");
+
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
+
+        var response = await httpClient.SendAsync(requestMessage);
+        var guilds = await DeserializeContent<IEnumerable<DiscordGuild>>(response);
+        await foreach (var guild in guilds)
+        {
+            var roles = 
+        }
     }
 
     private async Task<TModel> DeserializeContent<TModel>(HttpResponseMessage response)

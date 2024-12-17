@@ -4,22 +4,11 @@ using Shared;
 
 namespace Seatpicker.Application.Features;
 
-public interface IDocumentRepository
-{
-    public IDocumentTransaction CreateTransaction(string guildId, IDocumentSession documentSession);
-
-    public IDocumentReader CreateReader(string guildId, IQuerySession querySession);
-
-    public IGuildlessDocumentTransaction CreateGuildlessTransaction(IDocumentSession documentSession);
-
-    public IGuildlessDocumentReader CreateGuildlessReader(IQuerySession querySession);
-}
-
 public interface IGuildlessDocumentTransaction : IDocumentTransaction;
 
 public interface IGuildlessDocumentReader : IDocumentReader;
 
-public interface IDocumentReader : IDisposable
+public interface IDocumentReader : IAsyncDisposable
 {
     public Task<TDocument?> Query<TDocument>(string id)
         where TDocument : IDocument;
@@ -28,7 +17,7 @@ public interface IDocumentReader : IDisposable
         where TDocument : IDocument;
 }
 
-public interface IDocumentTransaction : IDisposable
+public interface IDocumentTransaction : IAsyncDisposable
 {
     public void Store<TDocument>(params TDocument[] documentsToAdd)
         where TDocument : IDocument;

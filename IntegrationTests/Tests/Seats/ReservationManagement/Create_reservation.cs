@@ -27,7 +27,7 @@ public class Create_reservation(
         // Arrange
 		var guild = await CreateGuild();
         var client = GetClient(guild.Id, Role.Operator);
-        var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
+        var lan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
         var seat = SeatGenerator.Create(lan, CreateUser(guild.Id));
         var reserveFor = CreateUser(guild.Id);
 
@@ -37,11 +37,12 @@ public class Create_reservation(
         var response = await MakeRequest(client, guild.Id, lan.Id, seat.Id, reserveFor.Id);
 
         // Assert
+        var committedSeats = await GetCommittedDocuments<ProjectedSeat>(guild.Id);
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                var committedSeat = GetCommittedDocuments<ProjectedSeat>(guild.Id).Should().ContainSingle().Subject;
+                var committedSeat = committedSeats.Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().NotBeNull();
                 committedSeat.ReservedBy!.Should().Be(reserveFor.Id);
             });
@@ -54,7 +55,7 @@ public class Create_reservation(
 		var guild = await CreateGuild();
         var client = GetClient(guild.Id, Role.Operator);
 
-        var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
+        var lan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
         var reserveFor = CreateUser(guild.Id);
         var seat = SeatGenerator.Create(lan, CreateUser(guild.Id), reservedBy: reserveFor);
 
@@ -64,11 +65,12 @@ public class Create_reservation(
         var response = await MakeRequest(client, guild.Id, lan.Id, seat.Id, reserveFor.Id);
 
         // Assert
+        var committedSeats = await GetCommittedDocuments<ProjectedSeat>(guild.Id);
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                var committedSeat = GetCommittedDocuments<ProjectedSeat>(guild.Id).Should().ContainSingle().Subject;
+                var committedSeat = committedSeats.Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().NotBeNull();
                 committedSeat.ReservedBy!.Should().Be(reserveFor.Id);
             });
@@ -82,7 +84,7 @@ public class Create_reservation(
         var client = GetClient(guild.Id, Role.Operator);
 
         var alreadyReservedBy = CreateUser(guild.Id);
-        var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
+        var lan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
         var seat = SeatGenerator.Create(lan, CreateUser(guild.Id), reservedBy: alreadyReservedBy);
         var reserveFor = CreateUser(guild.Id);
 
@@ -92,11 +94,12 @@ public class Create_reservation(
         var response = await MakeRequest(client, guild.Id, lan.Id, seat.Id, reserveFor.Id);
 
         // Assert
+        var committedSeats = await GetCommittedDocuments<ProjectedSeat>(guild.Id);
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.Conflict),
             () =>
             {
-                var committedSeat = GetCommittedDocuments<ProjectedSeat>(guild.Id).Should().ContainSingle().Subject;
+                var committedSeat = committedSeats.Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().NotBeNull();
                 committedSeat.ReservedBy!.Should().Be(alreadyReservedBy.Id);
             });
@@ -109,7 +112,7 @@ public class Create_reservation(
 		var guild = await CreateGuild();
         var client = GetClient(guild.Id, Role.Operator);
 
-        var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
+        var lan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
         var seat = SeatGenerator.Create(lan, CreateUser(guild.Id));
         var reserveFor = CreateUser(guild.Id);
 
@@ -128,7 +131,7 @@ public class Create_reservation(
         var client = GetClient(guild.Id, Role.Operator);
 
         var reserveFor = CreateUser(guild.Id);
-        var lan = RandomData.Aggregates.Lan(guild.Id, CreateUser(guild.Id));
+        var lan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
         var alreadyReservedSeat = SeatGenerator.Create(lan, CreateUser(guild.Id), reservedBy: reserveFor);
         var seat = SeatGenerator.Create(lan, CreateUser(guild.Id));
 
@@ -138,11 +141,12 @@ public class Create_reservation(
         var response = await MakeRequest(client, guild.Id, lan.Id, seat.Id, reserveFor.Id);
         
         // Assert
+        var committedSeats = await GetCommittedDocuments<ProjectedSeat>(guild.Id);
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity),
             () =>
             {
-                var committedSeat = GetCommittedDocuments<ProjectedSeat>(guild.Id).Should().ContainSingle(x => x.Id == seat.Id).Subject;
+                var committedSeat = committedSeats.Should().ContainSingle(x => x.Id == seat.Id).Subject;
                 committedSeat.ReservedBy.Should().BeNull();
             });
     }

@@ -213,7 +213,7 @@ public abstract class LoginAndRenewBase(
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         body.Should().NotBeNull();
 
-        var userDocuments = GetCommittedDocuments<UserManager.UserDocument>(guild.Id);
+        var userDocuments = await GetCommittedDocuments<UserDocument>(guild.Id);
         var userDocument = userDocuments.Should().ContainSingle(doc => doc.Id == discordUser.Id).Subject;
 
         Assert.Multiple(() => userDocument.Name.Should().Be(guildUsername ?? discordUser.Username),
@@ -238,7 +238,7 @@ public abstract class LoginAndRenewBase(
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         body.Should().NotBeNull();
 
-        var userDocuments = GetCommittedDocuments<UserManager.UserDocument>(guild.Id);
+        var userDocuments = await GetCommittedDocuments<UserDocument>(guild.Id);
         var userDocument = userDocuments.Should().ContainSingle(doc => doc.Id == discordUser.Id).Subject;
         Assert.Multiple(() => userDocument.Name.Should().Be(discordUser.Username),
             () => userDocument.Avatar.Should().Be(discordUser.Avatar));

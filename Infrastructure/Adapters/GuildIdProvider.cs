@@ -17,6 +17,4 @@ public class GuildIdProvider(IHttpContextAccessor httpContextAccessor)
     }
 }
 
-public class NoGuildIdSetException : Exception
-{
-}
+public class NoGuildIdSetException : Exception;

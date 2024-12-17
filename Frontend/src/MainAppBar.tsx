@@ -30,6 +30,10 @@ export default function MainAppBar(props: { activeGuild: ActiveGuild | null }) {
   const getPages = () => {
     if (loggedInUser != null) {
       const options = [] as string[]
+      options.push("Reserver plass")
+      options.push("Program")
+      options.push("Reglement")
+      options.push("Om oss")
       if (loggedInUser.roles.includes(Role.ADMIN) && props.activeGuild) options.push("Admin")
       if (loggedInUser.roles.includes(Role.SUPERADMIN)) options.push("Superadmin")
       return options

@@ -51,14 +51,16 @@ public class Update_guild(
         var client = GetClient(guild.Id, Role.Admin);
         var request = createRequest(guild);
 
-        var defaultDocument = GetCommittedDocuments<Application.Features.Lan.Guild>()
+        var defaultGuilds = await GetCommittedDocuments<Application.Features.Lan.Guild>(guild.Id);
+        var defaultDocument = defaultGuilds
             .First(document => document.Id == guild.Id);
 
         // Act
         var response = await MakeRequest(client, guild.Id, request);
 
         // Assert
-        var committedDocument = GetCommittedDocuments<Application.Features.Lan.Guild>()
+        var committedGuilds = await GetCommittedDocuments<Application.Features.Lan.Guild>(guild.Id);
+        var committedDocument = committedGuilds
             .First(document => document.Id == guild.Id);
 
         Assert.Multiple(
@@ -89,27 +91,28 @@ public class Update_guild(
         var data = new TheoryData<Func<Application.Features.Lan.Guild, UpdateGuild.Request>>()
         {
             // Should not be able to have empty or whitespace strings
-            guild => UpdateGuildRequest(guild) with { Id = "" },
-            guild => UpdateGuildRequest(guild) with { Id = "   " },
-            guild => UpdateGuildRequest(guild) with { Name = "" },
-            guild => UpdateGuildRequest(guild) with { Name = " " },
+            guild => UpdateGuildRequest(guild) with { Hostnames = [RandomData.Hostname()], Id = "" },
+            guild => UpdateGuildRequest(guild) with { Hostnames = [RandomData.Hostname()], Id = "   " },
+            guild => UpdateGuildRequest(guild) with { Hostnames = [RandomData.Hostname()], Name = "" },
+            guild => UpdateGuildRequest(guild) with { Hostnames = [RandomData.Hostname()], Name = " " },
             
             // Should not be able to change Id
-            guild => UpdateGuildRequest(guild) with { Id = "123" },
+            guild => UpdateGuildRequest(guild) with { Hostnames = [RandomData.Hostname()], Id = "123" },
             
             // Should not be able to change name
-            guild => UpdateGuildRequest(guild) with { Name = "asdasd" },
+            guild => UpdateGuildRequest(guild) with { Hostnames = [RandomData.Hostname()], Name = "asdasd" },
 
             // Should not be able to have duplicate hostnames
             guild => UpdateGuildRequest(guild) with { Hostnames = ["test.org", "test.org"] },
 
             // Should not be able to add a new role
-            guild => UpdateGuildRequest(guild) with { Roles = new[] { RandomData.GuildRole() } },
+            guild => UpdateGuildRequest(guild) with { Hostnames = [RandomData.Hostname()], Roles = [RandomData.GuildRole()] },
 
             // Should not be able to alter any roles
             guild =>
                 UpdateGuildRequest(guild) with
                 {
+                    Hostnames = [RandomData.Hostname()], 
                     Roles = guild.Roles.Select(role => role with { Name = "Hehe" }).ToArray()
                 },
 
@@ -117,6 +120,7 @@ public class Update_guild(
             guild =>
                 UpdateGuildRequest(guild) with
                 {
+                    Hostnames = [RandomData.Hostname()], 
                     RoleMapping =
                     [
                         new GuildRoleMapping(

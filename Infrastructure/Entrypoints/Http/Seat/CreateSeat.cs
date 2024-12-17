@@ -7,7 +7,6 @@ namespace Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 public static class CreateSeat
 {
     public static async Task<IResult> Create(
-        [FromRoute] string guildId,
         [FromRoute] string lanId,
         [FromBody] Request request,
         [FromServices] ILoggedInUserAccessor loggedInUserAccessor,

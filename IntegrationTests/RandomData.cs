@@ -66,8 +66,7 @@ public static class RandomData
             return Encoding.UTF8.GetBytes(svg);
         }
 
-        public static Lan Lan(string guildId,
-            User user,
+        public static Lan Lan(User user,
             string? id = null,
             string? title = null,
             byte[]? background = null)
