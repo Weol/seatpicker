@@ -22,13 +22,8 @@ public record DiscordGuildMember(
 public record DiscordGuild(
     [property: JsonPropertyName("id")] string Id,
     [property: JsonPropertyName("name")] string Name,
-    [property: JsonPropertyName("icon")] string? Icon);
-
-public record DiscordGuildWithRoles(
-    string Id,
-    string Name,
-    string? Icon,
-    [property: JsonPropertyName("icon")] DiscordGuildRole[] Roles) : DiscordGuild(Id, Name, Icon);
+    [property: JsonPropertyName("icon")] string? Icon,
+    [property: JsonPropertyName("icon")] DiscordGuildRole[] Roles);
 
 public record DiscordGuildRole(
     [property: JsonPropertyName("id")] string Id,

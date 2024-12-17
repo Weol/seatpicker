@@ -29,7 +29,6 @@ public class DiscordAdapter(
         var guilds = await GetGuilds();
         foreach (var guild in guilds)
         {
-            var guildRoles = await 
             var roles = guild.Roles.Select(role =>
                 new Application.Features.Lan.DiscordGuildRole(role.Id, role.Name, role.Color, role.Icon))
                 .ToArray();
@@ -132,32 +131,14 @@ public class DiscordAdapter(
         }
     }
 
-    public virtual async IAsyncEnumerable<DiscordGuildWithRoles> GetGuilds()
+    public virtual async Task<IEnumerable<DiscordGuild>> GetGuilds()
     {
         using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "users/@me/guilds");
 
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
 
         var response = await httpClient.SendAsync(requestMessage);
-        var guilds = await DeserializeContent<IEnumerable<DiscordGuild>>(response);
-        await foreach (var guild in guilds)
-        {
-            var roles = 
-        }
-    }
-    
-    private virtual async IAsyncEnumerable<DiscordGuildRole> GetGuilds()
-    {
-        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "users/@me/guilds");
-
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
-
-        var response = await httpClient.SendAsync(requestMessage);
-        var guilds = await DeserializeContent<IEnumerable<DiscordGuild>>(response);
-        await foreach (var guild in guilds)
-        {
-            var roles = 
-        }
+        return await DeserializeContent<IEnumerable<DiscordGuild>>(response);
     }
 
     private async Task<TModel> DeserializeContent<TModel>(HttpResponseMessage response)

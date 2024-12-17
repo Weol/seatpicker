@@ -12,7 +12,7 @@ export default function LandingPage() {
       <Typography variant="h4" component="h1" gutterBottom>
        17. til 19. januar 
       </Typography>
-      <Button variant={"contained"}>Under natures rgb</Button>
+      <Button variant={"contained"}>Resever en plass</Button>
     </Stack>
   )
 }
