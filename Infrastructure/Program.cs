@@ -7,7 +7,7 @@ using Seatpicker.Infrastructure.Entrypoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddJsonFile("appsettings.local.json");
+builder.Configuration.AddJsonFile("appsettings.local.json", true);
 
 builder.Configuration.AddEnvironmentVariables("App_");
 builder.Configuration.AddSeatpickerKeyvault();

@@ -8,6 +8,7 @@ import { RecoilRoot } from "recoil"
 import App from "./App"
 import ErrorPage from "./Pages/ErrorPage"
 import theme from "./theme"
+import AuthErrorBoundary from "./ErrorBoundry";
 
 const rootElement = document.getElementById("root")
 
@@ -31,7 +32,9 @@ if (rootElement != null) {
       <BrowserRouter>
         <RecoilRoot>
           <AppInsightsErrorBoundary onError={() => <ErrorPage />} appInsights={reactPlugin}>
-            <App />
+            <AuthErrorBoundary>
+              <App />
+            </AuthErrorBoundary>
           </AppInsightsErrorBoundary>
         </RecoilRoot>
       </BrowserRouter>

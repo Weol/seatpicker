@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {Cancel, Edit} from "@mui/icons-material"
+import {Add, Cancel, Edit} from "@mui/icons-material"
 import {
   Button,
   Divider,
@@ -14,10 +14,9 @@ import {
 import ListItemIcon from "@mui/material/ListItemIcon"
 import ListItemText from "@mui/material/ListItemText"
 import {useState} from "react"
-import {useGuilds} from "../Adapters/Guilds/Guilds"
+import {useGuilds, useUnconfiguredGuilds} from "../Adapters/Guilds/Guilds"
 import {Guild} from "../Adapters/Models"
 import DiscordGuildAvatar from "../Components/DiscordAvatar"
-import {useUnconfiguredGuilds} from "../Adapters/Guilds/UnconfiguredGuilds";
 import {useNavigate} from "react-router-dom";
 
 export default function AllGuildsOverview() {
@@ -49,7 +48,7 @@ export default function AllGuildsOverview() {
                     <ListItemText primary={unconfiguredGuild.name} secondary={unconfiguredGuild.id}/>
                     <ListItemSecondaryAction>
                       <IconButton onClick={() => configureGuild(unconfiguredGuild)}>
-                        <Edit/>
+                        <Add/>
                       </IconButton>
                     </ListItemSecondaryAction>
                   </ListItemButton>

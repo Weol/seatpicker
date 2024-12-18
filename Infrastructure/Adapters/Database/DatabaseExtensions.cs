@@ -99,7 +99,7 @@ internal static class DatabaseExtensions
         RegisterAllDocuments(options);
         RegisterAllEvents(options);
 
-        options.AutoCreateSchemaObjects = AutoCreate.None;
+        options.AutoCreateSchemaObjects = AutoCreate.All;
         options.GeneratedCodeMode = TypeLoadMode.Dynamic;
         options.SourceCodeWritingEnabled = false;
 

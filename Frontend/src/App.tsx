@@ -80,7 +80,8 @@ function AppWithActiveGuild(props: { activeGuild: ActiveGuild }) {
       <Suspense fallback={<Loading />}>
         <Container maxWidth="sm" sx={{ paddingTop: "1em" }}>
           <Routes>
-            <Route path="/" element={<Seats />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/reserve" element={<Seats />} />
             <Route path="/redirect-login" element={<RedirectLogin activeGuild={props.activeGuild}/>} />
             <Route path="/guilds" element={<AllGuildsOverview />} />
             <Route path="/guild/:guildId" element={<GuildOverviewWrapper />} />

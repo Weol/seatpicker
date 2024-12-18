@@ -42,7 +42,9 @@ export default async function ApiRequest(
     body: logBody,
   })
 
-  if (response.status > 499) {
+  if (response.status === 401) {
+    throw response
+  } else if (response.status > 499) {
     throw response
   }
 
