@@ -2,6 +2,7 @@ import { Component } from "react"
 import { useAuth } from "./Adapters/AuthAdapter"
 import {useNavigate} from "react-router-dom";
 import ErrorPage from "./Pages/ErrorPage";
+import {AuthenticationError} from "./Adapters/AdapterError";
 
 type AuthErrorBoundryProps = {
   children: React.ReactElement
@@ -25,9 +26,11 @@ class ErrorBoundary extends Component<ErrorBoundryProps, { error: boolean }> {
     this.state = { error: false }
   }
   
-  componentDidCatch(error: Error & { status?: number }) {
-    if (error.status == 401) {
+  componentDidCatch(error: Error) {
+    if (error instanceof AuthenticationError) {
       this.setState({ error: true });
+      
+      console.error(error)
       
       setTimeout(() => {
         this.props.logout()

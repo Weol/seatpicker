@@ -1,5 +1,4 @@
-﻿using Marten;
-using Seatpicker.Application.Features;
+﻿using Seatpicker.Application.Features;
 using Seatpicker.Application.Features.Lan;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Discord;
@@ -13,7 +12,7 @@ public class DiscordAuthenticationService(
 {
     public async Task<(string JwtToken, DateTimeOffset ExpiresAt, AuthenticationToken DiscordToken)> Renew(
         string refreshToken,
-        string? guildId)
+        string guildId)
     {
         var accessToken = await discordAdapter.RefreshAccessToken(refreshToken);
         var discordUser = await discordAdapter.Lookup(accessToken.AccessToken);
@@ -23,14 +22,13 @@ public class DiscordAuthenticationService(
 
     public async Task<(string JwtToken, DateTimeOffset ExpiresAt, AuthenticationToken DiscordToken)> Login(
         string discordToken,
-        string? guildId,
+        string guildId,
         string redirectUrl)
     {
         var accessToken = await discordAdapter.GetAccessToken(discordToken, redirectUrl);
         var discordUser = await discordAdapter.Lookup(accessToken.AccessToken);
 
-        if (guildId is not null)
-            await discordAdapter.AddGuildMember(guildId, discordUser.Id, accessToken.AccessToken);
+        await discordAdapter.AddGuildMember(guildId, discordUser.Id, accessToken.AccessToken);
 
         return await CreateToken(accessToken, discordUser, guildId);
     }
@@ -39,19 +37,8 @@ public class DiscordAuthenticationService(
         CreateToken(
             DiscordAccessToken accessToken,
             DiscordUser discordUser,
-            string? guildId)
+            string guildId)
     {
-        if (guildId is null)
-        {
-            return await authenticationService.Login(
-                discordUser.Id,
-                discordUser.GlobalName ?? discordUser.Username,
-                discordUser.Avatar,
-                accessToken.RefreshToken,
-                [Role.User, Role.Superadmin],
-                null);
-        }
-
         var (roles, guildNick, guildAvatar) = await GetGuildUserInfo(discordUser, guildId);
 
         return await authenticationService.Login(

@@ -27,7 +27,7 @@ internal static class DiscordAdapterExtensions
                 client.DefaultRequestHeaders.Add("User-Agent", userAgent);
             });
 
-        services.AddSingleton<IDiscordGuildProvider>(provider => provider.GetRequiredService<DiscordAdapter>());
+        services.AddTransient<IDiscordGuildProvider>(provider => provider.GetRequiredService<DiscordAdapter>());
 
         return services;
     }

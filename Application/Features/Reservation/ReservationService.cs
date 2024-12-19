@@ -2,7 +2,7 @@
 
 namespace Seatpicker.Application.Features.Reservation;
 
-public class ReservationService(IAggregateTransaction aggregateTransaction, IDocumentReader documentReader)
+public class ReservationService(IAggregateTransaction aggregateTransaction, IDocumentReader documentReader, IReservationNotifier reservationNotifier)
 {
     public async Task Create(string lanId, string seatId, User user)
     {
@@ -16,6 +16,8 @@ public class ReservationService(IAggregateTransaction aggregateTransaction, IDoc
         seatToReserve.MakeReservation(user, numReservedSeatsByUser);
 
         aggregateTransaction.Update(seatToReserve);
+        
+        await reservationNotifier.NotifySeatReservationChanged(seatToReserve);
     }
 
    public async Task Remove(string seatId, User user)
@@ -23,8 +25,10 @@ public class ReservationService(IAggregateTransaction aggregateTransaction, IDoc
         var seat = await aggregateTransaction.Aggregate<Seat>(seatId) ?? throw new SeatNotFoundException { SeatId = seatId };
 
         seat.RemoveReservation(user);
-
+        
         aggregateTransaction.Update(seat);
+        
+        await reservationNotifier.NotifySeatReservationChanged(seat);
     }
 
    public async Task Move(string fromSeatId, string toSeatId, User user)
@@ -39,6 +43,8 @@ public class ReservationService(IAggregateTransaction aggregateTransaction, IDoc
 
         aggregateTransaction.Update(fromSeat);
         aggregateTransaction.Update(toSeat);
-        await aggregateTransaction.Commit();
+        
+        await reservationNotifier.NotifySeatReservationChanged(fromSeat);
+        await reservationNotifier.NotifySeatReservationChanged(toSeat);
     }
 }

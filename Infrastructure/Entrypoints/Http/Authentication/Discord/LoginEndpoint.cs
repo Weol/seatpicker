@@ -22,5 +22,5 @@ public static class LoginEndpoint
             discordToken.Roles));
     }
 
-    public record Request(string Token, string? GuildId, string RedirectUrl);
+    public record Request(string Token, string GuildId, string RedirectUrl);
 }

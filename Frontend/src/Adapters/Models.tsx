@@ -1,6 +1,6 @@
 export type ActiveGuild = {
   guildId: string
-  lanId: string | null
+  lan: Lan | null
 }
 
 export type UnconfiguredGuild = {
@@ -14,7 +14,8 @@ export type Guild = {
   name: string
   icon: string | null
   hostnames: string[]
-  roleMappings: GuildRoleMapping[]
+  roleMapping: GuildRoleMapping[]
+  roles: GuildRole[]
 }
 
 export type GuildRoleMapping = {
@@ -24,7 +25,6 @@ export type GuildRoleMapping = {
 
 export type Lan = {
   id: string
-  guildId: string
   active: boolean
   title: string
   background: string
@@ -64,5 +64,5 @@ export type GuildRole = {
   id: string
   name: string
   color: number
-  roles: Role[]
+  icon?: string
 }

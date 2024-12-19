@@ -54,7 +54,7 @@ public class LanService(IAggregateTransaction aggregateTransaction, IDocumentRea
             aggregateTransaction.Update(activeLan);
         }
 
-        lan.SetActive(false, user);
+        lan.SetActive(active, user);
 
         aggregateTransaction.Update(lan);
     }

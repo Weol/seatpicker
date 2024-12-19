@@ -17,7 +17,7 @@ public class AuthenticationService(
         string? avatar,
         string refreshToken,
         Role[] roles,
-        string? guildId)
+        string guildId)
     {
         var isSuperAdmin = IsSuperAdmin(userId);
 

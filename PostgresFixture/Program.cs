@@ -1,6 +1,7 @@
 using Testcontainers.PostgreSql;
 
 var container = new PostgreSqlBuilder()
+    .WithPortBinding(55123, 5432)
     .Build();
 
 const string environmentVariableName = "POSTGRES_CONNECTION_STRING";

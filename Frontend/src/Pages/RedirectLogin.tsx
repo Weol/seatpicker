@@ -13,7 +13,7 @@ export default function RedirectLogin(props: { activeGuild: ActiveGuild | null }
 
   useEffect(() => {
     const code = searchParams.get("code")
-    if (code) {
+    if (code && !loggedInUser) {
       login(code, props.activeGuild?.guildId ?? null)
     }
   }, [])

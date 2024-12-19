@@ -1,8 +1,7 @@
 ﻿using FluentValidation;
-using FluentValidation.AspNetCore;
 using Seatpicker.Infrastructure.Entrypoints.Filters;
-using Seatpicker.Infrastructure.Entrypoints.Http.Frontend;
 using Seatpicker.Infrastructure.Entrypoints.Middleware;
+using Seatpicker.Infrastructure.Entrypoints.SignalR;
 
 namespace Seatpicker.Infrastructure.Entrypoints;
 
@@ -12,6 +11,7 @@ public static class EntrypointsExtensions
     {
         services
             .AddValidatorsFromAssemblyContaining<AssemblyAnchor>()
+            .AddSignalREntrypoints()
             .AddEndpointsApiExplorer()
             .AddLoggedInUserAccessor()
             .AddHealthChecks();
@@ -19,11 +19,11 @@ public static class EntrypointsExtensions
         return services;
     }
 
-
     public static WebApplication UseEntrypoints(this WebApplication app)
     {
         app.UseHttpsRedirection();
         app.UseTransactionMiddleware();
+        app.UseSignalREntrypoints();
         app.MapEntrypoints(builder =>
         {
             builder.AddEndpointFilter<FluentValidationFilter>();

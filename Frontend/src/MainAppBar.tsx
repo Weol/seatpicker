@@ -31,9 +31,6 @@ export default function MainAppBar(props: { activeGuild: ActiveGuild | null }) {
     if (loggedInUser != null) {
       const options = [] as string[]
       options.push("Reserver plass")
-      options.push("Program")
-      options.push("Reglement")
-      options.push("Om oss")
       if (loggedInUser.roles.includes(Role.ADMIN) && props.activeGuild) options.push("Admin")
       if (loggedInUser.roles.includes(Role.SUPERADMIN)) options.push("Superadmin")
       return options
@@ -53,6 +50,8 @@ export default function MainAppBar(props: { activeGuild: ActiveGuild | null }) {
 
     if (page == "Admin" && props.activeGuild) {
       navigate(`/guild/${props.activeGuild.guildId}`)
+    } else if (page == "Reserver plass") {
+      navigate(`/reserve`)
     } else if (page == "Superadmin") {
       navigate(`/guilds`)
     }
@@ -67,150 +66,138 @@ export default function MainAppBar(props: { activeGuild: ActiveGuild | null }) {
     }
   }
 
-  return (
-    <AppBar position="static">
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            onClick={() => navigate("/")}
-            sx={{
-              mr: 2,
-              display: { xs: "none", md: "flex" },
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
-              color: "inherit",
-              textDecoration: "none",
-              cursor: "pointer",
-            }}
-          ></Typography>
+  return <AppBar position="static">
+    <Container maxWidth="xl">
+      <Toolbar disableGutters>
+        <Typography
+          variant="h6"
+          noWrap
+          component="a"
+          onClick={() => navigate("/")}
+          sx={{
+            mr: 2,
+            display: { xs: "none", md: "flex" },
+            fontFamily: "monospace",
+            fontWeight: 700,
+            letterSpacing: ".3rem",
+            color: "inherit",
+            textDecoration: "none",
+            cursor: "pointer",
+          }}
+        >SALTENLAN</Typography>
 
-          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
+        <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+          <IconButton
+            size="large"
+            aria-label="account of current user"
+            aria-controls="menu-appbar"
+            aria-haspopup="true"
+            onClick={handleOpenNavMenu}
+            color="inherit"
+          >
+            <MenuIcon />
+          </IconButton>
+          <Menu
+            id="menu-appbar"
+            anchorEl={anchorElNav}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "left",
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "left",
+            }}
+            open={Boolean(anchorElNav)}
+            onClose={handleCloseNavMenu}
+            sx={{
+              display: { xs: "block", md: "none" },
+            }}
+          >
+            {getPages().map(page => <MenuItem
+              key={page}
+              onClick={() => {
+                handleCloseNavMenu(page)
+              }}
             >
-              <MenuIcon />
-            </IconButton>
+              <Typography textAlign="center">{page}</Typography>
+            </MenuItem>)}
+          </Menu>
+        </Box>
+        <Typography
+          variant="h5"
+          noWrap
+          component="a"
+          onClick={() => navigate("/")}
+          sx={{
+            mr: 2,
+            display: { xs: "flex", md: "none" },
+            flexGrow: 1,
+            fontFamily: "monospace",
+            fontWeight: 700,
+            letterSpacing: ".3rem",
+            color: "inherit",
+            textDecoration: "none",
+            cursor: "pointer",
+          }}
+        >
+          SALTENLAN
+        </Typography>
+        <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
+          {getPages().map(page => <Button
+            key={page}
+            onClick={() => {
+              handleCloseNavMenu(page)
+            }}
+            sx={{ my: 2, color: "white", display: "block" }}
+          >
+            {page}
+          </Button>)}
+        </Box>
+
+        {loggedInUser && <Box sx={{ flexGrow: 0 }}>
+            <Tooltip title="Open settings">
+              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                <DiscordUserAvatar user={loggedInUser} />
+              </IconButton>
+            </Tooltip>
             <Menu
+              sx={{ mt: "45px" }}
               id="menu-appbar"
-              anchorEl={anchorElNav}
+              anchorEl={anchorElUser}
               anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
+                vertical: "top",
+                horizontal: "right",
               }}
               keepMounted
               transformOrigin={{
                 vertical: "top",
-                horizontal: "left",
+                horizontal: "right",
               }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{
-                display: { xs: "block", md: "none" },
-              }}
+              open={Boolean(anchorElUser)}
+              onClose={handleCloseUserMenu}
             >
-              {getPages().map((page) => (
-                <MenuItem
-                  key={page}
-                  onClick={() => {
-                    handleCloseNavMenu(page)
-                  }}
-                >
-                  <Typography textAlign="center">{page}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            onClick={() => navigate("/")}
-            sx={{
-              mr: 2,
-              display: { xs: "flex", md: "none" },
-              flexGrow: 1,
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
-              color: "inherit",
-              textDecoration: "none",
-              cursor: "pointer",
-            }}
-          >
-            SALTENLAN
-          </Typography>
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            {getPages().map((page) => (
-              <Button
-                key={page}
+              {settings.map(setting => <MenuItem
+                key={setting}
                 onClick={() => {
-                  handleCloseNavMenu(page)
+                  handleCloseUserMenu(setting)
                 }}
-                sx={{ my: 2, color: "white", display: "block" }}
               >
-                {page}
-              </Button>
-            ))}
-          </Box>
-
-          {(loggedInUser && (
-            <Box sx={{ flexGrow: 0 }}>
-              <Tooltip title="Open settings">
-                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <DiscordUserAvatar user={loggedInUser} />
-                </IconButton>
-              </Tooltip>
-              <Menu
-                sx={{ mt: "45px" }}
-                id="menu-appbar"
-                anchorEl={anchorElUser}
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                open={Boolean(anchorElUser)}
-                onClose={handleCloseUserMenu}
-              >
-                {settings.map((setting) => (
-                  <MenuItem
-                    key={setting}
-                    onClick={() => {
-                      handleCloseUserMenu(setting)
-                    }}
-                  >
-                    <Typography textAlign="center">{setting}</Typography>
-                  </MenuItem>
-                ))}
-              </Menu>
-            </Box>
-          )) || (
-            <Box sx={{ flexGrow: 0 }}>
-              <Button
-                sx={{ color: "text.primary" }}
-                startIcon={<img src={discordIcon} style={{ width: 20 }} alt="avatar" />}
-                variant="text"
-                onClick={RedirectToDiscordLogin}
-              >
-                Logg inn
-              </Button>
-            </Box>
-          )}
-        </Toolbar>
-      </Container>
-    </AppBar>
-  )
+                <Typography textAlign="center">{setting}</Typography>
+              </MenuItem>)}
+            </Menu>
+          </Box> || <Box sx={{ flexGrow: 0 }}>
+            <Button
+              sx={{ color: "text.primary" }}
+              startIcon={<img src={discordIcon} style={{ width: 20 }} alt="avatar" />}
+              variant="text"
+              onClick={RedirectToDiscordLogin}
+            >
+              Logg inn
+            </Button>
+          </Box>}
+      </Toolbar>
+    </Container>
+  </AppBar>
 }

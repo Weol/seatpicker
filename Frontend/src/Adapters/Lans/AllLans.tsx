@@ -1,6 +1,6 @@
 import { atomFamily, selector, useRecoilState, useRecoilValue } from "recoil"
 import { activeGuildAtom } from "../ActiveGuild"
-import ApiRequest from "../ApiRequest"
+import { ApiRequest } from "../ApiRequest"
 import { Lan } from "../Models"
 
 function getLanUrl(guildId: string, lanId?: string | null) {
@@ -10,8 +10,8 @@ function getLanUrl(guildId: string, lanId?: string | null) {
 async function loadAllLans(guildId: string) {
   const response = await ApiRequest("GET", getLanUrl(guildId))
 
-  const lans = (await response.json()) as Lan[]
-  lans.forEach((lan) => {
+  const lans = await response.json() as Lan[]
+  lans.forEach(lan => {
     lan.createdAt = new Date(lan.createdAt)
     lan.updatedAt = new Date(lan.updatedAt)
   })
@@ -29,30 +29,20 @@ export const activeLanSelector = selector<Lan | null>({
   get: async ({ get }) => {
     const activeGuild = get(activeGuildAtom)
 
-    if (activeGuild == null || activeGuild.lanId == null) return null
-    const response = await ApiRequest("GET", getLanUrl(activeGuild.guildId, activeGuild.lanId))
-
-    if (response.status == 404) return null
-
-    const lan = (await response.json()) as Lan
-
-    lan.createdAt = new Date(lan.createdAt)
-    lan.updatedAt = new Date(lan.updatedAt)
-
-    return lan
+    if (activeGuild == null || activeGuild.lan == null) return null
+    return activeGuild.lan
   },
 })
 
 export function useActiveLan() {
-  const activeLan = useRecoilValue(activeLanSelector)
-
-  return activeLan
+  return useRecoilValue(activeLanSelector)
 }
 
 export function useAllLans(guildId: string) {
+  if (!guildId) throw new Error("Guild id cannot be null")
   const [lans, setLans] = useRecoilState(allLansAtomFamily(guildId))
 
-  const createLan = async (guildId: string, title: string, background: string) => {
+  const createLan = async (title: string, background: string) => {
     await ApiRequest("POST", getLanUrl(guildId), {
       guildId,
       title,
@@ -61,9 +51,10 @@ export function useAllLans(guildId: string) {
     setLans(await loadAllLans(guildId))
   }
 
-  const updateLan = async (lan: Lan, title: string, background: string) => {
-    await ApiRequest("PUT", getLanUrl(lan.guildId) + `${lan.id}`, {
+  const updateLan = async (lan: Lan, active: boolean, title: string, background: string) => {
+    await ApiRequest("PUT", getLanUrl(guildId) + `${lan.id}`, {
       id: lan.id,
+      active: active,
       title,
       background,
     })
@@ -71,15 +62,7 @@ export function useAllLans(guildId: string) {
   }
 
   const deleteLan = async (lan: Lan) => {
-    await ApiRequest("DELETE", getLanUrl(lan.guildId, lan.id))
-    setLans(await loadAllLans(guildId))
-  }
-
-  const setActiveLan = async (lan: Lan, active: boolean) => {
-    await ApiRequest("PUT", getLanUrl(lan.guildId, lan.id), {
-      id: lan.id,
-      active,
-    })
+    await ApiRequest("DELETE", getLanUrl(guildId, lan.id))
     setLans(await loadAllLans(guildId))
   }
 
@@ -87,7 +70,6 @@ export function useAllLans(guildId: string) {
     lans,
     createLan,
     deleteLan,
-    updateLan,
-    setActiveLan,
+    updateLan
   }
 }

@@ -1,5 +1,4 @@
-﻿using Seatpicker.Domain;
-using Seatpicker.Infrastructure.Adapters;
+﻿using Seatpicker.Infrastructure.Adapters;
 using Seatpicker.Infrastructure.Authentication;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Filters;
@@ -14,10 +13,6 @@ public class GuildIdAuthorizationFilter(GuildIdProvider guildIdProvider) : IEndp
         {
             var claimGuildId = context.HttpContext.User.Claims
                 .FirstOrDefault(claim => claim.Type == JwtTokenCreator.GuildIdClaimName);
-
-            var isSuperadmin = context.HttpContext.User.IsInRole(Role.Superadmin.ToString());
-            if (claimGuildId is null && !isSuperadmin)
-                return Results.Forbid();
 
             if (claimGuildId is not null && guildId != claimGuildId.Value)
                 return Results.Forbid();

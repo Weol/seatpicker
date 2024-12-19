@@ -3,7 +3,7 @@ using Seatpicker.Domain;
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Authentication;
 
 public record TokenResponse(string Token,
-    string? GuildId,
+    string GuildId,
     long ExpiresAt,
     string RefreshToken,
     string UserId,

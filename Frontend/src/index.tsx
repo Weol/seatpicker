@@ -8,7 +8,8 @@ import { RecoilRoot } from "recoil"
 import App from "./App"
 import ErrorPage from "./Pages/ErrorPage"
 import theme from "./theme"
-import AuthErrorBoundary from "./ErrorBoundry";
+import AuthErrorBoundary from "./AuthErrorBoundry"
+import React from "react"
 
 const rootElement = document.getElementById("root")
 

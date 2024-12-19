@@ -1,12 +1,12 @@
 import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr"
-import { DefaultValue, atomFamily, useRecoilState } from "recoil"
+import { atomFamily, DefaultValue, useRecoilState } from "recoil"
 import Config from "../config"
-import ApiRequest from "./ApiRequest"
+import { ApiRequest } from "./ApiRequest"
 import { useAuth } from "./AuthAdapter"
 import { Lan, Seat, User } from "./Models"
 
 async function LoadSeats(guildId: string, lanId: string) {
-  const response = await ApiRequest("GET", `guild/${guildId}lan/${lanId}/seat`)
+  const response = await ApiRequest("GET", `guild/${guildId}/lan/${lanId}/seat`)
   const seats = (await response.json()) as Seat[]
 
   return seats.reduce((map, seat) => map.set(seat.id, seat), new Map<string, Seat>())
@@ -32,7 +32,7 @@ const seatsAtomFamily = atomFamily<Map<string, Seat>, [string, string]>({
       }
 
       connection.on("ReservationChanged", (update: { id: string; reservedBy: User | null }) =>
-        setSelf((seats) => {
+        setSelf(seats => {
           if (seats instanceof DefaultValue) return seats
           const seat = seats.get(update.id)
           if (!seat) return seats
@@ -65,18 +65,18 @@ function findSeatReservedBy(seats: Seat[], loggedInUser: User | null) {
   return null
 }
 
-export function useSeats(lan: Lan) {
-  const [seatsMap, setSeatsMap] = useRecoilState(seatsAtomFamily([lan.guildId, lan.id]))
+export function useSeats(guildId: string, lan: Lan) {
+  const [seatsMap, setSeatsMap] = useRecoilState(seatsAtomFamily([guildId, lan.id]))
   const { loggedInUser } = useAuth()
   const seats = Array.from(seatsMap.values())
   const reservedSeat = findSeatReservedBy(seats, loggedInUser)
 
   const createNewSeat = async (seat: Seat) => {
-    await ApiRequest("POST", `lan/${lan.id}/seat`, {
+    await ApiRequest("POST", `guild/${guildId}/lan/${lan.id}/seat`, {
       title: seat.title,
       bounds: seat.bounds,
     })
-    setSeatsMap(await LoadSeats(lan.guildId, lan.id))
+    setSeatsMap(await LoadSeats(guildId, lan.id))
   }
 
   return { seats, reservedSeat, createNewSeat }

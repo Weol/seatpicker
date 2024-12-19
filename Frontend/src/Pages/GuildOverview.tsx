@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Add, Delete, Edit, Fullscreen, Upload } from "@mui/icons-material"
+import {Add, Delete, Edit, Fullscreen, Group, Upload} from "@mui/icons-material"
 import {
   Accordion,
   AccordionDetails,
@@ -7,10 +7,6 @@ import {
   Button,
   FormControlLabel,
   IconButton,
-  List,
-  ListItemButton,
-  ListItemSecondaryAction,
-  Paper,
   Stack,
   styled,
   Switch,
@@ -22,20 +18,20 @@ import {
   TextField,
 } from "@mui/material"
 import Divider from "@mui/material/Divider"
-import ListItemIcon from "@mui/material/ListItemIcon"
-import ListItemText from "@mui/material/ListItemText"
 import Typography from "@mui/material/Typography"
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { useAllLans } from "../Adapters/Lans/AllLans"
-import { Guild, Lan } from "../Adapters/Models"
-import DiscordGuildAvatar from "../Components/DiscordAvatar"
+import {useState} from "react"
+import {useAllLans} from "../Adapters/Lans/AllLans"
+import {Guild, Lan} from "../Adapters/Models"
 import Modal from "../Components/Modal"
-import { useAlerts } from "../Contexts/AlertContext"
+import {useAlerts} from "../Contexts/AlertContext"
+import {useGuild} from "../Adapters/Guilds/Guilds";
+import {useNavigate} from "react-router-dom";
 
-export default function GuildOverview(props: { guild: Guild }) {
+export default function GuildOverview(props: { guildId: string}) {
   const { alertLoading, alertSuccess } = useAlerts()
-  const { lans, updateLan, createLan, deleteLan, setActiveLan } = useAllLans(props.guild.id)
+  const { guild } = useGuild(props.guildId)
+  const navigate = useNavigate()
+  const { lans, updateLan, createLan, deleteLan } = useAllLans(guild.id)
   const [previewBackground, setPreviewBackground] = useState<string | null>(null)
   const [editingLan, setEditingLan] = useState<Lan | null>(null)
   const [selectedLan, setSelectedLan] = useState<Lan | null>(null)
@@ -57,16 +53,16 @@ export default function GuildOverview(props: { guild: Guild }) {
   }
 
   async function handleActiveToggleClick(lan: Lan) {
-    const active = lan.active ? "inaktiv" : "aktiv"
-    await alertLoading(`Endrer ${lan.title} til ${active}`, async () => {
-      await setActiveLan(lan, !lan.active)
+    const activeString = lan.active ? "inaktiv" : "aktiv"
+    await alertLoading(`Endrer ${lan.title} til ${activeString}`, async () => {
+      await updateLan(lan, !lan.active, lan.title, lan.background)
     })
-    alertSuccess(`${lan.title} ble satt til ${active}`)
+    alertSuccess(`${lan.title} ble satt til ${activeString}`)
   }
 
   async function handleSaveEditedLanClick(lan: Lan, title: string, background: string) {
     await alertLoading(`Oppdaterer ${lan.title}`, async () => {
-      await updateLan(lan, title, background)
+      await updateLan(lan, lan.active, title, background)
     })
     alertSuccess(`${lan.title} ble oppdatert`)
     setEditingLan(null)
@@ -78,7 +74,7 @@ export default function GuildOverview(props: { guild: Guild }) {
 
   async function handleCreateLanClick(title: string, background: string) {
     await alertLoading("Oppretter " + title, async () => {
-      await createLan(props.guild.id, title, background)
+      await createLan(title, background)
     })
     alertSuccess(title + " har blitt opprettet")
     handleCreateLanClose()
@@ -86,6 +82,10 @@ export default function GuildOverview(props: { guild: Guild }) {
 
   function handleOnLanClick(lan: Lan) {
     setSelectedLan(selectedLan?.id == lan.id ? null : lan)
+  }
+  
+  function handleRolesClick() {
+    navigate(`/guild/${guild.id}/roles`)
   }
 
   function handlePreviewBackgrundClick(background: string) {
@@ -100,105 +100,68 @@ export default function GuildOverview(props: { guild: Guild }) {
     setShowCreateLan(false)
   }
 
-  return (
-    <Stack spacing={2} justifyContent="center" alignItems="center">
-      <Stack width={"100%"}>
-        <LanListHeader guild={props.guild} onCreateClick={handleLanCreateClick} />
-        <Stack justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }} width="100%">
-          {lans.map((lan) => (
-            <LanDetails
-              key={lan.id}
-              lan={lan}
-              selected={selectedLan?.id == lan.id}
-              onEditClick={() => handleLanEditClick(lan)}
-              onClick={() => handleOnLanClick(lan)}
-              onActiveToggleClick={() => handleActiveToggleClick(lan)}
-              onDeleteClick={() => handleDeleteClick(lan)}
-              onPreviewBackgroundClick={() => handlePreviewBackgrundClick(lan.background)}
-            />
-          ))}
-          {lans.length == 0 && <NoLanExists />}
-        </Stack>
-      </Stack>
-
-      {editingLan && (
-        <LanEditorModal
-          open={Boolean(editingLan)}
-          lan={editingLan}
-          onClose={handleEditLanClose}
-          onPreviewBackgroundClick={(background: string) => handlePreviewBackgrundClick(background)}
-          onSaveClick={(title: string, background: string) =>
-            handleSaveEditedLanClick(editingLan, title, background)
-          }
-        />
-      )}
-      {showCreateLan && (
-        <LanEditorModal
-          open={showCreateLan}
-          onClose={handleCreateLanClose}
-          onPreviewBackgroundClick={handlePreviewBackgrundClick}
-          onSaveClick={handleCreateLanClick}
-        />
-      )}
-      {previewBackground && (
-        <BackgroundPreviewModal
-          background={previewBackground}
-          open={Boolean(previewBackground)}
-          onClose={handlePreviewBackgrundClose}
-        />
-      )}
-    </Stack>
-  )
-}
-
-function GuildList(props: {
-  guilds: Guild[]
-  selectedGuild: Guild | null
-  onGuildSelect: (guild: Guild) => void
-}) {
-  const navigate = useNavigate()
-
-  return (
-    <Paper sx={{ width: "100%" }}>
-      <List component={"nav"}>
-        {props.guilds.map((guild) => (
-          <ListItemButton
-            onClick={() => props.onGuildSelect(guild)}
-            selected={props.selectedGuild?.id == guild.id}
-            key={guild.id}
-          >
-            <ListItemSecondaryAction>
-              <IconButton onClick={() => navigate("/")}>
-                <Edit />
-              </IconButton>
-            </ListItemSecondaryAction>
-            <ListItemIcon>
-              <DiscordGuildAvatar guild={guild} />
-            </ListItemIcon>
-            <ListItemText primary={guild.name} secondary={guild.id} />
-          </ListItemButton>
-        ))}
-      </List>
-    </Paper>
-  )
-}
-
-function LanListHeader(props: { guild: Guild; onCreateClick: () => void }) {
-  return (
-    <Stack width={"100%"} spacing={2}>
-      <Stack direction="row" width="100%" justifyContent="space-between">
-        <Typography variant="h4">{props.guild.name}</Typography>
-        <Button
-          onClick={() => props.onCreateClick()}
-          startIcon={<Add />}
-          variant="outlined"
-          color="secondary"
-        >
-          Nytt lan
-        </Button>
+  return <Stack spacing={2} justifyContent="center" alignItems="center">
+    <Stack width={"100%"}>
+      <LanListHeader guild={guild} onCreateClick={handleLanCreateClick} onRolesClick={handleRolesClick} />
+      <Stack justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }} width="100%">
+        {lans.map(lan => <LanDetails
+          key={lan.id}
+          lan={lan}
+          selected={selectedLan?.id == lan.id}
+          onEditClick={() => handleLanEditClick(lan)}
+          onClick={() => handleOnLanClick(lan)}
+          onActiveToggleClick={() => handleActiveToggleClick(lan)}
+          onDeleteClick={() => handleDeleteClick(lan)}
+          onPreviewBackgroundClick={() => handlePreviewBackgrundClick(lan.background)}
+        />)}
+        {lans.length == 0 && <NoLanExists />}
       </Stack>
     </Stack>
-  )
+
+    {editingLan && <LanEditorModal
+        open={Boolean(editingLan)}
+        lan={editingLan}
+        onClose={handleEditLanClose}
+        onPreviewBackgroundClick={(background: string) => handlePreviewBackgrundClick(background)}
+        onSaveClick={(title: string, background: string) =>
+          handleSaveEditedLanClick(editingLan, title, background)
+        }
+      />}
+    {showCreateLan && <LanEditorModal
+        open={showCreateLan}
+        onClose={handleCreateLanClose}
+        onPreviewBackgroundClick={handlePreviewBackgrundClick}
+        onSaveClick={handleCreateLanClick}
+      />}
+    {previewBackground && <BackgroundPreviewModal
+        background={previewBackground}
+        open={Boolean(previewBackground)}
+        onClose={handlePreviewBackgrundClose}
+      />}
+  </Stack>
+}
+
+function LanListHeader(props: { guild: Guild; onCreateClick: () => void; onRolesClick: () => void }) {
+  return <Stack width={"100%"} spacing={2}>
+    <Stack direction="row" width="100%" justifyContent="space-between">
+      <Typography variant="h4">{props.guild.name}</Typography>
+      <Button
+        onClick={() => props.onRolesClick()}
+        startIcon={<Group />}
+        variant="outlined"
+      >
+        Grupper
+      </Button>
+      <Button
+        onClick={() => props.onCreateClick()}
+        startIcon={<Add />}
+        variant="outlined"
+        color="secondary"
+      >
+        Nytt lan
+      </Button>
+    </Stack>
+  </Stack>
 }
 
 function LanDetails(props: {
@@ -228,94 +191,82 @@ function LanDetails(props: {
     { label: "Oppdatert", value: formatTime(props.lan.updatedAt) },
   ]
 
-  const Summary = () => (
-    <AccordionSummary sx={{ width: "100%" }}>
-      <Stack width="100%" direction="row" spacing={2} justifyContent="space-between">
-        <Typography>{props.lan.title}</Typography>
-        <Typography color={"textSecondary"} variant="subtitle2">
-          {props.lan.active ? "Aktiv" : "Inaktiv"}
-        </Typography>
-      </Stack>
-    </AccordionSummary>
-  )
-
-  const Details = () => (
-    <TableContainer>
-      <Table sx={{ width: "100%" }} size="small">
-        <TableBody>
-          {details.map((detail) => (
-            <TableRow key={detail.label}>
-              <TableCell component="th" scope="row">
-                {detail.label}
-              </TableCell>
-              <TableCell align="right">{detail.value}</TableCell>
-            </TableRow>
-          ))}
-          <TableRow key={"background"}>
-            <TableCell component="th" scope="row">
-              Bakgrunn
-            </TableCell>
-            <TableCell align="right">
-              <Button variant="text" size="small" onClick={() => props.onPreviewBackgroundClick()}>
-                Vis bakgrunn
-              </Button>
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </TableContainer>
-  )
-
-  const Actions = () => (
-    <Stack direction={"row"} justifyContent={"space-between"}>
-      <IconButton onClick={() => props.onEditClick()}>
-        <Edit />
-      </IconButton>
-      <FormControlLabel
-        control={
-          <Switch
-            onChange={() => props.onActiveToggleClick()}
-            checked={props.lan.active}
-            color="success"
-          />
-        }
-        label="Aktiv"
-      />
-      <IconButton color="error" onClick={() => props.onDeleteClick()}>
-        <Delete />
-      </IconButton>
+  const Summary = () => <AccordionSummary sx={{ width: "100%" }}>
+    <Stack width="100%" direction="row" spacing={2} justifyContent="space-between">
+      <Typography>{props.lan.title}</Typography>
+      <Typography color={"textSecondary"} variant="subtitle2">
+        {props.lan.active ? "Aktiv" : "Inaktiv"}
+      </Typography>
     </Stack>
-  )
+  </AccordionSummary>
 
-  return (
-    <Accordion
-      key={props.lan.id}
-      expanded={props.selected}
-      onChange={() => props.onClick()}
-      sx={{ width: "100%" }}
-    >
-      <Summary />
-      <Divider orientation="horizontal" flexItem />
-      <AccordionDetails sx={{ paddingTop: "1em" }}>
-        <Stack sx={{ width: "100%" }}>
-          <Details />
-          <Actions />
-        </Stack>
-      </AccordionDetails>
-    </Accordion>
-  )
+  const Details = () => <TableContainer>
+    <Table sx={{ width: "100%" }} size="small">
+      <TableBody>
+        {details.map(detail => <TableRow key={detail.label}>
+          <TableCell component="th" scope="row">
+            {detail.label}
+          </TableCell>
+          <TableCell align="right">{detail.value}</TableCell>
+        </TableRow>)}
+        <TableRow key={"background"}>
+          <TableCell component="th" scope="row">
+            Bakgrunn
+          </TableCell>
+          <TableCell align="right">
+            <Button variant="text" size="small" onClick={() => props.onPreviewBackgroundClick()}>
+              Vis bakgrunn
+            </Button>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  </TableContainer>
+
+  const Actions = () => <Stack direction={"row"} justifyContent={"space-between"}>
+    <IconButton onClick={() => props.onEditClick()}>
+      <Edit />
+    </IconButton>
+    <FormControlLabel
+      control={
+        <Switch
+          onChange={() => props.onActiveToggleClick()}
+          checked={props.lan.active}
+          color="success"
+        />
+      }
+      label="Aktiv"
+    />
+    <IconButton color="error" onClick={() => props.onDeleteClick()}>
+      <Delete />
+    </IconButton>
+  </Stack>
+
+  return <Accordion
+    key={props.lan.id}
+    expanded={props.selected}
+    onChange={() => props.onClick()}
+    sx={{ width: "100%" }}
+  >
+    <Summary />
+    <Divider orientation="horizontal" flexItem />
+    <AccordionDetails sx={{ paddingTop: "1em" }}>
+      <Stack sx={{ width: "100%" }}>
+        <Details />
+        <Actions />
+      </Stack>
+    </AccordionDetails>
+  </Accordion>
 }
 
 function BackgroundPreviewModal(props: { background: string; open: boolean; onClose: () => void }) {
-  return (
-    <Modal title="Background preview" {...props}>
-      <img
-        alt="preview"
-        style={{ width: "100%" }}
-        src={`data:image/svg+xml;base64,${props.background}`}
-      />
-    </Modal>
-  )
+  return <Modal title="Background preview" {...props}>
+    <img
+      alt="preview"
+      style={{ width: "100%" }}
+      src={`data:image/svg+xml;base64,${props.background}`}
+    />
+  </Modal>
 }
 
 const VisuallyHiddenInput = styled("input")({
@@ -350,7 +301,7 @@ function LanEditorModal(props: {
   const blobToBase64 = (blob: Blob): Promise<string> => {
     const reader = new FileReader()
     reader.readAsDataURL(blob)
-    return new Promise<string>((resolve) => {
+    return new Promise<string>(resolve => {
       reader.onloadend = () => {
         const result = reader.result as string
         if (result != null) {
@@ -394,42 +345,38 @@ function LanEditorModal(props: {
     }
   }
 
-  return (
-    <Modal title={props.lan?.title ?? "Opprett nytt lan"} {...props}>
-      <Stack spacing={2} justifyContent="center" alignItems="center" sx={{ width: "100%" }}>
-        <TextField
-          defaultValue={title}
-          sx={{ width: "100%" }}
-          required
-          label="Lan name"
-          variant="outlined"
-          onChange={handleTitleChanged}
-          error={errors.title}
-        />
-        <Button
-          sx={{ width: "100%" }}
-          color={(errors.background && "error") || "primary"}
-          component="label"
-          variant="outlined"
-          startIcon={<Upload />}
+  return <Modal title={props.lan?.title ?? "Opprett nytt lan"} {...props}>
+    <Stack spacing={2} justifyContent="center" alignItems="center" sx={{ width: "100%" }}>
+      <TextField
+        defaultValue={title}
+        sx={{ width: "100%" }}
+        required
+        label="Lan name"
+        variant="outlined"
+        onChange={handleTitleChanged}
+        error={errors.title}
+      />
+      <Button
+        sx={{ width: "100%" }}
+        color={errors.background && "error" || "primary"}
+        component="label"
+        variant="outlined"
+        startIcon={<Upload />}
+      >
+        <Typography noWrap={true}>{backgroundName || "Last opp bakgrunn"}</Typography>
+        <VisuallyHiddenInput type="file" onInput={handleBackgroundChanged} accept="image/svg" />
+      </Button>
+      {background && <Button
+          onClick={() => props.onPreviewBackgroundClick(background)}
+          startIcon={<Fullscreen />}
         >
-          <Typography noWrap={true}>{backgroundName || "Last opp bakgrunn"}</Typography>
-          <VisuallyHiddenInput type="file" onInput={handleBackgroundChanged} accept="image/svg" />
-        </Button>
-        {background && (
-          <Button
-            onClick={() => props.onPreviewBackgroundClick(background)}
-            startIcon={<Fullscreen />}
-          >
-            Forhåndsvis bakgrunn
-          </Button>
-        )}
-        <Button onClick={handleSaveClicked} color="secondary" variant="contained">
-          Lagre
-        </Button>
-      </Stack>
-    </Modal>
-  )
+          Forhåndsvis bakgrunn
+        </Button>}
+      <Button onClick={handleSaveClicked} color="secondary" variant="contained">
+        Lagre
+      </Button>
+    </Stack>
+  </Modal>
 }
 
 function NoLanExists() {

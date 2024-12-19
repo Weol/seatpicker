@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Seatpicker.Application.Features.Lan;
 
@@ -16,31 +17,32 @@ public class DiscordAdapter(
     HttpClient httpClient,
     IOptions<DiscordAdapterOptions> options,
     JsonSerializerOptions jsonSerializerOptions,
+    IMemoryCache cache,
     ILogger<DiscordAdapter> logger) : IDiscordGuildProvider
 {
     private readonly DiscordAdapterOptions options = options.Value;
-
+    
     /*
      * Port implementations
      */
-    
+
     public async IAsyncEnumerable<Application.Features.Lan.DiscordGuild> GetAll()
     {
         var guilds = await GetGuilds();
         foreach (var guild in guilds)
         {
-            var roles = guild.Roles.Select(role =>
-                new Application.Features.Lan.DiscordGuildRole(role.Id, role.Name, role.Color, role.Icon))
+            var roles = (await GetGuildRoles(guild.Id)).Select(role =>
+                    new Application.Features.Lan.DiscordGuildRole(role.Id, role.Name, role.Color, role.Icon))
                 .ToArray();
-            
+
             yield return new Application.Features.Lan.DiscordGuild(guild.Id, guild.Name, guild.Icon, roles);
         }
     }
-    
+
     /*
      * Adapter methods
      */
-    
+
     public virtual async Task<DiscordAccessToken> GetAccessToken(string discordToken, string redirectUrl)
     {
         logger.LogInformation(
@@ -80,11 +82,15 @@ public class DiscordAdapter(
 
     public virtual async Task<DiscordUser> Lookup(string accessToken)
     {
-        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "users/@me");
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        return await PerformCached($"lookup_{accessToken}",
+            async () =>
+            {
+                using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "users/@me");
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-        var response = await httpClient.SendAsync(requestMessage);
-        return await DeserializeContent<DiscordUser>(response);
+                var response = await httpClient.SendAsync(requestMessage);
+                return await DeserializeContent<DiscordUser>(response);
+            });
     }
 
     public virtual async Task AddGuildMember(string guildId, string memberId, string accessToken)
@@ -115,30 +121,65 @@ public class DiscordAdapter(
 
     public virtual async Task<DiscordGuildMember?> GetGuildMember(string guildId, string memberId)
     {
-        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"guilds/{guildId}/members/{memberId}");
+        return await PerformCached($"guild_member_{guildId}_{memberId}",
+            async () =>
+            {
+                using var requestMessage
+                    = new HttpRequestMessage(HttpMethod.Get, $"guilds/{guildId}/members/{memberId}");
 
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
 
-        var response = await httpClient.SendAsync(requestMessage);
-        try
-        {
-            return await DeserializeContent<DiscordGuildMember>(response);
-        }
-        catch (DiscordException e) when (e.StatusCode == HttpStatusCode.NotFound)
-        {
-            logger.LogInformation("Could not find member with id {MemberId} in guild {GuildId}", memberId, guildId);
-            return null;
-        }
+                var response = await httpClient.SendAsync(requestMessage);
+                try
+                {
+                    return await DeserializeContent<DiscordGuildMember>(response);
+                }
+                catch (DiscordException e) when (e.StatusCode == HttpStatusCode.NotFound)
+                {
+                    logger.LogInformation("Could not find member with id {MemberId} in guild {GuildId}",
+                        memberId,
+                        guildId);
+                    return null;
+                }
+            });
     }
 
     public virtual async Task<IEnumerable<DiscordGuild>> GetGuilds()
     {
-        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "users/@me/guilds");
+        return await PerformCached("guilds",
+            async () =>
+            {
+                using var requestMessage = new HttpRequestMessage(HttpMethod.Get, "users/@me/guilds");
 
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
 
-        var response = await httpClient.SendAsync(requestMessage);
-        return await DeserializeContent<IEnumerable<DiscordGuild>>(response);
+                var response = await httpClient.SendAsync(requestMessage);
+                return await DeserializeContent<IEnumerable<DiscordGuild>>(response);
+            });
+    }
+
+    public virtual async Task<IEnumerable<DiscordGuildRole>> GetGuildRoles(string guildId)
+    {
+        return await PerformCached($"guild_roles_{guildId}",
+            async () =>
+            {
+                using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"guilds/{guildId}/roles");
+
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bot", options.BotToken);
+
+                var response = await httpClient.SendAsync(requestMessage);
+                return await DeserializeContent<IEnumerable<DiscordGuildRole>>(response);
+            });
+    }
+
+    private async Task<T> PerformCached<T>(string cacheKey, Func<Task<T>> action)
+    {
+        var cached = cache.Get<T>(cacheKey);
+        if (cached is not null) return cached;
+
+        var value = await action();
+        cache.Set(cacheKey, value, TimeSpan.FromMinutes(5));
+        return value;
     }
 
     private async Task<TModel> DeserializeContent<TModel>(HttpResponseMessage response)
@@ -154,7 +195,7 @@ public class DiscordAdapter(
                 body);
 
             return JsonSerializer.Deserialize<TModel>(body, jsonSerializerOptions) ??
-                   throw new JsonException($"Could not deserialize Discord response to {nameof(TModel)}");
+                throw new JsonException($"Could not deserialize Discord response to {nameof(TModel)}");
         }
 
         logger.LogError(

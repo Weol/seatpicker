@@ -1,9 +1,4 @@
-import {
-  Snackbar,
-  Alert as MuiAlert,
-  AlertTitle,
-  CircularProgress,
-} from "@mui/material"
+import { Alert as MuiAlert, AlertTitle, CircularProgress, Snackbar } from "@mui/material"
 import React, { useContext } from "react"
 
 export interface AlertModel {
@@ -28,8 +23,7 @@ const defaultValue: AlertContextObject = {
   alertLoading: async () => {},
 }
 
-export const AlertContext =
-  React.createContext<AlertContextObject>(defaultValue)
+export const AlertContext = React.createContext<AlertContextObject>(defaultValue)
 
 export const useAlerts = () => useContext(AlertContext)
 
@@ -42,21 +36,12 @@ export function setupAlerts(setAlert: (alert: AlertModel | null) => void) {
       onClose={() => setAlert(null)}
     >
       <MuiAlert
-        icon={
-          (props.alert.type == "loading" && (
-            <CircularProgress size={"1em"} />
-          )) ||
-          undefined
-        }
+        icon={(props.alert.type == "loading" && <CircularProgress size={"1em"} />) || undefined}
         variant="filled"
         severity={props.alert.type == "loading" ? "info" : props.alert.type}
       >
-        {props.alert.description != null && (
-          <AlertTitle>{props.alert.title}</AlertTitle>
-        )}
-        {props.alert.description != undefined
-          ? props.alert.description
-          : props.alert.title}
+        {props.alert.description != null && <AlertTitle>{props.alert.title}</AlertTitle>}
+        {props.alert.description != undefined ? props.alert.description : props.alert.title}
       </MuiAlert>
     </Snackbar>
   )

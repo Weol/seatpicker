@@ -34,13 +34,18 @@ public class GuildService(
             .All(roleId => discordGuild.Roles.Any(discordGuildRole => discordGuildRole.Id == roleId));
 
         if (!allRolesExist)
-            throw new IllegalGuildUpdateException("Cannot add role mapping with a discord roel that does not exist");
+            throw new IllegalGuildUpdateException("Cannot add role mapping with a discord role that does not exist");
+
+        if (guild.RoleMapping.Any(mapping => mapping.Roles.Contains(Role.Superadmin)))
+        {
+            throw new IllegalGuildUpdateException("Cannot add a guild mapping for superadmin");
+        }
 
         var updatedGuild = guild with
         {
             Name = discordGuild.Name,
             Icon = discordGuild.Icon,
-            Roles = discordGuild.Roles.Select(role => new GuildRole(role.Id, role.Name, role.Icon)).ToArray()
+            Roles = discordGuild.Roles.Select(role => new GuildRole(role.Id, role.Name, role.Color, role.Icon)).ToArray()
         };
 
         documentTransaction.Store(updatedGuild);

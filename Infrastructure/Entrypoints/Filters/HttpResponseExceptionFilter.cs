@@ -1,5 +1,7 @@
-﻿using Seatpicker.Domain;
+﻿using System.Text;
+using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Entrypoints.Http;
+using ApplicationException = Seatpicker.Application.ApplicationException;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Filters;
 
@@ -14,7 +16,6 @@ public class HttpResponseExceptionFilter : IEndpointFilter
 
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
-
         try
         {
             return await next(context);
@@ -23,22 +24,27 @@ public class HttpResponseExceptionFilter : IEndpointFilter
         {
             // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
             logger.LogError(domainException, "{Message}", domainException.Message);
-            
+
             return HandleDomainOrApplicationException(domainException);
         }
-        catch (Application.ApplicationException applicationException)
+        catch (ApplicationException applicationException)
         {
             // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
             logger.LogError(applicationException, "{Message}", applicationException.Message);
-            
+
             return HandleDomainOrApplicationException(applicationException);
         }
         catch (BadRequestException badRequestException)
         {
             // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
             logger.LogError(badRequestException, "{Message}", badRequestException.Message);
-            
+
             return HandleBadRequestException(badRequestException);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "{Message}", e.Message);
+            return Results.Text(Encoding.UTF8.GetBytes(e.Message), "text/plain", 500);
         }
     }
 
@@ -69,7 +75,7 @@ public class HttpResponseExceptionFilter : IEndpointFilter
             422 => Results.UnprocessableEntity(response),
             404 => Results.NotFound(response),
             409 => Results.Conflict(response),
-            
+
             // ReSharper disable once UnreachableSwitchArmDueToIntegerAnalysis
             _ => Results.Problem()
         };
@@ -79,7 +85,7 @@ public class HttpResponseExceptionFilter : IEndpointFilter
     {
         return Results.BadRequest(new
         {
-            badRequestException.Message,
+            badRequestException.Message
         });
     }
 }
