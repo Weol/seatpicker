@@ -1,9 +1,11 @@
 ﻿namespace Seatpicker.Domain;
 
-public record User(UserId Id, string Name, string? Avatar);
+public record User(string Id, string Name, string? Avatar, IEnumerable<Role> Roles);
 
-public record UserId(string Value)
+public enum Role
 {
-    public static implicit operator string(UserId id) => id.Value;
-    public static implicit operator UserId(string id) => new(id);
+    Superadmin,
+    Admin,
+    Operator,
+    User,
 }

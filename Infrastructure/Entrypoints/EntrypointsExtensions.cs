@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
-using Microsoft.AspNetCore.Mvc;
-using Seatpicker.Infrastructure.Entrypoints.Utils;
+using Seatpicker.Infrastructure.Entrypoints.Filters;
+using Seatpicker.Infrastructure.Entrypoints.Middleware;
+using Seatpicker.Infrastructure.Entrypoints.SignalR;
 
 namespace Seatpicker.Infrastructure.Entrypoints;
 
@@ -9,38 +10,28 @@ public static class EntrypointsExtensions
     public static IServiceCollection AddEntrypoints(this IServiceCollection services, IConfiguration configuration)
     {
         services
+            .AddValidatorsFromAssemblyContaining<AssemblyAnchor>()
+            .AddSignalREntrypoints()
             .AddEndpointsApiExplorer()
             .AddLoggedInUserAccessor()
-            .AddHealthChecks()
-            .Services
-            .AddFluentValidation()
-            .AddControllers(ConfigureMvcOptions);
+            .AddHealthChecks();
 
         return services;
-    }
-
-    private static IServiceCollection AddFluentValidation(this IServiceCollection services)
-    {
-        return services
-            .AddValidatorsFromAssemblyContaining<Program>()
-            .Configure<ApiBehaviorOptions>(options =>
-            {
-                options.SuppressModelStateInvalidFilter = true;
-            });
     }
 
     public static WebApplication UseEntrypoints(this WebApplication app)
     {
         app.UseHttpsRedirection();
-        app.UseRouting();
-        app.MapControllers();
+        app.UseTransactionMiddleware();
+        app.UseSignalREntrypoints();
+        app.MapEntrypoints(builder =>
+        {
+            builder.AddEndpointFilter<FluentValidationFilter>();
+            builder.AddEndpointFilter<HttpResponseExceptionFilter>();
+        });
 
         return app;
     }
-
-    private static void ConfigureMvcOptions(MvcOptions options)
-    {
-         options.Filters.Add<HttpResponseExceptionFilter>();
-         options.Filters.Add<FluentValidationFilter>();
-    }
 }
+
+public class AssemblyAnchor;

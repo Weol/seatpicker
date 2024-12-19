@@ -1,5 +1,6 @@
 ﻿import { atom, useRecoilState } from "recoil"
 import Config from "../config"
+import { Role, User } from "./Models"
 import { RedirectUrl } from "./RedirectToDiscordLogin"
 
 export type AuthenticationToken = {
@@ -29,11 +30,20 @@ export class AuthAdapter {
     localStorage.removeItem("authenticationToken")
   }
 
+  private static CreateUser(token: AuthenticationToken) {
+    return {
+      id: token.userId,
+      name: token.nick,
+      avatar: token.avatar,
+      roles: token.roles,
+    } as User
+  }
+
   static GetLoggedInUserFromLocalStorage() {
     const token = AuthAdapter.GetTokenFromLocalStorage()
 
     if (token == null) return null
-    return new User(token)
+    return this.CreateUser(token)
   }
 
   private static async Renew(token: AuthenticationToken) {
@@ -56,7 +66,7 @@ export class AuthAdapter {
     }
   }
 
-  static async Login(discordToken: string, guildId: string) {
+  static async Login(discordToken: string, guildId: string | null) {
     const response = await AuthAdapter.MakeRequest("POST", `authentication/discord/login`, {
       token: discordToken,
       guildId: guildId,
@@ -69,7 +79,7 @@ export class AuthAdapter {
         throw "Authentication token is null"
       } else {
         AuthAdapter.SaveTokenToLocalStorage(authenticationToken)
-        return new User(authenticationToken)
+        return this.CreateUser(authenticationToken)
       }
     } else {
       throw response
@@ -109,35 +119,11 @@ export class AuthAdapter {
     const headers = new Headers()
     if (method == "POST" || method == "PUT") {
       if (typeof body !== "undefined") requestInit.body = JSON.stringify(body)
-      headers.append("Content-Type", "text/json")
+      headers.append("Content-Type", "application/json")
     }
     requestInit.headers = headers
 
     return fetch(Config.ApiBaseUrl + "/" + path, requestInit)
-  }
-}
-
-export enum Role {
-  ADMIN = "Admin",
-  OPERATOR = "Operator",
-  USER = "User",
-}
-
-export class User {
-  id: string
-  name: string
-  avatar: string | null
-  roles: Role[]
-
-  constructor(authenticationToken: AuthenticationToken) {
-    this.id = authenticationToken.userId
-    this.name = authenticationToken.nick
-    this.avatar = authenticationToken.avatar
-    this.roles = authenticationToken.roles
-  }
-
-  isInRole(role: Role): boolean {
-    return this.roles.includes(role)
   }
 }
 
@@ -149,7 +135,7 @@ export const loggedInUserAtom = atom<User | null>({
 export function useAuth() {
   const [loggedInUser, setLoggedInUser] = useRecoilState(loggedInUserAtom)
 
-  async function login(discordToken: string, guildId: string) {
+  async function login(discordToken: string, guildId: string | null) {
     const user = await AuthAdapter.Login(discordToken, guildId)
     setLoggedInUser(user)
   }

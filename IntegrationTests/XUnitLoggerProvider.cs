@@ -1,22 +1,17 @@
 using System.Text;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using Xunit.Abstractions;
 
 namespace Seatpicker.IntegrationTests;
 
-internal sealed class XUnitLoggerProvider : ILoggerProvider
+internal sealed class XUnitLoggerProvider(ITestOutputHelper testOutputHelper) : ILoggerProvider
 {
-    private readonly ITestOutputHelper _testOutputHelper;
-    private readonly LoggerExternalScopeProvider _scopeProvider = new LoggerExternalScopeProvider();
-
-    public XUnitLoggerProvider(ITestOutputHelper testOutputHelper)
-    {
-        _testOutputHelper = testOutputHelper;
-    }
+    private readonly LoggerExternalScopeProvider scopeProvider = new();
 
     public ILogger CreateLogger(string categoryName)
     {
-        return new XUnitLogger(_testOutputHelper, _scopeProvider, categoryName);
+        return new XUnitLogger(testOutputHelper, scopeProvider, categoryName);
     }
 
     public void Dispose()
@@ -24,19 +19,15 @@ internal sealed class XUnitLoggerProvider : ILoggerProvider
     }
 }
 
-internal sealed class XUnitLogger<T> : XUnitLogger, ILogger<T>
-{
-    public XUnitLogger(ITestOutputHelper testOutputHelper, LoggerExternalScopeProvider scopeProvider)
-        : base(testOutputHelper, scopeProvider, typeof(T).FullName!)
-    {
-    }
-}
+internal sealed class XUnitLogger<T>(ITestOutputHelper testOutputHelper, LoggerExternalScopeProvider scopeProvider)
+    : XUnitLogger(testOutputHelper, scopeProvider, typeof(T).FullName!), ILogger<T>;
 
-internal class XUnitLogger : ILogger
+internal class XUnitLogger(
+    ITestOutputHelper testOutputHelper,
+    LoggerExternalScopeProvider scopeProvider,
+    string categoryName) : ILogger
 {
-    private readonly ITestOutputHelper _testOutputHelper;
-    private readonly string _categoryName;
-    private readonly LoggerExternalScopeProvider _scopeProvider;
+    private readonly string categoryName = categoryName;
 
     public static ILogger CreateLogger(ITestOutputHelper testOutputHelper) =>
         new XUnitLogger(testOutputHelper, new LoggerExternalScopeProvider(), "");
@@ -44,19 +35,9 @@ internal class XUnitLogger : ILogger
     public static ILogger<T> CreateLogger<T>(ITestOutputHelper testOutputHelper) =>
         new XUnitLogger<T>(testOutputHelper, new LoggerExternalScopeProvider());
 
-    public XUnitLogger(
-        ITestOutputHelper testOutputHelper,
-        LoggerExternalScopeProvider scopeProvider,
-        string categoryName)
-    {
-        _testOutputHelper = testOutputHelper;
-        _scopeProvider = scopeProvider;
-        _categoryName = categoryName;
-    }
-
     public bool IsEnabled(LogLevel logLevel) => logLevel != LogLevel.None;
 
-    public IDisposable BeginScope<TState>(TState state) => _scopeProvider.Push(state);
+    public IDisposable BeginScope<TState>(TState state) where TState : notnull => scopeProvider.Push(state);
 
     public void Log<TState>(
         LogLevel logLevel,
@@ -75,7 +56,13 @@ internal class XUnitLogger : ILogger
             sb.Append('\n').Append(exception);
         }
 
-        _testOutputHelper.WriteLine(sb.ToString());
+        try
+        {
+            testOutputHelper.WriteLine(sb.ToString());
+        }
+        catch (InvalidOperationException)
+        {
+        }
     }
 
     private static string GetLogLevelString(LogLevel logLevel)

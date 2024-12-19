@@ -1,11 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>Seatpicker.Application</RootNamespace>
-        <LangVersion>11</LangVersion>
+        <LangVersion>latest</LangVersion>
+        <EnableNETAnalyzers>true</EnableNETAnalyzers>
+        <AnalysisLevel>latest-Recommended</AnalysisLevel>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <WarningsAsErrors>CA2000</WarningsAsErrors>
+        <WarningsNotAsErrors>CA1848</WarningsNotAsErrors>
+        <NoWarn>CA1848</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,7 +20,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Marten" Version="6.0.4" />
+      <PackageReference Include="Marten" Version="7.34.0" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     </ItemGroup>
 
 </Project>

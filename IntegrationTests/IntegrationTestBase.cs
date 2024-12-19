@@ -1,17 +1,13 @@
 using System.Net.Http.Headers;
-using Bogus;
-using Marten;
+using Marten.Storage;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Http.Logging;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
-using Seatpicker.Application.Features;
+using Seatpicker.Application.Features.Lan;
 using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Adapters.Database;
 using Seatpicker.Infrastructure.Authentication;
-using Seatpicker.Infrastructure.Authentication.Discord;
-using Seatpicker.IntegrationTests.HttpInterceptor;
+using Seatpicker.IntegrationTests.TestAdapters;
 using Shared;
 using Xunit;
 using Xunit.Abstractions;
@@ -19,53 +15,45 @@ using Xunit.Extensions.AssemblyFixture;
 
 namespace Seatpicker.IntegrationTests;
 
-public abstract class IntegrationTestBase : IClassFixture<PostgresFixture>, IClassFixture<TestWebApplicationFactory>
+public abstract class IntegrationTestBase : IAssemblyFixture<PostgresFixture>,
+    IClassFixture<TestWebApplicationFactory>
 {
     private readonly WebApplicationFactory<Infrastructure.Program> factory;
     private readonly ITestOutputHelper testOutputHelper;
 
-    public string GuildId { get; } = new Faker().Random.Int(1).ToString();
-
-    protected IntegrationTestBase(TestWebApplicationFactory factory,
+    protected IntegrationTestBase(
+        TestWebApplicationFactory factory,
         PostgresFixture databaseFixture,
         ITestOutputHelper testOutputHelper)
     {
-        this.factory = factory
-            .WithWebHostBuilder(
-                builder =>
-                {
-                    builder.ConfigureServices(
-                        services =>
-                        {
-                            services.PostConfigure<DatabaseOptions>(options =>
-                            {
-                                options.ConnectionString = databaseFixture.Container.GetConnectionString();
-                            });
+        testOutputHelper.WriteLine(
+            $"Using Postgres fixture with connection string: {databaseFixture.Container.GetConnectionString()}");
 
-                            services.ConfigureMarten(options =>
-                            {
-                                options.MultiTenantedWithSingleServer(
-                                    databaseFixture.Container.GetConnectionString());
-                            });
-
-                            services.AddLogging(
-                                loggingBuilder =>
-                                {
-                                    loggingBuilder.ClearProviders();
-                                    loggingBuilder.AddDebug();
-                                    loggingBuilder.AddProvider(new XUnitLoggerProvider(testOutputHelper));
-                                });
-                        });
-                });
         this.testOutputHelper = testOutputHelper;
+        this.factory = factory.WithWebHostBuilder(
+            builder =>
+            {
+                builder.ConfigureServices(
+                    services =>
+                    {
+                        services.PostConfigure<DatabaseOptions>(
+                            options => { options.ConnectionString = databaseFixture.Container.GetConnectionString(); });
 
-        GetService<ITenantProvider>().GetTenant().Returns(GuildId);
+                        services.AddLogging(
+                            loggingBuilder =>
+                            {
+                                loggingBuilder.ClearProviders();
+                                loggingBuilder.AddDebug();
+                                loggingBuilder.AddProvider(new XUnitLoggerProvider(testOutputHelper));
+                            });
+                    });
+            });
     }
 
-    protected TService GetService<TService>()
-        where TService : notnull
+    protected T GetService<T>()
+        where T : notnull
     {
-        return factory.Services.GetRequiredService<TService>();
+        return factory.Services.GetRequiredService<T>();
     }
 
     protected HttpClient GetClient(TestIdentity identity)
@@ -76,27 +64,25 @@ public abstract class IntegrationTestBase : IClassFixture<PostgresFixture>, ICla
         return client;
     }
 
-    protected HttpClient GetClient(params Role[] roles)
+    protected HttpClient GetClient(string guildId, params Role[] roles)
     {
-        var identity = CreateIdentity(roles)
-            .GetAwaiter()
-            .GetResult();
+        var identity = CreateIdentity(guildId, roles).GetAwaiter().GetResult();
 
         return GetClient(identity);
     }
 
     protected HttpClient GetAnonymousClient()
     {
-        var client = factory.CreateDefaultClient(factory.ClientOptions.BaseAddress,
+        var client = factory.CreateDefaultClient(
+            factory.ClientOptions.BaseAddress,
             new HttpResponseLoggerHandler(testOutputHelper));
-        client.DefaultRequestHeaders.Add("Seatpicker-Tenant", Guid.NewGuid().ToString());
         return client;
     }
 
-    protected async Task SetupAggregates(params AggregateBase[] aggregates)
+    protected async Task SetupAggregates(string guildId, params AggregateBase[] aggregates)
     {
-        var repository = factory.Services.GetRequiredService<IAggregateRepository>();
-        using var aggregateTransaction = repository.CreateTransaction();
+        var repository = GetService<AggregateRepository>();
+        await using var aggregateTransaction = repository.CreateTransaction(guildId);
         foreach (var aggregate in aggregates)
         {
             aggregateTransaction.Create(aggregate);
@@ -108,66 +94,102 @@ public abstract class IntegrationTestBase : IClassFixture<PostgresFixture>, ICla
     protected async Task SetupDocuments<TDocument>(params TDocument[] documents)
         where TDocument : IDocument
     {
-        var repository = factory.Services.GetRequiredService<IDocumentRepository>();
-        using var documentTransaction = repository.CreateTransaction();
-        foreach (var document in documents)
-        {
-            documentTransaction.Store(document);
-        }
-
-        await documentTransaction.Commit();
+        var repository = GetService<DocumentRepository>();
+        var transaction = repository.CreateGuildlessTransaction();
+        transaction.Store(documents);
+        await transaction.Commit();
     }
 
-    protected IEnumerable<TDocument> GetCommittedDocuments<TDocument>()
+    protected async Task SetupDocuments<TDocument>(string guildId, params TDocument[] documents)
         where TDocument : IDocument
     {
-        var repository = factory.Services.GetRequiredService<IDocumentRepository>();
-        using var reader = repository.CreateReader();
-        return reader.Query<TDocument>().AsEnumerable();
+        var repository = GetService<DocumentRepository>();
+        await using var transaction = repository.CreateTransaction(guildId);
+        transaction.Store(documents);
+        await transaction.Commit();
     }
 
-    protected async Task<User> CreateUser()
+    protected async Task<TDocument[]> GetCommittedDocuments<TDocument>()
+        where TDocument : IDocument
     {
-        var userDocument = new UserManager.UserDocument(
-            Guid.NewGuid().ToString(),
-            GuildId,
-            new Faker().Name.FirstName(),
-            null);
-
-        await SetupDocuments(userDocument);
-
-        return new User(userDocument.Id, userDocument.Name, userDocument.Avatar);
+        var repository = factory.Services.GetRequiredService<DocumentRepository>();
+        await using var reader = repository.CreateGuildlessReader();
+        return reader.Query<TDocument>().ToArray();
     }
 
-    protected async Task<TestIdentity> CreateIdentity(params Role[] roles)
+    protected async Task<TDocument[]> GetCommittedDocuments<TDocument>(string guildId)
+        where TDocument : IDocument
     {
-        if (roles.Length == 0) roles = new[] { Role.User };
+        var repository = GetService<DocumentRepository>();
+        await using var reader = repository.CreateReader(guildId);
+        return reader.Query<TDocument>().ToArray();
+    }
 
-        var jwtTokenCreator = GetService<DiscordJwtTokenCreator>();
+    protected User CreateUser(string guildId)
+    {
+        return CreateIdentity(guildId).GetAwaiter().GetResult().User;
+    }
 
-        var user = await CreateUser();
+    protected Task<TestIdentity> CreateIdentity(string guildId, params Role[] roles)
+    {
+        return CreateIdentity(guildId, roles, false);
+    }
 
-        var discordToken = new DiscordToken(
-            Id: user.Id,
-            Nick: user.Name,
-            RefreshToken: "8ioq3",
-            Avatar: user.Avatar,
-            Roles: roles,
-            GuildId: "123"
-        );
+    protected async Task<TestIdentity> CreateIdentity(string guildId, Role[] roles, bool withoutGuildIdClaim)
+    {
+        if (roles.Length == 0) roles = [Role.User];
 
-        var (token, expiresAt) = await jwtTokenCreator.CreateToken(discordToken, roles);
+        var jwtTokenCreator = factory.Services.GetRequiredService<JwtTokenCreator>();
 
-        var identity = new TestIdentity(user, roles, token, GuildId);
+        var user = RandomData.User();
+        var token = new AuthenticationToken(
+            user.Id,
+            user.Name,
+            user.Avatar,
+            "asdasdasd",
+            roles,
+            withoutGuildIdClaim ? null : guildId);
+
+        var userDocument = new UserDocument(token.Id, token.Nick, token.Avatar, token.Roles);
+        await SetupDocuments(guildId, userDocument);
+
+        var (jwtToken, _) = await jwtTokenCreator.CreateToken(token);
+
+        var identity = new TestIdentity(
+            new User(userDocument.Id, userDocument.Name, userDocument.Avatar, userDocument.Roles),
+            roles,
+            jwtToken);
+
         return identity;
     }
 
-    protected internal void AddHttpInterceptor<TInterceptor>(TInterceptor interceptor)
-        where TInterceptor : IInterceptor
+    protected async Task<Guild> CreateGuild()
     {
-        GetService<InterceptingHttpMessageHandler>()
-            .Interceptors.Add(interceptor);
+        return await CreateGuild(RandomData.Guild());
     }
 
-    public record TestIdentity(User User, Role[] Roles, string Token, string GuildId);
+    protected async Task<Guild> CreateGuild(Guild guild)
+    {
+        var discordGuild = new Infrastructure.Adapters.Discord.DiscordGuild(
+            guild.Id,
+            guild.Name,
+            guild.Icon,
+            [RandomData.DiscordGuildRole()]);
+
+        var discordAdapter = GetService<TestDiscordAdapter>();
+        discordAdapter.AddGuild(
+            discordGuild,
+            guild.RoleMapping.Select(
+                roleMapping => new Infrastructure.Adapters.Discord.DiscordGuildRole(
+                    roleMapping.RoleId,
+                    RandomData.Faker.Random.Word(),
+                    RandomData.Faker.Random.Int(0, 16777215),
+                    null)));
+
+        await SetupDocuments(guild);
+
+        return guild;
+    }
+
+    public record TestIdentity(User User, Role[] Roles, string Token);
 }

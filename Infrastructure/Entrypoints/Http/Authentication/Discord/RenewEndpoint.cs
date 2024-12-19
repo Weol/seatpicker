@@ -3,19 +3,16 @@ using Seatpicker.Infrastructure.Authentication.Discord;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Authentication.Discord;
 
-[ApiController]
-[Route("authentication/discord")]
-public class RenewEndpoint
+public static class RenewEndpoint
 {
-    [HttpPost("renew")]
-    public async Task<ActionResult<TokenResponse>> Renew(
+    public static async Task<IResult> Renew(
         [FromServices] DiscordAuthenticationService discordAuthenticationService,
         [FromBody] Request request)
     {
         var (jwtToken, expiresAt, discordToken)
             = await discordAuthenticationService.Renew(request.RefreshToken, request.GuildId);
 
-        return new OkObjectResult(new TokenResponse(jwtToken,
+        return TypedResults.Ok(new TokenResponse(jwtToken,
             request.GuildId,
             expiresAt.ToUnixTimeSeconds(),
             discordToken.RefreshToken,

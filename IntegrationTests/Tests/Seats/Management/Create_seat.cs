@@ -1,86 +1,96 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
-using Seatpicker.Application.Features.Seats;
-using Seatpicker.Infrastructure.Authentication;
+using Seatpicker.Application.Features.Reservation;
+using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Entrypoints.Http.Seat;
 using Xunit;
 using Xunit.Abstractions;
+using Bounds = Seatpicker.Infrastructure.Entrypoints.Http.Seat.Bounds;
 
 namespace Seatpicker.IntegrationTests.Tests.Seats.Management;
 
 // ReSharper disable once InconsistentNaming
-public class Create_seat : IntegrationTestBase
+[SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
+public class Create_seat(
+    TestWebApplicationFactory factory,
+    PostgresFixture databaseFixture,
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
 {
-    public Create_seat(TestWebApplicationFactory factory, PostgresFixture databaseFixture, ITestOutputHelper testOutputHelper) : base(
-        factory,
-        databaseFixture,
-        testOutputHelper)
-    {
-    }
-
-    private async Task<HttpResponseMessage>
-        MakeRequest(HttpClient client, Guid lanId, CreateEndpoint.Request request) =>
-        await client.PostAsJsonAsync($"lan/{lanId}/seat", request);
+    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, string lanId, CreateSeat.Request request) =>
+        await client.PostAsJsonAsync($"guild/{guildId}/lan/{lanId}/seat", request);
 
     [Fact]
     public async Task succeeds_when_creating_new_seat()
     {
         // Arrange
-        var client = GetClient(Role.Operator);
+		var guild = await CreateGuild();
+        var client = GetClient(guild.Id, Role.Operator);
 
-        var lan = LanGenerator.Create(GuildId);
-        await SetupAggregates(lan);
+        var lan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
+        await SetupAggregates(guild.Id, lan);
 
-        var model = Generator.CreateSeatRequest();
+        var model = CreateSeatRequest();
 
-        //Act
-        var response = await MakeRequest(client, lan.Id, model);
+        // Act
+        var response = await MakeRequest(client, guild.Id, lan.Id, model);
 
-        //Assert
+        // Assert
+        var committedSeats = await GetCommittedDocuments<ProjectedSeat>(guild.Id);
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                var committedSeat = GetCommittedDocuments<ProjectedSeat>().Should().ContainSingle().Subject;
+                var committedSeat = committedSeats.Should().ContainSingle().Subject;
                 committedSeat.Title.Should().Be(model.Title);
-                committedSeat.Bounds.Should().BeEquivalentTo(model.Bounds);
+                committedSeat.Bounds.Should().BeEquivalentTo<Bounds>(model.Bounds);
             });
     }
 
-    public static IEnumerable<object[]> InvalidUpdateRequests = new[]
+    public static TheoryData<CreateSeat.Request> InvalidUpdateRequests()
     {
-        new object[] { Generator.CreateSeatRequest() with { Title = "" } },
-        new object[]
-            { Generator.CreateSeatRequest() with { Bounds = new Infrastructure.Entrypoints.Http.Bounds(0, 0, -1, 1) } },
-        new object[]
-            { Generator.CreateSeatRequest() with { Bounds = new Infrastructure.Entrypoints.Http.Bounds(0, 0, 1, -1) } },
-    };
+        return new TheoryData<CreateSeat.Request>
+        {
+            CreateSeatRequest() with { Title = "" },
+            CreateSeatRequest() with { Bounds = new Bounds(0, 0, -1, 1) },
+            CreateSeatRequest() with { Bounds = new Bounds(0, 0, 1, -1) },
+        };
+    }
 
     [Theory]
     [MemberData(nameof(InvalidUpdateRequests))]
-    public async Task fails_when_seat_request_model_is_invalid(CreateEndpoint.Request request)
+    public async Task fails_when_seat_request_model_is_invalid(CreateSeat.Request request)
     {
         // Arrange
-        var client = GetClient(Role.Operator);
+		var guild = await CreateGuild();
+        var client = GetClient(guild.Id, Role.Operator);
 
-        //Act
-        var response = await MakeRequest(client, Guid.NewGuid(), request);
+        // Act
+        var response = await MakeRequest(client, guild.Id, Guid.NewGuid().ToString(), request);
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
-    
+
     [Fact]
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
         // Arrange
-        var client = GetClient();
+		var guild = await CreateGuild();
+        var client = GetClient(guild.Id);
 
-        //Act
-        var response = await MakeRequest(client, Guid.NewGuid(), Generator.CreateSeatRequest());
+        // Act
+        var response = await MakeRequest(client, guild.Id, Guid.NewGuid().ToString(), CreateSeatRequest());
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    public static CreateSeat.Request CreateSeatRequest()
+    {
+        return new CreateSeat.Request(
+            Title: RandomData.Faker.Hacker.Verb(),
+            Bounds: new Bounds(0, 0, 1, 1));
     }
 }

@@ -1,29 +1,31 @@
-﻿using Shared;
+﻿using System.Linq.Expressions;
+using Marten;
+using Shared;
 
 namespace Seatpicker.Application.Features;
 
-public interface IDocumentRepository
-{
-    public IDocumentTransaction CreateTransaction();
+public interface IGuildlessDocumentTransaction : IDocumentTransaction;
 
-    public IDocumentReader CreateReader();
-}
+public interface IGuildlessDocumentReader : IDocumentReader;
 
-public interface IDocumentReader : IDisposable
+public interface IDocumentReader : IAsyncDisposable
 {
-    public Task<TDocument?> Get<TDocument>(string id)
+    public Task<TDocument?> Query<TDocument>(string id)
         where TDocument : IDocument;
 
     public IQueryable<TDocument> Query<TDocument>()
         where TDocument : IDocument;
 }
 
-public interface IDocumentTransaction : IDocumentReader
+public interface IDocumentTransaction : IAsyncDisposable
 {
     public void Store<TDocument>(params TDocument[] documentsToAdd)
         where TDocument : IDocument;
 
     public void Delete<TDocument>(string id)
+        where TDocument : IDocument;
+
+    public void DeleteWhere<TDocument>(Expression<Func<TDocument, bool>> where)
         where TDocument : IDocument;
 
     public Task Commit();

@@ -1,4 +1,5 @@
-﻿using Shared;
+﻿using System.Diagnostics.CodeAnalysis;
+using Shared;
 
 namespace Seatpicker.Domain;
 
@@ -8,13 +9,14 @@ namespace Seatpicker.Domain;
 // ReSharper disable UnusedParameter.Local
 #pragma warning disable CS1998 // Disable warning about async methods missing awaits
 #pragma warning disable CS8618 // Disable warning about uninitialized properties
+[SuppressMessage("Performance", "CA1822:Mark members as static")]
 public class Lan : AggregateBase
 {
-    public Lan(Guid lanId, string title, byte[] background, string guildId, User initiator)
+    public Lan(string lanId, string title, byte[] background, User user)
     {
         if (title.Length <= 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
 
-        var evt = new LanCreated(lanId, title, background, guildId, initiator.Id);
+        var evt = new LanCreated(lanId, title, background, user.Id);
 
         Raise(evt);
         Apply(evt);
@@ -28,68 +30,65 @@ public class Lan : AggregateBase
 
     public string Title { get; private set; }
 
-    public string GuildId { get; private set; }
-
     public byte[] Background { get; private set; }
 
     public bool Active { get; private set; }
 
     public override string ToString() => $"Lan {Title} ({Id})";
 
-    public void ChangeBackground(byte[] newBackground, User initiator)
+    public void ChangeBackground(byte[] newBackground, User user)
     {
-        var evt = new LanBackgroundChanged(newBackground, initiator.Id);
+        var evt = new LanBackgroundChanged(newBackground, user.Id);
         Raise(evt);
         Apply(evt);
     }
 
-    public void ChangeTitle(string newTitle, User initiator)
+    public void ChangeTitle(string newTitle, User user)
     {
-        var evt = new LanTitleChanged(newTitle, initiator.Id);
+        var evt = new LanTitleChanged(newTitle, user.Id);
         Raise(evt);
         Apply(evt);
     }
 
-    public void SetActive(bool active, User initiator)
+    public void SetActive(bool active, User user)
     {
-        var evt = new LanActiveChanged(active, initiator.Id);
+        var evt = new LanActiveChanged(active, user.Id);
         Raise(evt);
         Apply(evt);
     }
 
 
-    public void Archive(User initiator)
+    public void Archive(User user)
     {
-        var evt = new LanArchived(initiator.Id);
+        var evt = new LanArchived(user.Id);
         Raise(evt);
         Apply(evt);
     }
 
-    public void Apply(LanCreated evt)
+    private void Apply(LanCreated evt)
     {
         Id = evt.Id;
         Title = evt.Title;
         Background = evt.Background;
-        GuildId = evt.GuildId;
         Active = false;
     }
 
-    public void Apply(LanTitleChanged evt)
+    private void Apply(LanTitleChanged evt)
     {
         Title = evt.Title;
     }
 
-    public void Apply(LanBackgroundChanged evt)
+    private void Apply(LanBackgroundChanged evt)
     {
         Background = evt.Background;
     }
 
-    public void Apply(LanActiveChanged evt)
+    private void Apply(LanActiveChanged evt)
     {
         Active = evt.Active;
     }
 
-    public void Apply(LanArchived evt)
+    private void Apply(LanArchived evt)
     {
     }
 }
@@ -97,12 +96,12 @@ public class Lan : AggregateBase
 /**
  * Events
  */
-public record LanCreated(Guid Id, string Title, byte[] Background, string GuildId, UserId Initiator);
+public record LanCreated(string Id, string Title, byte[] Background, string CreatedBy) : IEvent;
 
-public record LanTitleChanged(string Title, UserId Initiator);
+public record LanTitleChanged(string Title, string ChangedBy) : IEvent;
 
-public record LanBackgroundChanged(byte[] Background, UserId Initiator);
+public record LanBackgroundChanged(byte[] Background, string ChangedBy) : IEvent;
 
-public record LanActiveChanged(bool Active, UserId Initiator);
+public record LanActiveChanged(bool Active, string ChangedBy) : IEvent;
 
-public record LanArchived(UserId Initiator);
+public record LanArchived(string ArchivedBy) : IEvent;

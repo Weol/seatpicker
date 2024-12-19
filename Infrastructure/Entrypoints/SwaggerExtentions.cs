@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using System.Globalization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -15,7 +16,6 @@ public static class SwaggerExtensions
                 options.SchemaGeneratorOptions.SupportNonNullableReferenceTypes = true;
                 options.OperationFilter<CustomOperationFilter>();
                 options.CustomSchemaIds(CreateCustomSchemeId);
-
 
                 var jwtSecurityScheme = new OpenApiSecurityScheme
                 {
@@ -53,7 +53,7 @@ public static class SwaggerExtensions
             var declaringType = type.DeclaringType!;
 
             var httpNamespace = typeof(EntrypointsExtensions).Namespace! + "." + nameof(Http);
-            if (declaringType.Namespace!.StartsWith(httpNamespace))
+            if (declaringType.Namespace!.StartsWith(httpNamespace, StringComparison.Ordinal))
             {
                 return declaringType.Name.Replace("Endpoint", "") + declaringType.Namespace.Substring(httpNamespace.Length + 1).Replace(".", "") + type.Name;
             }
@@ -79,7 +79,7 @@ public static class SwaggerExtensions
 
             if (name is not null)
             {
-                operation.OperationId = context.MethodInfo.Name + char.ToUpper(name[0]) + name.Substring(1);
+                operation.OperationId = context.MethodInfo.Name + char.ToUpper(name[0], CultureInfo.CurrentCulture) + name[1..];
 
                 operation.Tags.Clear();
                 operation.Tags.Add(new OpenApiTag

@@ -9,21 +9,22 @@ namespace Seatpicker.Domain;
 // ReSharper disable UnusedParameter.Local
 #pragma warning disable CS1998 // Disable warning about async methods missing awaits
 #pragma warning disable CS8618 // Disable warning about uninitialized properties
+[SuppressMessage("Performance", "CA1822:Mark members as static")]
 public class Seat : AggregateBase
 {
-    public Guid LanId { get; private set; }
+    public string LanId { get; private set; }
 
     public string Title { get; private set; }
 
     public Bounds Bounds { get; private set; }
 
-    public UserId? ReservedBy { get; private set; }
+    public string? ReservedBy { get; private set; }
 
-    public Seat(Guid id, Lan lan, string title, Bounds bounds, User initiator)
+    public Seat(string id, Lan lan, string title, Bounds bounds, User user)
     {
         if (title.Length == 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
 
-        var evt = new SeatCreated(id, lan.Id, title, bounds, initiator.Id);
+        var evt = new SeatCreated(id, lan.Id, title, bounds, user.Id);
         Raise(evt);
         Apply(evt);
     }
@@ -34,27 +35,27 @@ public class Seat : AggregateBase
         // Marten needs this
     }
 
-    public void SetTitle(string title, User initiator)
+    public void SetTitle(string title, User user)
     {
         if (title.Length == 0) throw new ArgumentOutOfRangeException(nameof(title), title, "Title cannot be empty");
 
-        var evt = new SeatTitleChanged(Id, title, initiator.Id);
+        var evt = new SeatTitleChanged(Id, title, user.Id);
 
         Raise(evt);
         Apply(evt);
     }
 
-    public void SetBounds(Bounds bounds, User initiator)
+    public void SetBounds(Bounds bounds, User user)
     {
-        var evt = new SeatBoundsChanged(Id, bounds, initiator.Id);
+        var evt = new SeatBoundsChanged(Id, bounds, user.Id);
 
         Raise(evt);
         Apply(evt);
     }
 
-    public void Archive(User initiator)
+    public void Archive(User user)
     {
-        var evt = new SeatArchived(Id, initiator.Id);
+        var evt = new SeatArchived(Id, user.Id);
 
         Raise(evt);
         Apply(evt);
@@ -86,11 +87,11 @@ public class Seat : AggregateBase
         Apply(evt);
     }
 
-    public void RemoveReservation(User initiator)
+    public void RemoveReservation(User user)
     {
         if (ReservedBy is null) return;
 
-        if (ReservedBy != initiator.Id) throw new SeatReservationConflictException(this, ReservedBy, initiator.Id);
+        if (ReservedBy != user.Id) throw new SeatReservationConflictException(this, ReservedBy, user.Id);
 
         var evt = new SeatReservationRemoved(Id, ReservedBy);
         Raise(evt);
@@ -225,42 +226,40 @@ public class Bounds
 /**
  * Events
  */
-public record SeatCreated(Guid Id, Guid LanId, string Title, Bounds Bounds, UserId CreatedBy);
+public interface ISeatEvent
+{
+    string LanId { get; }
+}
 
-public record SeatTitleChanged(Guid LanId, string Title, UserId ChangedBy);
+public record SeatCreated(string Id, string LanId, string Title, Bounds Bounds, string CreatedBy) : ISeatEvent;
 
-public record SeatBoundsChanged(Guid LanId, Bounds Bounds, UserId ChangedBy);
+public record SeatTitleChanged(string LanId, string Title, string ChangedBy) : ISeatEvent;
 
-public record SeatReservationMade(Guid LanId, UserId UserId);
+public record SeatBoundsChanged(string LanId, Bounds Bounds, string ChangedBy) : ISeatEvent;
 
-public record SeatReservationRemoved(Guid LanId, UserId UserId);
+public record SeatReservationMade(string LanId, string UserId) : ISeatEvent;
 
-public record SeatReservationMoved(Guid LanId, UserId UserId, Guid FromSeatId, Guid ToSeatId);
+public record SeatReservationRemoved(string LanId, string UserId) : ISeatEvent;
 
-public record SeatReservationMadeFor(Guid LanId, UserId UserId, UserId MadeBy);
+public record SeatReservationMoved(string LanId, string UserId, string FromSeatId, string ToSeatId) : ISeatEvent;
 
-public record SeatReservationRemovedFor(Guid LanId, UserId UserId, UserId RemovedBy);
+public record SeatReservationMadeFor(string LanId, string UserId, string MadeBy) : ISeatEvent;
 
-public record SeatReservationMovedFor(Guid LanId, UserId UserId, Guid FromSeatId, Guid ToSeatId, UserId MovedBy);
+public record SeatReservationRemovedFor(string LanId, string UserId, string RemovedBy) : ISeatEvent;
 
-public record SeatArchived(Guid LanId, UserId ArchivedBy);
+public record SeatReservationMovedFor(string LanId, string UserId, string FromSeatId, string ToSeatId, string MovedBy) : ISeatEvent;
+
+public record SeatArchived(string LanId, string ArchivedBy) : ISeatEvent;
 
 /**
  * Exceptions
  */
-public class SeatReservationConflictException : DomainException
+[method: SetsRequiredMembers]
+public class SeatReservationConflictException(Seat seat, string reservedUser, string attemptedUser) : DomainException
 {
-    public required Seat Seat { get; init; }
-    public required UserId ReservedUser { get; init; }
-    public required UserId AttemptedUser { get; init; }
-
-    [SetsRequiredMembers]
-    public SeatReservationConflictException(Seat seat, UserId reservedUser, UserId attemptedUser)
-    {
-        ReservedUser = reservedUser;
-        AttemptedUser = attemptedUser;
-        Seat = seat;
-    }
+    public required Seat Seat { get; init; } = seat;
+    public required string ReservedUser { get; init; } = reservedUser;
+    public required string AttemptedUser { get; init; } = attemptedUser;
 
     protected override string ErrorMessage =>
         $"{Seat} is reserved by {ReservedUser}, cannot be changed by {AttemptedUser} ";

@@ -1,50 +1,82 @@
 import Container from "@mui/material/Container"
-import { Suspense, useState } from "react"
+import React, { Suspense, useState } from "react"
 import { Route, Routes, useParams } from "react-router-dom"
+import { useActiveGuild } from "./Adapters/ActiveGuild"
+import { ActiveGuild } from "./Adapters/Models"
 import { AlertContext, AlertModel, setupAlerts } from "./Contexts/AlertContext"
 import { DialogContext, DialogModel, setupDialogs } from "./Contexts/DialogContext"
 import MainAppBar from "./MainAppBar"
-import Admin from "./Pages/Admin"
-import GuildSettings from "./Pages/GuildSettings"
-import LoadingPage from "./Pages/LoadingPage"
-import NotFound from "./Pages/NotFound"
+import AllGuildsOverview from "./Pages/AllGuildsOverview"
+import ErrorPage from "./Pages/ErrorPage"
+import GuildOverview from "./Pages/GuildOverview"
+import { GuildRoleOverview } from "./Pages/GuildRoleOverview"
+import Loading from "./Pages/Loading"
 import RedirectLogin from "./Pages/RedirectLogin"
 import Seats from "./Pages/Seats"
+import LandingPage from "./Pages/LandingPage"
 
-function GuildSettingsWrapper() {
+function GuildOverviewWrapper() {
   const params = useParams<{ guildId: string }>()
 
-  return <GuildSettings guildId={params.guildId as string} />
+  return <GuildOverview guildId={params.guildId as string} />
 }
 
-export function GuildSettingsPath(guildId: string) {
-  return `/admin/guild/${guildId}`
+function GuildRolesOverviewWrapper() {
+  const params = useParams<{ guildId: string }>()
+
+  return <GuildRoleOverview guildId={params.guildId as string} />
 }
 
 export default function App() {
+  const activeGuild = useActiveGuild()
   const [alert, setAlert] = useState<AlertModel | null>(null)
   const [dialog, setDialog] = useState<DialogModel | null>(null)
   const { Alert, ...alertActions } = setupAlerts(setAlert)
   const { Dialog, ...dialogActions } = setupDialogs(setDialog)
 
-  return (
-    <AlertContext.Provider value={alertActions}>
-      <DialogContext.Provider value={dialogActions}>
-        {alert && <Alert alert={alert} />}
-        {dialog && <Dialog dialog={dialog} />}
-        <MainAppBar />
-        <Suspense fallback={<LoadingPage />}>
-          <Container maxWidth="sm" sx={{ paddingTop: "1em" }}>
-            <Routes>
-              <Route path="/" element={<Seats />} />
-              <Route path="/redirect-login" element={<RedirectLogin />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/admin/guild/:guildId" element={<GuildSettingsWrapper />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Container>
-        </Suspense>
-      </DialogContext.Provider>
-    </AlertContext.Provider>
-  )
+  return <AlertContext.Provider value={alertActions}>
+    <DialogContext.Provider value={dialogActions}>
+      {alert && <Alert alert={alert} />}
+      {dialog && <Dialog dialog={dialog} />}
+      {activeGuild ? <AppWithActiveGuild activeGuild={activeGuild} /> : <AppWithoutActiveGuild />}
+    </DialogContext.Provider>
+  </AlertContext.Provider>
+}
+
+function AppWithoutActiveGuild() {
+  return <>
+    <MainAppBar activeGuild={null} />
+    <Suspense fallback={<Loading />}>
+      <Container maxWidth="sm" sx={{ paddingTop: "1em" }}>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/reserve" element={<ErrorPage header={"🙈"} message={"No guild has been configured for this host, please contact administrator"} />} />
+          <Route path="/redirect-login" element={<RedirectLogin activeGuild={null}/>} />
+          <Route path="/guilds" element={<AllGuildsOverview />} />
+          <Route path="/guild/:guildId" element={<GuildOverviewWrapper />} />
+          <Route path="/guild/:guildId/roles" element={<GuildRolesOverviewWrapper />} />
+          <Route path="*" element={<ErrorPage header={"404"} message={"Page not found"} />} />
+        </Routes>
+      </Container>
+    </Suspense>
+  </>
+}
+
+function AppWithActiveGuild(props: { activeGuild: ActiveGuild }) {
+  return <>
+    <MainAppBar activeGuild={props.activeGuild} />
+    <Suspense fallback={<Loading />}>
+      <Container maxWidth="sm" sx={{ paddingTop: "1em" }}>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/reserve" element={<Seats />} />
+          <Route path="/redirect-login" element={<RedirectLogin activeGuild={props.activeGuild}/>} />
+          <Route path="/guilds" element={<AllGuildsOverview />} />
+          <Route path="/guild/:guildId" element={<GuildOverviewWrapper />} />
+          <Route path="/guild/:guildId/roles" element={<GuildRolesOverviewWrapper />} />
+          <Route path="*" element={<ErrorPage header={"404"} message={"Page not found"} />} />
+        </Routes>
+      </Container>
+    </Suspense>
+  </>
 }

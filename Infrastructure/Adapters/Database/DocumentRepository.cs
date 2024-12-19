@@ -1,45 +1,98 @@
-﻿using System.Diagnostics;
+﻿using System.Linq.Expressions;
 using Marten;
+using Marten.Storage;
 using Seatpicker.Application.Features;
 using Shared;
 
 namespace Seatpicker.Infrastructure.Adapters.Database;
 
-public class DocumentRepository : IDocumentRepository
+public class DocumentRepository(IServiceProvider provider, ILogger<DocumentRepository> logger)
 {
-    private readonly IDocumentStore store;
-    private readonly ITenantProvider tenantProvider;
-
-    public DocumentRepository(IDocumentStore store, ITenantProvider tenantProvider)
+    public IDocumentTransaction CreateTransaction(string guildId)
     {
-        this.store = store;
-        this.tenantProvider = tenantProvider;
+        var documentSession = provider.GetRequiredService<IDocumentStore>().LightweightSession(guildId);
+        
+        if (documentSession.TenantId == Tenancy.DefaultTenantId)
+        {
+            throw new InvalidTenantIdForGuildSessionException {
+                TenantId = documentSession.TenantId,
+            };
+        }
+
+        var transactionId = Interlocked.Add(ref DatabaseExtensions.SessionIdCounter, 1);
+        logger.LogDebug("[{TransactionId}] Creating document transaction for tenant {TenantId}", transactionId, documentSession.TenantId);
+
+        var transactionLogger = provider.GetRequiredService<ILogger<DocumentTransaction>>();
+        return new DocumentTransaction(documentSession, transactionId, transactionLogger);
     }
 
-    public IDocumentTransaction CreateTransaction()
+    public virtual IDocumentReader CreateReader(string guildId)
     {
-        var session = store.LightweightSession(tenantProvider.GetTenant());
-        return new DocumentTransaction(session);
+        var querySession = provider.GetRequiredService<IDocumentStore>().QuerySession(guildId);
+        
+        if (querySession.TenantId == Tenancy.DefaultTenantId)
+        {
+            throw new InvalidTenantIdForGuildSessionException {
+                TenantId = querySession.TenantId,
+            };
+        }
+
+        var readerId = Interlocked.Add(ref DatabaseExtensions.SessionIdCounter, 1);
+        logger.LogDebug("[{ReaderId}] Creating document reader for tenant {TenantId}", readerId, querySession.TenantId);
+
+        var readerLogger = provider.GetRequiredService<ILogger<DocumentReader>>();
+        return new DocumentReader(querySession, readerId, readerLogger);
     }
 
-    public IDocumentReader CreateReader()
+    public virtual IGuildlessDocumentTransaction CreateGuildlessTransaction()
     {
-        var session = store.QuerySession(tenantProvider.GetTenant());
-        return new DocumentReader(session);
+        var documentSession = provider.GetRequiredService<IDocumentStore>().LightweightSession();
+
+        if (documentSession.TenantId != Tenancy.DefaultTenantId)
+        {
+            throw new InvalidTenantIdForGuildlessSessionException {
+                TenantId = documentSession.TenantId,
+            };
+        }
+
+        var transactionId = Interlocked.Add(ref DatabaseExtensions.SessionIdCounter, 1);
+        logger.LogDebug("[{ReaderId}] Creating document transaction for tenant {TenantId}", transactionId, documentSession.TenantId);
+
+        var transactionLogger = provider.GetRequiredService<ILogger<DocumentTransaction>>();
+        return new DocumentTransaction(documentSession, transactionId, transactionLogger);
     }
+
+    public IGuildlessDocumentReader CreateGuildlessReader()
+    {
+        var querySession = provider.GetRequiredService<IDocumentStore>().QuerySession();
+
+        if (querySession.TenantId != Tenancy.DefaultTenantId)
+        {
+            throw new InvalidTenantIdForGuildlessSessionException {
+                TenantId = querySession.TenantId,
+            };
+        }
+
+        var readerId = Interlocked.Add(ref DatabaseExtensions.SessionIdCounter, 1);
+        logger.LogDebug("[{ReaderId}] Creating document reader for tenant {TenantId}", readerId, querySession.TenantId);
+
+        var readerLogger = provider.GetRequiredService<ILogger<DocumentReader>>();
+        return new DocumentReader(querySession, readerId, readerLogger);
+    }
+
+    public class InvalidTenantIdForGuildlessSessionException : Exception
+    {
+        public required string TenantId { get; init; }
+    };
+    
+    public class InvalidTenantIdForGuildSessionException : Exception
+    {
+        public required string TenantId { get; init; }
+    };
 }
 
-public class DocumentTransaction : IDocumentTransaction
+public class DocumentTransaction(IDocumentSession session, int transactionId, ILogger<DocumentTransaction> logger) : IGuildlessDocumentTransaction
 {
-    private readonly IDocumentSession session;
-    private readonly DocumentReader reader;
-
-    public DocumentTransaction(IDocumentSession session)
-    {
-        this.session = session;
-        reader = new DocumentReader(session);
-    }
-
     public void Store<TDocument>(params TDocument[] documentsToAdd)
         where TDocument : IDocument
     {
@@ -52,40 +105,28 @@ public class DocumentTransaction : IDocumentTransaction
         session.Delete<TDocument>(id);
     }
 
+    public void DeleteWhere<TDocument>(Expression<Func<TDocument,bool>> where)
+        where TDocument : IDocument
+    {
+        session.DeleteWhere(where);
+    }
+
     public Task Commit()
     {
+        logger.LogDebug("[{TransactionId}] Disposing transaction for tenant {TenantId}", transactionId, session.TenantId);
         return session.SaveChangesAsync();
     }
 
-    public Task<TDocument?> Get<TDocument>(string id)
-        where TDocument : IDocument =>
-        reader.Get<TDocument>(id);
-
-    public Task<bool> Exists<TDocument>(string id)
-        where TDocument : IDocument =>
-        reader.Exists<TDocument>(id);
-
-    public IQueryable<TDocument> Query<TDocument>()
-        where TDocument : IDocument =>
-        reader.Query<TDocument>();
-
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        session.Dispose();
-        reader.Dispose();
+        await session.DisposeAsync();
+        GC.SuppressFinalize(this);
     }
 }
 
-public class DocumentReader : IDocumentReader
+public class DocumentReader(IQuerySession session, int readerId, ILogger<DocumentReader> logger) : IGuildlessDocumentReader
 {
-    private readonly IQuerySession session;
-
-    public DocumentReader(IQuerySession session)
-    {
-        this.session = session;
-    }
-
-    public Task<TDocument?> Get<TDocument>(string id)
+    public Task<TDocument?> Query<TDocument>(string id)
         where TDocument : IDocument
     {
         return session.LoadAsync<TDocument>(id);
@@ -94,7 +135,7 @@ public class DocumentReader : IDocumentReader
     public async Task<bool> Exists<TDocument>(string id)
         where TDocument : IDocument
     {
-        return await Get<TDocument>(id) is not null;
+        return await Query<TDocument>(id) is not null;
     }
 
     public IQueryable<TDocument> Query<TDocument>()
@@ -103,8 +144,10 @@ public class DocumentReader : IDocumentReader
         return session.Query<TDocument>();
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        session.Dispose();
+        logger.LogDebug("[{ReaderId}] Disposing document reader for tenant {TenantId}", readerId, session.TenantId);
+        await session.DisposeAsync();
+        GC.SuppressFinalize(this);
     }
 }

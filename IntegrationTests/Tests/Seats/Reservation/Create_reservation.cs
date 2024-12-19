@@ -1,47 +1,46 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using FluentAssertions;
-using Seatpicker.Application.Features.Seats;
-using Seatpicker.Infrastructure.Authentication;
-using Testcontainers.PostgreSql;
+using Seatpicker.Application.Features.Reservation;
+using Seatpicker.Domain;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Seatpicker.IntegrationTests.Tests.Seats.Reservation;
 
 // ReSharper disable once InconsistentNaming
-public class Create_reservation : IntegrationTestBase
+[SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
+public class Create_reservation(
+    TestWebApplicationFactory factory,
+    PostgresFixture databaseFixture,
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
 {
-    public Create_reservation(TestWebApplicationFactory factory, PostgresFixture databaseFixture, ITestOutputHelper testOutputHelper) : base(
-        factory,
-        databaseFixture,
-        testOutputHelper)
-    {
-    }
-
-    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, Guid lanId, Guid seatId) =>
-        await client.PostAsync($"lan/{lanId}/seat/{seatId}/reservation", null);
+    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, string lanId, string seatId) =>
+        await client.PostAsync($"guild/{guildId}/lan/{lanId}/seat/{seatId}/reservation", null);
 
     [Fact]
     public async Task succeeds_when_reserving_existing_available_seat()
     {
         // Arrange
-        var identity = await CreateIdentity(Role.User);
+		var guild = await CreateGuild();
+        var identity = await CreateIdentity(guild.Id, Role.User);
         var client = GetClient(identity);
 
-        var lan = LanGenerator.Create(GuildId);
-        var seat = SeatGenerator.Create(lan);
+        var lan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
+        var seat = SeatGenerator.Create(lan, CreateUser(guild.Id));
 
-        await SetupAggregates(seat);
+        await SetupAggregates(guild.Id, seat);
 
-        //Act
-        var response = await MakeRequest(client, lan.Id, seat.Id);
+        // Act
+        var response = await MakeRequest(client, guild.Id, lan.Id, seat.Id);
 
-        //Assert
+        // Assert
+        var committedSeats = await GetCommittedDocuments<ProjectedSeat>(guild.Id);
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                var committedSeat = GetCommittedDocuments<ProjectedSeat>().Should().ContainSingle().Subject;
+                var committedSeat = committedSeats.Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().NotBeNull();
                 committedSeat.ReservedBy!.Should().Be(identity.User.Id);
             });
@@ -51,23 +50,25 @@ public class Create_reservation : IntegrationTestBase
     public async Task succeeds_when_reserving_seat_that_user_has_already_reserved()
     {
         // Arrange
-        var identity = await CreateIdentity(Role.User);
+		var guild = await CreateGuild();
+        var identity = await CreateIdentity(guild.Id, Role.User);
         var client = GetClient(identity);
 
-        var lan = LanGenerator.Create(GuildId);
-        var seat = SeatGenerator.Create(lan, reservedBy: identity.User);
+        var lan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
+        var seat = SeatGenerator.Create(lan, CreateUser(guild.Id), reservedBy: identity.User);
 
-        await SetupAggregates(seat);
+        await SetupAggregates(guild.Id, seat);
 
-        //Act
-        var response = await MakeRequest(client, lan.Id, seat.Id);
+        // Act
+        var response = await MakeRequest(client, guild.Id, lan.Id, seat.Id);
 
-        //Assert
+        // Assert
+        var committedSeats = await GetCommittedDocuments<ProjectedSeat>(guild.Id);
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
             () =>
             {
-                var committedSeat = GetCommittedDocuments<ProjectedSeat>().Should().ContainSingle().Subject;
+                var committedSeat = committedSeats.Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().NotBeNull();
                 committedSeat.ReservedBy!.Should().Be(identity.User.Id);
             });
@@ -77,24 +78,26 @@ public class Create_reservation : IntegrationTestBase
     public async Task fails_when_seat_is_already_reserved()
     {
         // Arrange
-        var client = GetClient();
+		var guild = await CreateGuild();
+        var client = GetClient(guild.Id);
 
-        var alreadyReservedBy = await CreateUser();
+        var alreadyReservedBy = CreateUser(guild.Id);
 
-        var lan = LanGenerator.Create(GuildId);
-        var seat = SeatGenerator.Create(lan, reservedBy: alreadyReservedBy);
+        var lan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
+        var seat = SeatGenerator.Create(lan, CreateUser(guild.Id), reservedBy: alreadyReservedBy);
 
-        await SetupAggregates(seat);
+        await SetupAggregates(guild.Id, seat);
 
-        //Act
-        var response = await MakeRequest(client, lan.Id, seat.Id);
+        // Act
+        var response = await MakeRequest(client, guild.Id, lan.Id, seat.Id);
 
-        //Assert
+        // Assert
+        var committedSeats = await GetCommittedDocuments<ProjectedSeat>(guild.Id);
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.Conflict),
             () =>
             {
-                var committedSeat = GetCommittedDocuments<ProjectedSeat>().Should().ContainSingle().Subject;
+                var committedSeat = committedSeats.Should().ContainSingle().Subject;
                 committedSeat.ReservedBy.Should().NotBeNull();
                 committedSeat.ReservedBy!.Should().Be(alreadyReservedBy.Id);
             });
@@ -104,15 +107,16 @@ public class Create_reservation : IntegrationTestBase
     public async Task fails_when_seat_does_not_exist()
     {
         // Arrange
-        var client = GetClient();
+		var guild = await CreateGuild();
+        var client = GetClient(guild.Id);
 
-        var lan = LanGenerator.Create(GuildId);
-        var seat = SeatGenerator.Create(lan);
+        var lan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
+        var seat = SeatGenerator.Create(lan, CreateUser(guild.Id));
 
-        //Act
-        var response = await MakeRequest(client, lan.Id, seat.Id);
+        // Act
+        var response = await MakeRequest(client, guild.Id, lan.Id, seat.Id);
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -120,24 +124,26 @@ public class Create_reservation : IntegrationTestBase
     public async Task fails_when_user_already_has_a_reserved_seat()
     {
         // Arrange
-        var identity = await CreateIdentity(Role.User);
+		var guild = await CreateGuild();
+        var identity = await CreateIdentity(guild.Id, Role.User);
         var client = GetClient(identity);
 
-        var lan = LanGenerator.Create(GuildId);
-        var alreadyReservedSeat = SeatGenerator.Create(lan, reservedBy: identity.User);
-        var seat = SeatGenerator.Create(lan);
+        var lan = RandomData.Aggregates.Lan(CreateUser(guild.Id));
+        var alreadyReservedSeat = SeatGenerator.Create(lan, CreateUser(guild.Id), reservedBy: identity.User);
+        var seat = SeatGenerator.Create(lan, CreateUser(guild.Id));
 
-        await SetupAggregates(alreadyReservedSeat, seat);
+        await SetupAggregates(guild.Id, alreadyReservedSeat, seat);
 
-        //Act
-        var response = await MakeRequest(client, lan.Id, seat.Id);
+        // Act
+        var response = await MakeRequest(client, guild.Id, lan.Id, seat.Id);
 
-        //Assert
+        // Assert
+        var committedSeats = await GetCommittedDocuments<ProjectedSeat>(guild.Id);
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity),
             () =>
             {
-                var committedSeat = GetCommittedDocuments<ProjectedSeat>().Should()
+                var committedSeat = committedSeats.Should()
                     .ContainSingle(x => x.Id == seat.Id).Subject;
                 committedSeat.ReservedBy.Should().BeNull();
             });

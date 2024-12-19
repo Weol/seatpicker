@@ -1,6 +1,6 @@
 import { atomFamily, useRecoilValue } from "recoil"
-import ApiRequest from "../ApiRequest"
-import { User } from "../AuthAdapter"
+import { ApiRequest } from "../ApiRequest"
+import { User } from "../Models"
 
 async function LoadGuildUsers(guildId: string) {
   const response = await ApiRequest("GET", `guild/${guildId}/users`)
@@ -13,7 +13,5 @@ export const guildUsersAtomFamily = atomFamily<User[], string>({
 })
 
 export function useGuildUsers(guildId: string) {
-  const guildUsers = useRecoilValue(guildUsersAtomFamily(guildId))
-
-  return guildUsers
+  return useRecoilValue(guildUsersAtomFamily(guildId))
 }

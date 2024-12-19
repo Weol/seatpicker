@@ -1,22 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Seatpicker.Infrastructure.Authentication;
 using Seatpicker.Infrastructure.Authentication.Discord;
 
 namespace Seatpicker.Infrastructure.Entrypoints.Http.Authentication.Discord;
 
-[ApiController]
-[Route("authentication/discord")]
-public class LoginEndpoint
+public static class LoginEndpoint
 {
-    [HttpPost("login")]
-    public async Task<ActionResult<TokenResponse>> Login(
+    public static async Task<IResult> Login(
         [FromServices] DiscordAuthenticationService discordAuthenticationService,
         [FromBody] Request request)
     {
         var (jwtToken, expiresAt, discordToken)
             = await discordAuthenticationService.Login(request.Token, request.GuildId, request.RedirectUrl);
 
-        return new OkObjectResult(new TokenResponse(jwtToken,
+        return TypedResults.Ok(new TokenResponse(jwtToken,
             request.GuildId,
             expiresAt.ToUnixTimeSeconds(),
             discordToken.RefreshToken,

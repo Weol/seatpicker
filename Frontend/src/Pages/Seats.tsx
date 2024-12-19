@@ -19,28 +19,31 @@ import {
 } from "@mui/material"
 import * as React from "react"
 import { useState } from "react"
-import { Role, User, useAuth } from "../Adapters/AuthAdapter"
+import { useAuth } from "../Adapters/AuthAdapter"
 import { useGuildUsers } from "../Adapters/Guilds/GuildUsers"
-import { useActiveLan } from "../Adapters/Lans/ActiveLan"
-import { Lan } from "../Adapters/Lans/Lans"
-import useReservationAdapter from "../Adapters/ReservationAdapter"
-import { Seat, useSeats } from "../Adapters/SeatsAdapter"
+import { Lan, Role, Seat, User } from "../Adapters/Models"
+import useReservationAdapter from "../Adapters/Reservation"
+import { useSeats } from "../Adapters/Seats"
 import { DiscordUserAvatar } from "../Components/DiscordAvatar"
 import { useAlerts } from "../Contexts/AlertContext"
 import { useDialogs } from "../Contexts/DialogContext"
+import { useActiveGuild } from "../Adapters/ActiveGuild"
+import createSeats from "../StaticSeats"
 
 export default function Seats() {
-  const activeLan = useActiveLan()
+  const activeGuild = useActiveGuild()
 
-  return activeLan ? <SeatsWithLan activeLan={activeLan} /> : <NoActiveLan />
+  if (!activeGuild || !activeGuild.lan) {
+    return <ErrorMessage message="Det er ikke konfigurert et aktivt lan" />
+  } else {
+    return <SeatsWithLan guildId={activeGuild.guildId} activeLan={activeGuild.lan} />
+  }
 }
 
-function NoActiveLan() {
-  return (
-    <Stack width="100%" justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }}>
-      <Typography>No active lan is configured</Typography>
-    </Stack>
-  )
+function ErrorMessage(props: { message: string }) {
+  return <Stack width="100%" justifyContent="center" alignItems="center" sx={{ marginTop: "1em" }}>
+    <Typography>{props.message}</Typography>
+  </Stack>
 }
 
 type AwaitingSelectSeat = {
@@ -49,14 +52,21 @@ type AwaitingSelectSeat = {
   tooltip: string
 }
 
-function SeatsWithLan(props: { activeLan: Lan }) {
+function SeatsWithLan(props: { guildId: string, activeLan: Lan }) {
   const { alertSuccess, alertLoading } = useAlerts()
   const { showDialog } = useDialogs()
   const { loggedInUser } = useAuth()
-  const { reservedSeat, seats } = useSeats(props.activeLan)
-  const reservationAdapter = useReservationAdapter(props.activeLan)
+  const { reservedSeat, seats, createNewSeat } = useSeats(props.guildId, props.activeLan)
+  const reservationAdapter = useReservationAdapter(props.guildId, props.activeLan)
   const [awaitingSelectSeat, setAwaitingSelectSeat] = useState<AwaitingSelectSeat | null>(null)
-
+  
+  async function appyStaticSeats() {
+    const seats = createSeats()
+    for (const seat of seats) {
+      createNewSeat(seat)
+    }
+  }
+  
   async function handleReserve(toSeat: Seat) {
     if (reservedSeat != null) {
       const fromSeat = reservedSeat
@@ -177,7 +187,7 @@ function SeatsWithLan(props: { activeLan: Lan }) {
   }
 
   function getUserDisabledForReservation(user: User) {
-    return Boolean(seats.find((seat) => seat.reservedBy?.id == user.id))
+    return Boolean(seats.find(seat => seat.reservedBy?.id == user.id))
   }
 
   const getSeatColor = (seat: Seat): string => {
@@ -190,60 +200,55 @@ function SeatsWithLan(props: { activeLan: Lan }) {
     }
   }
 
-  return (
-    <Stack spacing={2} sx={{ my: 2, alignItems: "center" }}>
-      {awaitingSelectSeat && awaitingSelectSeat.seat.reservedBy && (
-        <AwaitingSelectInfoCard
-          userName={awaitingSelectSeat.seat.reservedBy.name}
-          seatTitle={awaitingSelectSeat.seat.title}
-          onCancelClick={handleCancelMoveFor}
-        />
-      )}
-      <Box sx={{ flexGrow: 1 }}>
+  return <Stack spacing={2} sx={{ my: 2, alignItems: "center" }}>
+    {awaitingSelectSeat && awaitingSelectSeat.seat.reservedBy && <AwaitingSelectInfoCard
+        userName={awaitingSelectSeat.seat.reservedBy.name}
+        seatTitle={awaitingSelectSeat.seat.title}
+        onCancelClick={handleCancelMoveFor}
+      />}
+    <Box sx={{ flexGrow: 1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          width: "100%",
+          height: "calc(100% - 64px)",
+          overflowX: "hidden",
+        }}
+      >
         <Box
           sx={{
-            display: "flex",
-            width: "100%",
-            height: "calc(100% - 64px)",
-            overflowX: "hidden",
+            marginBottom: "auto",
+            marginLeft: "auto",
+            marginRight: "auto",
+            position: "relative",
           }}
         >
-          <Box
-            sx={{
-              marginBottom: "auto",
-              marginLeft: "auto",
-              marginRight: "auto",
-              position: "relative",
+          <img
+            src={`data:image/svg+xml;base64,${props.activeLan.background}`}
+            alt=""
+            style={{
+              width: "100%",
             }}
-          >
-            <img
-              src={`data:image/svg+xml;base64,${props.activeLan.background}`}
-              alt=""
-              style={{
-                width: "100%",
-              }}
-            />
+          />
 
-            {seats.map((seat) => (
-              <SeatButton
-                key={seat.id}
-                seat={seat}
-                guildId={props.activeLan.guildId}
-                getUserDisabled={getUserDisabledForReservation}
-                color={getSeatColor(seat)}
-                onSeatClick={awaitingSelectSeat ? handleSeatClick : undefined}
-                onReserve={handleReserve}
-                onRemove={handleRemove}
-                onReserveFor={handleReserveFor}
-                onRemoveFor={handleRemoveFor}
-                onMoveFor={handleMoveFor}
-              />
-            ))}
-          </Box>
+          {seats.map(seat => <SeatButton
+            key={seat.id}
+            seat={seat}
+            guildId={props.guildId}
+            getUserDisabled={getUserDisabledForReservation}
+            color={getSeatColor(seat)}
+            onSeatClick={awaitingSelectSeat ? handleSeatClick : undefined}
+            onReserve={handleReserve}
+            onRemove={handleRemove}
+            onReserveFor={handleReserveFor}
+            onRemoveFor={handleRemoveFor}
+            onMoveFor={handleMoveFor}
+          />)}
         </Box>
       </Box>
-    </Stack>
-  )
+    </Box>
+    {loggedInUser && loggedInUser.roles.includes(Role.SUPERADMIN) ? <Button variant={"outlined"} onClick={appyStaticSeats}>Apply static seats</Button> : <></>}
+  </Stack>
 }
 
 type SeatButtonProps = {
@@ -256,24 +261,22 @@ function AwaitingSelectInfoCard(props: {
   seatTitle: string
   onCancelClick: () => void
 }) {
-  return (
-    <Card>
-      <CardContent>
-        <Typography color="text.secondary" gutterBottom>
-          Du flytter på {props.userName} fra plass {props.seatTitle}
-        </Typography>
-        <Typography>
-          Trykk på en plass for å velge hvor du vil flytte {props.userName} sin reservasjon til,
-          eller trykk avbryt for å avbryte.
-        </Typography>
-      </CardContent>
-      <CardActions>
-        <Button onClick={props.onCancelClick} size="small">
-          Avbryt
-        </Button>
-      </CardActions>
-    </Card>
-  )
+  return <Card>
+    <CardContent>
+      <Typography color="text.secondary" gutterBottom>
+        Du flytter på {props.userName} fra plass {props.seatTitle}
+      </Typography>
+      <Typography>
+        Trykk på en plass for å velge hvor du vil flytte {props.userName} sin reservasjon til,
+        eller trykk avbryt for å avbryte.
+      </Typography>
+    </CardContent>
+    <CardActions>
+      <Button onClick={props.onCancelClick} size="small">
+        Avbryt
+      </Button>
+    </CardActions>
+  </Card>
 }
 
 function SeatButton(props: SeatButtonProps) {
@@ -308,58 +311,54 @@ function SeatButton(props: SeatButtonProps) {
   }
 
   const renderSeat = (seat: Seat) => {
-    return (
-      <Container>
-        <Box
-          key={seat.id}
-          onClick={handleClick}
-          sx={{
-            position: "absolute",
-            minWidth: "0",
-            top: seat.bounds.y + "%",
-            left: seat.bounds.x + "%",
-            width: seat.bounds.width + "%",
-            height: seat.bounds.height + "%",
-            border: "1px #ffffff61 solid",
-            backgroundColor: props.color,
-            cursor: "pointer",
-            textAlign: "center",
-            display: "flex",
-          }}
+    return <Container>
+      <Box
+        key={seat.id}
+        onClick={handleClick}
+        sx={{
+          position: "absolute",
+          minWidth: "0",
+          top: seat.bounds.y + "%",
+          left: seat.bounds.x + "%",
+          width: seat.bounds.width + "%",
+          height: seat.bounds.height + "%",
+          border: "1px #ffffff61 solid",
+          backgroundColor: props.color,
+          cursor: "pointer",
+          textAlign: "center",
+          display: "flex",
+        }}
+      >
+        <Typography
+          variant="subtitle1"
+          gutterBottom
+          component="p"
+          sx={{ lineHeight: 1, fontSize: "0.9rem", margin: "auto" }}
         >
-          <Typography
-            variant="subtitle1"
-            gutterBottom
-            component="p"
-            sx={{ lineHeight: 1, fontSize: "0.9rem", margin: "auto" }}
-          >
-            {seat.title}
-          </Typography>
-        </Box>
-        {menuOpen && (
-          <SeatMenu
-            {...props}
-            onRemove={handleRemove}
-            onRemoveFor={handleRemoveFor}
-            onMoveFor={handleMoveFor}
-            seat={seat}
-            menuProps={{
-              anchorEl: menuAnchor,
-              onClose: handleClose,
-              open: menuOpen,
-              anchorOrigin: {
-                vertical: "top",
-                horizontal: "center",
-              },
-              transformOrigin: {
-                vertical: "bottom",
-                horizontal: "center",
-              },
-            }}
-          />
-        )}
-      </Container>
-    )
+          {seat.title}
+        </Typography>
+      </Box>
+      {menuOpen && <SeatMenu
+          {...props}
+          onRemove={handleRemove}
+          onRemoveFor={handleRemoveFor}
+          onMoveFor={handleMoveFor}
+          seat={seat}
+          menuProps={{
+            anchorEl: menuAnchor,
+            onClose: handleClose,
+            open: menuOpen,
+            anchorOrigin: {
+              vertical: "top",
+              horizontal: "center",
+            },
+            transformOrigin: {
+              vertical: "bottom",
+              horizontal: "center",
+            },
+          }}
+        />}
+    </Container>
   }
 
   return renderSeat(props.seat)
@@ -371,25 +370,21 @@ function GuildUsersAutoComplete(props: {
   getOptionDisabled?: (user: User) => boolean
 }) {
   const guildUsers = useGuildUsers(props.guildId)
-  return (
-    <Autocomplete
-      sx={{ width: "100%" }}
-      size="small"
-      autoHighlight
-      disableClearable
-      options={guildUsers}
-      getOptionDisabled={props.getOptionDisabled}
-      getOptionLabel={(option) => option.name}
-      onChange={(e, value) => props.onUserSelected(value)}
-      renderOption={(props, option) => (
-        <Box component="li" sx={{ "& > img": { mr: 2, flexShrink: 0 } }} {...props}>
-          <DiscordUserAvatar user={option} sx={{ marginRight: "0.5em" }} />
-          <Typography noWrap>{option.name}</Typography>
-        </Box>
-      )}
-      renderInput={(params) => <TextField {...params} label="User" />}
-    />
-  )
+  return <Autocomplete
+    sx={{ width: "100%" }}
+    size="small"
+    autoHighlight
+    disableClearable
+    options={guildUsers}
+    getOptionDisabled={props.getOptionDisabled}
+    getOptionLabel={option => option.name}
+    onChange={(e, value) => props.onUserSelected(value)}
+    renderOption={(props, option) => <Box component="li" sx={{ "& > img": { mr: 2, flexShrink: 0 } }} {...props}>
+      <DiscordUserAvatar user={option} sx={{ marginRight: "0.5em" }} />
+      <Typography noWrap>{option.name}</Typography>
+    </Box>}
+    renderInput={params => <TextField {...params} label="User" />}
+  />
 }
 
 type SeatMenuProps = {
@@ -419,120 +414,102 @@ function SeatMenu(props: SeatMenuProps & { menuProps: MenuProps }) {
   }
 
   const usersList = () => {
-    return (
-      <MenuItem>
-        <GuildUsersAutoComplete
-          guildId={props.guildId}
-          onUserSelected={handleuserSelectedForReservation}
-          getOptionDisabled={props.getUserDisabled}
-        />
-      </MenuItem>
-    )
+    return <MenuItem>
+      <GuildUsersAutoComplete
+        guildId={props.guildId}
+        onUserSelected={handleuserSelectedForReservation}
+        getOptionDisabled={props.getUserDisabled}
+      />
+    </MenuItem>
   }
 
   const makeReservationFor = () => {
-    return (
-      <MenuItem onClick={() => handleMakeReservationForClick()}>
-        <ListItemIcon>
-          <AddLink fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>Legg til reservasjon</ListItemText>
-      </MenuItem>
-    )
+    return <MenuItem onClick={() => handleMakeReservationForClick()}>
+      <ListItemIcon>
+        <AddLink fontSize="small" />
+      </ListItemIcon>
+      <ListItemText>Legg til reservasjon</ListItemText>
+    </MenuItem>
   }
 
   const moveReservationFor = () => {
-    return (
-      <MenuItem onClick={() => props.onMoveFor(props.seat)}>
-        <ListItemIcon>
-          <Shuffle fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>Flytt reservasjon</ListItemText>
-      </MenuItem>
-    )
+    return <MenuItem onClick={() => props.onMoveFor(props.seat)}>
+      <ListItemIcon>
+        <Shuffle fontSize="small" />
+      </ListItemIcon>
+      <ListItemText>Flytt reservasjon</ListItemText>
+    </MenuItem>
   }
 
   const removeReservationFor = () => {
-    return (
-      <MenuItem onClick={() => props.onRemoveFor(props.seat)}>
-        <ListItemIcon>
-          <Delete fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>Fjern reservasjon</ListItemText>
-      </MenuItem>
-    )
+    return <MenuItem onClick={() => props.onRemoveFor(props.seat)}>
+      <ListItemIcon>
+        <Delete fontSize="small" />
+      </ListItemIcon>
+      <ListItemText>Fjern reservasjon</ListItemText>
+    </MenuItem>
   }
 
   const makeReservation = () => {
-    return (
-      <MenuItem onClick={() => props.onReserve(props.seat)}>
-        <ListItemIcon>
-          <AddCircleOutline fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>Reserver denne plassen</ListItemText>
-      </MenuItem>
-    )
+    return <MenuItem onClick={() => props.onReserve(props.seat)}>
+      <ListItemIcon>
+        <AddCircleOutline fontSize="small" />
+      </ListItemIcon>
+      <ListItemText>Reserver denne plassen</ListItemText>
+    </MenuItem>
   }
 
   const removeReservation = () => {
-    return (
-      <MenuItem onClick={() => props.onRemove(props.seat)}>
+    return <MenuItem onClick={() => props.onRemove(props.seat)}>
+      <ListItemIcon>
         <ListItemIcon>
-          <ListItemIcon>
-            <Delete fontSize="small" />
-          </ListItemIcon>
+          <Delete fontSize="small" />
         </ListItemIcon>
-        <ListItemText>Fjern din reservasjon</ListItemText>
-      </MenuItem>
-    )
+      </ListItemIcon>
+      <ListItemText>Fjern din reservasjon</ListItemText>
+    </MenuItem>
   }
 
-  const header = (text: string) => (
-    <Divider flexItem sx={{ width: "100%" }} orientation={"horizontal"}>
-      <Typography color="text.secondary" variant={"subtitle2"}>
-        {text}
-      </Typography>
-    </Divider>
-  )
-
-  const message = (text: string) => (
-    <MenuItem
-      disabled
-      sx={{
-        "&.Mui-disabled": {
-          opacity: 1,
-        },
-      }}
-    >
+  const header = (text: string) => <Divider flexItem sx={{ width: "100%" }} orientation={"horizontal"}>
+    <Typography color="text.secondary" variant={"subtitle2"}>
       {text}
-    </MenuItem>
-  )
+    </Typography>
+  </Divider>
+
+  const message = (text: string) => <MenuItem
+    disabled
+    sx={{
+      "&.Mui-disabled": {
+        opacity: 1,
+      },
+    }}
+  >
+    {text}
+  </MenuItem>
 
   const reservedByHeader = (reservedBy: User) => {
-    return (
-      <Stack
-        direction={"row"}
-        justifyContent={"flex-start"}
-        alignItems="stretch"
-        maxWidth={"100%"}
-        minWidth={0}
-        sx={{ cursor: "default", padding: "0.5em" }}
-      >
-        <ListItemIcon>
-          <DiscordUserAvatar user={reservedBy} />
-        </ListItemIcon>
-        <Stack>
-          <Typography variant="caption" noWrap color={"text.secondary"}>
-            Resevert av
+    return <Stack
+      direction={"row"}
+      justifyContent={"flex-start"}
+      alignItems="stretch"
+      maxWidth={"100%"}
+      minWidth={0}
+      sx={{ cursor: "default", padding: "0.5em" }}
+    >
+      <ListItemIcon>
+        <DiscordUserAvatar user={reservedBy} />
+      </ListItemIcon>
+      <Stack>
+        <Typography variant="caption" noWrap color={"text.secondary"}>
+          Resevert av
+        </Typography>
+        <Stack direction="row" sx={{ minWidth: 0, maxWidth: "10em" }}>
+          <Typography sx={{ fontWeight: "medium" }} noWrap>
+            {reservedBy.name}
           </Typography>
-          <Stack direction="row" sx={{ minWidth: 0, maxWidth: "10em" }}>
-            <Typography sx={{ fontWeight: "medium" }} noWrap>
-              {reservedBy.name}
-            </Typography>
-          </Stack>
         </Stack>
       </Stack>
-    )
+    </Stack>
   }
 
   const getMenuComponents = () => {
@@ -546,7 +523,7 @@ function SeatMenu(props: SeatMenuProps & { menuProps: MenuProps }) {
         components.push(message("Logg inn for å reservere plass"))
       }
     } else if (loggedInUser != null) {
-      if (loggedInUser.isInRole(Role.OPERATOR)) {
+      if (loggedInUser.roles.includes(Role.OPERATOR)) {
         if (props.seat.reservedBy != null) {
           components.push(header("ADMIN"), removeReservationFor(), moveReservationFor())
         } else if (showUserList) {
@@ -567,9 +544,7 @@ function SeatMenu(props: SeatMenuProps & { menuProps: MenuProps }) {
     return components
   }
 
-  return (
-    <Menu sx={{ width: 320 }} {...props.menuProps}>
-      {getMenuComponents()}
-    </Menu>
-  )
+  return <Menu sx={{ width: 320 }} {...props.menuProps}>
+    {getMenuComponents()}
+  </Menu>
 }

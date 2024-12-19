@@ -1,13 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>Seatpicker.IntegrationTests</RootNamespace>
         <IsPackable>false</IsPackable>
-        <LangVersion>11</LangVersion>
+        <LangVersion>latest</LangVersion>
+        <EnableNETAnalyzers>true</EnableNETAnalyzers>
+        <AnalysisLevel>latest-Recommended</AnalysisLevel>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <WarningsAsErrors>CA2000</WarningsAsErrors>
+        <NoWarn>CA1848</NoWarn>
     </PropertyGroup>
+
+    <ItemGroup>
+        <GlobalAnalyzerConfigFiles Include="../AnalyzerConfig" />
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Bogus" Version="35.0.1" />
@@ -15,7 +24,7 @@
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="7.0.14" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
         <PackageReference Include="NSubstitute" Version="5.1.0" />
-        <PackageReference Include="Testcontainers.PostgreSql" Version="3.6.0" />
+        <PackageReference Include="Testcontainers.PostgreSql" Version="3.8.0" />
         <PackageReference Include="xunit" Version="2.6.3" />
         <PackageReference Include="coverlet.collector" Version="6.0.0">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -27,10 +36,4 @@
     <ItemGroup>
       <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     </ItemGroup>
-
-
-    <PropertyGroup>
-        <CodeAnalysisRuleSet>analysers.ruleset</CodeAnalysisRuleSet>
-    </PropertyGroup>
-
 </Project>

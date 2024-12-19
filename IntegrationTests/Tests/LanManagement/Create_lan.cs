@@ -1,8 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
-using Seatpicker.Application.Features.Lans;
-using Seatpicker.Infrastructure.Authentication;
+using Seatpicker.Application.Features.Lan;
+using Seatpicker.Domain;
 using Seatpicker.Infrastructure.Entrypoints.Http.Lan;
 using Xunit;
 using Xunit.Abstractions;
@@ -10,31 +11,36 @@ using Xunit.Abstractions;
 namespace Seatpicker.IntegrationTests.Tests.LanManagement;
 
 // ReSharper disable once InconsistentNaming
-public class Create_lan : IntegrationTestBase
+[SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores")]
+public class Create_lan(
+    TestWebApplicationFactory factory,
+    PostgresFixture databaseFixture,
+    ITestOutputHelper testOutputHelper) : IntegrationTestBase(factory, databaseFixture, testOutputHelper)
 {
-    public Create_lan(TestWebApplicationFactory factory, PostgresFixture databaseFixture, ITestOutputHelper testOutputHelper) : base(
-        factory,
-        databaseFixture,
-        testOutputHelper)
-    {
-    }
+    private static async Task<HttpResponseMessage> MakeRequest(HttpClient client, string guildId, CreateLan.Request request) =>
+        await client.PostAsJsonAsync($"guild/{guildId}/lan", request);
 
-    private async Task<HttpResponseMessage> MakeRequest(HttpClient client, CreateEndpoint.Request request) =>
-        await client.PostAsJsonAsync("lan", request);
+    private static CreateLan.Request CreateLanRequest(string guildId)
+    {
+        return new CreateLan.Request(
+            RandomData.Faker.Hacker.Noun(),
+            RandomData.Aggregates.LanBackground());
+    }
 
     [Fact]
     public async Task succeeds_when_lan_is_valid()
     {
         // Arrange
-        var client = GetClient(Role.Admin);
+		var guild = await CreateGuild();
+        var client = GetClient(guild.Id, Role.Admin);
 
-        var request = Generator.CreateLanRequest(GuildId);
+        var request = CreateLanRequest(guild.Id);
 
-        //Act
-        var response = await MakeRequest(client, request);
+        // Act
+        var response = await MakeRequest(client, guild.Id, request);
 
-        //Assert
-        var committedProjections = GetCommittedDocuments<ProjectedLan>();
+        // Assert
+        var committedProjections = await GetCommittedDocuments<ProjectedLan>(guild.Id);
 
         Assert.Multiple(
             () => response.StatusCode.Should().Be(HttpStatusCode.OK),
@@ -51,27 +57,29 @@ public class Create_lan : IntegrationTestBase
     public async Task fails_when_background_is_not_svg()
     {
         // Arrange
-        var client = GetClient(Role.Admin);
+		var guild = await CreateGuild();
+        var client = GetClient(guild.Id, Role.Admin);
 
-        var request = Generator.CreateLanRequest(GuildId) with { Background = new byte[] { 1, 2, 3, 4, 5, 6 } };
+        var request = CreateLanRequest(guild.Id) with { Background = [1, 2, 3, 4, 5, 6] };
 
-        //Act
-        var response = await MakeRequest(client, request);
+        // Act
+        var response = await MakeRequest(client, guild.Id, request);
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
-    
+
     [Fact]
     public async Task fails_when_logged_in_user_has_insufficent_roles()
     {
         // Arrange
-        var client = GetClient();
+		var guild = await CreateGuild();
+        var client = GetClient(guild.Id);
 
-        //Act
-        var response = await MakeRequest(client, Generator.CreateLanRequest(GuildId));
+        // Act
+        var response = await MakeRequest(client, guild.Id, CreateLanRequest(guild.Id));
 
-        //Assert
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 }

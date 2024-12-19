@@ -1,3 +1,4 @@
+using Microsoft.IdentityModel.Logging;
 using Seatpicker.Application;
 using Seatpicker.Infrastructure;
 using Seatpicker.Infrastructure.Adapters;
@@ -6,13 +7,15 @@ using Seatpicker.Infrastructure.Entrypoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (builder.Environment.IsDevelopment()) builder.Configuration.AddJsonFile("appsettings.local.json");
+builder.Configuration.AddJsonFile("appsettings.local.json", true);
 
 builder.Configuration.AddEnvironmentVariables("App_");
 builder.Configuration.AddSeatpickerKeyvault();
 
+IdentityModelEventSource.ShowPII = true;
+
 builder.Services.AddApplicationInsightsTelemetry()
-    .AddLogging(options => options.SetMinimumLevel(LogLevel.Information))
+    .AddLogging()
     .AddAdapters()
     .AddSeatpickerAuthentication()
     .ConfigureJsonSerialization()
@@ -23,15 +26,13 @@ builder.Services.AddApplicationInsightsTelemetry()
 var app = builder.Build();
 
 app.UseSwaggerGen();
-app.UseEntrypoints();
+app.UseRouting();
 app.UseSeatpickerAuthentication();
-app.UseAdapters();
+app.UseEntrypoints();
 
 app.Run();
 
 namespace Seatpicker.Infrastructure
 {
-    public class Program
-    {
-    }
+    public class Program;
 }
