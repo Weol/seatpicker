@@ -43,7 +43,7 @@ jobs:
       - name: Build API artifact
         run: dotnet publish Infrastructure/*.csproj --configuration Release -o api
       - name: Upload API artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: api
           path: api
