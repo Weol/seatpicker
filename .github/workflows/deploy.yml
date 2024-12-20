@@ -51,6 +51,7 @@ jobs:
   deployApp:
     runs-on: ubuntu-latest
     name: Deploy application
+    environment: production
     permissions:
       contents: "read"
       id-token: "write"
