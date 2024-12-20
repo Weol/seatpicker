@@ -24,7 +24,7 @@ jobs:
           npm run build
         name: Build frontend artifact
       - name: Upload frontend artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: frontend
           path: Frontend/build
@@ -57,23 +57,23 @@ jobs:
     needs: [buildApi, buildFrontend]
     steps:
       - name: Download API artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: api
           path: api
       - name: Download frontend artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: frontend
           path: ./
       - name: Azure Login
-        uses: Azure/login@v1.4.6
+        uses: Azure/login@v2.2.0
         with:
           client-id: ${{ secrets.CLIENT_ID }}
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION }}
       - name: Azure WebApp
-        uses: Azure/webapps-deploy@v2.2.6
+        uses: Azure/webapps-deploy@v3.0.1
         with:
           app-name: seatpicker-webapp
           package: ./
