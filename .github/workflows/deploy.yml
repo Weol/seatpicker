@@ -72,7 +72,7 @@ jobs:
         with:
           client-id: ${{ secrets.CLIENT_ID }}
           tenant-id: ${{ secrets.TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION }}
+          subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
       - name: Azure WebApp
         uses: Azure/webapps-deploy@v3.0.1
         with:
