@@ -69,24 +69,7 @@ export default function MainAppBar(props: { activeGuild: ActiveGuild | null }) {
   return <AppBar position="static">
     <Container maxWidth="xl">
       <Toolbar disableGutters>
-        <Typography
-          variant="h6"
-          noWrap
-          component="a"
-          onClick={() => navigate("/")}
-          sx={{
-            mr: 2,
-            display: { xs: "none", md: "flex" },
-            fontFamily: "monospace",
-            fontWeight: 700,
-            letterSpacing: ".3rem",
-            color: "inherit",
-            textDecoration: "none",
-            cursor: "pointer",
-          }}
-        >SALTENLAN</Typography>
-
-        <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+        <Box sx={{ flexGrow: 1, display: "flex" }}>
           <IconButton
             size="large"
             aria-label="account of current user"
@@ -112,7 +95,7 @@ export default function MainAppBar(props: { activeGuild: ActiveGuild | null }) {
             open={Boolean(anchorElNav)}
             onClose={handleCloseNavMenu}
             sx={{
-              display: { xs: "block", md: "none" },
+              display: "block",
             }}
           >
             {getPages().map(page => <MenuItem
@@ -132,7 +115,7 @@ export default function MainAppBar(props: { activeGuild: ActiveGuild | null }) {
           onClick={() => navigate("/")}
           sx={{
             mr: 2,
-            display: { xs: "flex", md: "none" },
+            display: "flex",
             flexGrow: 1,
             fontFamily: "monospace",
             fontWeight: 700,
@@ -144,18 +127,6 @@ export default function MainAppBar(props: { activeGuild: ActiveGuild | null }) {
         >
           SALTENLAN
         </Typography>
-        <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-          {getPages().map(page => <Button
-            key={page}
-            onClick={() => {
-              handleCloseNavMenu(page)
-            }}
-            sx={{ my: 2, color: "white", display: "block" }}
-          >
-            {page}
-          </Button>)}
-        </Box>
-
         {loggedInUser && <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
