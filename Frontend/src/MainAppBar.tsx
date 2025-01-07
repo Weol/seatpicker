@@ -50,8 +50,6 @@ export default function MainAppBar(props: { activeGuild: ActiveGuild | null }) {
 
     if (page == "Admin" && props.activeGuild) {
       navigate(`/guild/${props.activeGuild.guildId}`)
-    } else if (page == "Reserver plass") {
-      navigate(`/reserve`)
     } else if (page == "Superadmin") {
       navigate(`/guilds`)
     }

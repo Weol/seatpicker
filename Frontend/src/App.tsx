@@ -13,7 +13,6 @@ import { GuildRoleOverview } from "./Pages/GuildRoleOverview"
 import Loading from "./Pages/Loading"
 import RedirectLogin from "./Pages/RedirectLogin"
 import Seats from "./Pages/Seats"
-import LandingPage from "./Pages/LandingPage"
 
 function GuildOverviewWrapper() {
   const params = useParams<{ guildId: string }>()
@@ -49,8 +48,7 @@ function AppWithoutActiveGuild() {
     <Suspense fallback={<Loading />}>
       <Container maxWidth="sm" sx={{ paddingTop: "1em" }}>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/reserve" element={<ErrorPage header={"🙈"} message={"No guild has been configured for this host, please contact administrator"} />} />
+          <Route path="/" element={<ErrorPage header={"🙈"} message={"No guild has been configured for this host, please contact administrator"} />} />
           <Route path="/redirect-login" element={<RedirectLogin activeGuild={null}/>} />
           <Route path="/guilds" element={<AllGuildsOverview />} />
           <Route path="/guild/:guildId" element={<GuildOverviewWrapper />} />
@@ -68,8 +66,7 @@ function AppWithActiveGuild(props: { activeGuild: ActiveGuild }) {
     <Suspense fallback={<Loading />}>
       <Container maxWidth="sm" sx={{ paddingTop: "1em" }}>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/reserve" element={<Seats />} />
+          <Route path="/" element={<Seats />} />
           <Route path="/redirect-login" element={<RedirectLogin activeGuild={props.activeGuild}/>} />
           <Route path="/guilds" element={<AllGuildsOverview />} />
           <Route path="/guild/:guildId" element={<GuildOverviewWrapper />} />
