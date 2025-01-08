@@ -28,7 +28,6 @@ import { DiscordUserAvatar } from "../Components/DiscordAvatar"
 import { useAlerts } from "../Contexts/AlertContext"
 import { useDialogs } from "../Contexts/DialogContext"
 import { useActiveGuild } from "../Adapters/ActiveGuild"
-import createSeats from "../StaticSeats"
 
 export default function Seats() {
   const activeGuild = useActiveGuild()
@@ -56,17 +55,10 @@ function SeatsWithLan(props: { guildId: string, activeLan: Lan }) {
   const { alertSuccess, alertLoading } = useAlerts()
   const { showDialog } = useDialogs()
   const { loggedInUser } = useAuth()
-  const { reservedSeat, seats, createNewSeat } = useSeats(props.guildId, props.activeLan)
+  const { reservedSeat, seats } = useSeats(props.guildId, props.activeLan)
   const reservationAdapter = useReservationAdapter(props.guildId, props.activeLan)
   const [awaitingSelectSeat, setAwaitingSelectSeat] = useState<AwaitingSelectSeat | null>(null)
-  
-  async function appyStaticSeats() {
-    const seats = createSeats()
-    for (const seat of seats) {
-      createNewSeat(seat)
-    }
-  }
-  
+
   async function handleReserve(toSeat: Seat) {
     if (reservedSeat != null) {
       const fromSeat = reservedSeat
@@ -247,7 +239,6 @@ function SeatsWithLan(props: { guildId: string, activeLan: Lan }) {
         </Box>
       </Box>
     </Box>
-    {loggedInUser && loggedInUser.roles.includes(Role.SUPERADMIN) ? <Button variant={"outlined"} onClick={appyStaticSeats}>Apply static seats</Button> : <></>}
   </Stack>
 }
 

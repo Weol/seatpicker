@@ -15,7 +15,7 @@ namespace Seatpicker.Infrastructure.Adapters.Database;
 internal static class DatabaseExtensions
 {
     public static int SessionIdCounter = 1;
-    
+
     public static IServiceCollection AddDatabase(
         this IServiceCollection services,
         Action<DatabaseOptions, IConfiguration> configureAction)
@@ -41,10 +41,10 @@ internal static class DatabaseExtensions
                 })
             .InitializeWith()
             .OptimizeArtifactWorkflow();
-        
+
         return services;
     }
-    
+
     private static IDocumentTransaction CreateDocumentTransaction(IServiceProvider provider)
     {
         var guildIdProvider = provider.GetRequiredService<GuildIdProvider>();
@@ -57,7 +57,7 @@ internal static class DatabaseExtensions
     private static IAggregateTransaction CreateAggregateTransaction(IServiceProvider provider)
     {
         var guildIdProvider = provider.GetRequiredService<GuildIdProvider>();
-        
+
         var repository = provider.GetRequiredService<AggregateRepository>();
         return repository.CreateTransaction(guildIdProvider.GuildId);
     }
@@ -99,7 +99,7 @@ internal static class DatabaseExtensions
         RegisterAllDocuments(options);
         RegisterAllEvents(options);
 
-        options.AutoCreateSchemaObjects = AutoCreate.All;
+        options.AutoCreateSchemaObjects = AutoCreate.CreateOrUpdate;
         options.GeneratedCodeMode = TypeLoadMode.Dynamic;
         options.SourceCodeWritingEnabled = false;
 

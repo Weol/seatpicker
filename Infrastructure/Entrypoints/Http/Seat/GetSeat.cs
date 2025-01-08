@@ -26,7 +26,7 @@ public static class GetSeat
                         if (user is not null) reservedBy = user;
                     }
 
-                    return new SeatResponse(seat.Id, seat.Title, Bounds.FromDomainBounds(seat.Bounds), reservedBy);
+                    return new SeatResponse(seat.Id, seat.Title, Bounds.FromDomainBounds(seat.Bounds), reservedBy, seat.CreatedAt, seat.UpdatedAt);
                 });
 
         var seats = await Task.WhenAll(tasks);
@@ -53,6 +53,6 @@ public static class GetSeat
             if (user is not null) reservedBy = user;
         }
 
-        return TypedResults.Ok(new SeatResponse(seat.Id, seat.Title, Bounds.FromDomainBounds(seat.Bounds), reservedBy));
+        return TypedResults.Ok(new SeatResponse(seat.Id, seat.Title, Bounds.FromDomainBounds(seat.Bounds), reservedBy, seat.CreatedAt, seat.UpdatedAt));
     }
 }
